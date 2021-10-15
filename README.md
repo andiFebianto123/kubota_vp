@@ -1,0 +1,2 @@
+# kubota-vendor-portal
+
