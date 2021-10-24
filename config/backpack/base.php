@@ -100,7 +100,7 @@ return [
     // ------
 
     // Footer element classes.
-    'footer_class' => 'app-footer d-print-none',
+    'footer_class' => 'app-footer d-print-none d-none',
     // hide it with d-none
     // change background color with bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
 
@@ -195,7 +195,7 @@ return [
 
     // Set this to false if you would like to skip adding the dashboard routes
     // (you then need to overwrite the login route on your AuthController)
-    'setup_dashboard_routes' => true,
+    'setup_dashboard_routes' => false,
 
     // Set this to false if you would like to skip adding "my account" routes
     // (you then need to manually define the routes in your web.php)

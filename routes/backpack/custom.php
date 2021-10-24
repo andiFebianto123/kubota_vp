@@ -8,9 +8,10 @@ Route::group([
     Route::crud('tag', 'TagCrudController');
     Route::crud('purchase-order', 'PurchaseOrderCrudController');
     Route::crud('vendor', 'VendorCrudController');
+    Route::crud('user', 'UserCrudController');
+    Route::crud('general-message', 'GeneralMessageCrudController');
+    Route::get('dashboard', 'DashboardController@index');
 });
-// Route::group(['middleware' => 'web', 'prefix' => config('backpack.base.route_prefix', 'admin'), 'namespace' => 'Backpack\Base\app\Http\Controllers'], function () {
-//     // Route::auth();
 //     Route::get('logout', 'Auth\LoginController@logout');
 //     // Route::get('dashboard', 'AdminController@dashboard');
 //     // Route::get('/', 'AdminController@redirect');

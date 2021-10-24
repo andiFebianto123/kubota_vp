@@ -92,4 +92,15 @@
 .sidebar.sidebar-pills .nav-link:hover .nav-icon {
     color: #439b9c !important;
 }
+.icon-big i{
+    font-size: 84px;
+}
+
+.accordion .card-header{
+    background-color: #e8e8e8;
+    padding: 4px;
+}
+.accordion .card-header h2{
+    font-weight: bold;
+}
 

@@ -21,4 +21,7 @@ Route::post('two-factor-update', 'Auth\TwoFactorController@update')->name("twofa
 Route::get('/', function () {
     return redirect()->to('admin');
 });
+Route::get('admin', function () {
+    return redirect()->to('admin/dashboard');
+});
 
