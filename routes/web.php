@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,7 +10,15 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+// Route::get('two-factor', 'Auth\TwoFactorController@index')->name("twofactor");
+Route::get('admin/logout', 'Auth\LoginController@logout')->name("logout");
+Route::get('admin/login', 'Auth\LoginController@index')->name("rectmedia.auth.login");
+Route::post('admin/login', 'Auth\LoginController@authenticate')->name("rectmedia.auth.authenticate");
+// Route::post('authenticate', 'Auth\LoginController@authenticate')->name("rectmedia.auth.login");
+Route::get('two-factor', 'Auth\TwoFactorController@index')->name("twofactor");
+Route::post('two-factor-update', 'Auth\TwoFactorController@update')->name("twofactor.update");
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->to('admin');
 });
+

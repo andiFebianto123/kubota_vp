@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Mail\TwoFactorMail;
+use App\Models\User;
+use App\Notifications\TwoFactorCode;
+use Backpack\CRUD\app\Library\Auth\AuthenticatesUsers as AuthAuthenticatesUsers;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+
+class LoginController extends Controller
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Login Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
+    */
+
+    use AuthAuthenticatesUsers;
+
+    /**
+     * Where to redirect users after login.
+     *
+     * @var string
+     */
+  
+    public function __construct()
+    {
+        $guard = backpack_guard_name();
+
+        $this->middleware("guest:$guard", ['except' => 'logout']);
+    }
+
+    public function index()
+    {
+        return view('vendor.backpack.base.auth.login');
+
+    }
+
+    public function authenticate(Request $request)
+    {
+        $input = $request->all();
+     
+        $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+ 
+        if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
+        {
+            $two_factor_code = substr(md5(date("Ymd His")), 0, 8);
+            $two_factor_url = md5($two_factor_code);
+
+            $details = [
+                'title' => 'Mail from Kubota.com',
+                'otp_code' => $two_factor_code,
+                'otp_url' => route("twofactor")."?t=".$two_factor_url
+            ];
+
+            $user = User::where("id", backpack_auth()->user()->id)->first();
+            $user->two_factor_code = $two_factor_code;
+            $user->two_factor_url = $two_factor_url;
+            $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
+            $user->save();
+           
+            Mail::to('kubota@gmail.com')->send(new TwoFactorMail($details));
+
+            return response()->json([
+                'status' => true,
+                'alert' => 'success',
+                'message' => 'Sukses Login',
+                'redirect_to' => url('two-factor')."?t=".$two_factor_url,
+                'validation_errors' => []
+            ], 200);
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'Username atau Password Salah'
+                ], 200);
+        }
+    }
+
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'username' => ['required', 'string', 'max:255'],
+            'password' => ['required'],
+        ]);
+    }
+
+    public function logout () {
+        $user = User::where("id", backpack_auth()->user()->id)->first();
+        $user->two_factor_code = null;
+        $user->two_factor_expires_at = null;
+        $user->two_factor_url = null;
+        $user->save();
+        
+        backpack_auth()->logout();
+        return redirect()->route("rectmedia.auth.login");
+    }
+
+    protected function guard()
+    {
+        return backpack_auth();
+    }
+}
