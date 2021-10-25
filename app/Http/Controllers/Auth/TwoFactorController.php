@@ -32,7 +32,7 @@ class TwoFactorController extends Controller
             {
             $user = User::where("id", backpack_auth()->user()->id)->first();
             $user->two_factor_code = $two_factor_code;
-            $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
+            $user->two_factor_expires_at = Carbon::now()->addDay(1);
             $user->two_factor_url = null;
             $user->save();
         }
@@ -41,7 +41,7 @@ class TwoFactorController extends Controller
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses OTP',
-            'redirect_to' => url('admin/tag'),
+            'redirect_to' => url('admin/dashboard'),
             'validation_errors' => []
         ], 200);
     }

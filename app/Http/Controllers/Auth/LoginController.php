@@ -96,11 +96,13 @@ class LoginController extends Controller
     }
 
     public function logout () {
-        $user = User::where("id", backpack_auth()->user()->id)->first();
-        $user->two_factor_code = null;
-        $user->two_factor_expires_at = null;
-        $user->two_factor_url = null;
-        $user->save();
+        if (backpack_auth()->check()) {
+            $user = User::where("id", backpack_auth()->user()->id)->first();
+            $user->two_factor_code = null;
+            $user->two_factor_expires_at = null;
+            $user->two_factor_url = null;
+            $user->save();
+        }
         
         backpack_auth()->logout();
         return redirect()->route("rectmedia.auth.login");

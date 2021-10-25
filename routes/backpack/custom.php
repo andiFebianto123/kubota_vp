@@ -11,8 +11,8 @@ Route::group([
     Route::crud('user', 'UserCrudController');
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
+    Route::crud('delivery', 'DeliveryCrudController');
+    Route::crud('forecast', 'ForecastCrudController');
 });
-//     Route::get('logout', 'Auth\LoginController@logout');
-//     // Route::get('dashboard', 'AdminController@dashboard');
 //     // Route::get('/', 'AdminController@redirect');
 // });

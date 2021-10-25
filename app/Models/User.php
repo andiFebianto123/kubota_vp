@@ -21,7 +21,6 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'email',
-        'password',
     ];
 
     /**
@@ -43,11 +42,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function generateTwoFactorCode()
+    public function vendor()
     {
-        $this->timestamps = false;
-        $this->two_factor_code = rand(100000, 999999);
-        $this->two_factor_expires_at = now()->addMinutes(10);
-        $this->save();
+        return $this->belongsTo('App\Models\Vendor', 'vendor_id', 'id');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo('App\Models\Role', 'role_id', 'id');
     }
 }

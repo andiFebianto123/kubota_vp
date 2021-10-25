@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\VendorRequest;
+use App\Http\Requests\DeliveryRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Prologue\Alerts\Facades\Alert;
 
 /**
- * Class VendorCrudController
+ * Class DeliveryCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class VendorCrudController extends CrudController
+class DeliveryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -27,9 +26,9 @@ class VendorCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Vendor::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/vendor');
-        CRUD::setEntityNameStrings('vendor', 'vendors');
+        CRUD::setModel(\App\Models\Delivery::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
+        CRUD::setEntityNameStrings('delivery', 'deliveries');
     }
 
     /**
@@ -41,11 +40,30 @@ class VendorCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('number');
-        CRUD::column('name');
-        CRUD::column('address');
-        CRUD::column('company');
-        CRUD::column('phone');
+        CRUD::column('ds_num');
+        CRUD::column('ds_line');
+        CRUD::column('ds_type');
+        CRUD::column('po_line');
+        CRUD::column('po_release');
+        CRUD::column('description');
+        CRUD::column('order_qty');
+        CRUD::column('w_serial');
+        CRUD::column('u_m');
+        CRUD::column('due_date');
+        CRUD::column('unit_price');
+        CRUD::column('wh');
+        CRUD::column('location');
+        CRUD::column('tax_status');
+        CRUD::column('currency');
+        CRUD::column('shipped_qty');
+        CRUD::column('shipped_date');
+        CRUD::column('petugas_vendor');
+        CRUD::column('no_surat_jalan_vendor');
+        CRUD::column('group_ds_num');
+        CRUD::column('ref_ds_num');
+        CRUD::column('ref_ds_line');
+        CRUD::column('created_by');
+        CRUD::column('updated_by');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
@@ -64,14 +82,33 @@ class VendorCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(VendorRequest::class);
+        CRUD::setValidation(DeliveryRequest::class);
 
         CRUD::field('id');
-        CRUD::field('number');
-        CRUD::field('name');
-        CRUD::field('address');
-        CRUD::field('company');
-        CRUD::field('phone');
+        CRUD::field('ds_num');
+        CRUD::field('ds_line');
+        CRUD::field('ds_type');
+        CRUD::field('po_line');
+        CRUD::field('po_release');
+        CRUD::field('description');
+        CRUD::field('order_qty');
+        CRUD::field('w_serial');
+        CRUD::field('u_m');
+        CRUD::field('due_date');
+        CRUD::field('unit_price');
+        CRUD::field('wh');
+        CRUD::field('location');
+        CRUD::field('tax_status');
+        CRUD::field('currency');
+        CRUD::field('shipped_qty');
+        CRUD::field('shipped_date');
+        CRUD::field('petugas_vendor');
+        CRUD::field('no_surat_jalan_vendor');
+        CRUD::field('group_ds_num');
+        CRUD::field('ref_ds_num');
+        CRUD::field('ref_ds_line');
+        CRUD::field('created_by');
+        CRUD::field('updated_by');
         CRUD::field('created_at');
         CRUD::field('updated_at');
 
@@ -91,18 +128,5 @@ class VendorCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
-    }
-
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
-
-    public function destroy($id)
-    {
-        return true;
     }
 }

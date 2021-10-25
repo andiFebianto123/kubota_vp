@@ -1,6 +1,7 @@
 function submitAfterValid(formId, massError = false) {
         var initText = $('.btn').html()
-        $('.btn').html('Processing...')
+        var imgLoading = "<img src='../img/loading-buffering.gif' width='20px'>"
+        $('.btn').html(imgLoading+' Processing...')
         $('.btn').attr('disabled', 'disabled')
 
         var datastring = $("#"+formId).serialize()

@@ -62,7 +62,17 @@
     background-color: #fff;
 }
 
-.sidebar.sidebar-pills .nav-link.active, .sidebar.sidebar-pills .nav-link:hover {
+.sidebar.sidebar-pills .nav-link:hover {
+    background-color: #ffffff !important;
+    color: #439b9c!important;
+    transition: background .3s ease-in-out;
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+    box-shadow: 0px 0px 4px 1px #5cb8c1;
+    opacity: 0.7;
+}
+
+.sidebar.sidebar-pills .nav-link.active{
     background-color: #ffffff !important;
     color: #439b9c!important;
     transition: background .3s ease-in-out;
@@ -70,6 +80,7 @@
     border-top-left-radius: 20px;
     box-shadow: 0px 0px 4px 1px #5cb8c1;
 }
+
 .sidebar .nav-link.active {
     background: #ffffff !important;
     color: #439b9c;
@@ -82,7 +93,7 @@
 .sidebar .nav-item {
     margin: 6px 0px 4px 8px;
     position: relative;
-    transition: background .3s ease-in-out;
+    transition: background .5s ease-in-out;
 }
 
 .sidebar.sidebar-pills .nav-link.active .nav-icon{
@@ -102,5 +113,21 @@
 }
 .accordion .card-header h2{
     font-weight: bold;
+}
+
+.icon-toggle-menu{
+    font-size: 32px;
+    color: #f1f4f8;
+    opacity: 0.8;
+}
+
+.information-section{
+    border: 1px solid #d5dad8;
+    padding: 8px;
+    border-radius: 6px;
+}
+.information-section h6{
+    font-weight: 800;
+    color: #49abac;
 }
 

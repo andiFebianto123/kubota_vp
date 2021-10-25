@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\GeneralMessageRequest;
+use App\Http\Requests\ForecastRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Prologue\Alerts\Facades\Alert;
 
 /**
- * Class GeneralMessageCrudController
+ * Class ForecastCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class GeneralMessageCrudController extends CrudController
+class ForecastCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -27,9 +26,9 @@ class GeneralMessageCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\GeneralMessage::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/general-message');
-        CRUD::setEntityNameStrings('general message', 'general messages');
+        CRUD::setModel(\App\Models\Forecast::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/forecast');
+        CRUD::setEntityNameStrings('forecast', 'forecasts');
     }
 
     /**
@@ -41,9 +40,7 @@ class GeneralMessageCrudController extends CrudController
     protected function setupListOperation()
     {
         
-        CRUD::column('title');
-        CRUD::column('content');
-        CRUD::column('category');
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -59,7 +56,7 @@ class GeneralMessageCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(GeneralMessageRequest::class);
+        CRUD::setValidation(ForecastRequest::class);
 
         
 
@@ -79,18 +76,5 @@ class GeneralMessageCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
-    }
-
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
-
-    public function destroy($id)
-    {
-        return true;
     }
 }

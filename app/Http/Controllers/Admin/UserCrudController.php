@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\UserRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class UserCrudController
@@ -41,8 +42,20 @@ class UserCrudController extends CrudController
     {
         CRUD::column('username');
         CRUD::column('email');
-        CRUD::column('password');
-
+        CRUD::addColumn([
+            'label'     => 'Vendor', // Table column heading
+            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+            'entity'    => 'vendor', 
+            'type' => 'relationship',
+            'attribute' => 'number',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Role', // Table column heading
+            'name'      => 'role_id', // the column that contains the ID of that connected entity;
+            'entity'    => 'role', 
+            'type' => 'relationship',
+            'attribute' => 'name',
+        ]);
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -80,5 +93,18 @@ class UserCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    public function update($id)
+    {
+        // show a success message
+        Alert::success(trans('backpack::crud.update_success'))->flash();
+        
+        return redirect($this->crud->route);
+    }
+
+    public function destroy($id)
+    {
+        return true;
     }
 }

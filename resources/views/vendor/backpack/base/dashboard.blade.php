@@ -84,12 +84,12 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="background: #48abac;">
-                <h5 class="text-white text-bold mb-0">Quick Shortcuts</h5>
+                <h5 class="text-white text-bold mb-0"><i class="la la-folder"></i> Quick Shortcuts</h5>
             </div>
             <div class="card-body">
                 <h2>Hi, {{Auth::guard('backpack')->user()->username}}</h2>
                 Selamat Datang di Vendor Portal PT. Kubota Indonesia
-                Perhatian : Data di Website ini terupdate setiap harinya jam 12.00 WIB dan 18.00 WIB.
+                <br>Perhatian : Data di Website ini terupdate setiap harinya jam 12.00 WIB dan 18.00 WIB.
 
                 
             </div>
@@ -99,16 +99,17 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header" style="background: #48abac;">
-                <h5 class="text-white text-bold mb-0">Help</h5>
+                <h5 class="text-white text-bold mb-0"><i class="la la-question-circle"></i> Help</h5>
             </div>
             <div class="card-body">
                 <div class="accordion" id="accordionExample">
-                    @foreach($general_messages as $key => $gm)
+                    @foreach($general_message_help as $key => $gm)
                     <div class="card mb-2">
                         <div class="card-header" id="heading-{{$key}}">
                             <h2 class="mb-0">
-                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse-{{$key}}" aria-expanded="true" aria-controls="collapse-{{$key}}">
-                                {{$gm->title}}
+                                <button class="btn btn-link btn-block text-left" style="font-weight: bold;" type="button" data-toggle="collapse" data-target="#collapse-{{$key}}" aria-expanded="true" aria-controls="collapse-{{$key}}">
+                                    <i class="la la-angle-down"></i>
+                                    {{$gm->title}} 
                                 </button>
                             </h2>
                         </div>
@@ -129,13 +130,15 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header" style="background: #48abac;">
-                <h5 class="text-white text-bold mb-0">Information</h5>
+                <h5 class="text-white text-bold mb-0"> <i class="la la-info-circle"></i> Information</h5>
             </div>
             <div class="card-body">
-                <h1>Hi, {{Auth::guard('backpack')->user()->username}}</h1>
-                Selamat Datang di Vendor Portal PT. Kubota Indonesia
-                Perhatian : Data di Website ini terupdate setiap harinya jam 12.00 WIB dan 18.00 WIB.
-
+                @foreach($general_message_info as $key => $gm)
+                <div class="information-section mb-2">
+                    <h6>{{$gm->title}}</h6>
+                    {{$gm->content}}
+                </div>
+                @endforeach
                 
             </div>
         </div>

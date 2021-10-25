@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\PurchaseOrderRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class PurchaseOrderCrudController
@@ -99,5 +100,18 @@ class PurchaseOrderCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    public function update($id)
+    {
+        // show a success message
+        Alert::success(trans('backpack::crud.update_success'))->flash();
+        
+        return redirect($this->crud->route);
+    }
+
+    public function destroy($id)
+    {
+        return true;
     }
 }
