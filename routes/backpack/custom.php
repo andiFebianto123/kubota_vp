@@ -13,6 +13,6 @@ Route::group([
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');
     Route::crud('forecast', 'ForecastCrudController');
+    Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
 });
-//     // Route::get('/', 'AdminController@redirect');
 // });

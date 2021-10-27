@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\DeliveryRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class DeliveryCrudController
@@ -39,39 +40,47 @@ class DeliveryCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('id');
-        CRUD::column('ds_num');
-        CRUD::column('ds_line');
-        CRUD::column('ds_type');
-        CRUD::column('po_line');
-        CRUD::column('po_release');
-        CRUD::column('description');
-        CRUD::column('order_qty');
-        CRUD::column('w_serial');
-        CRUD::column('u_m');
-        CRUD::column('due_date');
-        CRUD::column('unit_price');
-        CRUD::column('wh');
-        CRUD::column('location');
-        CRUD::column('tax_status');
-        CRUD::column('currency');
-        CRUD::column('shipped_qty');
-        CRUD::column('shipped_date');
-        CRUD::column('petugas_vendor');
-        CRUD::column('no_surat_jalan_vendor');
-        CRUD::column('group_ds_num');
-        CRUD::column('ref_ds_num');
-        CRUD::column('ref_ds_line');
-        CRUD::column('created_by');
-        CRUD::column('updated_by');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+        $this->crud->removeButton('create');
 
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        $this->crud->addButtonFromModelFunction('top', 'pdf_check', 'pdfCheck', 'beginning');
+        $this->crud->addButtonFromModelFunction('top', 'pdf_export', 'pdfExport', 'end');
+
+        $this->crud->enableBulkActions();
+
+        CRUD::column('ds_num');
+        // CRUD::addColumn([
+        //     'label'     => 'PO', // Table column heading
+        //     'name'      => 'purchaseOrder', // the column that contains the ID of that connected entity;
+        //     'entity'    => 'vendor', 
+        //     'type' => 'relationship',
+        //     'attribute' => 'number',
+        // ]);
+        CRUD::addColumn([
+            'label'     => 'Shipped Date', // Table column heading
+            'name'      => 'shipped_date', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Order Qty', // Table column heading
+            'name'      => 'order_qty', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Shipped Qty', // Table column heading
+            'name'      => 'shipped_qty', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'DO Number', // Table column heading
+            'name'      => 'no_surat_jalan_vendor', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Operator', // Table column heading
+            'name'      => 'operator', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+       
     }
 
     /**
@@ -86,7 +95,6 @@ class DeliveryCrudController extends CrudController
 
         CRUD::field('id');
         CRUD::field('ds_num');
-        CRUD::field('ds_line');
         CRUD::field('ds_type');
         CRUD::field('po_line');
         CRUD::field('po_release');
@@ -128,5 +136,29 @@ class DeliveryCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    function show()
+    {
+        $entry = $this->crud->getCurrentEntry();
+       
+        $data['crud'] = $this->crud;
+        $data['entry'] = $entry;
+        $data['qr_code'] = "test";
+
+        return view('vendor.backpack.crud.delivery-show', $data);
+    }
+
+    public function update($id)
+    {
+        // show a success message
+        Alert::success(trans('backpack::crud.update_success'))->flash();
+        
+        return redirect($this->crud->route);
+    }
+
+    public function destroy($id)
+    {
+        return true;
     }
 }

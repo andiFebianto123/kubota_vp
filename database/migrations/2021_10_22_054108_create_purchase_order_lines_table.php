@@ -22,6 +22,8 @@ class CreatePurchaseOrderLinesTable extends Migration
             $table->string('item_ptki')->nullable();
             $table->string('w_serial')->nullable();
             $table->string('description');
+            $table->string('po_change');
+            $table->dateTime('po_change_date')->nullable();
             $table->double('order_qty');
             $table->integer('inspection_flag');
             $table->string('u_m');

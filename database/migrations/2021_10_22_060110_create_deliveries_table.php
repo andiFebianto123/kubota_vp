@@ -18,7 +18,7 @@ class CreateDeliveriesTable extends Migration
             $table->string('ds_num');
             $table->string('ds_line');
             $table->string('ds_type')->nullable();
-            $table->integer('po_line');
+            $table->integer('po_line_id');
             $table->integer('po_release');
             $table->string('description');
             $table->double('order_qty');

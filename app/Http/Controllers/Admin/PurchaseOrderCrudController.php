@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\PurchaseOrderRequest;
+use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -32,14 +33,14 @@ class PurchaseOrderCrudController extends CrudController
         CRUD::setEntityNameStrings('purchase order', 'purchase orders');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
+        $this->crud->removeButton('create');
+
+        $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
+
+        $this->crud->orderBy('id', 'asc');
+
         CRUD::column('id');
         CRUD::column('number');
         CRUD::addColumn([
@@ -101,6 +102,30 @@ class PurchaseOrderCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+    function show()
+    {
+        $entry = $this->crud->getCurrentEntry();
+        $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+                                ->where('read_at', null)
+                                ->get();
+        $po_line_reads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+                                ->where('read_at', '!=',null)
+                                ->get();
+        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
+                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
+                                'C' => ['text' => 'Complete', 'color' => 'text-success']
+                            ];
+
+        $data['crud'] = $this->crud;
+        $data['entry'] = $entry;
+        $data['po_line_reads'] = $po_line_reads;
+        $data['po_line_unreads'] = $po_line_unreads;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        return view('vendor.backpack.crud.purchase-order-show', $data);
+    }
+
 
     public function update($id)
     {

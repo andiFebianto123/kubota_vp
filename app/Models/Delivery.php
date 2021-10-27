@@ -9,4 +9,14 @@ class Delivery extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
+
+    public function pdfExport($crud = false)
+    {
+        return '<a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>';
+    }
+
+    public function pdfCheck($crud = false)
+    {
+        return "<div class='group-price-check'><input type='checkbox'> Dengan Harga</div>";
+    }
 }

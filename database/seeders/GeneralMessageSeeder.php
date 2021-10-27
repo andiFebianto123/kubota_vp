@@ -39,6 +39,20 @@ class GeneralMessageSeeder extends Seeder
                     "category" => "help",
                 ],["title" => "How to Check Delivery Status?"],
             ],
+            [
+                [
+                    "title" => "Pengumuman Libur",
+                    "content" => "Dalam Rangka tahun baru, maka kubota akan libur 3 hari",
+                    "category" => "information",
+                ],["title" => "Pengumuman Libur"],
+            ],
+            [
+                [
+                    "title" => "Update Password",
+                    "content" => "Setiap vendor disarankan untuk update password karena sistem kami baru",
+                    "category" => "information",
+                ],["title" => "Update Password"],
+            ],
         ];
 
        foreach($arr_seeders as $key => $seed) {
