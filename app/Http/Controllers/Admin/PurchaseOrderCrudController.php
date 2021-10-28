@@ -6,6 +6,7 @@ use App\Http\Requests\PurchaseOrderRequest;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Contracts\Session\Session;
 use Prologue\Alerts\Facades\Alert;
 
 /**
@@ -36,6 +37,8 @@ class PurchaseOrderCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('create');
+        $this->crud->removeButton('update');
+        $this->crud->removeButton('delete');
 
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
 
@@ -106,6 +109,7 @@ class PurchaseOrderCrudController extends CrudController
     function show()
     {
         $entry = $this->crud->getCurrentEntry();
+        session()->put("last_url", request()->url());
         $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', null)
                                 ->get();

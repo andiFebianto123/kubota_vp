@@ -41,6 +41,7 @@ class DeliveryCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('create');
+        $this->crud->removeButton('update');
 
         $this->crud->addButtonFromModelFunction('top', 'pdf_check', 'pdfCheck', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'pdf_export', 'pdfExport', 'end');
@@ -93,38 +94,20 @@ class DeliveryCrudController extends CrudController
     {
         CRUD::setValidation(DeliveryRequest::class);
 
-        CRUD::field('id');
-        CRUD::field('ds_num');
-        CRUD::field('ds_type');
-        CRUD::field('po_line');
-        CRUD::field('po_release');
-        CRUD::field('description');
-        CRUD::field('order_qty');
-        CRUD::field('w_serial');
-        CRUD::field('u_m');
-        CRUD::field('due_date');
-        CRUD::field('unit_price');
-        CRUD::field('wh');
-        CRUD::field('location');
-        CRUD::field('tax_status');
-        CRUD::field('currency');
-        CRUD::field('shipped_qty');
-        CRUD::field('shipped_date');
+        $this->crud->addField([
+            'label' => 'Delivery Date From Vendor',
+            'type' => 'date_picker',
+            'name' => 'articles',
+            'default' => date("Y-m-d"),
+            'date_picker_options' => [
+                'todayBtn' => 'linked',
+                'format'   => 'dd/mm/yyyy',
+                'language' => 'en'
+             ],
+        ]);        
         CRUD::field('petugas_vendor');
         CRUD::field('no_surat_jalan_vendor');
-        CRUD::field('group_ds_num');
-        CRUD::field('ref_ds_num');
-        CRUD::field('ref_ds_line');
-        CRUD::field('created_by');
-        CRUD::field('updated_by');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+        CRUD::field('order_qty');
     }
 
     /**
@@ -147,6 +130,14 @@ class DeliveryCrudController extends CrudController
         $data['qr_code'] = "test";
 
         return view('vendor.backpack.crud.delivery-show', $data);
+    }
+
+    public function store()
+    {
+        // show a success message
+        Alert::success(trans('backpack::crud.insert_success'))->flash();
+
+        return redirect()->to(session()->get('last_url'));
     }
 
     public function update($id)

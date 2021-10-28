@@ -14,5 +14,6 @@ Route::group([
     Route::crud('delivery', 'DeliveryCrudController');
     Route::crud('forecast', 'ForecastCrudController');
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
+    Route::crud('configuration', 'ConfigurationCrudController');
+    Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
 });
-// });

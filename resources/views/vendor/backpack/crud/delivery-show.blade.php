@@ -51,7 +51,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
     <div class="col-md-12">
         <div class="card-header bg-secondary">
-            <label class="font-weight-bold mb-0">Detail</label> 
+            <label class="font-weight-bold mb-0">Delivery Sheet</label>
         </div>
         <div class="card no-padding no-border p-4">
             <h1>Delivery Sheet</h1>
@@ -75,16 +75,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                             <tr>
                                 <td colspan="3" class="first">
-                                <table class="inline" width="100%">
-                                    <tbody>
-                                        <tr>
-                                            <td width="25%" style="border-right: 1px solid black ;">Order No.<br><strong>PU00011716.1</strong></td>
-                                            <td width="25%" style="border-right: 1px solid black ;" style="padding-right:5px;">Order QTY<br><strong style="text-align: right;">1</strong></td>
-                                            <td width="25%" style="border-right: 1px solid black ;">Dlv.QTY<br><strong style="text-align: right;">1</strong></td>
-                                            <td width="25%">Unit Price<br><strong class="right">29,250,000.00</strong></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    <table class="inline" width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td width="25%" style="border-right: 1px solid black ;">Order No.<br><strong>PU00011716.1</strong></td>
+                                                <td width="25%" style="border-right: 1px solid black ;" style="padding-right:5px;">Order QTY<br><strong style="text-align: right;">1</strong></td>
+                                                <td width="25%" style="border-right: 1px solid black ;">Dlv.QTY<br><strong style="text-align: right;">1</strong></td>
+                                                <td width="25%">Unit Price<br><strong class="right">29,250,000.00</strong></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </td>
                             </tr>
                             <tr>
@@ -125,10 +125,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
                 <div style="float:right; position:relative; width:20%;">
                     <div>
-                     {{QRCode::size(200)->generate($qr_code)}}
+                        {{QRCode::size(220)->generate($qr_code)}}
                     </div>
-                    <div style="border:1px solid #000; margin-top: 10px; width: 100%; padding: 5px 10px 0 10px;">
-                    <strong>Document Requirements</strong>
+                    <div style="border:1px solid #000; margin-top: 10px; width: 100%; max-width:220px; padding: 5px 10px 0 10px;">
+                        <strong>Document Requirements</strong>
                         <ul>
                             <li>Material Mill Sheet</li>
                             <li>Material Safety Data Sheet</li>
@@ -143,11 +143,110 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <a href="#" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                 <a href="#" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
             </div>
-            
-            
-        </div><!-- /.box-body -->
+        </div>
     </div><!-- /.box -->
-    
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary">
+                Delivery Status
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>ITEM DETAIL</strong>
+                        <table class="table table-striped table-hover">
+                            <tr>
+                                <td>PO Number</td>
+                                <td>: PU00016842</td>
+                            </tr>
+                            <tr>
+                                <td>PO Line</td>
+                                <td>: 2</td>
+                            </tr>
+                            <tr>
+                                <td>Item</td>
+                                <td>: SP.04.CSWDV.02.271020</td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>: GOOGLE MAP PLUGIN</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <div class="col-md-6" style="border-left: 1px solid #d9e2ef;">
+                        <strong>DELIVERY STATUS</strong>
+                        <table class="table table-striped table-hover">
+                            <tr>
+                                <td>Received</td>
+                                <td>: <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>Received Date</td>
+                                <td>: 2021-04-09	</td>
+                            </tr>
+                            <tr>
+                                <td>Received QTY</td>
+                                <td>: 0.4</td>
+                            </tr>
+                            <tr>
+                                <td>Shipped</td>
+                                <td>: 0.4</td>
+                            </tr>
+                            <tr>
+                                <td>Rejected QTY</td>
+                                <td>: <button type="button" class="btn btn-sm btn-danger">2</button></td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <div class="col-md-12">
+                        <strong>PAYMENT STATUS</strong>
+                        <table class="table table-striped table-hover">
+                            <tr>
+                                <td>Unit Price</td>
+                                <td>Rp 20.0000.000 </td>
+                            </tr>
+                            <tr>
+                                <td>Payment Plan Date</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Payment Est Date	</td>
+                                <td>2021-04-09	</td>
+                            </tr>
+                            <tr>
+                                <td>Validated</td>
+                                <td><button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>Payment in Proses</td>
+                                <td><button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>Executed</td>
+                                <td><button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>Bank</td>
+                                <td>B35-BANK RESONA PERDANIA IDR</td>
+                            </tr>
+                            <tr>
+                                <td>Payment Ref Number</td>
+                                <td>210535079-RESONA</td>
+                            </tr>
+                            <tr>
+                                <td>Total</td>
+                                <td>6,000,000.00</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -156,7 +255,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
 <style>
-    .pdf-table tbody tr td{
+    .pdf-table tbody tr td {
         padding: 4px;
     }
 </style>

@@ -17,14 +17,14 @@ class CreateForecastsTable extends Migration
             $table->id();
             $table->string('forecast_num');
             $table->integer('forecast_change')->nullable();
-            $table->dateTime('forecast_date');
-            $table->string('vend_num');
-            $table->integer('item');
-            $table->string('description');
-            $table->string('u_m');
-            $table->dateTime('due_date');
-            $table->dateTime('production_date');
-            $table->integer('qty');
+            $table->dateTime('forecast_date')->nullable();
+            $table->string('vend_num')->nullable();
+            $table->integer('item')->nullable();
+            $table->string('description')->nullable();
+            $table->string('u_m')->nullable();
+            $table->dateTime('due_date')->nullable();
+            $table->dateTime('production_date')->nullable();
+            $table->integer('qty')->nullable();
             $table->timestamps();
         });
     }

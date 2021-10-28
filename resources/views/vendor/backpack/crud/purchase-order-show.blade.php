@@ -138,10 +138,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <div>
                     <a class="btn btn-sm btn-primary-vp" href="#"><i class="la la-file-excel"></i> Excel</a>
                     <a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>
+                    <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button>
                 </div>
                 <table class="table table-striped mb-0 table-responsive">
                     <thead>
                         <tr>
+                            <th><input type="checkbox" id="check-all-cb-read" class="check-all-read"></th>
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
@@ -158,6 +160,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <tbody>
                         @foreach ($po_line_reads as $key => $po_line)
                         <tr>
+                            <td>
+                                @if($po_line->status == 'O')
+                                <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}">
+                                @endif
+                            </td>
                             <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
                             <td>
                                 <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
@@ -174,7 +181,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->status == "O")
-                                <a href="http://localhost/office/kubota-vendor-portal/public/admin/purchase-order/1/show" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                <a href="http://localhost/office/kubota-vendor-portal/public/admin/delivery/create" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
                                 @endif
                                 <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                             </td>
@@ -190,6 +197,30 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 </div>
 @endsection
 
+<!-- Modal -->
+<div id="importMassDS" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Import Mass Delivery Sheet</h5>
+        </div>
+        <div class="modal-body">
+            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{asset('docs/template-delivery-sheet.xlsx')}}">template-delivery-sheet.xlsx</a></p>
+            <form action="" method="post">
+                <input type="file" name="templatefile" class="form-control py-1">
+
+                <div class="mt-4 text-right">
+                    <a href="{{url('admin/temp-upload-delivery')}}" class="btn btn-sm btn-outline-primary">Import</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+
+  </div>
+</div>
 
 @section('after_styles')
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
@@ -201,8 +232,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script>
 var anyChecked = false
+var anyReadChecked = false
 var totalPoLine = $('.check-po-lines').length
+var totalPoLineRead = $('.check-read-po-lines').length
 var totalChecked = 0
+var totalCheckedRead = 0
 
 $('#check-all-cb').change(function () {
     totalChecked = 0
@@ -235,24 +269,36 @@ $('.check-po-lines').change(function () {
     }
 })
 
-// $.each($('.check-po-lines'), function( index, value ) {
+$('#check-all-cb-read').change(function () {
+    totalCheckedRead = 0
+    $(".check-read-po-lines").prop('checked', $(this).prop('checked'))
+    anyReadChecked = $(this).prop('checked')
+    if ($(this).prop('checked')) {
+        totalCheckedRead = totalPoLineRead
+    }
 
-//     $('.check-'+index).change(function () {
-//         if ($(this).prop('checked')==true){
-//             $(this).prop('checked', true); 
-//             totalPoLine ++
-//         }else{
-//             $(this).prop('checked', false); 
-//             totalPoLine --
-//         }
-//         console.log(totalPoLine);
-//         if (totalPoLine > 0) {
-//             callButton(true) 
-//         }else{
-//             callButton(false) 
-//         }
-//     })
-// })
+    $(".total-mass").text(totalCheckedRead)
+})
+
+$('.check-read-po-lines').change(function () {
+    if ($(this).prop('checked')==true){
+        $(this).prop('checked', true) 
+        totalCheckedRead ++
+    }else{
+        $(this).prop('checked', false)
+        totalCheckedRead --
+    }
+    
+    if (totalCheckedRead > 0) {
+        if (totalCheckedRead == totalPoLineRead) {
+            $('#check-all-cb-read').prop('checked', true)
+        }
+    }else{
+        $('#check-all-cb-read').prop('checked', false)
+    }
+    $(".total-mass").text(totalCheckedRead)
+
+})
 
  function callButton(anyChecked){
     var htmlBtnAccOrder = "<button id='btn-acc-order' class='btn btn-sm btn-primary-vp'><i class='la la-check-circle'></i> Accept Order</button>"
