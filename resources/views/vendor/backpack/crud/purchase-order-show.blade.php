@@ -76,54 +76,59 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div><!-- /.box -->
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header bg-danger">
-               <label class="font-weight-bold mb-0">PO Line (Unread)</label> 
+            <div class="card-header bg-secondary">
+               <label class="font-weight-bold mb-0">PO Line (UNREAD)</label> 
             </div>
             <div class="card-body">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
-                            <th>PO Number</th>
-                            <th>Item</th>
-                            <th>Description</th>
-                            <th>Qty Order</th>
-                            <th>Unit Price</th>
-                            <th>Total Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                        $total = 0
-                        @endphp
-                        @foreach ($po_line_unreads as $key => $po_line)
-                        <tr>
-                            <td><input type="checkbox" class="check-po-lines check-{{$po_line->id}}"></td>
-                            <td>{{$entry->number}}-{{$po_line->po_line}}</td>
-                            <td>{{$po_line->item}}</td>
-                            <td>{{$po_line->description}}</td>
-                            <td>{{$po_line->order_qty}}</td>
-                            <td>{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
-                            <td>{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
-                        </tr>
-                        @php
-                            $total += $po_line->unit_price*$po_line->order_qty
-                        @endphp
-                        @endforeach
+                <form action="{{url('admin/purchase-order-mass-read')}}" id="form-mass-read" method="post">
+                    @csrf
+                    <input type="hidden" name="po_id" value="{{$entry->id}}">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
+                                <th>PO Number</th>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th>Qty Order</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                            $total = 0
+                            @endphp
+                            @foreach ($po_line_unreads as $key => $po_line)
+                            <tr>
+                                <td><input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}"></td>
+                                <td>{{$entry->number}}-{{$po_line->po_line}}</td>
+                                <td>{{$po_line->item}}</td>
+                                <td>{{$po_line->description}}</td>
+                                <td>{{$po_line->order_qty}}</td>
+                                <td>{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
+                                <td>{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
+                            </tr>
+                            @php
+                                $total += $po_line->unit_price*$po_line->order_qty
+                            @endphp
+                            @endforeach
 
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" class="text-center font-weight-bold">
-                                Total
-                            </td>
-                            <td>
-                                {{"IDR " . number_format($total,0,',','.')}}</td>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <div class="section-buttons"></div>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-center font-weight-bold">
+                                    Total
+                                </td>
+                                <td>
+                                    {{"IDR " . number_format($total,0,',','.')}}</td>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="section-buttons"></div>
+                </form>
+
             </div>
 
         </div><!-- /.box-body -->
@@ -131,10 +136,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header bg-secondary">
-               <label class="font-weight-bold mb-0">PO Line (Read)</label> 
+            <div class="card-header bg-success">
+               <label class="font-weight-bold mb-0">PO Line (ACCEPT)</label> 
             </div>
             <div class="card-body">
+                @if(sizeof($po_line_read_accs) > 0)
                 <div>
                     <a class="btn btn-sm btn-primary-vp" href="#"><i class="la la-file-excel"></i> Excel</a>
                     <a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>
@@ -154,11 +160,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Tax</th>
                             <th>Unit Price</th>
                             <th>Total Price</th>
+                            <th>Read At</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($po_line_reads as $key => $po_line)
+                        @foreach ($po_line_read_accs as $key => $po_line)
                         <tr>
                             <td>
                                 @if($po_line->status == 'O')
@@ -179,9 +186,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->tax}}</td>
                             <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
                             <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
+                            <td>{{$po_line->read_at}}</td>
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->status == "O")
-                                <a href="http://localhost/office/kubota-vendor-portal/public/admin/delivery/create" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
                                 @endif
                                 <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                             </td>
@@ -190,6 +198,58 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
                     </tbody>
                 </table>
+                @else
+                <p class="text-center">
+                    No Data Available
+                </p>
+                @endif
+            </div>
+
+        </div><!-- /.box-body -->
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger">
+               <label class="font-weight-bold mb-0">PO Line (REJECT)</label> 
+            </div>
+            <div class="card-body">
+                @if(sizeof($po_line_read_rejects) > 0)
+
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>PO Number</th>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Read At</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($po_line_read_rejects as $key => $po_line)
+                        <tr>
+                            <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
+                            <td>{{$po_line->item}}</td>
+                            <td>{{$po_line->description}}</td>
+                            <td>{{$po_line->order_qty}}</td>
+                            <td>{{$po_line->read_at}}</td>
+                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
+                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
+                            
+                        </tr>
+                        @endforeach
+
+                    </tbody>
+                </table>
+                @else
+                <p class="text-center">
+                    No Data Available
+                </p>
+                @endif
             </div>
 
         </div><!-- /.box-body -->
@@ -301,7 +361,9 @@ $('.check-read-po-lines').change(function () {
 })
 
  function callButton(anyChecked){
-    var htmlBtnAccOrder = "<button id='btn-acc-order' class='btn btn-sm btn-primary-vp'><i class='la la-check-circle'></i> Accept Order</button>"
+    var htmlBtnAccOrder = "<input type='radio' name='flag_accept' value='1' checked> Accept "
+    htmlBtnAccOrder += "<input type='radio' name='flag_accept' value='2'> Reject <br>"
+    htmlBtnAccOrder += "<button id='btn-for-form-mass-read' type='button' onclick='submitAfterValid(\"form-mass-read\")' class='btn btn-sm btn-primary-vp'><i class='la la-check-circle'></i> Submit</button>"
     if (anyChecked) {
         $(".section-buttons").html(htmlBtnAccOrder)
     }else{

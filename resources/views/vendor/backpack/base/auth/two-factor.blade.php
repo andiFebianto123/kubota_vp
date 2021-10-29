@@ -19,7 +19,7 @@
 
                         <div class="form-group">
                             <div>
-                                <button type="button" onclick="submitAfterValid('form-two-factor')" class="btn btn-block btn-primary-vp">
+                                <button type="button" id="btn-for-form-two-factor" onclick="submitAfterValid('form-two-factor')" class="btn btn-block btn-primary-vp">
                                     Next
                                 </button>
                             </div>
@@ -29,4 +29,16 @@
             </div>
         </div>
     </div>
+    @section('after_scripts')
+    <script>
+        $('input').keypress(function (e) {
+            if (e.which == 13) {
+                submitAfterValid('form-two-factor')
+                return false;    //<---- Add this line
+            }
+        });
+    </script>
+    @endsection
 @endsection
+
+

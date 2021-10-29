@@ -16,4 +16,6 @@ Route::group([
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
     Route::crud('configuration', 'ConfigurationCrudController');
     Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
+    Route::post('purchase-order-mass-read', 'PurchaseOrderCrudController@massRead');
+
 });

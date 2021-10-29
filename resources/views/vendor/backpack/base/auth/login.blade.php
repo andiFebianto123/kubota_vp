@@ -27,7 +27,7 @@
 
                         <div class="form-group">
                             <div>
-                                <button type="button" onclick="submitAfterValid('form-login')" class="btn btn-block btn-primary-vp">
+                                <button type="button" id="btn-for-form-login" onclick="submitAfterValid('form-login')" class="btn btn-block btn-primary-vp">
                                     Login
                                 </button>
                             </div>
@@ -37,4 +37,14 @@
             </div>
         </div>
     </div>
+    @section('after_scripts')
+    <script>
+        $('input').keypress(function (e) {
+            if (e.which == 13) {
+                submitAfterValid('form-login')
+                return false;    //<---- Add this line
+            }
+        });
+    </script>
+    @endsection
 @endsection

@@ -6,8 +6,8 @@ use App\Http\Requests\PurchaseOrderRequest;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Illuminate\Contracts\Session\Session;
 use Prologue\Alerts\Facades\Alert;
+use Illuminate\Http\Request;
 
 /**
  * Class PurchaseOrderCrudController
@@ -113,8 +113,14 @@ class PurchaseOrderCrudController extends CrudController
         $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', null)
                                 ->get();
-        $po_line_reads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+        $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', '!=',null)
+                                ->where('accept_flag', 1)
+                                ->get();
+        
+        $po_line_read_rejects = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+                                ->where('read_at', '!=',null)
+                                ->where('accept_flag', 2)
                                 ->get();
         $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
                                 'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
@@ -123,7 +129,8 @@ class PurchaseOrderCrudController extends CrudController
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
-        $data['po_line_reads'] = $po_line_reads;
+        $data['po_line_read_accs'] = $po_line_read_accs;
+        $data['po_line_read_rejects'] = $po_line_read_rejects;
         $data['po_line_unreads'] = $po_line_unreads;
         $data['arr_po_line_status'] = $arr_po_line_status;
 
@@ -142,5 +149,28 @@ class PurchaseOrderCrudController extends CrudController
     public function destroy($id)
     {
         return true;
+    }
+
+    public function massRead(Request $request)
+    {
+        $po_line_ids = $request->po_line_ids;
+        $po_id = $request->po_id;
+        $flag_accept = $request->flag_accept;
+        foreach ($po_line_ids as $key => $po_line_id) {
+            $po_line = PurchaseOrderLine::where('id', $po_line_id)->first();
+            $po_line->accept_flag = $flag_accept;
+            $po_line->read_by = backpack_auth()->user()->id;
+            $po_line->read_at = now();
+            $po_line->save();
+        }
+        
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Read Successfully',
+            'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
+            'validation_errors' => []
+        ], 200);
     }
 }

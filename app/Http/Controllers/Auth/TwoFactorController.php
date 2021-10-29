@@ -18,7 +18,7 @@ class TwoFactorController extends Controller
         if (request("t") && User::where("two_factor_url", request("t"))->where('id', backpack_auth()->user()->id)->exists()) {
             return view('vendor.backpack.base.auth.two-factor');
         }else{
-            abort(404);
+            return redirect()->route("rectmedia.auth.login");
         }
     }
 
@@ -28,6 +28,7 @@ class TwoFactorController extends Controller
 
         if (User::where("id", backpack_auth()->user()->id)
             ->where("two_factor_code", $two_factor_code)
+            ->where("two_factor_expires_at", '>', Carbon::now())
             ->exists()) 
             {
             $user = User::where("id", backpack_auth()->user()->id)->first();
@@ -35,6 +36,11 @@ class TwoFactorController extends Controller
             $user->two_factor_expires_at = Carbon::now()->addDay(1);
             $user->two_factor_url = null;
             $user->save();
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'OTP Tidak Valid!'
+                ], 200);
         }
 
         return response()->json([

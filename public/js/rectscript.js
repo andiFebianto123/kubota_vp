@@ -1,8 +1,11 @@
+var baseUrl = $("meta[name=base_url]").attr("content");    
+
 function submitAfterValid(formId, massError = false) {
-        var initText = $('.btn').html()
-        var imgLoading = "<img src='../img/loading-buffering.gif' width='20px'>"
-        $('.btn').html(imgLoading+' Processing...')
-        $('.btn').attr('disabled', 'disabled')
+        var initText = $('#btn-for-'+formId).html()
+
+        var imgLoading = "<img src='"+baseUrl+"/img/loading-buffering.gif' width='20px'>"
+        $('#btn-for-'+formId).html(imgLoading+' Processing...')
+        $('#btn-for-'+formId).attr('disabled', 'disabled')
 
         var datastring = $("#"+formId).serialize()
         var formData = new FormData($("#"+formId)[0]);
@@ -22,9 +25,9 @@ function submitAfterValid(formId, massError = false) {
             contentType : false,
             processData : false,
             success: function(response) {
-                $('.btn').removeAttr('disabled')
+                $('#btn-for-'+formId).removeAttr('disabled')
                 $(".progress-loading").remove()
-                $('.btn').html(initText)
+                $('#btn-for-'+formId).html(initText)
                 if (response.status) {
                     window.location.href = response.redirect_to
                 } else {
@@ -48,8 +51,8 @@ function submitAfterValid(formId, massError = false) {
                 }
             },
             error: function(xhr, status, error) {
-                $('.btn').html(initText)
-                $('.btn').removeAttr('disabled')
+                $('#btn-for-'+formId).html(initText)
+                $('#btn-for-'+formId).removeAttr('disabled')
                 $(".progress-loading").remove()
                 var messageErr = "Something Went Wrong"
                 if (xhr.responseJSON) {
