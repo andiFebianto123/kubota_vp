@@ -80,6 +80,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                <label class="font-weight-bold mb-0">PO Line (UNREAD)</label> 
             </div>
             <div class="card-body">
+                @if(sizeof($po_line_unreads) > 0)
                 <form action="{{url('admin/purchase-order-mass-read')}}" id="form-mass-read" method="post">
                     @csrf
                     <input type="hidden" name="po_id" value="{{$entry->id}}">
@@ -128,7 +129,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     </table>
                     <div class="section-buttons"></div>
                 </form>
-
+                @else
+                <p class="text-center">
+                    No Data Available
+                </p>
+                @endif
             </div>
 
         </div><!-- /.box-body -->
@@ -142,8 +147,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <div class="card-body">
                 @if(sizeof($po_line_read_accs) > 0)
                 <div>
-                    <a class="btn btn-sm btn-primary-vp" href="#"><i class="la la-file-excel"></i> Excel</a>
-                    <a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>
+                    <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/purchase-order-line-export-excel-accept')}}"><i class="la la-file-excel"></i> Excel</a>
+                    <a class="btn btn-sm btn-danger" target="_blank" href="{{url('admin/purchase-order-line-export-pdf-accept')}}"><i class="la la-file-pdf"></i> PDF</a>
                     <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button>
                 </div>
                 <table class="table table-striped mb-0 table-responsive">
@@ -190,6 +195,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->status == "O")
                                 <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
                                 @endif
                                 <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                             </td>
@@ -227,6 +233,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Read At</th>
                             <th>Unit Price</th>
                             <th>Total Price</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -239,7 +246,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->read_at}}</td>
                             <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
                             <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
-                            
+                            <td>
+                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+
+                            </td>
+
                         </tr>
                         @endforeach
 

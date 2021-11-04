@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\TwoFactor;
 use App\Mail\TwoFactorMail;
 use App\Models\User;
+use App\Models\UserOtp;
 use App\Notifications\TwoFactorCode;
 use Backpack\CRUD\app\Library\Auth\AuthenticatesUsers as AuthAuthenticatesUsers;
 use Carbon\Carbon;
@@ -69,6 +71,13 @@ class LoginController extends Controller
             $user->two_factor_url = $two_factor_url;
             $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
             $user->save();
+
+            $insert_otp = new UserOtp();
+            $insert_otp->user_id = backpack_auth()->user()->id;
+            $insert_otp->two_factor_code = $two_factor_code;
+            $insert_otp->two_factor_url = $two_factor_url;
+            $insert_otp->expired_at = Carbon::now()->addMinutes(5);
+            $insert_otp->save();
            
             Mail::to('kubota@gmail.com')->send(new TwoFactorMail($details));
 

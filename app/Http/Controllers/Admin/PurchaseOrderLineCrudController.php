@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\PurchaseOrderLineAcceptExport;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use PDF;
 use Prologue\Alerts\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Class PurchaseOrderLineCrudController
@@ -166,5 +170,37 @@ class PurchaseOrderLineCrudController extends CrudController
     public function destroy($id)
     {
         return true;
+    }
+
+    public function exportExcelAccept()
+    {
+        return Excel::download(new PurchaseOrderLineAcceptExport, 'poline-'.date('YmdHis').'.xlsx');
+
+    }
+
+    public function exportPdfAccept()
+    {
+        $purchase_order_lines = PurchaseOrderLine::leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+                                ->get(['purchase_order_lines.id as id', 'purchase_orders.number as number', 'purchase_order_lines.po_line as po_line'
+                                ,'purchase_order_lines.item as item', 'purchase_order_lines.description as description', 'purchase_order_lines.order_qty'
+                                ,'purchase_order_lines.u_m', 'purchase_order_lines.unit_price']);
+
+        $data['purchase_order_lines'] = $purchase_order_lines;
+    	$pdf = PDF::loadview('exports.pdf.purchaseorderline-accept',$data);
+
+        return $pdf->download('poline-'.date('YmdHis').'-pdf');
+    }
+
+    public function unread($id)
+    {
+        $po_line = PurchaseOrderLine::where('id', $id)->first();
+        $po_line->accept_flag = 0;
+        $po_line->read_by = null;
+        $po_line->read_at = null;
+        $po_line->save();
+
+        Alert::success("Data has already unread!")->flash();
+
+        return redirect()->back();
     }
 }

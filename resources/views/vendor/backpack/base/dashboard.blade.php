@@ -14,7 +14,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Unread PO</label>
-                            <h2>11</h2>
+                            <h2>{{$count_po_line_unreads}}</h2>
                         </div>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Total PO</label>
-                            <h2>101</h2>
+                            <h2>{{$count_po_all}}</h2>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Delivery Sheet</label>
-                            <h2>91</h2>
+                            <h2>{{$count_delivery}}</h2>
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Delivery Status</label>
-                            <h2>76</h2>
+                            <h2>{{$count_delivery_status}}</h2>
                         </div>
                     </div>
                 </div>

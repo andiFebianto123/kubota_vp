@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\TwoFactorMail;
 use App\Models\User;
+use App\Models\UserOtp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -18,7 +19,7 @@ class TwoFactorController extends Controller
         if (request("t") && User::where("two_factor_url", request("t"))->where('id', backpack_auth()->user()->id)->exists()) {
             return view('vendor.backpack.base.auth.two-factor');
         }else{
-            return redirect()->route("rectmedia.auth.login");
+            abort(404);
         }
     }
 
@@ -36,6 +37,12 @@ class TwoFactorController extends Controller
             $user->two_factor_expires_at = Carbon::now()->addDay(1);
             $user->two_factor_url = null;
             $user->save();
+
+            $update_otp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
+            $update_otp->two_factor_code = $two_factor_code;
+            $update_otp->expired_at = Carbon::now()->addDay(1);
+            $update_otp->save();
+
         }else{
             return response()->json([
                 'status' => false,

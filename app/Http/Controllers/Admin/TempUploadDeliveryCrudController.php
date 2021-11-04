@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\TempUploadDeliveryRequest;
+use App\Models\Delivery;
+use App\Models\PurchaseOrderLine;
+use App\Models\TempUploadDelivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 
 /**
@@ -43,8 +47,11 @@ class TempUploadDeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('show');
-        $this->crud->addButtonFromModelFunction('top', 'insert_db', 'insertToDB', 'beginning');
-        $this->crud->addButtonFromModelFunction('top', 'cancel_db', 'cancelInsert', 'end');
+        $this->crud->addButtonFromView('top', 'insertfromtemp', 'insertfromtemp', 'beginning');
+        $this->crud->addButtonFromView('top', 'canceltemp', 'canceltemp', 'end');
+        // $this->crud->addButtonFromModelFunction('top', 'insert_db', 'insertToDB', 'beginning');
+        // $this->crud->addButtonFromModelFunction('top', 'cancel_db', 'cancelInsert', 'end');
+        $this->crud->addClause('where','user_id', backpack_auth()->user()->id);
 
         CRUD::addColumn([
             'label'     => 'Delivery Sheet Number', // Table column heading
@@ -117,5 +124,43 @@ class TempUploadDeliveryCrudController extends CrudController
     public function destroy($id)
     {
         return true;
+    }
+
+    public function insertToDb(Request $request)
+    {
+        $data_temps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+
+        foreach ($data_temps as $key => $data_temp) {
+            $po_line = PurchaseOrderLine::where('id', $data_temp->po_line_id)->first();
+
+            $insert = new Delivery();
+            $insert->ds_num = 'V00'.date('YmdHis');
+            $insert->po_line_id = $data_temp->po_line_id;
+            $insert->po_release = 0;
+            $insert->ds_line = $key+1;
+            $insert->description = $po_line->description;
+            $insert->u_m = $po_line->u_m;
+            $insert->due_date = $po_line->due_date;
+            $insert->unit_price = $po_line->unit_price;
+            $insert->wh = $po_line->wh;
+            $insert->location = $po_line->location;
+            $insert->tax_status = $po_line->tax_status;
+            $insert->currency = $po_line->currency;
+            $insert->shipped_qty = $po_line->order_qty;
+            $insert->shipped_date = now();
+            $insert->order_qty = $data_temp->order_qty;
+            $insert->w_serial = $data_temp->serial_number;
+            $insert->petugas_vendor = $data_temp->petugas_vendor;
+            $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
+            $insert->save();
+        }
+
+        TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+    }
+
+    public function cancelToDb(Request $request)
+    {
+        // return true;
+        TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
     }
 }

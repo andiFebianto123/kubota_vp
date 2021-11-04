@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\PurchaseOrderExport;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Class PurchaseOrderCrudController
@@ -41,7 +43,7 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->removeButton('delete');
 
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
-
+        // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
 
         CRUD::column('id');
@@ -112,6 +114,7 @@ class PurchaseOrderCrudController extends CrudController
         session()->put("last_url", request()->url());
         $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', null)
+                                ->where('accept_flag', 0)
                                 ->get();
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', '!=',null)
@@ -172,5 +175,11 @@ class PurchaseOrderCrudController extends CrudController
             'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
             'validation_errors' => []
         ], 200);
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new PurchaseOrderExport, 'po-'.date('YmdHis').'.xlsx');
+
     }
 }

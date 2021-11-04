@@ -17,6 +17,6 @@ class PurchaseOrder extends Model
 
     public function excelExport($crud = false)
     {
-        return '<a class="btn btn-sm btn-primary-vp" target="_blank" href="#"><i class="la la-file-excel"></i> Export</a>';
+        return '<a class="btn btn-sm btn-primary-vp" href="'.url('admin/purchase-order-export-excel').'"><i class="la la-file-excel"></i> Export</a>';
     }
 }
