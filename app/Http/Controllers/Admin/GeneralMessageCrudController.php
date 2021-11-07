@@ -40,6 +40,7 @@ class GeneralMessageCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        $this->crud->removeButton('show');
         
         CRUD::column('title');
         CRUD::column('content');

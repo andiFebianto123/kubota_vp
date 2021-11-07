@@ -279,11 +279,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{asset('docs/template-delivery-sheet.xlsx')}}">template-delivery-sheet.xlsx</a></p>
-            <form action="" method="post">
-                <input type="file" name="templatefile" class="form-control py-1">
+            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+                @csrf
+                <input type="file" name="file_po" class="form-control py-1 rect-validation">
 
                 <div class="mt-4 text-right">
-                    <a href="{{url('admin/temp-upload-delivery')}}" class="btn btn-sm btn-outline-primary">Import</a>
+                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>

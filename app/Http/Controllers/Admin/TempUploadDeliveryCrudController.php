@@ -134,7 +134,7 @@ class TempUploadDeliveryCrudController extends CrudController
             $po_line = PurchaseOrderLine::where('id', $data_temp->po_line_id)->first();
 
             $insert = new Delivery();
-            $insert->ds_num = 'V00'.date('YmdHis');
+            $insert->ds_num = $data_temp->ds_num;
             $insert->po_line_id = $data_temp->po_line_id;
             $insert->po_release = 0;
             $insert->ds_line = $key+1;

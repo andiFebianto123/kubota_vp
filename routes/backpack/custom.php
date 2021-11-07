@@ -17,6 +17,7 @@ Route::group([
     Route::crud('configuration', 'ConfigurationCrudController');
     Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
     Route::post('purchase-order-mass-read', 'PurchaseOrderCrudController@massRead');
+    Route::post('purchase-order-import-ds', 'PurchaseOrderCrudController@importDs');
     Route::get('purchase-order-export-excel', 'PurchaseOrderCrudController@exportExcel');
     Route::get('purchase-order-line-export-excel-accept', 'PurchaseOrderLineCrudController@exportExcelAccept');
     Route::get('purchase-order-line-export-pdf-accept', 'PurchaseOrderLineCrudController@exportPdfAccept');
