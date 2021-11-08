@@ -27,6 +27,7 @@ class UserRequest extends FormRequest
     public function rules()
     {
         return [
+            'name' => "required",
             'role_id' => "required",
             'vendor_id' => "required_if:role_id,==,2",
             'username' => 'required|string|unique:users,username,'.$this->id.',id',

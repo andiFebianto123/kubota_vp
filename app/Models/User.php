@@ -20,6 +20,7 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
+        'name',
         'username',
         'email',
         'vendor_id',
@@ -56,7 +57,7 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Role', 'role_id', 'id');
     }
 
-    public function setPasswordAttribute($value) {
-        $this->attributes['password'] = Hash::make($value);
-    }
+    // public function setPasswordAttribute($value) {
+    //     $this->attributes['password'] = Hash::make($value);
+    // }
 }

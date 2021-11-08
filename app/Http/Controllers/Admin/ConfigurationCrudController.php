@@ -40,6 +40,8 @@ class ConfigurationCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+        $this->crud->removeButton('create');
+        $this->crud->removeButton('delete');
 
         CRUD::column('label');
         CRUD::column('name');

@@ -8,6 +8,7 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 
 /**
@@ -44,6 +45,7 @@ class UserCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+        CRUD::column('name');
         CRUD::column('username');
         CRUD::column('email');
         CRUD::addColumn([
@@ -93,6 +95,7 @@ class UserCrudController extends CrudController
             'attribute' => 'number', // foreign key attribute that is shown to user
             'model'     => "App\Models\Vendor",
         ]);
+        CRUD::field('name');
         CRUD::field('username');
         CRUD::field('email');
         CRUD::field('password');
@@ -114,6 +117,59 @@ class UserCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+    public function store(Request $request)
+    {
+        $this->crud->setRequest($this->crud->validateRequest());
+
+        $request = $this->crud->getRequest();
+
+        // Encrypt password if specified.
+        if ($request->input('password')) {
+            $request->request->set('password', bcrypt($request->input('password')));
+        } 
+        $this->crud->setRequest($request);
+        $this->crud->unsetValidation(); // Validation has already been run
+
+        $item = $this->crud->create($this->crud->getStrippedSaveRequest());
+
+        Alert::success(trans('backpack::crud.insert_success'))->flash();
+
+        // save the redirect choice for next time
+        $this->crud->setSaveAction();
+
+        return $this->crud->performSaveAction($item->getKey());
+    }
+
+
+    function update($id)
+    {
+        $this->crud->setRequest($this->crud->validateRequest());
+
+        /** @var \Illuminate\Http\Request $request */
+        $request = $this->crud->getRequest();
+
+        if ($request->input('password')) {
+            $request->request->set('password', bcrypt($request->input('password')));
+        } else {
+            $request->request->remove('password');
+        }
+
+        $this->crud->setRequest($request);
+        $this->crud->unsetValidation(); // Validation has already been run
+
+            
+        $item = $this->crud->update($request->get($this->crud->model->getKeyName()),
+        $this->crud->getStrippedSaveRequest());
+        $this->data['entry'] = $this->crud->entry = $item;
+        Alert::success(trans('backpack::crud.update_success'))->flash();
+
+        // save the redirect choice for next time
+        $this->crud->setSaveAction();
+
+        return $this->crud->performSaveAction($item->getKey());
+    }
+
 
     public function destroy($id)
     {
