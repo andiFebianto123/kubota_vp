@@ -61,14 +61,22 @@ class GeneralMessageCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(GeneralMessageRequest::class);
-
-        
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+        $this->crud->addField([
+            'name'            => 'category',
+            'label'           => 'Category',
+            'type'            => 'select_from_array',
+            'options'         => ['help' => 'Help', 'information' => 'Information'],
+        ]);
+        $this->crud->addField([
+            'label'     => 'Title', // Table column heading
+            'name'      => 'title', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        $this->crud->addField([
+            'label'     => 'Content', // Table column heading
+            'name'      => 'content', // the column that contains the ID of that connected entity;
+            'type' => 'textarea',
+        ]);
     }
 
     /**
@@ -82,16 +90,4 @@ class GeneralMessageCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
-
-    public function destroy($id)
-    {
-        return true;
-    }
 }

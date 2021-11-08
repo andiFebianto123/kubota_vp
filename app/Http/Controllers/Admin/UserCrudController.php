@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\UserRequest;
+use App\Models\UserOtp;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
 /**
@@ -40,6 +43,7 @@ class UserCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        $this->crud->removeButton('show');
         CRUD::column('username');
         CRUD::column('email');
         CRUD::addColumn([
@@ -72,7 +76,23 @@ class UserCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(UserRequest::class);
-
+       
+        $this->crud->addField([
+            'label'     => 'Role', // Table column heading
+            'type'      => 'select',
+            'name'      => 'role_id', // the column that contains the ID of that connected entity;
+            'entity'    => 'role', // the method that defines the relationship in your Model
+            'attribute' => 'name', // foreign key attribute that is shown to user
+            'model'     => "App\Models\Role",
+        ]);
+        $this->crud->addField([
+            'label'     => 'Vendor', // Table column heading
+            'type'      => 'select2',
+            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+            'entity'    => 'vendor', // the method that defines the relationship in your Model
+            'attribute' => 'number', // foreign key attribute that is shown to user
+            'model'     => "App\Models\Vendor",
+        ]);
         CRUD::field('username');
         CRUD::field('email');
         CRUD::field('password');
@@ -95,16 +115,26 @@ class UserCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
-
     public function destroy($id)
     {
-        return true;
+        $this->crud->hasAccessOrFail('delete');
+
+        $id = $this->crud->getCurrentEntryId() ?? $id;
+
+        DB::beginTransaction();
+        try{
+            if(UserOtp::where('user_id', $id)->exists()){
+                UserOtp::where('user_id', $id)->delete();
+            }
+            $response = $this->crud->delete($id);
+            DB::commit();
+            return $response;
+        }
+        catch(Exception $e){
+            DB::rollback();
+            throw $e;
+        }
     }
+
+   
 }

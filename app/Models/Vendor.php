@@ -9,8 +9,10 @@ class Vendor extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
+    protected $guarded = ['id'];
+
     protected $fillable = [
-        'name',
+        'name','number', 'address', 'company', 'phone'
     ];
 
     // public function purchase()

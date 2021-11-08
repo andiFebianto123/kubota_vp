@@ -9,4 +9,7 @@ class GeneralMessage extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
+    protected $fillable = [
+        'title','content', 'category'
+    ];
 }

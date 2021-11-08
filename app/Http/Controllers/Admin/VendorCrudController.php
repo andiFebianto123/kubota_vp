@@ -40,7 +40,8 @@ class VendorCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('id');
+        $this->crud->removeButton('show');
+
         CRUD::column('number');
         CRUD::column('name');
         CRUD::column('address');
@@ -66,14 +67,11 @@ class VendorCrudController extends CrudController
     {
         CRUD::setValidation(VendorRequest::class);
 
-        CRUD::field('id');
         CRUD::field('number');
         CRUD::field('name');
         CRUD::field('address');
         CRUD::field('company');
         CRUD::field('phone');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -93,16 +91,16 @@ class VendorCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
+    // public function update($id)
+    // {
+    //     // show a success message
+    //     Alert::success(trans('backpack::crud.update_success'))->flash();
         
-        return redirect($this->crud->route);
-    }
+    //     return redirect($this->crud->route);
+    // }
 
-    public function destroy($id)
-    {
-        return true;
-    }
+    // public function destroy($id)
+    // {
+    //     return true;
+    // }
 }
