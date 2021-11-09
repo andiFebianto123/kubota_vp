@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\TwoFactor;
+use App\Mail\ResetPasswordMail;
 use App\Mail\TwoFactorMail;
 use App\Models\User;
+use App\Models\UserForgotPassword;
 use App\Models\UserOtp;
 use App\Notifications\TwoFactorCode;
 use Backpack\CRUD\app\Library\Auth\AuthenticatesUsers as AuthAuthenticatesUsers;
@@ -47,6 +49,35 @@ class LoginController extends Controller
     {
         return view('vendor.backpack.base.auth.login');
 
+    }
+
+    public function forgotPassword()
+    {
+        return view('vendor.backpack.base.auth.forgot-password');
+
+    }
+
+
+    public function sendLinkforgotPassword(Request $request)
+    {
+        $email = $request->email;
+
+        $token = md5(date("Ymd His"));
+
+        $insert_otp = new UserForgotPassword();
+        $insert_otp->email = $email;
+        $insert_otp->token = $token;
+        $insert_otp->expired_at = Carbon::now()->addMinutes(5);
+        $insert_otp->save();
+
+        $details = [
+            'title' => 'Mail from Kubota.com',
+            'fp_url' => route("reset-password")."?t=".$token
+        ];
+
+        Mail::to($email)->send(new ResetPasswordMail($details));
+
+        return view('vendor.backpack.base.auth.forgot-password');
     }
 
     public function authenticate(Request $request)

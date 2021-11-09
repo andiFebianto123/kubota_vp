@@ -29,9 +29,13 @@ function submitAfterValid(formId, massError = false) {
                 $(".progress-loading").remove()
                 $('#btn-for-'+formId).html(initText)
                 if (response.status) {
-                    window.location.href = response.redirect_to
+                    messageStatusGeneral("#"+formId, response.message, 'success')
+
+                    if (response.redirect_to) {
+                        window.location.href = response.redirect_to
+                    }
                 } else {
-                    messageErrorGeneral("#"+formId, response.message)
+                    messageStatusGeneral("#"+formId, response.message)
                     if (massError && response.mass_errors) {
                         $(".modal").modal('hide')
                         $("#massError-"+formId).modal('show')
@@ -58,7 +62,7 @@ function submitAfterValid(formId, massError = false) {
                 if (xhr.responseJSON) {
                     messageErr = xhr.responseJSON.message
                 }
-                messageErrorGeneral("#"+formId, messageErr)
+                messageStatusGeneral("#"+formId, messageErr)
             }
         });
 }
@@ -75,7 +79,7 @@ function messageErrorForm(currentID, message) {
                         .insertBefore(currentID).hide().show('medium')
 }
 
-function messageErrorGeneral(currentID, message) {
-    $("<div class='error-message alert alert-danger'>" +message + "</div>")
+function messageStatusGeneral(currentID,message ,status = 'danger' ) {
+    $("<div class='error-message alert alert-"+status+"'>" +message + "</div>")
                         .insertBefore(currentID).hide().show('medium')
 }

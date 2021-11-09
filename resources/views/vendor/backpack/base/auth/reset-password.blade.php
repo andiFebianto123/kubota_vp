@@ -6,33 +6,30 @@
             <img src="{{asset('img/logo-kubota.png')}}" style="width: 100px;" class="img img-fluid" alt="">
             <div class="card">
                 <div class="card-body">
-                    <form id="form-login" class="col-md-12 p-t-10"  method="post" action="{{ route('rectmedia.auth.authenticate') }}">
+                    <form class="col-md-12 p-t-10" id="form-update-password" role="form" method="POST" action="{{route('forgotpassword.update')}}">
                         {!! csrf_field() !!}
 
                         <div class="form-group">
-                            <label class="control-label">Username</label>
+                            <label class="control-label">New Password</label>
 
                             <div>
-                                <input type="text" class="form-control rect-validation" name="username" id="username">
+                                <input type="password" class="form-control rect-validation" name="password">
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">New Password Confirmation</label>
+
+                            <div>
+                                <input type="password" class="form-control rect-validation" name="password_confirmation">
+                            </div>
+                            <input type="hidden" name="token" value="{{request('t')}}">
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label" for="password">Password</label>
-
                             <div>
-                                <input type="password" class="form-control rect-validation" name="password" id="password">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div>
-                                <button type="button" id="btn-for-form-login" onclick="submitAfterValid('form-login')" class="btn btn-block btn-primary-vp">
-                                    Login
+                                <button type="button" id="btn-for-form-update-password" onclick="submitAfterValid('form-update-password')" class="btn btn-block btn-primary-vp">
+                                    Update
                                 </button>
-                            </div>
-                            <div class="mt-2">
-                                <a href="{{route('rectmedia.auth.forgotpassword')}}">Forgot Your Password?</a> 
                             </div>
                         </div>
                     </form>
@@ -44,10 +41,12 @@
     <script>
         $('input').keypress(function (e) {
             if (e.which == 13) {
-                submitAfterValid('form-login')
+                submitAfterValid('form-update-password')
                 return false;    //<---- Add this line
             }
         });
     </script>
     @endsection
 @endsection
+
+

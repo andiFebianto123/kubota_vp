@@ -61,50 +61,34 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <table border="1px" width="98%" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td>Delivery Sheet No.<br><strong>{{$entry->ds_num}}</strong></td>
-                                <td colspan="2"></td>
+                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$entry->ds_num}}</strong></td>
+                                <td width="50%" colspan="2"></td>
                             </tr>
                             <tr>
-                                <td>Dlv.Date<br><strong>{{$entry->ds_num}}</strong></td>
-                                <td colspan="2">P/O Due Date<br><strong>{{$entry->due_date}}</strong></td>
+                                <td width="50%" colspan="2">Dlv.Date<br><strong>{{$entry->ds_num}}</strong></td>
+                                <td width="50%" colspan="2">P/O Due Date<br><strong>{{$entry->due_date}}</strong></td>
                             </tr>
                             <tr>
-                                <td>Vend. No<br><strong>V018073</strong></td>
-                                <td>Vend. Name<br><strong>RECT MEDIA KOMPUTINDO, PT</strong></td>
-                                <td>Vendor Dlv. No<br><strong></strong></td>
+                                <td width="50%" colspan="2">Vend. No<br><strong>V018073</strong></td>
+                                <td width="25%">Vend. Name<br><strong>RECT MEDIA KOMPUTINDO, PT</strong></td>
+                                <td width="25%">Vendor Dlv. No<br><strong></strong></td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="first">
-                                    <table class="inline" width="100%">
-                                        <tbody>
-                                            <tr>
-                                                <td width="25%" style="border-right: 1px solid black ;">Order No.<br><strong>PU00011716.1</strong></td>
-                                                <td width="25%" style="border-right: 1px solid black ;" style="padding-right:5px;">Order QTY<br><strong style="text-align: right;">1</strong></td>
-                                                <td width="25%" style="border-right: 1px solid black ;">Dlv.QTY<br><strong style="text-align: right;">1</strong></td>
-                                                <td width="25%">Unit Price<br><strong class="right">29,250,000.00</strong></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
+                                <td width="25%">Order No.<br><strong>PU00011716.1</strong></td>
+                                <td width="25%">Order QTY<br><strong style="text-align: right;">1</strong></td>
+                                <td width="25%">Dlv.QTY<br><strong style="text-align: right;">1</strong></td>
+                                <td width="25%">Unit Price<br><strong class="right">29,250,000.00</strong></td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="first">
-                                    <table class="inline">
-                                        <tbody>
-                                            <tr>
-                                                <td width="25%" style="border-right: 1px solid black ;">Part No.<br><strong>SP.18.CSWDV.03.241017.REV01</strong></td>
-                                                <td width="20%" style="border-right: 1px solid black ;">Currency<br><strong>IDR</strong></td>
-                                                <td width="15%" style="border-right: 1px solid black ;">Tax Status<br><strong class="right">PPN0</strong></td>
-                                                <td width="25%">Amount<br><strong class="right">29,250,000.00</strong></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
+                                <td width="25%">Part No.<br><strong>SP.18.CSWDV.03.241017.REV01</strong></td>
+                                <td width="25%">Currency<br><strong>IDR</strong></td>
+                                <td width="25%">Tax Status<br><strong class="right">PPN0</strong></td>
+                                <td width="25%">Amount<br><strong class="right">29,250,000.00</strong></td>
                             </tr>
                             <tr>
-                                <td>Part Name<br><strong>Pengembangan Website dan Security PT KI</strong></td>
-                                <td>WH<br><strong>P1</strong></td>
-                                <td>Location<br><strong></strong></td>
+                                <td width="50%" colspan="2">Part Name<br><strong>Pengembangan Website dan Security PT KI</strong></td>
+                                <td width="25%">WH<br><strong>P1</strong></td>
+                                <td width="25%">Location<br><strong></strong></td>
                             </tr>
                         </tbody>
                     </table>
