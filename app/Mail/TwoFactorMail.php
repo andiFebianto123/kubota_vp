@@ -33,6 +33,7 @@ class TwoFactorMail extends Mailable
     public function build()
     {
         return $this->subject('Mail from '.env('MAIL_FROM_ADDRESS',""))
+                    ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->view('emails.two-factor', $this->details);
     }
 }
