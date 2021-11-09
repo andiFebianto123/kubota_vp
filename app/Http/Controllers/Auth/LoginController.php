@@ -79,7 +79,7 @@ class LoginController extends Controller
             $insert_otp->expired_at = Carbon::now()->addMinutes(5);
             $insert_otp->save();
            
-            Mail::to('kubota@gmail.com')->send(new TwoFactorMail($details));
+            Mail::to($user->email)->send(new TwoFactorMail($details));
 
             return response()->json([
                 'status' => true,

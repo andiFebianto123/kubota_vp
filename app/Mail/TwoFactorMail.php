@@ -32,7 +32,7 @@ class TwoFactorMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Mail from Kubota.com')
+        return $this->subject('Mail from '.env('MAIL_FROM_ADDRESS',""))
                     ->view('emails.two-factor', $this->details);
     }
 }
