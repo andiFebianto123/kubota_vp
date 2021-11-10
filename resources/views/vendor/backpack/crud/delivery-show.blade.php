@@ -61,34 +61,35 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <table border="1px" width="98%" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$entry->ds_num}}</strong></td>
+                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}</strong></td>
                                 <td width="50%" colspan="2"></td>
                             </tr>
                             <tr>
-                                <td width="50%" colspan="2">Dlv.Date<br><strong>{{$entry->ds_num}}</strong></td>
-                                <td width="50%" colspan="2">P/O Due Date<br><strong>{{$entry->due_date}}</strong></td>
+                                <td width="50%" colspan="2">Dlv.Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->shipped_date))}}</strong></td>
+                                <td width="50%" colspan="2">P/O Due Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->due_date))}}</strong></td>
                             </tr>
                             <tr>
-                                <td width="50%" colspan="2">Vend. No<br><strong>V018073</strong></td>
-                                <td width="25%">Vend. Name<br><strong>RECT MEDIA KOMPUTINDO, PT</strong></td>
-                                <td width="25%">Vendor Dlv. No<br><strong></strong></td>
+                                <td width="50%" colspan="2">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
+                                <td width="25%">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                                <td width="25%">Vendor Dlv. No<br><strong>{{$delivery_show->no_surat_jalan_vendor}}</strong></td>
                             </tr>
                             <tr>
-                                <td width="25%">Order No.<br><strong>PU00011716.1</strong></td>
-                                <td width="25%">Order QTY<br><strong style="text-align: right;">1</strong></td>
-                                <td width="25%">Dlv.QTY<br><strong style="text-align: right;">1</strong></td>
-                                <td width="25%">Unit Price<br><strong class="right">29,250,000.00</strong></td>
+                                <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
+                                <td width="25%">Order QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
+                                <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
+                                <td width="25%">Unit Price<br><strong class="right">{{"IDR " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
+                            </tr>
+
+                            <tr>
+                                <td width="25%">Part No.<br><strong>-</strong></td>
+                                <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
+                                <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
+                                <td width="25%">Amount<br><strong class="right">-</strong></td>
                             </tr>
                             <tr>
-                                <td width="25%">Part No.<br><strong>SP.18.CSWDV.03.241017.REV01</strong></td>
-                                <td width="25%">Currency<br><strong>IDR</strong></td>
-                                <td width="25%">Tax Status<br><strong class="right">PPN0</strong></td>
-                                <td width="25%">Amount<br><strong class="right">29,250,000.00</strong></td>
-                            </tr>
-                            <tr>
-                                <td width="50%" colspan="2">Part Name<br><strong>Pengembangan Website dan Security PT KI</strong></td>
-                                <td width="25%">WH<br><strong>P1</strong></td>
-                                <td width="25%">Location<br><strong></strong></td>
+                                <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>
+                                <td width="25%">WH<br><strong>{{$delivery_show->wh}}</strong></td>
+                                <td width="25%">Location<br><strong>{{$delivery_show->location}}</strong></td>
                             </tr>
                         </tbody>
                     </table>
@@ -124,8 +125,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="text-center mt-4">
-                <a href="#" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                <a href="#" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
             </div>
         </div>
     </div><!-- /.box -->

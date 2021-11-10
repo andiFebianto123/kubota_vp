@@ -12,6 +12,8 @@ Route::group([
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');
+    Route::get('delivery-export-pdf', 'DeliveryCrudController@exportPdf');
+
     Route::crud('forecast', 'ForecastCrudController');
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
     Route::crud('configuration', 'ConfigurationCrudController');

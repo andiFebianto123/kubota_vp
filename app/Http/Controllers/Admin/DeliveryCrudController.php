@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DeliveryRequest;
+use App\Models\Delivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
+use PDF;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 
 /**
  * Class DeliveryCrudController
@@ -124,12 +129,66 @@ class DeliveryCrudController extends CrudController
     function show()
     {
         $entry = $this->crud->getCurrentEntry();
-       
+        
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
-        $data['qr_code'] = "test";
+        $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
+        $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
         return view('vendor.backpack.crud.delivery-show', $data);
+    }
+
+    private function detailDS($id)
+    {
+        $delivery_show = Delivery::leftJoin('purchase_order_lines', 'purchase_order_lines.id', 'deliveries.po_line_id')
+                        ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+                        // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
+                        ->leftJoin('vendors', 'vendors.id', 'purchase_orders.vendor_id')
+                        ->where('deliveries.id', $id)
+                        ->get(['deliveries.id as id','deliveries.ds_num','deliveries.ds_line','deliveries.shipped_date', 'purchase_order_lines.due_date', 'deliveries.po_release','purchase_order_lines.item','deliveries.u_m',
+                        'vendors.number as vendor_number', 'vendors.name as vendor_name', 'deliveries.no_surat_jalan_vendor',
+                        'purchase_orders.number as po_number','purchase_order_lines.po_line as po_line', 'deliveries.order_qty as order_qty', 'deliveries.shipped_qty', 'deliveries.unit_price', 'deliveries.currency', 'deliveries.tax_status', 'deliveries.description', 'deliveries.wh', 'deliveries.location'])
+                        ->first();
+        $qr_code = "DSW|";
+        $qr_code .= $delivery_show->ds_num."|";
+        $qr_code .= $delivery_show->ds_line."|";
+        $qr_code .= $delivery_show->po_number."|";
+        $qr_code .= $delivery_show->po_line."|";
+        $qr_code .= $delivery_show->po_release."|";
+        $qr_code .= $delivery_show->item."|";
+        $qr_code .= $delivery_show->shipped_qty."|";
+        $qr_code .= $delivery_show->u_m."|";
+        $qr_code .= $delivery_show->unit_price."|";
+        $qr_code .= date("Y-m-d", strtotime($delivery_show->shipped_date))."|";
+        $qr_code .= $delivery_show->no_surat_jalan_vendor;
+
+        $data['delivery_show'] = $delivery_show;
+        $data['qr_code'] = $qr_code;
+
+        return $data;
+    }
+
+    public function exportPdf()
+    {
+        $id = request('id');
+        $with_price = request('wp');
+        // $writer = new PngWriter();
+
+        $qr_code = FacadesQrCode::format('svg')->size(200)->generate($this->detailDS($id)['qr_code']);
+        // $qr_code = base64_encode(QrCode::format('svg')->size(200)->errorCorrection('H')->generate($this->detailDS($id)['qr_code']));
+        // $qrCode = QrCode::create($this->detailDS($id)['qr_code'])
+        // ->setSize(200);
+        // $qr_code = $writer->write($qrCode);
+
+
+        $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
+        $data['qr_code'] = $qr_code;
+        $data['with_price'] = $with_price;
+
+    	$pdf = PDF::loadview('exports.pdf.delivery-sheet',$data);
+        return $pdf->stream();
+
+        // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
 
     public function store()
