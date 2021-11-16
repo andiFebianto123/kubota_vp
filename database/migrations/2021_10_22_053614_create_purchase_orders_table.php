@@ -18,7 +18,8 @@ class CreatePurchaseOrdersTable extends Migration
             $table->string('number');
             $table->unsignedBigInteger('vendor_id')->nullable();
             $table->dateTime('po_date');
-            $table->dateTime('email_flag');
+            $table->integer('po_change')->default(0);
+            $table->dateTime('email_flag')->nullable();
             $table->timestamps();
 
             $table->foreign('vendor_id')

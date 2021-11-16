@@ -49,7 +49,7 @@
 
         {{-- UPDATE INFO FORM --}}
         <div class="col-lg-8">
-            <form class="form" action="{{ route('backpack.account.info.store') }}" method="post">
+            <form class="form" action="{{ route('rectmedia.account.info.update') }}" method="post">
 
                 {!! csrf_field() !!}
 
@@ -75,8 +75,8 @@
                                     $label = config('backpack.base.authentication_column_name');
                                     $field = backpack_authentication_column();
                                 @endphp
-                                <label class="required">{{ $label }}</label>
-                                <input required class="form-control" type="{{ backpack_authentication_column()=='email'?'email':'text' }}" name="{{ $field }}" value="{{ old($field) ? old($field) : $user->$field }}">
+                                <label>{{ $label }}</label>
+                                <input required class="form-control" type="{{ backpack_authentication_column()=='email'?'email':'text' }}" name="{{ $field }}" value="{{ old($field) ? old($field) : $user->$field }}" disabled>
                             </div>
                         </div>
                     </div>

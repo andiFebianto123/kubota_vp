@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConfigurationsTable extends Migration
+class CreateDeliveryRejectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class CreateConfigurationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('configurations', function (Blueprint $table) {
+        Schema::create('delivery_rejects', function (Blueprint $table) {
             $table->id();
-            $table->string('label');
-            $table->string('name');
-            $table->string('value');
+            $table->string('ds_num');
+            $table->integer('ds_line');
+            $table->string('reason_num');
+            $table->string('reason');
+            $table->double('rejected_qty');
+            $table->dateTime('inspection_date');
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ class CreateConfigurationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('configurations');
+        Schema::dropIfExists('delivery_rejects');
     }
 }

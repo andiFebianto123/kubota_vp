@@ -37,6 +37,7 @@ class CreatePurchaseOrderLinesTable extends Migration
             $table->string('status');
             $table->dateTime('production_date')->nullable();
             $table->integer('accept_flag')->default(0);
+            $table->integer('outhouse_flag')->default(0);
             $table->string('reason')->nullable();
             $table->string('read_by')->nullable();
             $table->string('read_at')->nullable();
@@ -47,7 +48,6 @@ class CreatePurchaseOrderLinesTable extends Migration
             ->on('purchase_orders')
             ->onUpdate('cascade');
         });
-    
     }
 
     /**

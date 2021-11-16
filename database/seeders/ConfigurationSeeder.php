@@ -15,7 +15,7 @@ class ConfigurationSeeder extends Seeder
             [
               "label" => "Email Reminder Day",
               "name" => "email_reminder_day",
-              "action" => 5,
+              "value" => 5,
             ],
             ["name" => "email_reminder_day"],
           ],
@@ -23,7 +23,7 @@ class ConfigurationSeeder extends Seeder
             [
               "label" => "Expired OTP (Day)",
               "name" => "expired_otp",
-              "action" => 1,
+              "value" => 1,
             ],
             ["name" => "expired_otp"],
           ],

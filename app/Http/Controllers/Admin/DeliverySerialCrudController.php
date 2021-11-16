@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ConfigurationRequest;
+use App\Http\Requests\DeliverySerialRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class ConfigurationCrudController
+ * Class DeliverySerialCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ConfigurationCrudController extends CrudController
+class DeliverySerialCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class ConfigurationCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Configuration::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/configuration');
-        CRUD::setEntityNameStrings('configuration', 'configurations');
+        CRUD::setModel(\App\Models\DeliverySerial::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery-serial');
+        CRUD::setEntityNameStrings('delivery serial', 'delivery serials');
     }
 
     /**
@@ -40,12 +40,22 @@ class ConfigurationCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
-        $this->crud->removeButton('create');
-        $this->crud->removeButton('delete');
 
-        CRUD::column('label');
-        CRUD::column('name');
-        CRUD::column('value');
+        CRUD::column('id');
+        CRUD::column('ds_num');
+        CRUD::column('ds_line');
+        CRUD::column('ds_detail');
+        CRUD::column('no_mesin');
+        CRUD::column('created_by');
+        CRUD::column('updated_by');
+        CRUD::column('created_at');
+        CRUD::column('updated_at');
+
+        /**
+         * Columns can be defined using the fluent syntax or array syntax:
+         * - CRUD::column('price')->type('number');
+         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
+         */
     }
 
     /**
@@ -56,10 +66,23 @@ class ConfigurationCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ConfigurationRequest::class);
-        CRUD::field('label');
-        CRUD::field('name');
-        CRUD::field('value');
+        CRUD::setValidation(DeliverySerialRequest::class);
+
+        CRUD::field('id');
+        CRUD::field('ds_num');
+        CRUD::field('ds_line');
+        CRUD::field('ds_detail');
+        CRUD::field('no_mesin');
+        CRUD::field('created_by');
+        CRUD::field('updated_by');
+        CRUD::field('created_at');
+        CRUD::field('updated_at');
+
+        /**
+         * Fields can be defined using the fluent syntax or array syntax:
+         * - CRUD::field('price')->type('number');
+         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
+         */
     }
 
     /**

@@ -14,7 +14,8 @@ class PurchaseOrderSeeder extends Seeder
           [
             [
              "number" => "PU00006434",
-             "vendor_id" => 2,
+             "vendor_id" => 2,                
+             "po_change" => 0,
              "po_date" => now(),
              "email_flag" => now()
             ],
@@ -24,8 +25,9 @@ class PurchaseOrderSeeder extends Seeder
             [
                 "number" => "PU00006435",
                 "vendor_id" => 2,
-                "po_date" => now(),
-                "email_flag" => now()
+                "po_change" => 0,
+                "email_flag" => null,
+                "po_date" => now()
             ],
            ["number" => "PU00006435"],
           ],
@@ -34,6 +36,7 @@ class PurchaseOrderSeeder extends Seeder
                 "number" => "PU00006436",
                 "vendor_id" => 2,
                 "po_date" => now(),
+                "po_change" => 0,
                 "email_flag" => now()
             ],
            ["number" => "PU00006436"],
@@ -43,6 +46,7 @@ class PurchaseOrderSeeder extends Seeder
                 "number" => "PU00006424",
                 "vendor_id" => 3,
                 "po_date" => now(),
+                "po_change" => 0,
                 "email_flag" => now()
             ],
            ["number" => "PU00006424"],
@@ -52,6 +56,7 @@ class PurchaseOrderSeeder extends Seeder
                 "number" => "PU00006425",
                 "vendor_id" => 4,
                 "po_date" => now(),
+                "po_change" => 2,
                 "email_flag" => now()
                 ],
             ["number" => "PU00006425"],

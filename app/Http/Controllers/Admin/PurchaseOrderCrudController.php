@@ -40,6 +40,7 @@ class PurchaseOrderCrudController extends CrudController
 
     protected function setupListOperation()
     {
+        $current_role = backpack_auth()->user()->role->name;
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
@@ -47,25 +48,44 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
+        if($current_role == 'vendor'){
+            $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
+        }
+
 
         CRUD::column('id');
+        if($current_role == 'admin'){
+            CRUD::addColumn([
+                'label'     => 'Kode Vendor', // Table column heading
+                'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+                'entity'    => 'vendor', 
+                'type' => 'relationship',
+                'attribute' => 'number',
+            ]);
+        }
         CRUD::column('number');
+        // CRUD::addColumn([
+        //     'label'     => 'Nama Vendor', // Table column heading
+        //     'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+        //     'entity'    => 'vendor', 
+        //     'type' => 'relationship',
+        //     'attribute' => 'name',
+        // ]);
         CRUD::addColumn([
-            'label'     => 'Kode Vendor', // Table column heading
-            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'vendor', 
-            'type' => 'relationship',
-            'attribute' => 'number',
+            'label'     => 'PO Date', // Table column heading
+            'name'      => 'po_date', // the column that contains the ID of that connected entity;
+            'type' => 'date',
+            'format' => 'YYYY-M-D'
         ]);
         CRUD::addColumn([
-            'label'     => 'Nama Vendor', // Table column heading
-            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'vendor', 
-            'type' => 'relationship',
-            'attribute' => 'name',
-        ]);
-        CRUD::column('po_date');
-        CRUD::column('email_flag');
+            'name'     => 'email_flag',
+            'label'    => 'Email Flag',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                return ($entry->email_flag) ? "✓":"-";
+            }
+        ]);        
+        CRUD::column('po_change');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:

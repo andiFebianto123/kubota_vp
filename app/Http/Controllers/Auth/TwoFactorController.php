@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TwoFactorMail;
+use App\Models\Configuration;
 use App\Models\User;
 use App\Models\UserOtp;
 use Carbon\Carbon;
@@ -26,6 +27,9 @@ class TwoFactorController extends Controller
     public function update(Request $request) 
     {
         $two_factor_code = $request->two_factor_code;
+        $conf_exp_otp = Configuration::where('name', 'expired_otp')->first();
+        $expired_otp = ($conf_exp_otp) ? $conf_exp_otp->value:1; // in day
+
 
         if (User::where("id", backpack_auth()->user()->id)
             ->where("two_factor_code", $two_factor_code)
@@ -34,13 +38,13 @@ class TwoFactorController extends Controller
             {
             $user = User::where("id", backpack_auth()->user()->id)->first();
             $user->two_factor_code = $two_factor_code;
-            $user->two_factor_expires_at = Carbon::now()->addDay(1);
+            $user->two_factor_expires_at = Carbon::now()->addDay($expired_otp);
             $user->two_factor_url = null;
             $user->save();
 
             $update_otp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
             $update_otp->two_factor_code = $two_factor_code;
-            $update_otp->expired_at = Carbon::now()->addDay(1);
+            $update_otp->expired_at = Carbon::now()->addDay($expired_otp);
             $update_otp->save();
 
         }else{

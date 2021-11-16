@@ -27,4 +27,6 @@ Route::group([
     Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
     Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
 
+    Route::crud('delivery-status', 'DeliveryStatusCrudController');
+    Route::crud('delivery-serial', 'DeliverySerialCrudController');
 });

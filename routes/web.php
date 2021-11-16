@@ -13,6 +13,7 @@
 // Route::get('two-factor', 'Auth\TwoFactorController@index')->name("twofactor");
 Route::get('admin/logout', 'Auth\LoginController@logout')->name("logout");
 Route::get('admin/login', 'Auth\LoginController@index')->name("rectmedia.auth.login");
+Route::post('admin/update-account', 'Auth\MyAccountController@postAccountInfoForm')->name("rectmedia.account.info.update");
 Route::get('admin/forgot-password', 'Auth\ForgotPasswordController@forgotPassword')->name("rectmedia.auth.forgotpassword");
 Route::post('admin/forgot-password', 'Auth\ForgotPasswordController@sendLink')->name('forgotpassword.sendlink');
 Route::get('admin/reset-password', 'Auth\ForgotPasswordController@resetPassword')->name("reset-password");
