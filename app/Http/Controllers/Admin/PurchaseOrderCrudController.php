@@ -134,10 +134,10 @@ class PurchaseOrderCrudController extends CrudController
     {
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
-        $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
-                                ->where('read_at', null)
-                                ->where('accept_flag', 0)
-                                ->get();
+        $po_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+                                ->paginate(8);
+
+        /* not used
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', '!=',null)
                                 ->where('accept_flag', 1)
@@ -147,16 +147,18 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('read_at', '!=',null)
                                 ->where('accept_flag', 2)
                                 ->get();
+        */
         $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
                                 'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
                                 'C' => ['text' => 'Complete', 'color' => 'text-success']
                             ];
+ 
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
-        $data['po_line_read_accs'] = $po_line_read_accs;
-        $data['po_line_read_rejects'] = $po_line_read_rejects;
-        $data['po_line_unreads'] = $po_line_unreads;
+        // $data['po_line_read_accs'] = $po_line_read_accs;
+        // $data['po_line_read_rejects'] = $po_line_read_rejects;
+        $data['po_lines'] = $po_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
 
         return view('vendor.backpack.crud.purchase-order-show', $data);

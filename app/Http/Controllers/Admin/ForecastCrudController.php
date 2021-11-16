@@ -57,6 +57,18 @@ class ForecastCrudController extends CrudController
             'name'      => 'forecast_num',
         ]);
 
+        // $list=array();
+        // $month = 4;
+        // $year = 2020;
+
+        // for($d=1; $d<=31; $d++)
+        // {
+        //     $time=mktime(12, 0, 0, $month, $d, $year);          
+        //     if (date('m', $time)==$month)       
+        //         $list[]=date('Y-m-d-D', $time);
+        // }
+
+        // dd($list);
 
         if (request("filter_forecast_by") != null) {
             $ffb = request("filter_forecast_by");

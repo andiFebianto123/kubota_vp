@@ -1,4 +1,4 @@
-.btn-primary-vp, .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+.btn-primary-vp, .bg-primary-vp, .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     background-color: #48abac;
     border-color: #48abac;
     color: #fff;
