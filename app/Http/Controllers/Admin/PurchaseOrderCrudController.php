@@ -135,8 +135,17 @@ class PurchaseOrderCrudController extends CrudController
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
         $po_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
-                                ->paginate(8);
-
+                                ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+                                ->leftJoin('vendors', 'purchase_orders.vendor_id', 'vendors.id')
+                                ->select('purchase_order_lines.*', 'vendors.name as vendor_name', 'vendors.currency as vendor_currency')
+                                ->orderBy('id', 'desc')
+                                ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $po_changes_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
+                    ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+                    ->where('purchase_order_lines.po_change', '>', 0)
+                    ->orderBy('purchase_order_lines.id', 'desc')
+                    ->get();
         /* not used
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', '!=',null)
@@ -158,7 +167,8 @@ class PurchaseOrderCrudController extends CrudController
         $data['entry'] = $entry;
         // $data['po_line_read_accs'] = $po_line_read_accs;
         // $data['po_line_read_rejects'] = $po_line_read_rejects;
-        $data['po_lines'] = $po_lines;
+        $data['po_lines'] = $collection_po_lines;
+        $data['po_changes_lines'] = $po_changes_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
 
         return view('vendor.backpack.crud.purchase-order-show', $data);

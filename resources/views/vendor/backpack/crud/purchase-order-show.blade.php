@@ -95,6 +95,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
+                            <th>Vendor Name</th>
                             <th>Description</th>
                             <th>Qty</th>
                             <th>UM</th>
@@ -102,6 +103,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Tax (%)</th>
                             <th>Unit Price</th>
                             <th>Total Price</th>
+                            <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
                             @if(backpack_auth()->user()->role->name == 'admin')
@@ -125,24 +127,35 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </span>
                             </td>
                             <td>{{$po_line->item}}</td>
+                            <td>{{$po_line->vendor_name}}</td>
                             <td>{{$po_line->description}}</td>
-                            <td>{{$po_line->order_qty}}</td>
+                            <td>{!! $po_line->change_order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
-                            <td>{{date('Y-m-d', strtotime($po_line->due_date))}}</td>
+                            <td>{!! $po_line->change_due_date !!}</td>
                             <td>{{$po_line->tax}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
+                            <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
+                            <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
+                            <td class="{{['','text-success', 'text-danger'][$po_line->accept_flag]}}">{{['','Accept', 'Reject'][$po_line->accept_flag]}}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
                             @if(backpack_auth()->user()->role->name == 'admin')
                             <td>{{$po_line->created_at}}</td>
                             @endif
                             <td class="text-nowrap"><!-- Single edit button -->
-                                @if($po_line->status == "O")
-                                <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
-                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                @if($po_line->read_at)
+                                    @if($po_line->status == "O" && $po_line->accept_flag == 1)
+                                        <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                    @endif
+                                    @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                    @endif    
+                                    <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                @else
+                                    @if(backpack_auth()->user()->role->name != 'admin')
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                    @endif
                                 @endif
-                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                             </td>
                         </tr>
                         @endforeach
@@ -154,16 +167,59 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     No Data Available
                 </p>
                 @endif
-                {{$po_lines->links()}}
+                {{-- $po_lines->links() --}}
             </div>
 
         </div><!-- /.box-body -->
     </div>
 
-    
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary-vp">
+               <label class="font-weight-bold mb-0">PO Change History</label> 
+            </div>
+            <div class="card-body">
+                @if(sizeof($po_changes_lines) > 0)
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>PO Number</th>
+                            <th>PO Line</th>
+                            <th>Issued Date</th>
+                            <th>Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($po_changes_lines as $key => $po_line)
+                        <tr>
+                            <td>{{$po_line->number}}</td>
+                            <td>{{$po_line->po_line}}</td>
+                            <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
+                            <td>{{$po_line->po_change}}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @else
+                <p class="text-center">
+                    No Data Available
+                </p>
+                @endif
+            </div>
 
+        </div><!-- /.box-body -->
+    </div>
 </div>
 
+
+@endsection
+
+@section('after_styles')
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
+@endsection
+
+@section('after_scripts')
 
 <!-- Modal -->
 <div id="importMassDS" class="modal fade" role="dialog">
@@ -187,18 +243,53 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </form>
         </div>
     </div>
-
   </div>
 </div>
 
-@endsection
+<div id="modalAccept" class="modal fade" role="dialog">
+  <div class="modal-dialog">
 
-@section('after_styles')
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
-@endsection
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Accept PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+                @csrf
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Submit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
 
-@section('after_scripts')
+<div id="modalReject" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Reject PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+                @csrf
+                <label for="">Write Reason</label>
+                <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
+
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Submit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script>
@@ -208,7 +299,9 @@ var totalPoLine = $('.check-po-lines').length
 var totalPoLineRead = $('.check-read-po-lines').length
 var totalChecked = 0
 var totalCheckedRead = 0
-
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 $('#check-all-cb').change(function () {
     totalChecked = 0
     $(".check-po-lines").prop('checked', $(this).prop('checked'))
