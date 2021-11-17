@@ -11,7 +11,7 @@ class PurchaseOrderLine extends Model
     use HasFactory;
     
     protected $append = [
-        'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date'
+        'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept'
     ];
 
     public function purchaseOrder()
@@ -94,6 +94,18 @@ class PurchaseOrderLine extends Model
             if(date('Y-m-d', strtotime($last_po_line->due_date)) != $value){
                 $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
             }
+        }
+
+        return $html_row;
+    }
+
+    public function getReformatFlagAcceptAttribute()
+    {
+        $value = "<button class='btn p-0 ".['','text-success', 'text-danger'][$this->accept_flag]."'>".['','Accept', 'Reject'][$this->accept_flag]."</button>";
+
+        $html_row = $value; 
+        if($this->accept_flag == 2){
+            $html_row = "<button class='btn p-0 ".['','text-success', 'text-danger'][$this->accept_flag]."' data-toggle='tooltip' data-placement='top' title='Reason :: ".$this->reason."'>".['','Accept', 'Reject'][$this->accept_flag]."</button>";
         }
 
         return $html_row;

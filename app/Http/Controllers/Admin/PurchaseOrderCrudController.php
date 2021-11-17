@@ -211,6 +211,52 @@ class PurchaseOrderCrudController extends CrudController
         ], 200);
     }
 
+    public function acceptPoLine(Request $request)
+    {
+        $po_line_ids = json_decode($request->po_line_ids);
+        $po_id = $request->po_id;
+        foreach ($po_line_ids as $key => $po_line_id) {
+            $po_line = PurchaseOrderLine::where('id', $po_line_id)->first();
+            $po_line->accept_flag = 1;
+            $po_line->read_by = backpack_auth()->user()->id;
+            $po_line->read_at = now();
+            $po_line->save();
+        }
+        
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Accept Successfully',
+            'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
+            'validation_errors' => []
+        ], 200);
+    }
+
+    public function rejectPoLine(Request $request)
+    {
+        $po_line_ids = json_decode($request->po_line_ids);
+        $po_id = $request->po_id;
+        $reason = $request->reason;
+        foreach ($po_line_ids as $key => $po_line_id) {
+            $po_line = PurchaseOrderLine::where('id', $po_line_id)->first();
+            $po_line->reason = $reason;
+            $po_line->accept_flag = 2;
+            $po_line->read_by = backpack_auth()->user()->id;
+            $po_line->read_at = now();
+            $po_line->save();
+        }
+        
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Reject Successfully',
+            'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
+            'validation_errors' => []
+        ], 200);
+    }
+
     public function exportExcel()
     {
         return Excel::download(new PurchaseOrderExport, 'po-'.date('YmdHis').'.xlsx');

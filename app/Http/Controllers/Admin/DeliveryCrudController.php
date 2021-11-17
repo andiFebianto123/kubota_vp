@@ -209,6 +209,7 @@ class DeliveryCrudController extends CrudController
 
     public function destroy($id)
     {
+        Delivery::where('id', $id)->delete();
         return true;
     }
 }

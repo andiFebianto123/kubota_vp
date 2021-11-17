@@ -91,7 +91,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <table class="table table-striped mb-0 table-responsive">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all-cb-read" class="check-all-read"></th>
+                            <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
@@ -116,8 +116,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->status == 'O')
-                                <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}">
+                                @if($po_line->read_at == null)
+                                <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
+                                <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
                             </td>
                             <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
@@ -135,7 +136,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->tax}}</td>
                             <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
                             <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
-                            <td class="{{['','text-success', 'text-danger'][$po_line->accept_flag]}}">{{['','Accept', 'Reject'][$po_line->accept_flag]}}</td>
+                            <td>{!! $po_line->reformat_flag_accept !!}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
                             @if(backpack_auth()->user()->role->name == 'admin')
@@ -152,8 +153,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @else
                                     @if(backpack_auth()->user()->role->name != 'admin')
-                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
-                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                     @endif
                                 @endif
                             </td>
@@ -162,6 +163,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
                     </tbody>
                 </table>
+                <div class="section-buttons"></div>
+
                 @else
                 <p class="text-center">
                     No Data Available
@@ -255,10 +258,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <h5 class="modal-title">Accept PO Line</h5>
         </div>
         <div class="modal-body">
-            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+            <p class="text-accept"></p>
+            <form id="form-accept-po-line" action="{{url('admin/purchase-order-accept-po-line')}}" method="post">
                 @csrf
+                <input type="hidden" name="po_line_ids" class="val-accept">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Submit</a>
+                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-accept-po-line')">Submit</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
@@ -275,13 +281,15 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <h5 class="modal-title">Reject PO Line</h5>
         </div>
         <div class="modal-body">
-            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+            <p class="text-reject"></p>
+            <form id="form-reject-po-line" action="{{url('admin/purchase-order-reject-po-line')}}" method="post">
                 @csrf
                 <label for="">Write Reason</label>
                 <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
-
+                <input type="hidden" name="po_line_ids" class="val-reject">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Submit</a>
+                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-reject-po-line')">Submit</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
@@ -364,15 +372,54 @@ $('.check-read-po-lines').change(function () {
 
 })
 
- function callButton(anyChecked){
-    var htmlBtnAccOrder = "<input type='radio' name='flag_accept' value='1' checked> Accept "
-    htmlBtnAccOrder += "<input type='radio' name='flag_accept' value='2'> Reject <br>"
-    htmlBtnAccOrder += "<button id='btn-for-form-mass-read' type='button' onclick='submitAfterValid(\"form-mass-read\")' class='btn btn-sm btn-primary-vp'><i class='la la-check-circle'></i> Submit</button>"
+function changeBtn(v){
+    var htmlButton = ""
+    var arrPoLines = []
+    $( ".check-po-lines" ).each(function() {
+        if($(this).prop('checked')==true){
+            arrPoLines.push($(this).val())
+        }
+    })
+    if (v == 1){
+        htmlButton += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='acceptPoLines(["+arrPoLines+"])' data-target='#modalAccept'><i class='la la-check-circle'></i> Submit</button>"
+    }else{
+        htmlButton += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='rejectPoLines(["+arrPoLines+"])' data-target='#modalReject'><i class='la la-check-circle'></i> Submit</button>"
+    }
+    $(".button-area").html(htmlButton)
+}
+
+function callButton(anyChecked){
+    var arrPoLines = []
+    $( ".check-po-lines" ).each(function() {
+        if($(this).prop('checked')==true){
+            arrPoLines.push($(this).val())
+        }
+    })
+    var htmlBtnAccOrder = "<input type='radio' name='flag_accept' class='radio-flag-accept' onclick='changeBtn(1)' value='1' checked> Accept "
+    htmlBtnAccOrder += "<input type='radio' name='flag_accept' class='radio-flag-accept'  onclick='changeBtn(2)' value='2'> Reject <br>"
+    htmlBtnAccOrder += "<div class='button-area'>"
+    htmlBtnAccOrder += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='acceptPoLines(["+arrPoLines+"])' data-target='#modalAccept'><i class='la la-check-circle'></i> Submit</button>"
+    htmlBtnAccOrder += "</div>"
     if (anyChecked) {
         $(".section-buttons").html(htmlBtnAccOrder)
     }else{
         $(".section-buttons").html("")
     }
+ }
+
+
+ function acceptPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-accept').val(strPoLines)
+     $('.text-accept').text('Accept '+lengthPoLines+' Po Line?')
+ }
+
+ function rejectPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-reject').val(strPoLines)
+     $('.text-reject').text('Reject '+lengthPoLines+' Po Line?')
  }
  
 </script>
