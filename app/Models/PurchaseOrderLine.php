@@ -11,7 +11,8 @@ class PurchaseOrderLine extends Model
     use HasFactory;
     
     protected $append = [
-        'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept'
+        'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept',
+        'count_ds'
     ];
 
     public function purchaseOrder()
@@ -109,6 +110,11 @@ class PurchaseOrderLine extends Model
         }
 
         return $html_row;
+    }
+
+    public function getCountDsAttribute()
+    {
+        return Delivery::where('po_line_id', $this->id)->count();
     }
 
 

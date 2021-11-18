@@ -191,21 +191,6 @@ class DeliveryCrudController extends CrudController
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
 
-    public function store()
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.insert_success'))->flash();
-
-        return redirect()->to(session()->get('last_url'));
-    }
-
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
 
     public function destroy($id)
     {

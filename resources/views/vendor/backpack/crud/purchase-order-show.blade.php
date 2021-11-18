@@ -145,7 +145,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
+                                        @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                        @else
+                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}})" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
+                                        @endif
                                     @endif
                                     @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
@@ -298,6 +302,22 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
   </div>
 </div>
 
+<div id="modalCreate" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Warning!</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-count-ds"></p>
+            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary">Submit</a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+  </div>
+</div>
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script>
@@ -420,6 +440,10 @@ function callButton(anyChecked){
      var lengthPoLines = arrPoLines.length
      $('.val-reject').val(strPoLines)
      $('.text-reject').text('Reject '+lengthPoLines+' Po Line?')
+ }
+
+ function createDs(num){
+    $('.text-count-ds').text("Anda Sudah Memiliki "+num+" DS. Apakah yakin akan melanjutkan menambah DS?")
  }
  
 </script>
