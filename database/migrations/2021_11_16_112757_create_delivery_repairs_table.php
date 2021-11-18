@@ -14,7 +14,7 @@ class CreateDeliveryRepairsTable extends Migration
     public function up()
     {
         Schema::create('delivery_repairs', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('ds_num');
             $table->integer('ds_line');
             $table->string('reason_num');
@@ -24,7 +24,10 @@ class CreateDeliveryRepairsTable extends Migration
             $table->double('repair_qty');
             $table->string('ref_num');
             $table->integer('ref_line');
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
     /**

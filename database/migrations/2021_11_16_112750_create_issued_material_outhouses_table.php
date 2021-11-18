@@ -14,7 +14,7 @@ class CreateIssuedMaterialOuthousesTable extends Migration
     public function up()
     {
         Schema::create('issued_material_outhouses', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('ds_num');
             $table->integer('ds_line');
             $table->integer('ds_detail');
@@ -22,9 +22,10 @@ class CreateIssuedMaterialOuthousesTable extends Migration
             $table->string('description');
             $table->string('lot');
             $table->double('issue_qty');
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
     /**

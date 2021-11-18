@@ -14,12 +14,12 @@ class CreateUsersTable extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('name');
             $table->string('username');
             $table->string('email')->unique();
-            $table->unsignedBigInteger('vendor_id')->nullable();
-            $table->unsignedBigInteger('role_id')->nullable();
+            $table->integer('vendor_id')->nullable(); 
+            $table->integer('role_id')->nullable(); 
             $table->string('password');
             $table->integer('is_active')->default(1);
             $table->dateTime('last_login')->nullable();
@@ -29,21 +29,12 @@ class CreateUsersTable extends Migration
             $table->string('two_factor_code')->nullable();
             $table->string('two_factor_url')->nullable();
             $table->dateTime('two_factor_expires_at')->nullable();
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->timestamps();
+            $table->integer('created_by')->nullable(); 
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
             $table->softDeletes();
 
-
-            $table->foreign('role_id')
-            ->references('id')
-            ->on('roles')
-            ->onUpdate('cascade');
-
-            $table->foreign('vendor_id')
-            ->references('id')
-            ->on('vendors')
-            ->onUpdate('cascade');
         });
 
 

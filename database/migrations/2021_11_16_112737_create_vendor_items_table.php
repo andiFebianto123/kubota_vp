@@ -14,12 +14,15 @@ class CreateVendorItemsTable extends Migration
     public function up()
     {
         Schema::create('vendor_items', function (Blueprint $table) {
-            $table->id();
-            $table->string('vend_num');
+            $table->increments('id');
+            $table->string('vendor_num');
             $table->string('item');
             $table->string('description');
             $table->double('qty_per_box');
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

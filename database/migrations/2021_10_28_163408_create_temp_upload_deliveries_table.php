@@ -14,14 +14,17 @@ class CreateTempUploadDeliveriesTable extends Migration
     public function up()
     {
         Schema::create('temp_upload_deliveries', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('po_line_id');
-            $table->bigInteger('user_id');
+            $table->increments('id');
+            $table->integer('po_line_id');
+            $table->integer('user_id');
             $table->double('order_qty');
             $table->string('serial_number');
             $table->string('petugas_vendor')->nullable();
             $table->string('no_surat_jalan_vendor')->nullable();
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

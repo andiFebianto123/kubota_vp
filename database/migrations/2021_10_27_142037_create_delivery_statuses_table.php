@@ -14,7 +14,7 @@ class CreateDeliveryStatusesTable extends Migration
     public function up()
     {
         Schema::create('delivery_statuses', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('ds_num');
             $table->string('ds_line');
             $table->string('ds_type')->nullable();
@@ -42,7 +42,10 @@ class CreateDeliveryStatusesTable extends Migration
             $table->string('no_surat_jalan_vendor')->nullable();
             $table->string('ref_ds_num')->nullable();
             $table->integer('ref_ds_line')->nullable();
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

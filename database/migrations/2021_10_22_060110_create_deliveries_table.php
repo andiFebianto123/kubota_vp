@@ -14,7 +14,7 @@ class CreateDeliveriesTable extends Migration
     public function up()
     {
         Schema::create('deliveries', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('ds_num');
             $table->string('ds_line');
             $table->string('ds_type')->nullable();
@@ -37,10 +37,10 @@ class CreateDeliveriesTable extends Migration
             $table->string('group_ds_num')->nullable();
             $table->string('ref_ds_num')->nullable();
             $table->integer('ref_ds_line')->nullable();
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
     /**

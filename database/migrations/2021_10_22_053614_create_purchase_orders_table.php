@@ -14,18 +14,16 @@ class CreatePurchaseOrdersTable extends Migration
     public function up()
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('number');
-            $table->unsignedBigInteger('vendor_id')->nullable();
+            $table->string('vendor_number');
             $table->dateTime('po_date');
             $table->integer('po_change')->default(0);
             $table->dateTime('email_flag')->nullable();
-            $table->timestamps();
-
-            $table->foreign('vendor_id')
-            ->references('id')
-            ->on('vendors')
-            ->onUpdate('cascade');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

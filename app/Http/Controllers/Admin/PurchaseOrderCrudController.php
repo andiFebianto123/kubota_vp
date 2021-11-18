@@ -136,7 +136,7 @@ class PurchaseOrderCrudController extends CrudController
         session()->put("last_url", request()->url());
         $po_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
-                                ->leftJoin('vendors', 'purchase_orders.vendor_id', 'vendors.id')
+                                ->leftJoin('vendors', 'purchase_orders.vendor_number', 'vendors.number')
                                 ->select('purchase_order_lines.*', 'vendors.name as vendor_name', 'vendors.currency as vendor_currency')
                                 ->orderBy('id', 'desc')
                                 ->get();

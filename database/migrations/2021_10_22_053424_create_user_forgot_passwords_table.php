@@ -14,11 +14,12 @@ class CreateUserForgotPasswordsTable extends Migration
     public function up()
     {
         Schema::create('user_forgot_passwords', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('email');
             $table->string('token');
             $table->dateTime('expired_at');
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

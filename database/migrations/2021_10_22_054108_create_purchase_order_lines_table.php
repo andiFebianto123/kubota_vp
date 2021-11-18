@@ -14,8 +14,8 @@ class CreatePurchaseOrderLinesTable extends Migration
     public function up()
     {
         Schema::create('purchase_order_lines', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('purchase_order_id')->nullable();
+            $table->increments('id');
+            $table->integer('purchase_order_id')->nullable();
             $table->integer('po_line');
             $table->integer('po_release');
             $table->string('item');
@@ -41,12 +41,10 @@ class CreatePurchaseOrderLinesTable extends Migration
             $table->string('reason')->nullable();
             $table->string('read_by')->nullable();
             $table->string('read_at')->nullable();
-            $table->timestamps();
-
-            $table->foreign('purchase_order_id')
-            ->references('id')
-            ->on('purchase_orders')
-            ->onUpdate('cascade');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

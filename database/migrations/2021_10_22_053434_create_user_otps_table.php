@@ -14,17 +14,12 @@ class CreateUserOtpsTable extends Migration
     public function up()
     {
         Schema::create('user_otps', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->increments('id');
+            $table->integer('user_id')->nullable();
             $table->string('two_factor_code');
             $table->string('two_factor_url')->nullable();
             $table->dateTime('expired_at')->nullable();
             $table->timestamps();
-
-            $table->foreign('user_id')
-            ->references('id')
-            ->on('users')
-            ->onUpdate('cascade');
         });
     }
 

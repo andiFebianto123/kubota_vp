@@ -143,7 +143,7 @@ class DeliveryCrudController extends CrudController
         $delivery_show = Delivery::leftJoin('purchase_order_lines', 'purchase_order_lines.id', 'deliveries.po_line_id')
                         ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
                         // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
-                        ->leftJoin('vendors', 'vendors.id', 'purchase_orders.vendor_id')
+                        ->leftJoin('vendors', 'vendors.number', 'purchase_orders.vendor_number')
                         ->where('deliveries.id', $id)
                         ->get(['deliveries.id as id','deliveries.ds_num','deliveries.ds_line','deliveries.shipped_date', 'purchase_order_lines.due_date', 'deliveries.po_release','purchase_order_lines.item','deliveries.u_m',
                         'vendors.number as vendor_number', 'vendors.name as vendor_name', 'deliveries.no_surat_jalan_vendor',

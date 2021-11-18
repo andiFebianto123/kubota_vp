@@ -14,7 +14,7 @@ class CreateMaterialOuthousesTable extends Migration
     public function up()
     {
         Schema::create('material_outhouses', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('instruction_num');
             $table->string('po_numb');
             $table->integer('po_line');
@@ -24,7 +24,10 @@ class CreateMaterialOuthousesTable extends Migration
             $table->integer('lot_seq');
             $table->string('lot');
             $table->double('lot_qty');
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

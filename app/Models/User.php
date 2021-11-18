@@ -60,4 +60,13 @@ class User extends Authenticatable
     // public function setPasswordAttribute($value) {
     //     $this->attributes['password'] = Hash::make($value);
     // }
+
+    public function setCreatedAtAttribute($value)
+    {
+        $this->attributes['created_at'] = date("Y/m/d H:i:s", strtotime($value));
+    }
+    public function setUpdatedAtAttribute($value)
+    {
+        $this->attributes['updated_at'] = date("Y/m/d H:i:s", strtotime($value));
+    }
 }

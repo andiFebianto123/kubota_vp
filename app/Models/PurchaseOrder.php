@@ -12,7 +12,7 @@ class PurchaseOrder extends Model
 
     public function vendor()
     {
-        return $this->belongsTo('App\Models\Vendor', 'vendor_id', 'id');
+        return $this->belongsTo('App\Models\Vendor', 'vendor_number', 'number');
     }
 
     public function excelExport($crud = false)
