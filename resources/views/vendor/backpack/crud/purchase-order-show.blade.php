@@ -146,9 +146,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
                                         @if($po_line->count_ds == 0)
-                                        <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                        <a href="{{url('admin/delivery/create?po_line_id='.$po_line->id)}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
                                         @else
-                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}})" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
+                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}}, '{{url('admin/delivery/create?po_line_id='.$po_line->id)}}')" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
                                         @endif
                                     @endif
                                     @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
@@ -312,7 +312,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-count-ds"></p>
-            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary">Submit</a>
+            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Submit</a>
             <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
         </div>
     </div>
@@ -442,8 +442,9 @@ function callButton(anyChecked){
      $('.text-reject').text('Reject '+lengthPoLines+' Po Line?')
  }
 
- function createDs(num){
+ function createDs(num, url){
     $('.text-count-ds').text("Anda Sudah Memiliki "+num+" DS. Apakah yakin akan melanjutkan menambah DS?")
+    $('.goto-create').attr('href', url)
  }
  
 </script>

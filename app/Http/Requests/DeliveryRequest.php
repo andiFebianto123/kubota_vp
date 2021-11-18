@@ -26,7 +26,9 @@ class DeliveryRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+            'order_qty' => 'required',
+            'petugas_vendor' => 'required',
+            'no_surat_jalan_vendor' => 'required'
         ];
     }
 

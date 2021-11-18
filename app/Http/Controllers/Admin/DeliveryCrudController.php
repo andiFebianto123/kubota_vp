@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DeliveryRequest;
 use App\Models\Delivery;
+use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
 use PDF;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 
 /**
@@ -102,13 +104,18 @@ class DeliveryCrudController extends CrudController
         $this->crud->addField([
             'label' => 'Delivery Date From Vendor',
             'type' => 'date_picker',
-            'name' => 'articles',
+            'name' => 'shipped_date',
             'default' => date("Y-m-d"),
             'date_picker_options' => [
                 'todayBtn' => 'linked',
                 'format'   => 'dd/mm/yyyy',
                 'language' => 'en'
              ],
+        ]);      
+        $this->crud->addField([
+            'type' => 'hidden',
+            'name' => 'po_line_id',
+            'value' => request('po_line_id')
         ]);        
         CRUD::field('petugas_vendor');
         CRUD::field('no_surat_jalan_vendor');
@@ -166,6 +173,61 @@ class DeliveryCrudController extends CrudController
         $data['qr_code'] = $qr_code;
 
         return $data;
+    }
+
+    public function store(Request $request)
+    {
+        $this->crud->setRequest($this->crud->validateRequest());
+        $request = $this->crud->getRequest();
+
+        $po_line_id = $request->input('po_line_id');
+        $order_qty = $request->input('order_qty');
+        $petugas_vendor = $request->input('petugas_vendor');
+        $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
+
+        $po_line = PurchaseOrderLine::where('purchase_order_lines.id', $po_line_id)
+                ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id' )
+                ->first();
+        $code = "";
+        switch (backpack_auth()->user()->role->name) {
+            case 'admin':
+                $code = "01";
+                break;
+            case 'vendor':
+                $code = "00";
+                break;
+            default:
+                # code...
+                break;
+        }
+
+        $ds_num = $po_line->vendor_number.date("ymd").$code;
+        $insert = new Delivery();
+        $insert->ds_num = $ds_num;
+        $insert->po_line_id = $po_line_id;
+        $insert->po_release = 0;
+        $insert->ds_line = Delivery::where('po_line_id', $po_line_id)->count()+1;
+        $insert->description = $po_line->description;
+        $insert->u_m = $po_line->u_m;
+        $insert->due_date = $po_line->due_date;
+        $insert->unit_price = $po_line->unit_price;
+        $insert->wh = $po_line->wh;
+        $insert->location = $po_line->location;
+        $insert->tax_status = $po_line->tax_status;
+        $insert->currency = $po_line->currency;
+        $insert->shipped_qty = $po_line->order_qty;
+        $insert->shipped_date = now();
+        $insert->order_qty = $order_qty;
+        // $insert->w_serial = $data_temp->serial_number;
+        $insert->petugas_vendor = $petugas_vendor;
+        $insert->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+        $insert->created_by = backpack_auth()->user()->id;
+        $insert->updated_by = backpack_auth()->user()->id;
+        $insert->save();
+
+        Alert::success(trans('backpack::crud.insert_success'))->flash();
+    
+        return redirect()->to('admin/purchase-order-line/'.$po_line_id.'/show');
     }
 
     public function exportPdf()

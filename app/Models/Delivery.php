@@ -10,6 +10,13 @@ class Delivery extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
 
+    protected $fillable = [
+        'shipped_qty',
+        'petugas_vendor',
+        'no_surat_jalan_vendor',
+        'order_qty',
+    ];
+
     public function pdfExport($crud = false)
     {
         return '<a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>';
