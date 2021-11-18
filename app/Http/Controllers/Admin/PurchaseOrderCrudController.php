@@ -49,7 +49,7 @@ class PurchaseOrderCrudController extends CrudController
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
-            $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
+            $this->crud->addClause('where', 'vendor_number', '=', backpack_auth()->user()->vendor->number);
         }
 
 
