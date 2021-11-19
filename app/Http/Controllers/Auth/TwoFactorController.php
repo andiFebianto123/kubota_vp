@@ -20,7 +20,7 @@ class TwoFactorController extends Controller
         if (request("t") && User::where("two_factor_url", request("t"))->where('id', backpack_auth()->user()->id)->exists()) {
             return view('vendor.backpack.base.auth.two-factor');
         }else{
-            abort(404);
+            return redirect()->to("/");
         }
     }
 
