@@ -107,7 +107,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($deliveries as $key => $delivery)
                         <tr>
                             <td>{{$delivery->ds_num}}</td>
-                            <td>{{$delivery->shipped_date}}</td>
+                            <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                             <td>{{$delivery->shipped_qty}}</td>
                             <td>{{"IDR " . number_format($delivery->unit_price,0,',','.')}}</td>
                             <td>{{$delivery->petugas_vendor}}</td>

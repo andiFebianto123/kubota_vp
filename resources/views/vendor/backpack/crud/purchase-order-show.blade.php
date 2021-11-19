@@ -65,7 +65,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </tr>
                 <tr>
                     <td>PO Date</td>
-                    <td>: {{$entry->po_date}}</td>
+                    <td>: {{date('Y-m-d', strtotime($entry->po_date))}}</td>
                 </tr>
                 <tr>
                     <td>Email Sent</td>
