@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\PurchaseOrderExport;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Imports\DeliverySheetImport;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -176,6 +177,30 @@ class PurchaseOrderCrudController extends CrudController
         $data['arr_po_line_status'] = $arr_po_line_status;
 
         return view('vendor.backpack.crud.purchase-order-show', $data);
+    }
+
+    public function detailChange($po_num, $line)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                ->where('po_line', $line)
+                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                ->orderBy('po_line.id', 'desc')
+                ->get();
+                
+        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
+                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
+                'C' => ['text' => 'Complete', 'color' => 'text-success']
+            ];
+
+        $data['po'] = $po;
+        $data['crud'] = $this->crud;
+        $data['po_lines'] = $po_lines;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        return view('vendor.backpack.crud.purchase-order-detail-change', $data);
     }
 
 

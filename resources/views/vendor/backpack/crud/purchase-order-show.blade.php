@@ -194,6 +194,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>PO Line</th>
                             <th>Issued Date</th>
                             <th>Change</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -203,6 +204,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->po_line}}</td>
                             <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
                             <td>{{$po_line->po_change}}</td>
+                            <td>
+                                <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
