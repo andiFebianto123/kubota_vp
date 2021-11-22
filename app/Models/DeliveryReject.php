@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryReject extends Model
 {
     use HasFactory;
+    protected $table = 'delivery_reject';
 }

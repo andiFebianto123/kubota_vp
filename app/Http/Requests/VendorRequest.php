@@ -26,10 +26,10 @@ class VendorRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|min:5|max:255',
-            'phone' => 'required',
-            'company' => 'required',
-            'number' => 'required|string|unique:vendors,number,'.$this->id.',id',
+            'vend_name' => 'required|min:5|max:255',
+            'currency' => 'required',
+            'vend_addr' => 'required',
+            'vend_num' => 'required|string|unique:vendor,vend_num,'.$this->id.',id',
         ];
     }
 

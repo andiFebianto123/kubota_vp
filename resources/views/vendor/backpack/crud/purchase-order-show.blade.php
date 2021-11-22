@@ -57,95 +57,32 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <table class="table">
                 <tr>
                     <td>PO Number</td>
-                    <td>: {{$entry->number}}</td>
+                    <td>: {{$entry->po_num}}</td>
                 </tr>
                 <tr>
                     <td>Vendor</td>
-                    <td>: {{$entry->vendor->number}}</td>
+                    <td>: {{$entry->vendor->vend_num}}</td>
                 </tr>
                 <tr>
                     <td>PO Date</td>
-                    <td>: {{$entry->po_date}}</td>
+                    <td>: {{date('Y-m-d', strtotime($entry->po_date))}}</td>
                 </tr>
                 <tr>
                     <td>Email Sent</td>
-                    <td>: {{$entry->email_flag}}</td>
+                    <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
     </div><!-- /.box -->
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-secondary">
-               <label class="font-weight-bold mb-0">PO Line (UNREAD)</label> 
-            </div>
-            <div class="card-body">
-                @if(sizeof($po_line_unreads) > 0)
-                <form action="{{url('admin/purchase-order-mass-read')}}" id="form-mass-read" method="post">
-                    @csrf
-                    <input type="hidden" name="po_id" value="{{$entry->id}}">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
-                                <th>PO Number</th>
-                                <th>Item</th>
-                                <th>Description</th>
-                                <th>Qty Order</th>
-                                <th>Unit Price</th>
-                                <th>Total Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                            $total = 0
-                            @endphp
-                            @foreach ($po_line_unreads as $key => $po_line)
-                            <tr>
-                                <td><input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}"></td>
-                                <td>{{$entry->number}}-{{$po_line->po_line}}</td>
-                                <td>{{$po_line->item}}</td>
-                                <td>{{$po_line->description}}</td>
-                                <td>{{$po_line->order_qty}}</td>
-                                <td>{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
-                                <td>{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
-                            </tr>
-                            @php
-                                $total += $po_line->unit_price*$po_line->order_qty
-                            @endphp
-                            @endforeach
-
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="5" class="text-center font-weight-bold">
-                                    Total
-                                </td>
-                                <td>
-                                    {{"IDR " . number_format($total,0,',','.')}}</td>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    <div class="section-buttons"></div>
-                </form>
-                @else
-                <p class="text-center">
-                    No Data Available
-                </p>
-                @endif
-            </div>
-
-        </div><!-- /.box-body -->
-    </div>
+    
 
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header bg-success">
-               <label class="font-weight-bold mb-0">PO Line (ACCEPT)</label> 
+            <div class="card-header bg-primary-vp">
+               <label class="font-weight-bold mb-0">PO Line</label> 
             </div>
             <div class="card-body">
-                @if(sizeof($po_line_read_accs) > 0)
+                @if(sizeof($po_lines) > 0)
                 <div>
                     <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/purchase-order-line-export-excel-accept')}}"><i class="la la-file-excel"></i> Excel</a>
                     <a class="btn btn-sm btn-danger" target="_blank" href="{{url('admin/purchase-order-line-export-pdf-accept')}}"><i class="la la-file-pdf"></i> PDF</a>
@@ -154,106 +91,120 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <table class="table table-striped mb-0 table-responsive">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all-cb-read" class="check-all-read"></th>
+                            <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
+                            <th>Vendor Name</th>
                             <th>Description</th>
                             <th>Qty</th>
                             <th>UM</th>
                             <th>Due Date</th>
-                            <th>Tax</th>
+                            <th>Tax (%)</th>
                             <th>Unit Price</th>
                             <th>Total Price</th>
+                            <th>Status Accept</th>
+                            <th>Read By</th>
                             <th>Read At</th>
+                            @if(backpack_auth()->user()->role->name == 'admin')
+                            <th>Created At</th>
+                            @endif
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($po_line_read_accs as $key => $po_line)
+                        @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->status == 'O')
-                                <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}">
+                                @if($po_line->read_at == null)
+                                <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
+                                <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
                             </td>
-                            <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
+                            <td class="text-nowrap">{{$entry->po_num}}-{{$po_line->po_line}}</td>
                             <td>
                                 <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
                                     {{$arr_po_line_status[$po_line->status]['text']}}
                                 </span>
                             </td>
                             <td>{{$po_line->item}}</td>
+                            <td>{{$po_line->vendor_name}}</td>
                             <td>{{$po_line->description}}</td>
-                            <td>{{$po_line->order_qty}}</td>
+                            <td>{!! $po_line->change_order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
-                            <td>{{$po_line->due_date}}</td>
+                            <td>{!! $po_line->change_due_date !!}</td>
                             <td>{{$po_line->tax}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
+                            <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
+                            <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
+                            <td>{!! $po_line->reformat_flag_accept !!}</td>
+                            <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
+                            @if(backpack_auth()->user()->role->name == 'admin')
+                            <td>{{$po_line->created_at}}</td>
+                            @endif
                             <td class="text-nowrap"><!-- Single edit button -->
-                                @if($po_line->status == "O")
-                                <a href="{{url('admin/delivery/create')}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
-                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                @if($po_line->read_at)
+                                    @if($po_line->status == "O" && $po_line->accept_flag == 1)
+                                        @if($po_line->count_ds == 0)
+                                        <a href="{{url('admin/delivery/create?po_line_id='.$po_line->id)}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
+                                        @else
+                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}}, '{{url('admin/delivery/create?po_line_id='.$po_line->id)}}')" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
+                                        @endif
+                                    @endif
+                                    @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                    @endif    
+                                    <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                @else
+                                    @if(backpack_auth()->user()->role->name != 'admin')
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                    @endif
                                 @endif
-                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                             </td>
                         </tr>
                         @endforeach
 
                     </tbody>
                 </table>
+                <div class="section-buttons"></div>
+
                 @else
                 <p class="text-center">
                     No Data Available
                 </p>
                 @endif
+                {{-- $po_lines->links() --}}
             </div>
 
         </div><!-- /.box-body -->
     </div>
 
-
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header bg-danger">
-               <label class="font-weight-bold mb-0">PO Line (REJECT)</label> 
+            <div class="card-header bg-primary-vp">
+               <label class="font-weight-bold mb-0">PO Change History</label> 
             </div>
             <div class="card-body">
-                @if(sizeof($po_line_read_rejects) > 0)
-
+                @if(sizeof($po_changes_lines) > 0)
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
                             <th>PO Number</th>
-                            <th>Item</th>
-                            <th>Description</th>
-                            <th>Qty</th>
-                            <th>Read At</th>
-                            <th>Unit Price</th>
-                            <th>Total Price</th>
-                            <th></th>
+                            <th>PO Line</th>
+                            <th>Issued Date</th>
+                            <th>Change</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($po_line_read_rejects as $key => $po_line)
+                        @foreach ($po_changes_lines as $key => $po_line)
                         <tr>
-                            <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
-                            <td>{{$po_line->item}}</td>
-                            <td>{{$po_line->description}}</td>
-                            <td>{{$po_line->order_qty}}</td>
-                            <td>{{$po_line->read_at}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price,0,',','.')}}</td>
-                            <td class="text-nowrap">{{"IDR " . number_format($po_line->unit_price*$po_line->order_qty,0,',','.')}}</td>
-                            <td>
-                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
-
-                            </td>
-
+                            <td>{{$po_line->po_num}}</td>
+                            <td>{{$po_line->po_line}}</td>
+                            <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
+                            <td>{{$po_line->po_change}}</td>
                         </tr>
                         @endforeach
-
                     </tbody>
                 </table>
                 @else
@@ -266,7 +217,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div><!-- /.box-body -->
     </div>
 </div>
+
+
 @endsection
+
+@section('after_styles')
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
+@endsection
+
+@section('after_scripts')
 
 <!-- Modal -->
 <div id="importMassDS" class="modal fade" role="dialog">
@@ -290,16 +250,74 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </form>
         </div>
     </div>
-
   </div>
 </div>
 
-@section('after_styles')
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
-@endsection
+<div id="modalAccept" class="modal fade" role="dialog">
+  <div class="modal-dialog">
 
-@section('after_scripts')
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Accept PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-accept"></p>
+            <form id="form-accept-po-line" action="{{url('admin/purchase-order-accept-po-line')}}" method="post">
+                @csrf
+                <input type="hidden" name="po_line_ids" class="val-accept">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-accept-po-line')">Submit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalReject" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Reject PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-reject"></p>
+            <form id="form-reject-po-line" action="{{url('admin/purchase-order-reject-po-line')}}" method="post">
+                @csrf
+                <label for="">Write Reason</label>
+                <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
+                <input type="hidden" name="po_line_ids" class="val-reject">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-reject-po-line')">Submit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalCreate" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Warning!</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-count-ds"></p>
+            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Submit</a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+  </div>
+</div>
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script>
@@ -309,7 +327,9 @@ var totalPoLine = $('.check-po-lines').length
 var totalPoLineRead = $('.check-read-po-lines').length
 var totalChecked = 0
 var totalCheckedRead = 0
-
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 $('#check-all-cb').change(function () {
     totalChecked = 0
     $(".check-po-lines").prop('checked', $(this).prop('checked'))
@@ -372,15 +392,59 @@ $('.check-read-po-lines').change(function () {
 
 })
 
- function callButton(anyChecked){
-    var htmlBtnAccOrder = "<input type='radio' name='flag_accept' value='1' checked> Accept "
-    htmlBtnAccOrder += "<input type='radio' name='flag_accept' value='2'> Reject <br>"
-    htmlBtnAccOrder += "<button id='btn-for-form-mass-read' type='button' onclick='submitAfterValid(\"form-mass-read\")' class='btn btn-sm btn-primary-vp'><i class='la la-check-circle'></i> Submit</button>"
+function changeBtn(v){
+    var htmlButton = ""
+    var arrPoLines = []
+    $( ".check-po-lines" ).each(function() {
+        if($(this).prop('checked')==true){
+            arrPoLines.push($(this).val())
+        }
+    })
+    if (v == 1){
+        htmlButton += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='acceptPoLines(["+arrPoLines+"])' data-target='#modalAccept'><i class='la la-check-circle'></i> Submit</button>"
+    }else{
+        htmlButton += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='rejectPoLines(["+arrPoLines+"])' data-target='#modalReject'><i class='la la-check-circle'></i> Submit</button>"
+    }
+    $(".button-area").html(htmlButton)
+}
+
+function callButton(anyChecked){
+    var arrPoLines = []
+    $( ".check-po-lines" ).each(function() {
+        if($(this).prop('checked')==true){
+            arrPoLines.push($(this).val())
+        }
+    })
+    var htmlBtnAccOrder = "<input type='radio' name='flag_accept' class='radio-flag-accept' onclick='changeBtn(1)' value='1' checked> Accept "
+    htmlBtnAccOrder += "<input type='radio' name='flag_accept' class='radio-flag-accept'  onclick='changeBtn(2)' value='2'> Reject <br>"
+    htmlBtnAccOrder += "<div class='button-area'>"
+    htmlBtnAccOrder += "<button class='btn btn-sm btn-primary-vp' data-toggle='modal' onclick='acceptPoLines(["+arrPoLines+"])' data-target='#modalAccept'><i class='la la-check-circle'></i> Submit</button>"
+    htmlBtnAccOrder += "</div>"
     if (anyChecked) {
         $(".section-buttons").html(htmlBtnAccOrder)
     }else{
         $(".section-buttons").html("")
     }
+ }
+
+
+ function acceptPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-accept').val(strPoLines)
+     $('.text-accept').text('Accept '+lengthPoLines+' Po Line?')
+ }
+
+ function rejectPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-reject').val(strPoLines)
+     $('.text-reject').text('Reject '+lengthPoLines+' Po Line?')
+ }
+
+ function createDs(num, url){
+    $('.text-count-ds').text("Anda Sudah Memiliki "+num+" DS. Apakah yakin akan melanjutkan menambah DS?")
+    $('.goto-create').attr('href', url)
  }
  
 </script>

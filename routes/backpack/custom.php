@@ -20,6 +20,8 @@ Route::group([
     Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
     Route::post('purchase-order-mass-read', 'PurchaseOrderCrudController@massRead');
     Route::post('purchase-order-import-ds', 'PurchaseOrderCrudController@importDs');
+    Route::post('purchase-order-accept-po-line', 'PurchaseOrderCrudController@acceptPoLine');
+    Route::post('purchase-order-reject-po-line', 'PurchaseOrderCrudController@rejectPoLine');
     Route::get('purchase-order-export-excel', 'PurchaseOrderCrudController@exportExcel');
     Route::get('purchase-order-line-export-excel-accept', 'PurchaseOrderLineCrudController@exportExcelAccept');
     Route::get('purchase-order-line-export-pdf-accept', 'PurchaseOrderLineCrudController@exportPdfAccept');

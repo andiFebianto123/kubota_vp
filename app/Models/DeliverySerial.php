@@ -15,7 +15,7 @@ class DeliverySerial extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'delivery_serials';
+    protected $table = 'delivery_serial';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];

@@ -13,19 +13,23 @@ class CreatePurchaseOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('purchase_orders', function (Blueprint $table) {
-            $table->id();
-            $table->string('number');
-            $table->unsignedBigInteger('vendor_id')->nullable();
-            $table->dateTime('po_date');
+        Schema::create('po', function (Blueprint $table) {
+            $table->engine = 'MyISAM';
+            $table->integer('id');
+            $table->string('po_num')->length(10);
+            $table->string('vend_num')->nullable();
+            $table->dateTime('po_date')->nullable();
             $table->integer('po_change')->default(0);
             $table->dateTime('email_flag')->nullable();
-            $table->timestamps();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
 
-            $table->foreign('vendor_id')
-            ->references('id')
-            ->on('vendors')
-            ->onUpdate('cascade');
+            $table->primary(['id','po_num']);
+        });
+        Schema::table('po', function (Blueprint $table) {
+            $table->integer('id', true, true)->change();
         });
     }
 
@@ -36,6 +40,6 @@ class CreatePurchaseOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('purchase_orders');
+        Schema::dropIfExists('po');
     }
 }

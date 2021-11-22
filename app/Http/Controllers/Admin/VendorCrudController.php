@@ -42,14 +42,25 @@ class VendorCrudController extends CrudController
     {
         $this->crud->removeButton('show');
 
-        CRUD::column('number');
-        CRUD::column('name');
-        CRUD::column('address');
-        CRUD::column('company');
-        CRUD::column('phone');
+        CRUD::addColumn([
+            'label'     => 'Number', // Table column heading
+            'name'      => 'vend_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Name', // Table column heading
+            'name'      => 'vend_name', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Address', // Table column heading
+            'name'      => 'vend_addr', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn('currency');
+
         CRUD::column('created_at');
         CRUD::column('updated_at');
-
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -66,12 +77,22 @@ class VendorCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(VendorRequest::class);
-
-        CRUD::field('number');
-        CRUD::field('name');
-        CRUD::field('address');
-        CRUD::field('company');
-        CRUD::field('phone');
+        CRUD::addField([
+            'label'     => 'Number', // Table column heading
+            'name'      => 'vend_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addField([
+            'label'     => 'Name', // Table column heading
+            'name'      => 'vend_name', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addField([
+            'label'     => 'Address', // Table column heading
+            'name'      => 'vend_addr', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addField('currency');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

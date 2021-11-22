@@ -35,3 +35,5 @@ class ConfigurationSeeder extends Seeder
        }
     }
 }
+
+

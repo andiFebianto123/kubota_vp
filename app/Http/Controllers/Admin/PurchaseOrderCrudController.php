@@ -49,7 +49,7 @@ class PurchaseOrderCrudController extends CrudController
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
-            $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
+            $this->crud->addClause('where', 'vendor_number', '=', backpack_auth()->user()->vendor->number);
         }
 
 
@@ -57,13 +57,17 @@ class PurchaseOrderCrudController extends CrudController
         if($current_role == 'admin'){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor', // Table column heading
-                'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+                'name'      => 'vend_num', // the column that contains the ID of that connected entity;
                 'entity'    => 'vendor', 
                 'type' => 'relationship',
-                'attribute' => 'number',
+                'attribute' => 'vend_num',
             ]);
         }
-        CRUD::column('number');
+        CRUD::addColumn([
+            'label'     => 'PO Number', // Table column heading
+            'name'      => 'po_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
         // CRUD::addColumn([
         //     'label'     => 'Nama Vendor', // Table column heading
         //     'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
@@ -134,10 +138,19 @@ class PurchaseOrderCrudController extends CrudController
     {
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
-        $po_line_unreads = PurchaseOrderLine::where('purchase_order_id', $entry->id )
-                                ->where('read_at', null)
-                                ->where('accept_flag', 0)
+        $po_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
                                 ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $po_changes_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
+                    ->leftJoin('po', 'po.po_num',  'po_line.po_num')
+                    ->where('po_line.po_change', '>', 0)
+                    ->orderBy('po_line.id', 'desc')
+                    ->get();
+        /* not used
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
                                 ->where('read_at', '!=',null)
                                 ->where('accept_flag', 1)
@@ -147,16 +160,19 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('read_at', '!=',null)
                                 ->where('accept_flag', 2)
                                 ->get();
+        */
         $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
                                 'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
                                 'C' => ['text' => 'Complete', 'color' => 'text-success']
                             ];
+ 
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
-        $data['po_line_read_accs'] = $po_line_read_accs;
-        $data['po_line_read_rejects'] = $po_line_read_rejects;
-        $data['po_line_unreads'] = $po_line_unreads;
+        // $data['po_line_read_accs'] = $po_line_read_accs;
+        // $data['po_line_read_rejects'] = $po_line_read_rejects;
+        $data['po_lines'] = $collection_po_lines;
+        $data['po_changes_lines'] = $po_changes_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
 
         return view('vendor.backpack.crud.purchase-order-show', $data);
@@ -194,6 +210,52 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Read Successfully',
+            'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
+            'validation_errors' => []
+        ], 200);
+    }
+
+    public function acceptPoLine(Request $request)
+    {
+        $po_line_ids = json_decode($request->po_line_ids);
+        $po_id = $request->po_id;
+        foreach ($po_line_ids as $key => $po_line_id) {
+            $po_line = PurchaseOrderLine::where('id', $po_line_id)->first();
+            $po_line->accept_flag = 1;
+            $po_line->read_by = backpack_auth()->user()->id;
+            $po_line->read_at = now();
+            $po_line->save();
+        }
+        
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Accept Successfully',
+            'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
+            'validation_errors' => []
+        ], 200);
+    }
+
+    public function rejectPoLine(Request $request)
+    {
+        $po_line_ids = json_decode($request->po_line_ids);
+        $po_id = $request->po_id;
+        $reason = $request->reason;
+        foreach ($po_line_ids as $key => $po_line_id) {
+            $po_line = PurchaseOrderLine::where('id', $po_line_id)->first();
+            $po_line->reason = $reason;
+            $po_line->accept_flag = 2;
+            $po_line->read_by = backpack_auth()->user()->id;
+            $po_line->read_at = now();
+            $po_line->save();
+        }
+        
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Reject Successfully',
             'redirect_to' => url('admin/purchase-order')."/".$po_id."/show",
             'validation_errors' => []
         ], 200);

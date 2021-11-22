@@ -107,7 +107,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($deliveries as $key => $delivery)
                         <tr>
                             <td>{{$delivery->ds_num}}</td>
-                            <td>{{$delivery->shipped_date}}</td>
+                            <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                             <td>{{$delivery->shipped_qty}}</td>
                             <td>{{"IDR " . number_format($delivery->unit_price,0,',','.')}}</td>
                             <td>{{$delivery->petugas_vendor}}</td>
@@ -115,7 +115,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>
                                 <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                 <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
-                                <a href="{{url('admin/delivery/'.$entry->id.'/show')}}" class="btn btn-sm btn-primary"><i class="la la-qrcode"></i> Detail</a>
+                                <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-primary"><i class="la la-qrcode"></i> Detail</a>
+                                <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-link" data-button-type="delete"><i class="la la-trash"></i> {{ trans('backpack::crud.delete') }}</a>
                             </td>
                         </tr>
                         @php
@@ -203,4 +204,92 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+
+<script>
+
+	if (typeof deleteEntry != 'function') {
+	  $("[data-button-type=delete]").unbind('click');
+
+	  function deleteEntry(button) {
+		// ask for confirmation before deleting an item
+		// e.preventDefault();
+		var route = $(button).attr('data-route');
+
+		swal({
+		  title: "{!! trans('backpack::base.warning') !!}",
+		  text: "{!! trans('backpack::crud.delete_confirm') !!}",
+		  icon: "warning",
+		  buttons: ["{!! trans('backpack::crud.cancel') !!}", "{!! trans('backpack::crud.delete') !!}"],
+		  dangerMode: true,
+		}).then((value) => {
+			if (value) {
+				$.ajax({
+			      url: route,
+			      type: 'DELETE',
+			      success: function(result) {
+			          if (result == 1) {
+						  // Redraw the table
+						  if (typeof crud != 'undefined' && typeof crud.table != 'undefined') {
+							  // Move to previous page in case of deleting the only item in table
+							  if(crud.table.rows().count() === 1) {
+							    crud.table.page("previous");
+							  }
+
+							  crud.table.draw(false);
+						  }
+
+			          	  // Show a success notification bubble
+			              new Noty({
+		                    type: "success",
+		                    text: "{!! '<strong>'.trans('backpack::crud.delete_confirmation_title').'</strong><br>'.trans('backpack::crud.delete_confirmation_message') !!}"
+		                  }).show();
+
+			              // Hide the modal, if any
+			              $('.modal').modal('hide');
+                          location.reload()
+			          } else {
+			              // if the result is an array, it means 
+			              // we have notification bubbles to show
+			          	  if (result instanceof Object) {
+			          	  	// trigger one or more bubble notifications 
+			          	  	Object.entries(result).forEach(function(entry, index) {
+			          	  	  var type = entry[0];
+			          	  	  entry[1].forEach(function(message, i) {
+					          	  new Noty({
+				                    type: type,
+				                    text: message
+				                  }).show();
+			          	  	  });
+			          	  	});
+			          	  } else {// Show an error alert
+				              swal({
+				              	title: "{!! trans('backpack::crud.delete_confirmation_not_title') !!}",
+	                            text: "{!! trans('backpack::crud.delete_confirmation_not_message') !!}",
+				              	icon: "error",
+				              	timer: 4000,
+				              	buttons: false,
+				              });
+			          	  }			          	  
+			          }
+			      },
+			      error: function(result) {
+			          // Show an alert with the result
+			          swal({
+		              	title: "{!! trans('backpack::crud.delete_confirmation_not_title') !!}",
+                        text: "{!! trans('backpack::crud.delete_confirmation_not_message') !!}",
+		              	icon: "error",
+		              	timer: 4000,
+		              	buttons: false,
+		              });
+			      }
+			  });
+			}
+		});
+
+      }
+	}
+
+	// make it so that the function above is run after each DataTable draw event
+	// crud.addFunctionToDataTablesDrawEventQueue('deleteEntry');
+</script>
 @endsection

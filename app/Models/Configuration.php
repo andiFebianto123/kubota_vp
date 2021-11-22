@@ -10,6 +10,6 @@ class Configuration extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     protected $fillable = [
-        'label','name', 'action'
+        'label','name', 'value'
     ];
 }

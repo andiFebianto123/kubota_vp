@@ -13,18 +13,27 @@ class CreateDeliveryRepairsTable extends Migration
      */
     public function up()
     {
-        Schema::create('delivery_repairs', function (Blueprint $table) {
-            $table->id();
-            $table->string('ds_num');
+        Schema::create('delivery_repair', function (Blueprint $table) {
+            $table->integer('id');
+            $table->string('ds_num')->length(15);
             $table->integer('ds_line');
-            $table->string('reason_num');
-            $table->string('repair_num');
-            $table->dateTime('repair_date');
+            $table->string('reason_num')->length(5);
+            $table->string('repair_num')->length(15);
             $table->string('repair_type');
             $table->double('repair_qty');
-            $table->string('ref_num');
-            $table->integer('ref_line');
-            $table->timestamps();
+            $table->dateTime('repair_date');
+            $table->dateTime('inspection_date');
+            $table->string('ref_num')->nullable();
+            $table->integer('ref_line')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
+
+            $table->primary(['id', 'ds_num', 'ds_line', 'reason_num', 'repair_num']);
+        });
+        Schema::table('delivery_repair', function (Blueprint $table) {
+            $table->integer('id', true, true)->change();
         });
     }
     /**
@@ -34,6 +43,6 @@ class CreateDeliveryRepairsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('delivery_repairs');
+        Schema::dropIfExists('delivery_repair');
     }
 }

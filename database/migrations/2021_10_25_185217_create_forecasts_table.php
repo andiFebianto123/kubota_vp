@@ -14,7 +14,7 @@ class CreateForecastsTable extends Migration
     public function up()
     {
         Schema::create('forecasts', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('forecast_num');
             $table->integer('forecast_change')->nullable();
             $table->dateTime('forecast_date')->nullable();
@@ -25,7 +25,8 @@ class CreateForecastsTable extends Migration
             $table->dateTime('due_date')->nullable();
             $table->dateTime('production_date')->nullable();
             $table->integer('qty')->nullable();
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

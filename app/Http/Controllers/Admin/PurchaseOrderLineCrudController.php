@@ -47,7 +47,7 @@ class PurchaseOrderLineCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('purchase_order_id');
+        CRUD::column('po_num');
         CRUD::column('po_line');
         CRUD::column('po_release');
         CRUD::column('item');
@@ -93,7 +93,7 @@ class PurchaseOrderLineCrudController extends CrudController
         CRUD::setValidation(PurchaseOrderLineRequest::class);
 
         CRUD::field('id');
-        CRUD::field('purchase_order_id');
+        CRUD::field('po_num');
         CRUD::field('po_line');
         CRUD::field('po_release');
         CRUD::field('item');
@@ -142,8 +142,8 @@ class PurchaseOrderLineCrudController extends CrudController
     function show()
     {
         $entry = $this->crud->getCurrentEntry();
-        $deliveries = Delivery::where("po_line_id", $entry->id)->get();
-        $delivery_statuses = DeliveryStatus::where("po_line_id", $entry->id)->get();
+        $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
+        $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
                                 'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
                                 'C' => ['text' => 'Complete', 'color' => 'text-success']
@@ -180,10 +180,11 @@ class PurchaseOrderLineCrudController extends CrudController
 
     public function exportPdfAccept()
     {
-        $purchase_order_lines = PurchaseOrderLine::leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
-                                ->get(['purchase_order_lines.id as id', 'purchase_orders.number as number', 'purchase_order_lines.po_line as po_line'
-                                ,'purchase_order_lines.item as item', 'purchase_order_lines.description as description', 'purchase_order_lines.order_qty'
-                                ,'purchase_order_lines.u_m', 'purchase_order_lines.unit_price']);
+        $purchase_order_lines = PurchaseOrderLine::leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->get(['po_line.id as id', 'po.po_num as number', 'po_line.po_line as po_line'
+                                ,'po_line.item as item', 'po_line.description as description', 'po_line.order_qty'
+                                ,'po_line.u_m', 'po_line.unit_price', 'vendor.vend_name as vendor_name']);
 
         $data['purchase_order_lines'] = $purchase_order_lines;
     	$pdf = PDF::loadview('exports.pdf.purchaseorderline-accept',$data);

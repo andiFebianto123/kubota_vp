@@ -9,4 +9,5 @@ class DeliveryStatus extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
+    protected $table = 'delivery_status';
 }

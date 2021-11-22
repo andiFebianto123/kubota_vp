@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class MaterialOuthouse extends Model
 {
     use HasFactory;
+    protected $table = 'materilal_outhouse';
 }

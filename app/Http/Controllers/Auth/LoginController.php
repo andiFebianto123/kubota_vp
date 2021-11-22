@@ -74,7 +74,7 @@ class LoginController extends Controller
             'title' => 'Mail from Kubota.com',
             'fp_url' => route("reset-password")."?t=".$token
         ];
-
+        
         Mail::to($email)->send(new ResetPasswordMail($details));
 
         return view('vendor.backpack.base.auth.forgot-password');

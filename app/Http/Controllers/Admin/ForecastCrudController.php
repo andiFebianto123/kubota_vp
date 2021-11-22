@@ -76,7 +76,7 @@ class ForecastCrudController extends CrudController
         //     'name'      => 'age',
         // ]);
 
-        // $this->crud->allowResponsive();
+        $this->crud->allowResponsive();
 
         $forecast = new forecastConverter;
         if(request("filter_forecast_by") != null){

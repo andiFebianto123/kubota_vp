@@ -14,10 +14,12 @@ class CreateGeneralMessagesTable extends Migration
     public function up()
     {
         Schema::create('general_messages', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('title');
             $table->string('content');
             $table->string('category');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
     }

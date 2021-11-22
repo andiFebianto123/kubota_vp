@@ -44,7 +44,6 @@ class ConfigurationCrudController extends CrudController
         $this->crud->removeButton('delete');
 
         CRUD::column('label');
-        CRUD::column('name');
         CRUD::column('value');
     }
 
@@ -57,8 +56,16 @@ class ConfigurationCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(ConfigurationRequest::class);
-        CRUD::field('label');
-        CRUD::field('name');
+        $this->crud->addField(
+            [
+                'name'  => 'label',
+                'type'  => 'text',
+                'label' => 'Label',
+                'attributes' => [
+                    'readonly'    => 'readonly',
+                    'disabled'    => 'disabled',
+                ], 
+            ]);
         CRUD::field('value');
     }
 

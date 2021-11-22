@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DeliveryRequest;
 use App\Models\Delivery;
+use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
 use PDF;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 
 /**
@@ -102,13 +104,18 @@ class DeliveryCrudController extends CrudController
         $this->crud->addField([
             'label' => 'Delivery Date From Vendor',
             'type' => 'date_picker',
-            'name' => 'articles',
+            'name' => 'shipped_date',
             'default' => date("Y-m-d"),
             'date_picker_options' => [
                 'todayBtn' => 'linked',
                 'format'   => 'dd/mm/yyyy',
                 'language' => 'en'
              ],
+        ]);      
+        $this->crud->addField([
+            'type' => 'hidden',
+            'name' => 'po_line_id',
+            'value' => request('po_line_id')
         ]);        
         CRUD::field('petugas_vendor');
         CRUD::field('no_surat_jalan_vendor');
@@ -140,14 +147,17 @@ class DeliveryCrudController extends CrudController
 
     private function detailDS($id)
     {
-        $delivery_show = Delivery::leftJoin('purchase_order_lines', 'purchase_order_lines.id', 'deliveries.po_line_id')
-                        ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+        $delivery_show = Delivery::leftjoin('po_line', function ($join) {
+                            $join->on('po_line.po_num', 'delivery.po_num')
+                                ->orOn('po_line.po_line', 'delivery.po_line');
+                        })
+                        ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                         // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
-                        ->leftJoin('vendors', 'vendors.id', 'purchase_orders.vendor_id')
-                        ->where('deliveries.id', $id)
-                        ->get(['deliveries.id as id','deliveries.ds_num','deliveries.ds_line','deliveries.shipped_date', 'purchase_order_lines.due_date', 'deliveries.po_release','purchase_order_lines.item','deliveries.u_m',
-                        'vendors.number as vendor_number', 'vendors.name as vendor_name', 'deliveries.no_surat_jalan_vendor',
-                        'purchase_orders.number as po_number','purchase_order_lines.po_line as po_line', 'deliveries.order_qty as order_qty', 'deliveries.shipped_qty', 'deliveries.unit_price', 'deliveries.currency', 'deliveries.tax_status', 'deliveries.description', 'deliveries.wh', 'deliveries.location'])
+                        ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
+                        ->where('delivery.id', $id)
+                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 'delivery.po_release','po_line.item','delivery.u_m',
+                        'vendor.vend_num as vendor_number', 'vendor.vend_num as vendor_name', 'delivery.no_surat_jalan_vendor',
+                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location'])
                         ->first();
         $qr_code = "DSW|";
         $qr_code .= $delivery_show->ds_num."|";
@@ -166,6 +176,62 @@ class DeliveryCrudController extends CrudController
         $data['qr_code'] = $qr_code;
 
         return $data;
+    }
+
+    public function store(Request $request)
+    {
+        $this->crud->setRequest($this->crud->validateRequest());
+        $request = $this->crud->getRequest();
+
+        $po_line_id = $request->input('po_line_id');
+        $order_qty = $request->input('order_qty');
+        $petugas_vendor = $request->input('petugas_vendor');
+        $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
+
+        $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
+                ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
+                ->first();
+        $code = "";
+        switch (backpack_auth()->user()->role->name) {
+            case 'admin':
+                $code = "01";
+                break;
+            case 'vendor':
+                $code = "00";
+                break;
+            default:
+                # code...
+                break;
+        }
+
+        $ds_num = $po_line->vendor_number.date("ymd").$code;
+        $insert = new Delivery();
+        $insert->ds_num = $ds_num;
+        $insert->po_num = $po_line->po_num;
+        $insert->po_line = $po_line->po_line;
+        $insert->po_release = $po_line->po_release;
+        $insert->ds_line = Delivery::where('po_num', $po_line->po_num)->count()+1;
+        $insert->description = $po_line->description;
+        $insert->u_m = $po_line->u_m;
+        $insert->due_date = $po_line->due_date;
+        $insert->unit_price = $po_line->unit_price;
+        $insert->wh = $po_line->wh;
+        $insert->location = $po_line->location;
+        $insert->tax_status = $po_line->tax_status;
+        $insert->currency = $po_line->currency;
+        $insert->shipped_qty = $po_line->order_qty;
+        $insert->shipped_date = now();
+        $insert->order_qty = $order_qty;
+        // $insert->w_serial = $data_temp->serial_number;
+        $insert->petugas_vendor = $petugas_vendor;
+        $insert->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+        $insert->created_by = backpack_auth()->user()->id;
+        $insert->updated_by = backpack_auth()->user()->id;
+        $insert->save();
+
+        Alert::success(trans('backpack::crud.insert_success'))->flash();
+    
+        return redirect()->to('admin/purchase-order-line/'.$po_line_id.'/show');
     }
 
     public function exportPdf()
@@ -191,24 +257,10 @@ class DeliveryCrudController extends CrudController
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
 
-    public function store()
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.insert_success'))->flash();
-
-        return redirect()->to(session()->get('last_url'));
-    }
-
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
 
     public function destroy($id)
     {
+        Delivery::where('id', $id)->delete();
         return true;
     }
 }
