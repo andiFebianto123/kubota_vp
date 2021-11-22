@@ -13,7 +13,7 @@ class PurchaseOrderLineSeeder extends Seeder
         $arr_seeders = [
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "1",
              "po_release" => "0",
              "item" => "55330500/0424",
@@ -37,11 +37,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 11:58:44",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "2",
              "po_release" => "0",
              "item" => "0084A-00009-420-2",
@@ -65,11 +65,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:00:52",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "2",
              "po_release" => "0",
              "item" => "0084A-00009-420-2",
@@ -93,11 +93,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:00:52",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "3",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -121,11 +121,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:00:52",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "2",
+             "po_num" => "PU00006435",
              "po_line" => "1",
              "po_release" => "0",
              "item" => "0092C-00008-425-2",
@@ -149,11 +149,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "",
              "read_at" => "",
             ],
-            ["purchase_order_id" => "2"],
+            ["po_num" => "2"],
           ],
           [
             [
-             "purchase_order_id" => "2",
+             "po_num" => "PU00006435",
              "po_line" => "2",
              "po_release" => "0",
              "item" => "0084A-00019-420-2",
@@ -177,11 +177,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "",
              "read_at" => "",
             ],
-            ["purchase_order_id" => "2"],
+            ["po_num" => "2"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "4",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -205,11 +205,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "",
              "read_at" => "",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "5",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -233,11 +233,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:06:24",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "6",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -261,11 +261,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:06:24",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "7",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -289,11 +289,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "1",
              "read_at" => "2021-10-29 12:06:24",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "8",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -317,11 +317,11 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "",
              "read_at" => "",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-             "purchase_order_id" => "1",
+             "po_num" => "PU00006434",
              "po_line" => "9",
              "po_release" => "0",
              "item" => "0084A-00021-420-2",
@@ -345,7 +345,7 @@ class PurchaseOrderLineSeeder extends Seeder
              "read_by" => "",
              "read_at" => "",
             ],
-            ["purchase_order_id" => "1"],
+            ["po_num" => "PU00006434"],
           ],
         ];
 

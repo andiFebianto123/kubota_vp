@@ -53,7 +53,7 @@ class UserCrudController extends CrudController
             'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
             'entity'    => 'vendor', 
             'type' => 'relationship',
-            'attribute' => 'number',
+            'attribute' => 'vend_num',
         ]);
         CRUD::addColumn([
             'label'     => 'Role', // Table column heading
@@ -92,7 +92,7 @@ class UserCrudController extends CrudController
             'type'      => 'select2',
             'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
             'entity'    => 'vendor', // the method that defines the relationship in your Model
-            'attribute' => 'number', // foreign key attribute that is shown to user
+            'attribute' => 'vend_num', // foreign key attribute that is shown to user
             'model'     => "App\Models\Vendor",
         ]);
         CRUD::field('name');

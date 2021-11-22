@@ -13,20 +13,21 @@ class CreateDeliveriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('deliveries', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('ds_num');
-            $table->string('ds_line');
-            $table->string('ds_type')->nullable();
-            $table->integer('po_line_id');
-            $table->integer('po_release');
-            $table->string('description');
-            $table->double('order_qty');
+        Schema::create('delivery', function (Blueprint $table) {
+            $table->integer('id');
+            $table->string('ds_num')->length(10);
+            $table->integer('ds_line');
+            $table->string('ds_type')->default('00');
+            $table->string('po_num');
+            $table->integer('po_line');
+            $table->integer('po_release')->nullable();
+            $table->string('description')->nullable();
+            $table->double('order_qty')->nullable();
             $table->integer('w_serial')->default(0);
-            $table->string('u_m');
-            $table->dateTime('due_date');
-            $table->double('unit_price');
-            $table->string('wh');
+            $table->string('u_m')->nullable();
+            $table->dateTime('due_date')->nullable();
+            $table->double('unit_price')->nullable();
+            $table->string('wh')->nullable();
             $table->string('location');
             $table->string('tax_status');
             $table->string('currency');
@@ -41,6 +42,11 @@ class CreateDeliveriesTable extends Migration
             $table->integer('updated_by')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
+
+            $table->primary(['id', 'ds_num', 'ds_line']);
+        });
+        Schema::table('delivery', function (Blueprint $table) {
+            $table->integer('id', true, true)->change();
         });
     }
     /**
@@ -50,6 +56,6 @@ class CreateDeliveriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('deliveries');
+        Schema::dropIfExists('delivery');
     }
 }

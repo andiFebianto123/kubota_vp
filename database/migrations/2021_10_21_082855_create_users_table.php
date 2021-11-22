@@ -31,8 +31,7 @@ class CreateUsersTable extends Migration
             $table->dateTime('two_factor_expires_at')->nullable();
             $table->integer('created_by')->nullable(); 
             $table->integer('updated_by')->nullable();
-            $table->dateTime('created_at')->nullable();
-            $table->dateTime('updated_at')->nullable();
+            $table->timestamps();
             $table->softDeletes();
 
         });

@@ -17,8 +17,7 @@ class CreateRolesTable extends Migration
             $table->increments('id');
             $table->string('label');
             $table->string('name');
-            $table->dateTime('created_at')->nullable();
-            $table->dateTime('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

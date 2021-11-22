@@ -57,13 +57,17 @@ class PurchaseOrderCrudController extends CrudController
         if($current_role == 'admin'){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor', // Table column heading
-                'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+                'name'      => 'vend_num', // the column that contains the ID of that connected entity;
                 'entity'    => 'vendor', 
                 'type' => 'relationship',
-                'attribute' => 'number',
+                'attribute' => 'vend_num',
             ]);
         }
-        CRUD::column('number');
+        CRUD::addColumn([
+            'label'     => 'PO Number', // Table column heading
+            'name'      => 'po_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
         // CRUD::addColumn([
         //     'label'     => 'Nama Vendor', // Table column heading
         //     'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
@@ -134,17 +138,17 @@ class PurchaseOrderCrudController extends CrudController
     {
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
-        $po_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
-                                ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
-                                ->leftJoin('vendors', 'purchase_orders.vendor_number', 'vendors.number')
-                                ->select('purchase_order_lines.*', 'vendors.name as vendor_name', 'vendors.currency as vendor_currency')
-                                ->orderBy('id', 'desc')
+        $po_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
                                 ->get();
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
-        $po_changes_lines = PurchaseOrderLine::where('purchase_order_id', $entry->id )
-                    ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
-                    ->where('purchase_order_lines.po_change', '>', 0)
-                    ->orderBy('purchase_order_lines.id', 'desc')
+        $po_changes_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
+                    ->leftJoin('po', 'po.po_num',  'po_line.po_num')
+                    ->where('po_line.po_change', '>', 0)
+                    ->orderBy('po_line.id', 'desc')
                     ->get();
         /* not used
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )

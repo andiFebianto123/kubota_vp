@@ -18,8 +18,7 @@ class CreateUserForgotPasswordsTable extends Migration
             $table->string('email');
             $table->string('token');
             $table->dateTime('expired_at');
-            $table->dateTime('created_at')->nullable();
-            $table->dateTime('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

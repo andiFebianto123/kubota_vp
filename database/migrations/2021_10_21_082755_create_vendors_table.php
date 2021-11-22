@@ -13,16 +13,26 @@ class CreateVendorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('vendors', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('number')->unique();
-            $table->string('name');
-            $table->string('address')->nullable();
-            $table->string('company')->nullable();
-            $table->string('phone')->nullable();
+
+        Schema::create('vendor', function (Blueprint $table) {
+            $table->engine = 'MyISAM';
+            $table->integer('id');
+            $table->string('vend_num')->length(10);
+            $table->string('vend_name');
+            $table->string('vend_addr')->nullable();
+            $table->string('vend_email')->nullable();
+            $table->string('buyer')->nullable();
+            $table->string('buyer_email')->nullable();
             $table->string('currency')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
+
+            $table->primary(['id','vend_num']);
+        });
+        Schema::table('vendor', function (Blueprint $table) {
+            $table->integer('id', true, true)->change();
         });
     }
 
@@ -33,6 +43,6 @@ class CreateVendorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vendors');
+        Schema::dropIfExists('vendor');
     }
 }

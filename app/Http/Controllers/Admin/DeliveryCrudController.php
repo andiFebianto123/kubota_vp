@@ -147,14 +147,17 @@ class DeliveryCrudController extends CrudController
 
     private function detailDS($id)
     {
-        $delivery_show = Delivery::leftJoin('purchase_order_lines', 'purchase_order_lines.id', 'deliveries.po_line_id')
-                        ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id')
+        $delivery_show = Delivery::leftjoin('po_line', function ($join) {
+                            $join->on('po_line.po_num', 'delivery.po_num')
+                                ->orOn('po_line.po_line', 'delivery.po_line');
+                        })
+                        ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                         // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
-                        ->leftJoin('vendors', 'vendors.number', 'purchase_orders.vendor_number')
-                        ->where('deliveries.id', $id)
-                        ->get(['deliveries.id as id','deliveries.ds_num','deliveries.ds_line','deliveries.shipped_date', 'purchase_order_lines.due_date', 'deliveries.po_release','purchase_order_lines.item','deliveries.u_m',
-                        'vendors.number as vendor_number', 'vendors.name as vendor_name', 'deliveries.no_surat_jalan_vendor',
-                        'purchase_orders.number as po_number','purchase_order_lines.po_line as po_line', 'deliveries.order_qty as order_qty', 'deliveries.shipped_qty', 'deliveries.unit_price', 'deliveries.currency', 'deliveries.tax_status', 'deliveries.description', 'deliveries.wh', 'deliveries.location'])
+                        ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
+                        ->where('delivery.id', $id)
+                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 'delivery.po_release','po_line.item','delivery.u_m',
+                        'vendor.vend_num as vendor_number', 'vendor.vend_num as vendor_name', 'delivery.no_surat_jalan_vendor',
+                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location'])
                         ->first();
         $qr_code = "DSW|";
         $qr_code .= $delivery_show->ds_num."|";
@@ -185,8 +188,8 @@ class DeliveryCrudController extends CrudController
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
 
-        $po_line = PurchaseOrderLine::where('purchase_order_lines.id', $po_line_id)
-                ->leftJoin('purchase_orders', 'purchase_orders.id', 'purchase_order_lines.purchase_order_id' )
+        $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
+                ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
         $code = "";
         switch (backpack_auth()->user()->role->name) {
@@ -204,9 +207,10 @@ class DeliveryCrudController extends CrudController
         $ds_num = $po_line->vendor_number.date("ymd").$code;
         $insert = new Delivery();
         $insert->ds_num = $ds_num;
-        $insert->po_line_id = $po_line_id;
-        $insert->po_release = 0;
-        $insert->ds_line = Delivery::where('po_line_id', $po_line_id)->count()+1;
+        $insert->po_num = $po_line->po_num;
+        $insert->po_line = $po_line->po_line;
+        $insert->po_release = $po_line->po_release;
+        $insert->ds_line = Delivery::where('po_num', $po_line->po_num)->count()+1;
         $insert->description = $po_line->description;
         $insert->u_m = $po_line->u_m;
         $insert->due_date = $po_line->due_date;

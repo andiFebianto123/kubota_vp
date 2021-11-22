@@ -9,7 +9,8 @@ class PurchaseOrderLine extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-    
+    protected $table = 'po_line';
+
     protected $append = [
         'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept',
         'count_ds'
@@ -17,11 +18,11 @@ class PurchaseOrderLine extends Model
 
     public function purchaseOrder()
     {
-        return $this->belongsTo('App\Models\PurchaseOrder', 'purchase_order_id', 'id');
+        return $this->belongsTo('App\Models\PurchaseOrder', 'po_num', 'po_num');
     }
 
     function delivery(){
-		return $this->hasMany('App\Models\Delivery','po_line_id');
+		return $this->hasMany('App\Models\Delivery','po_num');
 	}
 
     public function getReadByUserAttribute()
@@ -114,7 +115,7 @@ class PurchaseOrderLine extends Model
 
     public function getCountDsAttribute()
     {
-        return Delivery::where('po_line_id', $this->id)->count();
+        return Delivery::where('po_num', $this->po_num)->where('po_line', $this->po_line)->count();
     }
 
 

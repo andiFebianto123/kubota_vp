@@ -13,53 +13,53 @@ class PurchaseOrderSeeder extends Seeder
         $arr_seeders = [
           [
             [
-             "number" => "PU00006434",
-             "vendor_number" => "V001303",                
+             "po_num" => "PU00006434",
+             "vend_num" => "V001303",                
              "po_change" => 1,
              "po_date" => now(),
              "email_flag" => now()
             ],
-            ["number" => "PU00006434"],
+            ["po_num" => "PU00006434"],
           ],
           [
             [
-                "number" => "PU00006435",
-                "vendor_number" => "V001303",                
+                "po_num" => "PU00006435",
+                "vend_num" => "V001303",                
                 "po_change" => 0,
                 "email_flag" => null,
                 "po_date" => now()
             ],
-           ["number" => "PU00006435"],
+           ["po_num" => "PU00006435"],
           ],
           [
             [
-                "number" => "PU00006436",
-                "vendor_number" => "V001303",                
+                "po_num" => "PU00006436",
+                "vend_num" => "V001303",                
                 "po_date" => now(),
                 "po_change" => 0,
                 "email_flag" => now()
             ],
-           ["number" => "PU00006436"],
+           ["po_num" => "PU00006436"],
           ],
           [
             [
-                "number" => "PU00006424",
-                "vendor_number" => "V002011",                
+                "po_num" => "PU00006424",
+                "vend_num" => "V002011",                
                 "po_date" => now(),
                 "po_change" => 0,
                 "email_flag" => now()
             ],
-           ["number" => "PU00006424"],
+           ["po_num" => "PU00006424"],
           ],
           [
             [
-                "number" => "PU00006425",
-                "vendor_number" => "V002062",                
+                "po_num" => "PU00006425",
+                "vend_num" => "V002062",                
                 "po_date" => now(),
                 "po_change" => 2,
                 "email_flag" => now()
                 ],
-            ["number" => "PU00006425"],
+            ["po_num" => "PU00006425"],
           ],
           
         ];

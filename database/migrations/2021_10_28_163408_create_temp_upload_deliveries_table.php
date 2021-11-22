@@ -23,8 +23,7 @@ class CreateTempUploadDeliveriesTable extends Migration
             $table->string('no_surat_jalan_vendor')->nullable();
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
-            $table->dateTime('created_at')->nullable();
-            $table->dateTime('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

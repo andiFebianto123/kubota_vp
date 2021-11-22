@@ -57,11 +57,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <table class="table">
                 <tr>
                     <td>PO Number</td>
-                    <td>: {{$entry->number}}</td>
+                    <td>: {{$entry->po_num}}</td>
                 </tr>
                 <tr>
                     <td>Vendor</td>
-                    <td>: {{$entry->vendor->number}}</td>
+                    <td>: {{$entry->vendor->vend_num}}</td>
                 </tr>
                 <tr>
                     <td>PO Date</td>
@@ -69,7 +69,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </tr>
                 <tr>
                     <td>Email Sent</td>
-                    <td>: {{$entry->email_flag}}</td>
+                    <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
@@ -121,7 +121,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
                             </td>
-                            <td class="text-nowrap">{{$entry->number}}-{{$po_line->po_line}}</td>
+                            <td class="text-nowrap">{{$entry->po_num}}-{{$po_line->po_line}}</td>
                             <td>
                                 <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
                                     {{$arr_po_line_status[$po_line->status]['text']}}
@@ -199,7 +199,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <tbody>
                         @foreach ($po_changes_lines as $key => $po_line)
                         <tr>
-                            <td>{{$po_line->number}}</td>
+                            <td>{{$po_line->po_num}}</td>
                             <td>{{$po_line->po_line}}</td>
                             <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
                             <td>{{$po_line->po_change}}</td>

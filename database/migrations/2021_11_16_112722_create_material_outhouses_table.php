@@ -13,10 +13,10 @@ class CreateMaterialOuthousesTable extends Migration
      */
     public function up()
     {
-        Schema::create('material_outhouses', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('instruction_num');
-            $table->string('po_numb');
+        Schema::create('material_outhouse', function (Blueprint $table) {
+            $table->integer('id');
+            $table->string('instruction_num')->length(15);
+            $table->string('po_num')->length(10);
             $table->integer('po_line');
             $table->integer('seq');
             $table->string('matl_item');
@@ -28,6 +28,11 @@ class CreateMaterialOuthousesTable extends Migration
             $table->integer('updated_by')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
+
+            $table->primary(['id', 'instruction_num', 'seq', 'lot_seq']);
+        });
+        Schema::table('material_outhouse', function (Blueprint $table) {
+            $table->integer('id', true, true)->change();
         });
     }
 
@@ -39,6 +44,6 @@ class CreateMaterialOuthousesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('material_outhouses');
+        Schema::dropIfExists('material_outhouse');
     }
 }
