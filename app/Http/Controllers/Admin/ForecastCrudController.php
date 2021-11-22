@@ -8,6 +8,11 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\Session;
 use App\Helpers\ForecastConverter;
 use App\Models\PurchaseOrder;
+use Illuminate\Support\Facades\DB;
+use App\Mail\vendorNewPo;
+use Illuminate\Support\Facades\Mail;
+
+
 
 /**
  * Class ForecastCrudController
@@ -52,17 +57,6 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
 
-        $ds = PurchaseOrder::join('vendors', 'vendors.id', '=', 'purchase_orders.vendor_id')
-        ->select('purchase_orders.id as ID')
-        ->whereNull('email_flag')->get();
-        $a = [];
-        foreach($ds as $dataBaru){
-            echo "<pre>";
-            print_r($dataBaru->ID);
-            echo "</pre>";
-        }
-        die();
-        dd($a);
 
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -76,7 +70,7 @@ class ForecastCrudController extends CrudController
         //     'name'      => 'age',
         // ]);
 
-        $this->crud->allowResponsive();
+        // $this->crud->allowResponsive();
 
         $forecast = new forecastConverter;
         if(request("filter_forecast_by") != null){

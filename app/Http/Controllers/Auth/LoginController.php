@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\vendorNewPo;
 
 class LoginController extends Controller
 {
@@ -74,7 +75,7 @@ class LoginController extends Controller
             'title' => 'Mail from Kubota.com',
             'fp_url' => route("reset-password")."?t=".$token
         ];
-        
+
         Mail::to($email)->send(new ResetPasswordMail($details));
 
         return view('vendor.backpack.base.auth.forgot-password');
@@ -111,6 +112,9 @@ class LoginController extends Controller
             $insert_otp->save();
            
             Mail::to($user->email)->send(new TwoFactorMail($details));
+
+            // Mail::to($user->email)->send(new vendorNewPo($details));
+
 
             return response()->json([
                 'status' => true,
