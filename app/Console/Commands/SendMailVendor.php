@@ -47,18 +47,20 @@ class SendMailVendor extends Command
             # alias terdapat data yang kosong
             $getPo = $pos->get();
             foreach($getPo as $po){
+                $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
                 $details = [
                     'type' => 'reminder_po',
                     'title' => 'Ada PO baru',
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => url("admin/purchase-order/{$po->ID}/show")
+                    'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
                 Mail::to('admin@ptki.com')->send(new vendorNewPo($details));
-                $updatePo = DB::table('po')::find($po->ID)->update([
+                $updatePo = DB::table('po')->where('id', $po->ID)->update([
                     'email_flag' => now()
                 ]);
             }
         }
-        return Command::SUCCESS;
+        $this->info("Cron is working fine!");
+        // return Command::SUCCESS;
     }
 }
