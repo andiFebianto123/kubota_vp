@@ -60,7 +60,7 @@ class SendMailVendor extends Command
                 ]);
             }
         }
-        $this->info("Cron is working fine!");
+        $this->info("Cron is working fine!"); 
         // return Command::SUCCESS;
     }
 }
