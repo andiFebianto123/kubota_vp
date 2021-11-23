@@ -360,7 +360,7 @@ class PurchaseOrderCrudController extends CrudController
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
-                Mail::to('admin@ptki.com')->send(new vendorNewPo($details));
+                Mail::to($po->email_vendor)->send(new vendorNewPo($details));
                 $updatePo = \App\Models\PurchaseOrder::where('id', $po->ID)->update([
                     'email_flag' => now()
                 ]);
