@@ -9,10 +9,12 @@ use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Dompdf\Dompdf;
 use Prologue\Alerts\Facades\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use PDF;
 
 /**
  * Class PurchaseOrderCrudController
@@ -45,7 +47,8 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
-
+        
+        $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
@@ -352,6 +355,32 @@ class PurchaseOrderCrudController extends CrudController
             'redirect_to' => url('admin/temp-upload-delivery'),
             'validation_errors' => [],
         ], 200);
+    }
+
+    public function exportPdfOrderSheet($po_num)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
+                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
+                                'C' => ['text' => 'Complete', 'color' => 'text-success']
+                            ];
+        
+        $data['po_lines'] = $collection_po_lines;
+        $data['po'] = $po;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        $pdf = PDF::loadview('exports.pdf.order-sheet',$data);
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->stream();
     }
 
     private function validationMessage($validator,$rules)

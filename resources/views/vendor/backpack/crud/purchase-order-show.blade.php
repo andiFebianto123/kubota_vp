@@ -71,6 +71,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>Email Sent</td>
                     <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
                 </tr>
+                <tr>
+                    <td>Order Sheet</td>
+                    <td>: <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> Download</a></td>
+                </tr>
             </table>
         </div><!-- /.box-body -->
     </div><!-- /.box -->
@@ -86,7 +90,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <div>
                     <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/purchase-order-line-export-excel-accept')}}"><i class="la la-file-excel"></i> Excel</a>
                     <a class="btn btn-sm btn-danger" target="_blank" href="{{url('admin/purchase-order-line-export-pdf-accept')}}"><i class="la la-file-pdf"></i> PDF</a>
-                    <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button>
+                    <!-- <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button> -->
                 </div>
                 <table class="table table-striped mb-0 table-responsive">
                     <thead>
@@ -233,29 +237,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 
 <!-- Modal -->
-<div id="importMassDS" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Import Mass Delivery Sheet</h5>
-        </div>
-        <div class="modal-body">
-            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{asset('docs/template-delivery-sheet.xlsx')}}">template-delivery-sheet.xlsx</a></p>
-            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
-                @csrf
-                <input type="file" name="file_po" class="form-control py-1 rect-validation">
-
-                <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
-                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
-                </div>      
-            </form>
-        </div>
-    </div>
-  </div>
-</div>
 
 <div id="modalAccept" class="modal fade" role="dialog">
   <div class="modal-dialog">
