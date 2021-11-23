@@ -31,4 +31,6 @@ Route::group([
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
+    // route untuk accept all PO
+    Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
 });

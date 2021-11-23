@@ -1,7 +1,6 @@
 @component('mail::message')
 # {{ $details['title'] }}
 
-The body of your message.
 <h3>{{ $details['message'] }}</h3>
 
 @if($details['type'] == 'reminder_po')

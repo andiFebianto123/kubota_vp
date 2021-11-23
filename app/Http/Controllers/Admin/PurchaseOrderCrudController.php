@@ -12,6 +12,8 @@ use Prologue\Alerts\Facades\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\vendorNewPo;
 
 /**
  * Class PurchaseOrderCrudController
@@ -45,7 +47,9 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
 
+        // 
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
+        $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
@@ -339,5 +343,33 @@ class PurchaseOrderCrudController extends CrudController
                 }
             }
         return $message_errors;
+    }
+    public function accept_all_po(){
+        $pos = \App\Models\PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
+        ->join('users', 'vendor.id', '=', 'users.vendor_id')
+        ->select('po.id as ID', 'users.email as email_vendor')
+        ->whereNull('po.email_flag');
+        if($pos->count() > 0){
+            # alias terdapat data yang kosong
+            $getPo = $pos->get();
+            foreach($getPo as $po){
+                $URL = url('admin/purchase-order/'.$po->ID.'/show');
+                $details = [
+                    'type' => 'reminder_po',
+                    'title' => 'Ada PO baru',
+                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
+                    'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
+                ];
+                Mail::to('admin@ptki.com')->send(new vendorNewPo($details));
+                $updatePo = \App\Models\PurchaseOrder::where('id', $po->ID)->update([
+                    'email_flag' => now()
+                ]);
+            }
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Request all Accept PO success',
+        ], 200);
     }
 }

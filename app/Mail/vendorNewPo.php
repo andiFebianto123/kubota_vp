@@ -29,6 +29,9 @@ class vendorNewPo extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.sample-mail');
+        // return $this->markdown('emails.sample-mail');
+        return $this->subject('Mail from '.env('MAIL_FROM_ADDRESS',""))
+        ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+        ->markdown('emails.sample-mail');
     }
 }

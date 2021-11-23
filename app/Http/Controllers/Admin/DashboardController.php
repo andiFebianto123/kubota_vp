@@ -33,5 +33,4 @@ class DashboardController extends Controller
         return view('vendor.backpack.base.dashboard', $data);
 
     }
-
 }
