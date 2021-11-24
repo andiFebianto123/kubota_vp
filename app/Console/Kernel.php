@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Models\Configuration;
 use Log;
 
 class Kernel extends ConsoleKernel
@@ -14,7 +15,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\SendMailVendor::class
+        Commands\SendMailVendor::class,
+        Commands\reminderPo::class
     ];
 
     /**
@@ -27,6 +29,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('vendor:daily')->dailyAt('12:15');
         $schedule->command('vendor:daily')->dailyAt('18:15');
+        $schedule->command('reminder:po_line')->dailyAt("08:00");
     }
 
     /**

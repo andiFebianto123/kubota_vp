@@ -1,4 +1,4 @@
-<a href="javascript:void(0)" onclick="acceptPoAll(this)" data-routee="{{ url($crud->route.'/accept_vendor') }}" data-route="{{ url('admin/accept-all-po') }}" class="btn btn-sm btn-primary-vp" data-button-type="acceptPo">
+<a href="javascript:void(0)" onclick="acceptPoAll(this)" data-route="{{ url('admin/accept-all-po') }}" class="btn btn-sm btn-primary-vp" data-button-type="acceptPo">
     <i class="la la-check"></i> Send Mail New PO
 </a>
 

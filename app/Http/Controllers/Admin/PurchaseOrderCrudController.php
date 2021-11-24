@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PurchaseOrderCrudController
