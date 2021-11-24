@@ -7,6 +7,14 @@
 @component('mail::button', ['url' => $details['url_button']])
     Detail PO
 @endcomponent
+@elseif($details['type'] == 'forgot_password')
+@component('mail::button', ['url' => $details['fp_url']])
+    Reset Password
+@endcomponent
+@elseif($details['type'] == 'otp')
+@component('mail::button', ['url' => '#'])
+    {{ $details['otp_code'] }}
+@endcomponent
 @endif
 
 Thanks,<br>

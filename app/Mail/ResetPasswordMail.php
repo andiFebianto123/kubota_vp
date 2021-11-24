@@ -34,6 +34,7 @@ class ResetPasswordMail extends Mailable
     {
         return $this->subject('Mail from '.env('MAIL_FROM_ADDRESS',""))
                     ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
-                    ->view('emails.forgot-password', $this->details);
+                    ->markdown('emails.sample-mail');
+                    // ->view('emails.forgot-password', $this->details);
     }
 }

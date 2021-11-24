@@ -73,6 +73,8 @@ class LoginController extends Controller
 
         $details = [
             'title' => 'Mail from Kubota.com',
+            'message' => 'Gunakan Link di bawah ini untuk mereset password',
+            'type' => 'forgot_password',
             'fp_url' => route("reset-password")."?t=".$token
         ];
 
@@ -94,6 +96,8 @@ class LoginController extends Controller
 
             $details = [
                 'title' => 'Mail from Kubota.com',
+                'message' => 'Kode OTP anda adalah',
+                'type' => 'otp',
                 'otp_code' => $two_factor_code,
                 'otp_url' => route("twofactor")."?t=".$two_factor_url
             ];
