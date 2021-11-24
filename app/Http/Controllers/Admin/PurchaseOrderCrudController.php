@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\PurchaseOrderExport;
+use App\Exports\TemplateMassDsExport;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Imports\DeliverySheetImport;
 use App\Models\PurchaseOrder;
@@ -292,6 +293,12 @@ class PurchaseOrderCrudController extends CrudController
     public function exportExcel()
     {
         return Excel::download(new PurchaseOrderExport, 'po-'.date('YmdHis').'.xlsx');
+
+    }
+
+    public function templateMassDs()
+    {
+        return Excel::download(new TemplateMassDsExport(backpack_auth()->user()), 'template-mass-ds-'.date('YmdHis').'.xlsx');
 
     }
 

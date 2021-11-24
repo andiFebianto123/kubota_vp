@@ -21,6 +21,7 @@ class CreateDeliveryStatusesTable extends Migration
             $table->string('po_num')->nullable();
             $table->integer('po_line')->nullable();
             $table->integer('po_release')->nullable();
+            $table->string('item')->nullable();
             $table->string('description')->nullable();
             $table->integer('grn_num')->default(0);
             $table->integer('grn_line')->default(0);

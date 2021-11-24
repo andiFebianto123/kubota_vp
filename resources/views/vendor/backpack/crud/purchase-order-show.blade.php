@@ -297,8 +297,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-count-ds"></p>
-            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Submit</a>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Ya</a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
         </div>
     </div>
   </div>

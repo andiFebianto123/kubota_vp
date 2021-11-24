@@ -10,7 +10,7 @@
             <h5 class="modal-title">Import Mass Delivery Sheet</h5>
         </div>
         <div class="modal-body">
-            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{asset('docs/template-delivery-sheet.xlsx')}}">template-delivery-sheet.xlsx</a></p>
+            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{url('admin/template-mass-ds')}}">template-delivery-sheet.xlsx</a></p>
             <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
                 @csrf
                 <input type="file" name="file_po" class="form-control py-1 rect-validation">

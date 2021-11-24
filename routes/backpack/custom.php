@@ -30,6 +30,7 @@ Route::group([
     Route::get('purchase-order/{id}/{line}/detail-change', 'PurchaseOrderCrudController@detailChange');
     Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
     Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
+    Route::get('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');

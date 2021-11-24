@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DeliveryRequest;
 use App\Models\Delivery;
+use App\Models\DeliveryStatus;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -120,6 +121,7 @@ class DeliveryCrudController extends CrudController
         CRUD::field('petugas_vendor');
         CRUD::field('no_surat_jalan_vendor');
         CRUD::field('order_qty');
+        CRUD::field('serial_number');
     }
 
     /**
@@ -136,10 +138,15 @@ class DeliveryCrudController extends CrudController
     function show()
     {
         $entry = $this->crud->getCurrentEntry();
+
+        $delivery_status = DeliveryStatus::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)
+                            ->first();
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
+        $data['delivery_status'] = $delivery_status;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
         return view('vendor.backpack.crud.delivery-show', $data);
@@ -187,6 +194,7 @@ class DeliveryCrudController extends CrudController
         $order_qty = $request->input('order_qty');
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
+        $serial_number = $request->input('serial_number');
 
         $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
@@ -222,7 +230,7 @@ class DeliveryCrudController extends CrudController
         $insert->shipped_qty = $po_line->order_qty;
         $insert->shipped_date = now();
         $insert->order_qty = $order_qty;
-        // $insert->w_serial = $data_temp->serial_number;
+        $insert->w_serial = ($serial_number)?$serial_number:0;
         $insert->petugas_vendor = $petugas_vendor;
         $insert->no_surat_jalan_vendor = $no_surat_jalan_vendor;
         $insert->created_by = backpack_auth()->user()->id;

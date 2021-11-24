@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\TempUploadDeliveryRequest;
 use App\Models\Delivery;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\TempUploadDelivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -52,22 +53,22 @@ class TempUploadDeliveryCrudController extends CrudController
         // $this->crud->addButtonFromModelFunction('top', 'insert_db', 'insertToDB', 'beginning');
         // $this->crud->addButtonFromModelFunction('top', 'cancel_db', 'cancelInsert', 'end');
         $this->crud->addClause('where','user_id', backpack_auth()->user()->id);
+        $this->crud->orderBy('po_num', 'asc');        
+        $this->crud->orderBy('po_line', 'asc');        
 
         CRUD::addColumn([
-            'label'     => 'Delivery Sheet Number', // Table column heading
-            'name'      => 'ds_numb', // the column that contains the ID of that connected entity;
-            'type'     => 'closure',
-            'function' => function($entry) {
-                return 'VSD000'.$entry->id;
-            }
+            'label'     => 'PO', // Table column heading
+            'name'      => 'po_num', 
         ]);
 
         CRUD::addColumn([
-            'label'     => 'Item Number', // Table column heading
-            'name'      => 'po_line_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'purchaseOrderLine', 
-            'type' => 'relationship',
-            'attribute' => 'item',
+            'label'     => 'PO Line', // Table column heading
+            'name'      => 'po_line',
+        ]);
+
+        CRUD::addColumn([
+            'label'     => 'Delivery Date', // Table column heading
+            'name'      => 'delivery_date',
         ]);
 
         CRUD::addColumn([
@@ -130,12 +131,28 @@ class TempUploadDeliveryCrudController extends CrudController
     {
         $data_temps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
 
-        foreach ($data_temps as $key => $data_temp) {
-            $po_line = PurchaseOrderLine::where('id', $data_temp->po_line_id)->first();
+        $code = "";
+            switch (backpack_auth()->user()->role->name) {
+                case 'admin':
+                    $code = "01";
+                    break;
+                case 'vendor':
+                    $code = "00";
+                    break;
+                default:
+                    # code...
+                    break;
+            }
 
+        foreach ($data_temps as $key => $data_temp) {
+            $po = PurchaseOrder::where('po_num', $data_temp->po_num)->first();
+            $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)->where('po_line', $data_temp->po_line)->first();
+            $ds_num = $po->vend_num.date("ymd").$code;
+            
             $insert = new Delivery();
-            $insert->ds_num = $data_temp->ds_num;
-            $insert->po_line_id = $data_temp->po_line_id;
+            $insert->ds_num = $ds_num;
+            $insert->po_line = $data_temp->po_line;
+            $insert->po_num = $data_temp->po_num;
             $insert->po_release = 0;
             $insert->ds_line = $key+1;
             $insert->description = $po_line->description;
@@ -149,7 +166,7 @@ class TempUploadDeliveryCrudController extends CrudController
             $insert->shipped_qty = $po_line->order_qty;
             $insert->shipped_date = now();
             $insert->order_qty = $data_temp->order_qty;
-            $insert->w_serial = $data_temp->serial_number;
+            $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
             $insert->petugas_vendor = $data_temp->petugas_vendor;
             $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
             $insert->save();
