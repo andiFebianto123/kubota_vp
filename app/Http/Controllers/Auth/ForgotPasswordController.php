@@ -61,6 +61,8 @@ class ForgotPasswordController extends Controller
 
         $details = [
             'title' => 'Mail from Kubota.com',
+            'message' => 'Gunakan Link di bawah ini untuk mereset password',
+            'type' => 'forgot_password',
             'fp_url' => route("reset-password")."?t=".$token
         ];
 

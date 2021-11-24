@@ -12,7 +12,7 @@
     Reset Password
 @endcomponent
 @elseif($details['type'] == 'otp')
-@component('mail::button', ['url' => '#'])
+@component('mail::button', ['url' => $details['otp_url']])
     {{ $details['otp_code'] }}
 @endcomponent
 @endif

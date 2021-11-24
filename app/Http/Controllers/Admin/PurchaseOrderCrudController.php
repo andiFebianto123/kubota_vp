@@ -96,6 +96,17 @@ class PurchaseOrderCrudController extends CrudController
         ]);        
         CRUD::column('po_change');
 
+        $this->crud->addFilter([
+            'name'  => 'item',
+            'type'  => 'select2_multiple',
+            'label' => 'Number Items'
+          ], function() {
+              return PurchaseOrderLine::all()->pluck('item', 'po_num')->toArray();
+          }, function($values) { // if the filter is active
+              // $this->crud->addClause('whereIn', 'status', json_decode($values));
+              $this->crud->addClause('whereIn', 'po_num', json_decode($values));
+          });
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
