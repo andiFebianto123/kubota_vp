@@ -130,6 +130,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
         </div>
     </div><!-- /.box -->
+    @if($delivery_status)
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-secondary">
@@ -256,6 +257,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
         </div>
     </div>
+    @else
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary">
+                Delivery Status
+            </div>
+            <div class="card-body">
+                Tidak Ada Data!
+            </div
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
 
