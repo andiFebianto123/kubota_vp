@@ -56,7 +56,7 @@ class PurchaseOrderSeeder extends Seeder
                 "po_num" => "PU00006425",
                 "vend_num" => "V002062",                
                 "po_date" => now(),
-                "po_change" => 2,
+                "po_change" => 0,
                 "email_flag" => now()
                 ],
             ["po_num" => "PU00006425"],

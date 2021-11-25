@@ -6,6 +6,7 @@ use App\Exports\PurchaseOrderLineAcceptExport;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -142,6 +143,10 @@ class PurchaseOrderLineCrudController extends CrudController
     function show()
     {
         $entry = $this->crud->getCurrentEntry();
+        $po = PurchaseOrder::where("po_num", $entry->po_num)
+                ->join('vendor', 'vendor.vend_num', 'po.vend_num')
+                ->get('vendor.currency as vendor_currency')
+                ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
@@ -151,6 +156,7 @@ class PurchaseOrderLineCrudController extends CrudController
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
+        $data['po'] = $po;
         $data['arr_po_line_status'] = $arr_po_line_status;
         $data['deliveries'] = $deliveries;
         $data['delivery_statuses'] = $delivery_statuses;

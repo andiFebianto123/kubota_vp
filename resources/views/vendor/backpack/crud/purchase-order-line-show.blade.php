@@ -76,7 +76,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </tr>
                 <tr>
                     <td>Unit Price</td>
-                    <td>: {{"IDR " . number_format($entry->unit_price,0,',','.')}}</td>
+                    <td>: {{$entry->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
@@ -109,7 +109,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$delivery->ds_num}}</td>
                             <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                             <td>{{$delivery->shipped_qty}}</td>
-                            <td>{{"IDR " . number_format($delivery->unit_price,0,',','.')}}</td>
+                            <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
                             <td>{{$delivery->petugas_vendor}}</td>
                             <td>{{$delivery->no_surat_jalan_vendor}}</td>
                             <td>
@@ -135,7 +135,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 {{$total_qty}}</td>
                             </td>
                             <td>
-                                {{"IDR " . number_format($total_price,0,',','.')}}</td>
+                            {{$delivery->currency}} {{ number_format($total_price,0,',','.')}}</td>
                             </td>
                         </tr>
                     </tfoot>
