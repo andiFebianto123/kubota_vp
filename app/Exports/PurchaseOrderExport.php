@@ -28,7 +28,7 @@ class PurchaseOrderExport implements FromView, WithEvents
     {
         $purchase_orders = PurchaseOrder::leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                             ->get(['po.id as id', 'po.po_num as number', 'vendor.vend_num as vendor_number'
-                            ,'po.po_date as po_date', 'po.email_flag as email_flag']);
+                            ,'po.po_date as po_date', 'po.email_flag as email_flag', 'po.po_change']);
 
         $data['purchase_orders'] = $purchase_orders;
 
