@@ -56,7 +56,7 @@ class PurchaseOrderCrudController extends CrudController
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
-            $this->crud->addClause('where', 'vendor_number', '=', backpack_auth()->user()->vendor->number);
+            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
 
@@ -96,7 +96,11 @@ class PurchaseOrderCrudController extends CrudController
                 return ($entry->email_flag) ? "✓":"-";
             }
         ]);        
-        CRUD::column('po_change');
+        CRUD::addColumn([
+            'label'     => 'PO Change', // Table column heading
+            'name'      => 'po_change', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
 
         // function() {
         //     return PurchaseOrderLine::groupBy('item')->select('item')->get()->mapWithKeys(function($item){
