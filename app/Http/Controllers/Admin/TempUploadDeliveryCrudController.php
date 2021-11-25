@@ -169,7 +169,10 @@ class TempUploadDeliveryCrudController extends CrudController
             $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
             $insert->petugas_vendor = $data_temp->petugas_vendor;
             $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
-            $insert->save();
+
+            if ($po_line->status == 'O' && $po_line->accept_flag == 1) {
+                $insert->save();
+            }
         }
 
         TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();

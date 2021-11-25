@@ -96,7 +96,10 @@ class TemplateMassDsSingleSheetExport implements FromArray, WithTitle,  WithHead
 
     public function array(): array
     {
-        $po_lines = PurchaseOrderLine::where('po_num', $this->po_num)->get();
+        $po_lines = PurchaseOrderLine::where('po_num', $this->po_num)
+                ->where('status', 'O')
+                ->where('accept_flag', 1)
+                ->get();
         $arr_po_lines = [];
         foreach ($po_lines as $key => $po_line) {
             $arr_po_line = [];
