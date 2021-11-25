@@ -7,7 +7,7 @@
     trans('backpack::crud.list') => false,
   ];
 
-  $arr_filter_forecasts = ['day', 'week', 'month', 'year'];
+  $arr_filter_forecasts = ['day', 'week', 'month'];
 
   // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
   $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;

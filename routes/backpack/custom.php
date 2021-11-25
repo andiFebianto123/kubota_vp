@@ -34,4 +34,8 @@ Route::group([
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
+    // route untuk accept all PO
+    Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
+    // route untuk ajax filter di nomor item di po
+    Route::get('test/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
 });

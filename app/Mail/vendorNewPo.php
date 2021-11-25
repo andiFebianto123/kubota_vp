@@ -7,14 +7,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ResetPasswordMail extends Mailable
+class vendorNewPo extends Mailable
 {
     use Queueable, SerializesModels;
-
-    use Queueable, SerializesModels;
-  
     public $details;
-  
+
     /**
      * Create a new message instance.
      *
@@ -32,9 +29,9 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
+        // return $this->markdown('emails.sample-mail');
         return $this->subject('Mail from '.env('MAIL_FROM_ADDRESS',""))
-                    ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
-                    ->markdown('emails.sample-mail');
-                    // ->view('emails.forgot-password', $this->details);
+        ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+        ->markdown('emails.sample-mail');
     }
 }

@@ -10,12 +10,14 @@ use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Dompdf\Dompdf;
 use Prologue\Alerts\Facades\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\vendorNewPo;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PurchaseOrderCrudController
@@ -47,10 +49,10 @@ class PurchaseOrderCrudController extends CrudController
         $current_role = backpack_auth()->user()->role->name;
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
-        $this->crud->removeButton('delete');
-        
-        $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
+        $this->crud->removeButton('delete');        
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
+        $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
+        $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
@@ -95,6 +97,28 @@ class PurchaseOrderCrudController extends CrudController
             }
         ]);        
         CRUD::column('po_change');
+
+        // function() {
+        //     return PurchaseOrderLine::groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+        //         return [$item->item => $item->item];
+        //     })->toArray();
+        // }
+
+        $this->crud->addFilter([
+            'name'  => 'item',
+            'type'  => 'select2_multiple_ajax',
+            'label' => 'Number Items',
+            'url' => url('admin/test/ajax-itempo-options'),
+          ],
+          function(){
+          },
+          function($values) { // if the filter is active
+                $getPoLineSearch = PurchaseOrderLine::whereIn('item', json_decode($values));
+                $keysValue = $getPoLineSearch->select('po_num')->get()->mapWithKeys(function($item, $index){
+                    return [$index => $item->po_num];
+                });
+                $this->crud->addClause('whereIn', 'po_num', $keysValue->unique()->toArray());
+          });
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -400,5 +424,39 @@ class PurchaseOrderCrudController extends CrudController
                 }
             }
         return $message_errors;
+    }
+    public function accept_all_po(){
+        $pos = \App\Models\PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
+        ->join('users', 'vendor.id', '=', 'users.vendor_id')
+        ->select('po.id as ID', 'users.email as email_vendor')
+        ->whereNull('po.email_flag');
+        if($pos->count() > 0){
+            # alias terdapat data yang kosong
+            $getPo = $pos->get();
+            foreach($getPo as $po){
+                $URL = url('admin/purchase-order/'.$po->ID.'/show');
+                $details = [
+                    'type' => 'reminder_po',
+                    'title' => 'Ada PO baru',
+                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
+                    'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
+                ];
+                Mail::to($po->email_vendor)->send(new vendorNewPo($details));
+                $updatePo = \App\Models\PurchaseOrder::where('id', $po->ID)->update([
+                    'email_flag' => now()
+                ]);
+            }
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Request all Accept PO success',
+        ], 200);
+    }
+    public function itemPoOptions(Request $request){
+        $term = $request->input('term');
+        return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+            return [$item->item => $item->item];
+        });
     }
 }
