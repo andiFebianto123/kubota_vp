@@ -107,6 +107,7 @@ class PurchaseOrderCrudController extends CrudController
             'type'  => 'select2_multiple_ajax',
             'label' => 'Number Items',
             'url' => url('admin/test/ajax-itempo-options'),
+            'placeholder' => 'Pilih item number',
           ],
           function(){
           },
