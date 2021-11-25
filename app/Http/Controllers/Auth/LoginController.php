@@ -91,14 +91,14 @@ class LoginController extends Controller
  
         if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
         {
-            $two_factor_code = substr(md5(date("Ymd His")), 0, 8);
+            $two_factor_code = strtoupper(substr(md5(date("Ymd His")), 0, 8));
             $two_factor_url = md5($two_factor_code);
 
             $details = [
                 'title' => 'Mail from Kubota.com',
                 'message' => 'Kode OTP anda adalah',
                 'type' => 'otp',
-                'otp_code' => $two_factor_code,
+                'otp_code' => "<span style='font-size:30px;'>".$two_factor_code. "</span>",
                 'otp_url' => route("twofactor")."?t=".$two_factor_url
             ];
 

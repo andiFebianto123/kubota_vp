@@ -40,6 +40,9 @@ class TwoFactorController extends Controller
             $user->two_factor_code = $two_factor_code;
             $user->two_factor_expires_at = Carbon::now()->addDay($expired_otp);
             $user->two_factor_url = null;
+            $user->last_login = now();
+            $user->ip = $this->getClientIp();
+            $user->user_agent = $_SERVER['HTTP_USER_AGENT'];
             $user->save();
 
             $update_otp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
@@ -61,6 +64,26 @@ class TwoFactorController extends Controller
             'redirect_to' => url('admin/dashboard'),
             'validation_errors' => []
         ], 200);
+    }
+
+
+    private function getClientIp() {
+        $ipaddress = '';
+        if (getenv('HTTP_CLIENT_IP'))
+            $ipaddress = getenv('HTTP_CLIENT_IP');
+        else if(getenv('HTTP_X_FORWARDED_FOR'))
+            $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+        else if(getenv('HTTP_X_FORWARDED'))
+            $ipaddress = getenv('HTTP_X_FORWARDED');
+        else if(getenv('HTTP_FORWARDED_FOR'))
+            $ipaddress = getenv('HTTP_FORWARDED_FOR');
+        else if(getenv('HTTP_FORWARDED'))
+           $ipaddress = getenv('HTTP_FORWARDED');
+        else if(getenv('REMOTE_ADDR'))
+            $ipaddress = getenv('REMOTE_ADDR');
+        else
+            $ipaddress = 'UNKNOWN';
+        return $ipaddress;
     }
 
 }
