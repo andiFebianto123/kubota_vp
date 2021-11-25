@@ -96,15 +96,26 @@ class PurchaseOrderCrudController extends CrudController
         ]);        
         CRUD::column('po_change');
 
+        // function() {
+        //     return PurchaseOrderLine::groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+        //         return [$item->item => $item->item];
+        //     })->toArray();
+        // }
+
         $this->crud->addFilter([
             'name'  => 'item',
-            'type'  => 'select2_multiple',
-            'label' => 'Number Items'
-          ], function() {
-              return PurchaseOrderLine::all()->pluck('item', 'po_num')->toArray();
-          }, function($values) { // if the filter is active
-              // $this->crud->addClause('whereIn', 'status', json_decode($values));
-              $this->crud->addClause('whereIn', 'po_num', json_decode($values));
+            'type'  => 'select2_multiple_ajax',
+            'label' => 'Number Items',
+            'url' => url('admin/test/ajax-itempo-options'),
+          ],
+          function(){
+          },
+          function($values) { // if the filter is active
+                $getPoLineSearch = PurchaseOrderLine::whereIn('item', json_decode($values));
+                $keysValue = $getPoLineSearch->select('po_num')->get()->mapWithKeys(function($item, $index){
+                    return [$index => $item->po_num];
+                });
+                $this->crud->addClause('whereIn', 'po_num', $keysValue->unique()->toArray());
           });
 
         /**
@@ -383,5 +394,11 @@ class PurchaseOrderCrudController extends CrudController
             'alert' => 'success',
             'message' => 'Request all Accept PO success',
         ], 200);
+    }
+    public function itemPoOptions(Request $request){
+        $term = $request->input('term');
+        return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+            return [$item->item => $item->item];
+        });
     }
 }
