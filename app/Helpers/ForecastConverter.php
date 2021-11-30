@@ -10,6 +10,9 @@ class forecastConverter {
     var $fromDate = "";
     var $targetDate = "";
 
+    # membuat koneksi ke model data forecast
+    var $model; 
+
     # type forecast
     var $type = '';
 
@@ -56,8 +59,30 @@ class forecastConverter {
 
     var $dataDatePerWeek = []; // ini hanya dipakai untuk type mingguan
 
+    // data hasil perhitungan data secara original
+    public $resultForecastForOriginal = [];
+
+    // data hasil peritungan forecast perhari
     private $resultForecastForDays = [];
+    // data hasil perhitungan perminggu
     private $resultForecastForWeeks = [];
+
+    function getResultWithOrderBy($order){
+        $colectDataMerge = [];
+        if($this->type == 'days'){
+            foreach($this->resultForecastForOriginal as $key => $dataForecastOri){
+                $mergeData = collect($dataForecastOri)->merge($this->resultForecastForDays[$key]);
+                array_push($colectDataMerge, $mergeData->all());
+            }
+        }else if($this->type == 'week'){
+
+        }
+       $colectDataMerge = collect($colectDataMerge)->sortBy($order)->map(function($item){
+           $cut = array_slice($item, (count($item) / 2));
+           return $cut;
+       });
+       return $colectDataMerge->values()->all();
+    }
 
     /**
      * Method yang bertugas untuk melakukan screening data sebelum proses perhitungan data dimulai
@@ -175,6 +200,14 @@ class forecastConverter {
                         array_push($dataColumn, "{$date} {$moon} {$year}");
                     }
                 }
+                break;
+            case 'moon':
+                foreach($this->dataTglPerDay as $moonYear){
+                    // contoh output dari $moonYear "2021-11"
+                    $date = new DateTime($moonYear);
+                    array_push($dataColumn, $date->format('y-M'));
+                }
+                break;
             default:
                 # code...
                 break;
@@ -200,6 +233,7 @@ class forecastConverter {
         $data = $keys->values()->all();
 
         $itemForecast = ["<span>{$str}</span>"]; // isi data forecast pertama dengan nama item
+        $itemForecastOriginal = ["<span>{$str}</span>"];
         $qtyBefore = 0;
         $iterasi = 0;
 
@@ -221,12 +255,16 @@ class forecastConverter {
                 }else{
                     $qtyBefore = (int) $key->first()['qty'];
                 }
+                // tambahkah value qty ke data ori
+                array_push($itemForecastOriginal, $qtyBefore);
+                // tambahkan value qty ke data asli
                 array_push($itemForecast, "<span style='color:green;'>{$qtyBefore}</span>");
             }else{
                 # jika tidak ada datanya
                 if($iterasi > 0){
                     # jika iterasi lebih dari 0 alias sudah looping sekali
                     # tapi masih tidak ada datanya
+                    array_push($itemForecastOriginal, $qtyBefore);
                     array_push($itemForecast, "<span style='color: blue;'>{$qtyBefore}</span>");
                 }else{
                     # jika berada di urutan looping pertama kog datanya tidak ada maka bisa dicari data di 
@@ -247,12 +285,15 @@ class forecastConverter {
                             $qtyBefore = (int) $searchBeforeDate->first()['qty'];
                         }
                     }
+                    array_push($itemForecastOriginal, $qtyBefore);
                     array_push($itemForecast, "<span style='color: red;'>{$qtyBefore}</span>");
                 }
             }
             $iterasi++;
         }
+        array_push($itemForecastOriginal, '<span>View</span>');
         array_push($itemForecast, '<span>View</span>');
+        array_push($this->resultForecastForOriginal, $itemForecastOriginal);
         array_push($this->resultForecastForDays, $itemForecast);
     }
 
@@ -436,7 +477,7 @@ class forecastConverter {
 
         $jumlahhariSetahun = 0;
 
-        for($v = 1; $v<=(12 + 1); $v++){
+        for($v = 1; $v<=(13); $v++){
             /*
               Lopping sebanyak 13x untuk menghitung bulan dalam 1 tahun ditambah 1 bulan
             */
@@ -453,6 +494,12 @@ class forecastConverter {
 
             #mendapatkan jumlah tanggal dalam 1 bulan berdasarkan kalender georgian
             $totalDayofMonth = cal_days_in_month(CAL_GREGORIAN, $monthNowTrigger, $yearNowTrigger);
+
+            if($this->type == 'moon'){
+                // jika Tipe forecast adalah perbulan
+                $totalDayofMonth = 0;
+                array_push($this->dataTglPerDay, "{$yearNowTrigger}-{$monthNowTrigger}");
+            }
 
             $picu = 0; // trigger untuk menghentikan proses looping
 
@@ -537,7 +584,7 @@ class forecastConverter {
             $date_ = new DateTime("last day of {$convertYear}-{$getDate['date'][1]}");
             $maxDate = $date_->format("Y-m-d");
         }
-        // $maxDate = "15-12-2021";
+        # $maxDate = "2021-11-28";
         return [
             'now' => $minDate,
             'target' => $maxDate,

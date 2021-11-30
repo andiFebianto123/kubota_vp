@@ -41,8 +41,7 @@ class SendMailVendor extends Command
     public function handle()
     {
         $pos = DB::table('po')->join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->join('users', 'vendor.id', '=', 'users.vendor_id')
-        ->select('po.id as ID', 'users.email as email_vendor')
+        ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('email_flag');
         if($pos->count() > 0){
             # alias terdapat data yang kosong
@@ -55,7 +54,13 @@ class SendMailVendor extends Command
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
-                Mail::to($po->email_vendor)->send(new vendorNewPo($details));
+                if($po->emails != null){
+                    $pecahEmailVendor = explode(';', $po->emails); // email nya vendor
+                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                    Mail::to($pecahEmailVendor)
+                    ->cc($pecahEmailBuyer)
+                    ->send(new vendorNewPo($details));
+                }
                 $updatePo = DB::table('po')->where('id', $po->ID)->update([
                     'email_flag' => now()
                 ]);

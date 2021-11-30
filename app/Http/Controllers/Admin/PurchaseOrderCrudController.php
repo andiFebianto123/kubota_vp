@@ -189,7 +189,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('accept_flag', 2)
                                 ->get();
         */
-        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
+        $arr_po_line_status = [ 'O' => ['text' => 'Ordered', 'color' => ''], 
                                 'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
                                 'C' => ['text' => 'Complete', 'color' => 'text-success']
                             ];
@@ -370,8 +370,7 @@ class PurchaseOrderCrudController extends CrudController
     }
     public function accept_all_po(){
         $pos = \App\Models\PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->join('users', 'vendor.id', '=', 'users.vendor_id')
-        ->select('po.id as ID', 'users.email as email_vendor')
+        ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('po.email_flag');
         if($pos->count() > 0){
             # alias terdapat data yang kosong
@@ -384,7 +383,14 @@ class PurchaseOrderCrudController extends CrudController
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
-                Mail::to($po->email_vendor)->send(new vendorNewPo($details));
+
+                if($po->emails != null){
+                    $pecahEmailVendor = explode(';', $po->emails); // email nya vendor
+                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                    Mail::to($pecahEmailVendor)
+                    ->cc($pecahEmailBuyer)
+                    ->send(new vendorNewPo($details));
+                }
                 $updatePo = \App\Models\PurchaseOrder::where('id', $po->ID)->update([
                     'email_flag' => now()
                 ]);

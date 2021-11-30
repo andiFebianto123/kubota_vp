@@ -11,6 +11,7 @@ use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\Mail;
+use DateTime;
 
 
 
@@ -56,7 +57,7 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
-
+        $this->crud->query = $this->crud->query->select('id', 'forecast_num', 'qty');
 
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -90,7 +91,8 @@ class ForecastCrudController extends CrudController
         foreach($columns as $column){
             CRUD::addColumn([
                 'label' => "{$column}",
-                'name' => "column_" . $column
+                'name' => "column_" . $column,
+                // 'orderable' => false,
             ]);
         }
 
@@ -100,6 +102,8 @@ class ForecastCrudController extends CrudController
         // }else{
         //     $this->dynamicColumns('year');
         // }
+        $this->crud->andi = 'Andi febianto';
+        $this->crud->urlAjaxFilterVendor = url('admin/filter/ajax-vendor-options');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
         
     }
@@ -107,7 +111,6 @@ class ForecastCrudController extends CrudController
     private function dynamicColumns($ffb)
     {
         // dd($ffb);
-
         $arr_filter_forecasts = ['day', 'week', 'month', 'year'];
 
         $arr_filters = [
@@ -280,8 +283,8 @@ class ForecastCrudController extends CrudController
     public function search(){
         $this->crud->hasAccessOrFail('list');
         // $this->crud->applyUnappliedFilters();
-        $totalRows = 3;
-        $filteredRows = 3;
+        $totalRows = 3; # $this->crud->model->count();
+        $filteredRows = 3; # $this->crud->query->toBase()->getCountForPagination();
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
         if (request()->input('search') && request()->input('search')['value']) {
@@ -291,15 +294,18 @@ class ForecastCrudController extends CrudController
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {
-            // $this->crud->skip((int) request()->input('start'));
+            $this->crud->skip((int) request()->input('start'));
         }
         // limit the number of results according to the datatables pagination
         if (request()->input('length')) {
-            // $this->crud->take((int) request()->input('length'));
+            $this->crud->take((int) request()->input('length'));
         }
 
+        $entries = $this->crud->getEntries();
 
         $forecast = new forecastConverter;
+
+        $forecast->model = $this->crud->model;
 
         if(Session::get('forecast_type') == 'days'){
             $forecast->type = 'days';
@@ -309,21 +315,29 @@ class ForecastCrudController extends CrudController
 
         $start = $forecast->forecastStart();
 
-       //  $columns = $start->getColumns();
+        $resultForecast =  $start->getResultForecast();
 
-        // echo "<pre>";
-        // print_r($start->dataDatePerWeek);
-        // print_r($columns);
-        // print_r($start->getResultForecast());
-        // echo "</pre>";
-        // die();
-        // // dd($columns);
+
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            // $collectData = collect($start->resultForecastForOriginal);
+            // // dd(request()->input('order'));
+            $orderBy = array();
+            foreach ((array) request()->input('order') as $order) {
+                $columnIndex = (int) $order['column'];
+                $perfix = $order['dir'];
+                array_push($orderBy, [$columnIndex, $perfix]);
+            }
+            // $resultForecast = $start->getResultWithOrderBy($orderBy);
+        }
+
 
         $callback = array(
             'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
             'recordsTotal' => $totalRows, // total dari semua row
             'recordsFiltered' => $filteredRows,
-            'data' => $start->getResultForecast()
+            'data' => $resultForecast,
         );
         // echo "<pre>";
         // print_r($start->getResultForecast());

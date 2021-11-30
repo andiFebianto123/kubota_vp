@@ -23,6 +23,29 @@
 @endsection
 
 @section('content')
+  <!-- Filter Box -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+          <div class="card-header bg-secondary">
+              <strong>Filter</strong>
+          </div>
+          <div class="card-body">
+              <div class="form-group">
+                <label>Filter By Vendor</label>
+                <select 
+                  class="form-control select2 select2_filter_vendor" 
+                  style="width: 100;"
+                  name="filter_vendor"
+                >
+                  <option value="hallo" selected>-</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+  </div>
   <!-- Default box -->
   <div class="row">
 
@@ -160,6 +183,10 @@
     </div>
 
   </div>
+  <script>
+    var jobs = {!! json_encode($crud) !!};
+    console.log(jobs);
+  </script>
 
 @endsection
 
@@ -168,6 +195,9 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}">
+
+  <link href="{{ asset('packages/select2/dist/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+  <link href="{{ asset('packages/select2-bootstrap-theme/dist/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
 
   <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
   <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/form.css').'?v='.config('backpack.base.cachebusting_string') }}">
@@ -179,10 +209,41 @@
 
 @section('after_scripts')
   @include('crud::inc.datatables_logic')
+  <!-- include select2 js-->
+  <script src="{{ asset('packages/select2/dist/js/select2.full.min.js') }}"></script>
+  @if (app()->getLocale() !== 'en')
+  <script src="{{ asset('packages/select2/dist/js/i18n/' . str_replace('_', '-', app()->getLocale()) . '.js') }}"></script>
+  @endif
+  <script type="text/javascript">
+    $(function(){
+       $('.select2_filter_vendor').select2({
+           minimumInputLength: 3,
+           allowClear: true,
+           placeholder: 'Select Vendor',
+           ajax: {
+              dataType: 'json',
+              url: 'action/daftarProvinsi.php',
+              delay: 800,
+              data: function(params) {
+                return {
+                  search: params.term
+                }
+              },
+              processResults: function (data, page) {
+              return {
+                results: data
+              };
+            },
+          }
+      }).on('select2:select', function (evt) {
+         // var data = $(".select2 option:selected").text();
+         // alert("Data yang dipilih adalah "+data);
+      });
+    });
+  </script>
   <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/list.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
-
   <!-- CRUD LIST CONTENT - crud_list_scripts stack -->
   @stack('crud_list_scripts')
 @endsection

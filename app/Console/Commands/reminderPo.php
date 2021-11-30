@@ -47,14 +47,14 @@ class reminderPo extends Command
 
         $dataPo = \App\Models\PurchaseOrderLine::join('po', 'po.po_num' , '=', 'po_line.po_num')
         ->join('vendor', 'po.vend_num' , '=', 'vendor.vend_num')
-        ->join('users', 'vendor.id', '=', 'users.vendor_id')
         ->select(
             'po.po_num as po_number',
             'po.id as ID',
             'po.vend_num as kode_vendor',
             'po_line.item as name_item',
             'vendor.vend_name as name_vendor',
-            'users.email as email',
+            'vendor.vend_email as emails',
+            'vendor.buyer_email as buyers',
             DB::raw('datediff(current_date(), po_line.created_at) as selisih'
         ))
         ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
@@ -70,15 +70,6 @@ class reminderPo extends Command
             foreach($groupByPoLine as $po_line){
                 $id = $po_line['ID'];
                 $poNumber = $po_line['po_number'];
-                $emailVendor = $po_line['email'];
-
-                $updateDataPoLine = \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
-                ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
-                ->where('accept_flag', 0)
-                ->update([
-                    'accept_flag' => 1,
-                    'read_at' => now()
-                ]);
 
                 $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$id}/show");
                 $details = [
@@ -87,8 +78,23 @@ class reminderPo extends Command
                     'message' => 'Semua data PO Line anda telah di accept, Anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
-                Mail::to($emailVendor)->send(new vendorNewPo($details));
-                Log::info("Sukses kirim ke email {$emailVendor}");
+
+                if($po_line['emails'] != null){
+                    $pecahEmailVendor = explode(';', $po_line['emails']); // email nya vendor
+                    $pecahEmailBuyer = ($po_line['buyers'] != null) ? explode(';', $po_line['buyers']) : '';
+                    Mail::to($pecahEmailVendor)
+                    ->cc($pecahEmailBuyer)
+                    ->send(new vendorNewPo($details));
+                }
+
+                $updateDataPoLine = \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
+                ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
+                ->where('accept_flag', 0)
+                ->update([
+                    'accept_flag' => 1,
+                    'read_at' => now()
+                ]);
+                Log::info("Sukses kirim ke email untuk Reminder PO");
             }
         }
         return Command::SUCCESS;
