@@ -14,6 +14,7 @@ Route::group([
     Route::crud('delivery', 'DeliveryCrudController');
     Route::get('delivery-export-pdf', 'DeliveryCrudController@exportPdf');
     Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
+    Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
 
     Route::crud('forecast', 'ForecastCrudController');
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');

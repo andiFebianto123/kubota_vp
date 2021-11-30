@@ -73,7 +73,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </tr>
                 <tr>
                     <td>Order Sheet</td>
-                    <td>: <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> Download</a></td>
+                    <td>: 
+                        <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                        <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                    </td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
@@ -88,8 +91,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <div class="card-body">
                 @if(sizeof($po_lines) > 0)
                 <div>
-                    <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/purchase-order-line-export-excel-accept')}}"><i class="la la-file-excel"></i> Excel</a>
-                    <a class="btn btn-sm btn-danger" target="_blank" href="{{url('admin/purchase-order-line-export-pdf-accept')}}"><i class="la la-file-pdf"></i> PDF</a>
                     <!-- <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button> -->
                 </div>
                 <table class="table table-striped mb-0 table-responsive">
@@ -156,11 +157,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                         @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/delivery/create?po_line_id='.$po_line->id)}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
                                         @else
-                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}}, '{{url('admin/delivery/create?po_line_id='.$po_line->id)}}')" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
+                                        <button class="btn btn-sm btn-link"  type="button" onclick="window.location='{{url('admin/delivery/create?po_line_id='.$po_line->id)}}'" ><i class="la la-plus"></i> Create</button>
                                         @endif
                                     @endif
                                     @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                        @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                        @endif
                                     @endif    
                                     <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @else

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\PurchaseOrderLineAcceptExport;
+use App\Helpers\Constant;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
@@ -149,10 +150,7 @@ class PurchaseOrderLineCrudController extends CrudController
                 ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
-        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
-                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                                'C' => ['text' => 'Complete', 'color' => 'text-success']
-                            ];
+        $arr_po_line_status = (new Constant())->statusOFC();
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;

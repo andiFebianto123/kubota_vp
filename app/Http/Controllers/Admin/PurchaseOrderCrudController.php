@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\OrderSheetExport;
 use App\Exports\PurchaseOrderExport;
 use App\Exports\TemplateMassDsExport;
+use App\Helpers\Constant;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Imports\DeliverySheetImport;
 use App\Models\PurchaseOrder;
@@ -194,11 +196,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('accept_flag', 2)
                                 ->get();
         */
-        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
-                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                                'C' => ['text' => 'Complete', 'color' => 'text-success']
-                            ];
- 
+        $arr_po_line_status = (new Constant())->statusOFC();
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
@@ -222,10 +220,7 @@ class PurchaseOrderCrudController extends CrudController
                 ->orderBy('po_line.id', 'desc')
                 ->get();
                 
-        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
-                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                'C' => ['text' => 'Complete', 'color' => 'text-success']
-            ];
+        $arr_po_line_status = (new Constant())->statusOFC();
 
         $data['po'] = $po;
         $data['crud'] = $this->crud;
@@ -403,10 +398,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->orderBy('po_line.id', 'desc')
                                 ->get();
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
-        $arr_po_line_status = [ 'O' => ['text' => 'Open', 'color' => ''], 
-                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                                'C' => ['text' => 'Complete', 'color' => 'text-success']
-                            ];
+        $arr_po_line_status = (new Constant())->statusOFC();
         
         $data['po_lines'] = $collection_po_lines;
         $data['po'] = $po;
@@ -416,6 +408,27 @@ class PurchaseOrderCrudController extends CrudController
         $pdf->setPaper('A4', 'landscape');
 
         return $pdf->stream();
+    }
+
+
+    public function exportExcelOrderSheet($po_num)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $arr_po_line_status = (new Constant())->statusOFC();
+        
+        $data['po_lines'] = $collection_po_lines;
+        $data['po'] = $po;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        return Excel::download(new OrderSheetExport($data), 'order-sheet-'.date('YmdHis').'.xlsx');
     }
 
     private function validationMessage($validator,$rules)
@@ -463,4 +476,5 @@ class PurchaseOrderCrudController extends CrudController
             return [$item->item => $item->item];
         });
     }
+
 }
