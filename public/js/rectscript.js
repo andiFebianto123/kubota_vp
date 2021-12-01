@@ -32,7 +32,11 @@ function submitAfterValid(formId, massError = false) {
                     messageStatusGeneral("#"+formId, response.message, 'success')
 
                     if (response.redirect_to) {
-                        window.location.href = response.redirect_to
+                        if (response.newtab) {
+                            window.open(response.redirect_to, '_blank');
+                        }else{
+                            window.location.href = response.redirect_to
+                        }
                     }else{
                         setTimeout(function() { 
                             location.reload(true)

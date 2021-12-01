@@ -42,12 +42,17 @@
         font-size: 12px;
         font-weight: normal;
     }
+    .page_break { page-break-after: always; }
 </style>
 <body>
     <div>
-        <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
-        <hr>
-        <div>
+        @foreach($deliveries as $key => $delivery)
+            @php
+                $delivery_show = $delivery['delivery_show'];
+                $qr_code = $delivery['qr_code'];
+                $with_price = $delivery['with_price'];
+            @endphp
+        <div @if($key % 2 != 0) class="page_break" @endif style="margin-bottom: 40px;"> 
             <div style="float:left; position:relative; width: 540px;">
                 <table width="98%" class="pdf-table">
                     <tbody>
@@ -100,7 +105,7 @@
             </div>
             <div style="float:right; position:relative; width:168px;">
                 <div>
-                    <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
+                    <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate('Make me into an QrCode!')) }} ">
                 </div>
                 <div class="doc-requirement">
                     <strong>Document Requirements</strong>
@@ -114,7 +119,9 @@
                     </ul>
                 </div>
             </div>
+            <div style="clear: both; float:none;"></div>
         </div>
+        @endforeach
     </div>
 </body>
 

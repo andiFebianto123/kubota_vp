@@ -122,66 +122,79 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
+                <form id="form-print-mass-ds" action="{{url('admin/delivery-export-mass-pdf-post')}}" method="post">
+                    @csrf
+                    <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
+                    <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
 
-                <table id="ds-table" class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>PO</th>
-                            <th>PO Line</th>
-                            <th>DS Number</th>
-                            <th>DS Line</th>
-                            <th>Shipped Date</th>
-                            <th>Qty</th>
-                            <th>Amount</th>
-                            <th>DO Number</th>
-                            <th>Operator</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $total_price = 0;
-                            $total_qty = 0;
-                        @endphp
-                        @foreach ($deliveries as $key => $delivery)
-                        <tr>
-                            <td>{{$delivery->po_num}}</td>
-                            <td>{{$delivery->po_line}}</td>
-                            <td>{{$delivery->ds_num}}</td>
-                            <td>{{$delivery->ds_line}}</td>
-                            <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
-                            <td>{{$delivery->order_qty}}</td>
-                            <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
-                            <td>{{$delivery->no_surat_jalan_vendor}}</td>
-                            <td>{{$delivery->petugas_vendor}}</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                                <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
-                                <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-primary"><i class="la la-qrcode"></i> Detail</a>
-                                <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-link" data-button-type="delete"><i class="la la-trash"></i> {{ trans('backpack::crud.delete') }}</a>
-                            </td>
-                        </tr>
-                        @php
-                            $total_qty += $delivery->order_qty;
-                            $total_price += $delivery->unit_price*$delivery->order_qty;
-                        @endphp
-                        @endforeach
+                    <table id="ds-table" class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="check-all-cb" name="print_deliveries" class="check-all" data-delivery="{{sizeof($deliveries)}}" >
+                                </th>
+                                <th>PO</th>
+                                <th>PO Line</th>
+                                <th>DS Number</th>
+                                <th>DS Line</th>
+                                <th>Shipped Date</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>DO Number</th>
+                                <th>Operator</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $total_price = 0;
+                                $total_qty = 0;
+                            @endphp
+                            @foreach ($deliveries as $key => $delivery)
+                            <tr>
+                                <td>
+                                    <input type="checkbox" value="{{$delivery->id}}" name="print_delivery[]" class="check-delivery check-{{$delivery->id}}">
+                                </td>
+                                <td>{{$delivery->po_num}}</td>
+                                <td>{{$delivery->po_line}}</td>
+                                <td>{{$delivery->ds_num}}</td>
+                                <td>{{$delivery->ds_line}}</td>
+                                <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
+                                <td>{{$delivery->order_qty}}</td>
+                                <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
+                                <td>{{$delivery->no_surat_jalan_vendor}}</td>
+                                <td>{{$delivery->petugas_vendor}}</td>
+                                <td>
+                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
+                                    <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                </td>
+                            </tr>
+                            @php
+                                $total_qty += $delivery->order_qty;
+                                $total_price += $delivery->unit_price*$delivery->order_qty;
+                            @endphp
+                            @endforeach
 
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" class="text-center font-weight-bold">
-                                Total
-                            </td>
-                            <td>
-                                {{$total_qty}}</td>
-                            </td>
-                            <td>
-                            {{$delivery->currency}} {{ number_format($total_price,0,',','.')}}</td>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-center font-weight-bold">
+                                    Total
+                                </td>
+                                <td>
+                                    {{$total_qty}}</td>
+                                </td>
+                                <td>
+                                {{$delivery->currency}} {{ number_format($total_price,0,',','.')}}</td>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="submitAfterValid('form-print-mass-ds')"><i class="la la-file-pdf"></i> <span>PDF</span></button>
+                </form>
+
                 @else
                 <p>No Data Available</p>
                 @endif
@@ -230,10 +243,38 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
 @stack('crud_fields_scripts')
 <script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
     $(document).ready( function () {
         $('#ds-table').DataTable();
         initializeFieldsWithJavascript('form');
     } );
+
+    var totalChecked = 0
+
+    $('#check-all-cb').change(function () {
+        totalChecked = 0
+        $(".check-delivery").prop('checked', $(this).prop('checked'))
+        anyChecked = $(this).prop('checked')
+        $(this).val($(this).prop('checked'))
+        if ($(this).prop('checked')) {
+            totalChecked = $(this).data('delivery')
+        }
+        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+    })
+
+    $('.check-delivery').change(function () {
+        if ($(this).prop('checked')==true){
+            $(this).prop('checked', true) 
+            totalChecked ++
+        }else{
+            $(this).prop('checked', false)
+            totalChecked --
+        }
+
+        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+    })
 
     function initializeFieldsWithJavascript(container) {
       var selector;

@@ -292,23 +292,84 @@ class DeliveryCrudController extends CrudController
     {
         $id = request('id');
         $with_price = request('wp');
-        // $writer = new PngWriter();
-
-        $qr_code = FacadesQrCode::format('svg')->size(200)->generate($this->detailDS($id)['qr_code']);
-        // $qr_code = base64_encode(QrCode::format('svg')->size(200)->errorCorrection('H')->generate($this->detailDS($id)['qr_code']));
-        // $qrCode = QrCode::create($this->detailDS($id)['qr_code'])
-        // ->setSize(200);
-        // $qr_code = $writer->write($qrCode);
-
 
         $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
-        $data['qr_code'] = $qr_code;
+        $data['qr_code'] = $this->detailDS($id)['qr_code'];
         $data['with_price'] = $with_price;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet',$data);
         return $pdf->stream();
 
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
+    }
+
+    public function exportMassPdf()
+    {
+        $str_param = request('param');
+        $arr_param = unserialize(base64_decode($str_param));
+
+        $print_all = $arr_param['print_all'];
+        $po_num = $arr_param['po_num'];
+        $po_line = $arr_param['po_line'];
+        $print_deliveries = $arr_param['print_delivery'];
+        $with_price = $arr_param['with_price'];
+
+        if ($print_all) {
+            $deliveries = Delivery::where('po_num', $po_num)
+                        ->where('po_line', $po_line)
+                        ->get();
+        }else{
+            $deliveries = Delivery::whereIn('id', $print_deliveries)
+                    ->get();
+        }
+
+        $arr_deliveries = [];
+
+        foreach ($deliveries as $key => $delivery) {
+            $arr_deliveries[] = [
+                'delivery_show' => $this->detailDS($delivery->id)['delivery_show'],
+                'qr_code' => $this->detailDS($delivery->id)['qr_code'],
+                'with_price' => $with_price
+            ];
+        }
+
+        $data['deliveries'] = $arr_deliveries;
+
+    	$pdf = PDF::loadview('exports.pdf.delivery-sheet-multiple',$data);
+        return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
+    }
+
+
+    public function exportMassPdfPost(Request $request)
+    {
+        $print_all = $request->print_deliveries;
+        $po_num = $request->po_num;
+        $po_line = $request->po_line;
+        $print_deliveries = $request->print_delivery;
+        $with_price = 'yes';
+        
+        $arr_param['print_all'] = $print_all;
+        $arr_param['po_num'] = $po_num;
+        $arr_param['po_line'] = $po_line;
+        $arr_param['print_delivery'] = $print_deliveries;
+        $arr_param['with_price'] = $with_price;
+
+        $str_param = base64_encode(serialize($arr_param));
+
+        if (!isset($print_deliveries)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pilih Minimal 1 DS'
+                ], 200);
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Sukses Generate PDF',
+            'newtab' => true,
+            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
+            'validation_errors' => []
+        ], 200);
     }
 
 
