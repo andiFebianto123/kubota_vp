@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\PurchaseOrderLineAcceptExport;
 use App\Helpers\Constant;
+use App\Http\Requests\DeliveryRequest;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -143,14 +145,80 @@ class PurchaseOrderLineCrudController extends CrudController
 
     function show()
     {
+        CRUD::setValidation(DeliveryRequest::class);
+
         $entry = $this->crud->getCurrentEntry();
         $po = PurchaseOrder::where("po_num", $entry->po_num)
                 ->join('vendor', 'vendor.vend_num', 'po.vend_num')
                 ->get('vendor.currency as vendor_currency')
                 ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
+        $realtime_ds_qty = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->sum('order_qty');
         $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $arr_po_line_status = (new Constant())->statusOFC();
+
+        $current_qty = ($entry->order_qty < $realtime_ds_qty)? 0 : $entry->order_qty -  $realtime_ds_qty;
+
+        $this->crud->addField([
+            'label' => 'Delivery Date From Vendor',
+            'type' => 'date_picker',
+            'name' => 'shipped_date',
+            'default' => date("Y-m-d"),
+            'date_picker_options' => [
+                'todayBtn' => 'linked',
+                'format'   => 'dd/mm/yyyy',
+                'language' => 'en'
+             ],
+        ]);  
+        $this->crud->addField([
+            'type' => 'hidden',
+            'name' => 'po_line_id',
+            'value' => $entry->id
+        ]);        
+        CRUD::field('petugas_vendor');
+        CRUD::field('no_surat_jalan_vendor');
+        $this->crud->addField([
+            'type' => 'number_qty',
+            'name' => 'order_qty',
+            'label' => 'Qty',
+            'actual_qty' => $entry->order_qty,
+            'default' => $current_qty
+        ]);
+        if($entry->w_serial == 1){
+            $this->crud->addField(
+                [
+                    'name'  => 'serial_numbers',
+                    'label' => 'Serial Number',
+                    'type'  => 'upload_serial_number',
+                    'fields' => [
+                        [
+                            'name'    => 'sn_childs[]',
+                            'type'    => 'text',
+                            'label'   => 'Number',
+                            'wrapper' => ['class' => 'form-group col-md-6'],
+                        ],
+                        
+                    ],
+                ],
+            );
+        }
+
+        if($entry->outhouse_flag == 1){
+            $this->crud->addField([   // select2_from_array
+                'name'        => 'material_id',
+                'label'       => "Material",
+                'type'        => 'select2_from_array',
+                'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
+                'allows_null' => false,
+            ]);
+
+            $this->crud->addField([   // select2_from_array
+                'name'        => 'mo_issue_qty',
+                'label'       => "Issue Qty",
+                'type'        => 'number',
+            ]);
+            
+        }
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
@@ -160,6 +228,16 @@ class PurchaseOrderLineCrudController extends CrudController
         $data['delivery_statuses'] = $delivery_statuses;
 
         return view('vendor.backpack.crud.purchase-order-line-show', $data);
+    }
+
+
+    private function optionMaterial($po_num, $po_line){
+        $mos = MaterialOuthouse::where('po_num', $po_num)->where('po_line', $po_line)->get();
+        $arr_opt = [];
+        foreach ($mos as $key => $mo) {
+            $arr_opt[$mo->id] = $mo->matl_item.' - '.$mo->description .' ('.$mo->lot.')';
+        }
+        return $arr_opt;
     }
 
 

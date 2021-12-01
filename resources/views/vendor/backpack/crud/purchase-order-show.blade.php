@@ -154,18 +154,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
-                                        @if($po_line->count_ds == 0)
-                                        <a href="{{url('admin/delivery/create?po_line_id='.$po_line->id)}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
-                                        @else
-                                        <button class="btn btn-sm btn-link"  type="button" onclick="window.location='{{url('admin/delivery/create?po_line_id='.$po_line->id)}}'" ><i class="la la-plus"></i> Create</button>
-                                        @endif
+                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
                                     @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
                                         @endif
                                     @endif    
-                                    <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @else
                                     @if(backpack_auth()->user()->role->name != 'admin')
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
@@ -289,23 +284,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
-        </div>
-    </div>
-  </div>
-</div>
-
-<div id="modalCreate" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Warning!</h5>
-        </div>
-        <div class="modal-body">
-            <p class="text-count-ds"></p>
-            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Ya</a>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
         </div>
     </div>
   </div>

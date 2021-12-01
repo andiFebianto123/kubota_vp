@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\TemplateSerialNumberExport;
 use App\Http\Requests\DeliveryRequest;
+use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
+use App\Models\DeliverySerial;
 use App\Models\DeliveryStatus;
+use App\Models\IssuedMaterialOuthouse;
+use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
 use PDF;
-use Endroid\QrCode\QrCode;
+use Maatwebsite\Excel\Facades\Excel;
 use Endroid\QrCode\Writer\PngWriter;
-use Illuminate\Support\Facades\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
+use Illuminate\Http\Request;
 
 /**
  * Class DeliveryCrudController
@@ -194,7 +199,9 @@ class DeliveryCrudController extends CrudController
         $order_qty = $request->input('order_qty');
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
-        $serial_number = $request->input('serial_number');
+        $material_id = $request->input('material_id');
+        $mo_issue_qty = $request->input('mo_issue_qty');
+        $sn_childs = $request->input('sn_childs');
 
         $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
@@ -213,33 +220,72 @@ class DeliveryCrudController extends CrudController
         }
 
         $ds_num = $po_line->vendor_number.date("ymd").$code;
-        $insert = new Delivery();
-        $insert->ds_num = $ds_num;
-        $insert->po_num = $po_line->po_num;
-        $insert->po_line = $po_line->po_line;
-        $insert->po_release = $po_line->po_release;
-        $insert->ds_line = Delivery::where('po_num', $po_line->po_num)->count()+1;
-        $insert->description = $po_line->description;
-        $insert->u_m = $po_line->u_m;
-        $insert->due_date = $po_line->due_date;
-        $insert->unit_price = $po_line->unit_price;
-        $insert->wh = $po_line->wh;
-        $insert->location = $po_line->location;
-        $insert->tax_status = $po_line->tax_status;
-        $insert->currency = $po_line->currency;
-        $insert->shipped_qty = $po_line->order_qty;
-        $insert->shipped_date = now();
-        $insert->order_qty = $order_qty;
-        $insert->w_serial = ($serial_number)?$serial_number:0;
-        $insert->petugas_vendor = $petugas_vendor;
-        $insert->no_surat_jalan_vendor = $no_surat_jalan_vendor;
-        $insert->created_by = backpack_auth()->user()->id;
-        $insert->updated_by = backpack_auth()->user()->id;
-        $insert->save();
+        $insert_d = new Delivery();
+        $insert_d->ds_num = $ds_num;
+        $insert_d->po_num = $po_line->po_num;
+        $insert_d->po_line = $po_line->po_line;
+        $insert_d->po_release = $po_line->po_release;
+        $insert_d->ds_line = Delivery::where('po_num', $po_line->po_num)->where('po_line', $po_line->po_line)->count()+1;
+        $insert_d->description = $po_line->description;
+        $insert_d->u_m = $po_line->u_m;
+        $insert_d->due_date = $po_line->due_date;
+        $insert_d->unit_price = $po_line->unit_price;
+        $insert_d->wh = $po_line->wh;
+        $insert_d->location = $po_line->location;
+        $insert_d->tax_status = $po_line->tax_status;
+        $insert_d->currency = $po_line->currency;
+        $insert_d->shipped_qty = $po_line->order_qty;
+        $insert_d->shipped_date = now();
+        $insert_d->order_qty = $order_qty;
+        $insert_d->w_serial = $po_line->w_serial;
+        $insert_d->petugas_vendor = $petugas_vendor;
+        $insert_d->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+        $insert_d->created_by = backpack_auth()->user()->id;
+        $insert_d->updated_by = backpack_auth()->user()->id;
+        $insert_d->save();
 
-        Alert::success(trans('backpack::crud.insert_success'))->flash();
-    
-        return redirect()->to('admin/purchase-order-line/'.$po_line_id.'/show');
+        if ( $po_line->w_serial == 1) {
+            foreach ($sn_childs as $key => $sn_child) {
+                if (isset($sn_child)) {
+                    $insert_sn = new DeliverySerial();
+                    $insert_sn->ds_num = $insert_d->ds_num;
+                    $insert_sn->ds_line = $insert_d->ds_line;
+                    $insert_sn->ds_detail = 123;
+                    $insert_sn->no_mesin = $sn_child;
+                    $insert_sn->created_by = backpack_auth()->user()->id;
+                    $insert_sn->updated_by = backpack_auth()->user()->id;
+                    $insert_sn->save();
+                }
+                
+            }
+        }
+
+        if ( $po_line->outhouse_flag == 1) {
+            $materil_outhouse = MaterialOuthouse::where('id', $material_id)->first();
+            $insert_imo = new IssuedMaterialOuthouse();
+            $insert_imo->ds_num = $insert_d->ds_num;
+            $insert_imo->ds_line = $insert_d->ds_line;
+            $insert_imo->ds_detail = 123;
+            $insert_imo->matl_item = $materil_outhouse->matl_item;
+            $insert_imo->description = $materil_outhouse->description;
+            $insert_imo->lot =  $materil_outhouse->lot;
+            $insert_imo->issue_qty = $mo_issue_qty;
+            $insert_imo->created_by = backpack_auth()->user()->id;
+            $insert_imo->updated_by = backpack_auth()->user()->id;
+            $insert_imo->save();
+        }
+
+        $message = 'Delivery Sheet Created';
+
+        Alert::success($message)->flash();
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => $message,
+            'redirect_to' => url('admin/purchase-order-line/'.$po_line_id.'/show'),
+            'validation_errors' => []
+        ], 200);
     }
 
     public function exportPdf()
@@ -263,6 +309,39 @@ class DeliveryCrudController extends CrudController
         return $pdf->stream();
 
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
+    }
+
+
+    public function exportTemplateSerialNumber()
+    {
+        return Excel::download(new TemplateSerialNumberExport, 'template-sn-'.date('YmdHis').'.xlsx');
+
+    }
+
+    public function importSn(Request $request)
+    {
+        $rules = [
+            'file_sn' => 'required|mimes:xlsx,xls',
+        ];
+
+        $file = $request->file('file_sn');
+        
+
+        $attrs['filename'] = $file;
+
+        $rows = Excel::toArray(new SerialNumberImport($attrs), $file )[0];
+
+        unset($rows[0]);
+        $value_row = [];
+        foreach ($rows as $key => $value) {
+            $value_row[] = ['serial_number' => $value[1]];
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'datas' => $value_row
+        ], 200);
+
     }
 
 
