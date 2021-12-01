@@ -88,7 +88,26 @@ class DeliveryCrudController extends CrudController
             'name'      => 'operator', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-       
+        $this->crud->addFilter([
+            'name'        => 'vendor',
+            'type'        => 'select2_ajax',
+            'label'       => 'Name Vendor',
+            'placeholder' => 'Pick a vendor'
+        ],
+        url('admin/test/ajax-vendor-options'),
+        function($value) {
+            // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
+            // JOIN po p ON p.po_num = d.po_num
+            // WHERE p.vend_num = 'V001303'
+            $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+            ->select('delivery.id as id')
+            ->where('po.vend_num', $value)
+            ->get()
+            ->mapWithKeys(function($po, $index){
+                return [$index => $po->id];
+            });
+            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
+        });
     }
 
     /**

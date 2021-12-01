@@ -1,5 +1,7 @@
 <?php
 namespace App\Helpers;
+use Illuminate\Support\Facades\DB;
+
 use DateTime;
 
 class forecastConverter {
@@ -67,6 +69,35 @@ class forecastConverter {
     // data hasil perhitungan perminggu
     private $resultForecastForWeeks = [];
 
+    function getQuery(){
+        // SELECT id, 
+        // item, 
+        // forecast_date, 
+        // SUBSTR(forecast_date, 1, 10) AS tanggal, 
+        // qty FROM `forecasts` f1 where id = (
+        //     SELECT max(id) FROM forecasts f2 WHERE f2.item = f1.item AND SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)
+        // ) AND f1.forecast_date BETWEEN '2021-11-12' AND '2021-12-01' 
+        $db = $this->model::from('forecasts as f1')
+        ->select(
+            'id', 
+            'item', 
+            'forecast_date', 
+            DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
+            'qty'
+        )
+        ->where('id', function($query){
+            $query->from('forecasts as f2')
+            ->select(DB::raw('MAX(id)'))
+            // ->where('item', $this->item)
+            ->where('f2.item', 'f1.item')
+            ->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = ?', ['SUBSTR(f1.forecast_date, 1, 10)']);
+        })
+        ->whereBetween('f1.forecast_date', ['2021-11-12', '2021-12-01']);
+        //dd($this->model::select('id', 'item', 'forecast_date')->get());
+        dd($db->get());
+
+    }
+
     function getResultWithOrderBy($order){
         $colectDataMerge = [];
         if($this->type == 'days'){
@@ -99,15 +130,15 @@ class forecastConverter {
         #end
 
         #proses mendapatkan aggregat data termasuk olahan data aggregation berdasarkan pagination
-            $u = collect($this->contohData);
-            $unique = $u->unique('name_item');
-            $unique_sort = $unique->sortBy([
-                ['id', 'desc']
-            ])
-            ->map(function($value, $key){
-                return $value['name_item'];
-            });
-            $this->name_items = $unique_sort->all(); // ['Item 3', 'Item 2', 'Item 1']
+            // $u = collect($this->contohData);
+            // $unique = $u->unique('name_item');
+            // $unique_sort = $unique->sortBy([
+            //     ['id', 'desc']
+            // ])
+            // ->map(function($value, $key){
+            //     return $value['name_item'];
+            // });
+            // $this->name_items = $unique_sort->all(); // ['Item 3', 'Item 2', 'Item 1']
         #end
 
         $d = $this->dateNow();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\VendorRequest;
+use Illuminate\Http\Request;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -61,6 +62,17 @@ class VendorCrudController extends CrudController
 
         CRUD::column('created_at');
         CRUD::column('updated_at');
+
+        $this->crud->addFilter([
+            'name'        => 'vendor',
+            'type'        => 'select2_ajax',
+            'label'       => 'Name Vendor',
+            'placeholder' => 'Pick a vendor'
+        ],
+        url('admin/test/ajax-vendor-options'),
+        function($value) { 
+            $this->crud->addClause('where', 'vend_num', $value);
+        });
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -124,4 +136,14 @@ class VendorCrudController extends CrudController
     // {
     //     return true;
     // }
+
+    public function itemVendorOptions(Request $request){
+        $term = $request->input('term');
+        return \App\Models\Vendor::where('vend_name', 'like', '%'.$term.'%')
+        ->select('vend_num', 'vend_name')
+        ->get()
+        ->mapWithKeys(function($vendor){
+            return [$vendor->vend_num => $vendor->vend_name];
+        });
+    }
 }

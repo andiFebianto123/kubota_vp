@@ -36,7 +36,7 @@
 
 @push('crud_list_styles')
     <!-- include select2 css-->
-    <link href="{{ asset('packages/select2/dist/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('packages/select2/dist/css/select2.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('packages/select2-bootstrap-theme/dist/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
 	  .form-inline .select2-container {
@@ -83,7 +83,6 @@
             	var filterName = $(this).attr('data-filter-name');
                 var filter_key = $(this).attr('data-filter-key');
 
-
                 $(this).select2({
                 	allowClear: true,
 					closeOnSelect: false,
@@ -124,6 +123,7 @@
 				        }
 				    }
                 });
+
 
                 $(this).change(function() {
 	                var value = '';

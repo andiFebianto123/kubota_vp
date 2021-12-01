@@ -185,7 +185,6 @@
   </div>
   <script>
     var jobs = {!! json_encode($crud) !!};
-    console.log(jobs);
   </script>
 
 @endsection

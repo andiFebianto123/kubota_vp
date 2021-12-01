@@ -40,10 +40,13 @@
     float: left; }
     .select2-container .select2-search--inline .select2-search__field {
       box-sizing: border-box;
+      background-color: #f2f2f2d1 !important;
       border: none;
       font-size: 100%;
       margin-top: 5px;
-      padding: 0; }
+      margin-bottom: 2px;
+      padding: 5px;
+     }
       .select2-container .select2-search--inline .select2-search__field::-webkit-search-cancel-button {
         -webkit-appearance: none; }
 

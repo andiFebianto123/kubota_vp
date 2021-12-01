@@ -57,8 +57,10 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
-        $this->crud->query = $this->crud->query->select('id', 'forecast_num', 'qty');
-
+        $this->crud->query = $this->crud->query
+        ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+        ->groupBy('item')
+        ->orderBy('id', 'DESC');
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
         // $ar_month = ["Januari","Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -283,8 +285,8 @@ class ForecastCrudController extends CrudController
     public function search(){
         $this->crud->hasAccessOrFail('list');
         // $this->crud->applyUnappliedFilters();
-        $totalRows = 3; # $this->crud->model->count();
-        $filteredRows = 3; # $this->crud->query->toBase()->getCountForPagination();
+        $totalRows = $this->crud->query->get()->count(); # $this->crud->model->count();
+        $filteredRows = $this->crud->query->toBase()->getCountForPagination(); # $this->crud->query->toBase()->getCountForPagination();
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
         if (request()->input('search') && request()->input('search')['value']) {
@@ -303,15 +305,26 @@ class ForecastCrudController extends CrudController
 
         $entries = $this->crud->getEntries();
 
+        $getItem = $entries->map(function($item){
+            return $item->item;
+        });
+
+        // dd($totalRows);
+        // dd($getItem->values()->all());
+
         $forecast = new forecastConverter;
 
         $forecast->model = $this->crud->model;
+
+        $forecast->name_items = $getItem->values()->all();
 
         if(Session::get('forecast_type') == 'days'){
             $forecast->type = 'days';
         }else{
             $forecast->type = 'week';
         }
+
+        // $forecast->getQuery();
 
         $start = $forecast->forecastStart();
 
