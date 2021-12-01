@@ -153,7 +153,7 @@ class PurchaseOrderLineCrudController extends CrudController
                 ->get('vendor.currency as vendor_currency')
                 ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
-        $realtime_ds_qty = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->sum('order_qty');
+        $realtime_ds_qty = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->sum('shipped_qty');
         $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
         $arr_po_line_status = (new Constant())->statusOFC();
 
@@ -179,9 +179,9 @@ class PurchaseOrderLineCrudController extends CrudController
         CRUD::field('no_surat_jalan_vendor');
         $this->crud->addField([
             'type' => 'number_qty',
-            'name' => 'order_qty',
+            'name' => 'shipped_qty',
             'label' => 'Qty',
-            'actual_qty' => $entry->order_qty,
+            'actual_qty' => $entry->shipped_qty,
             'default' => $current_qty
         ]);
         if($entry->w_serial == 1){
@@ -204,20 +204,33 @@ class PurchaseOrderLineCrudController extends CrudController
         }
 
         if($entry->outhouse_flag == 1){
-            $this->crud->addField([   // select2_from_array
-                'name'        => 'material_id',
-                'label'       => "Material",
-                'type'        => 'select2_from_array',
-                'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
-                'allows_null' => false,
-            ]);
-
-            $this->crud->addField([   // select2_from_array
-                'name'        => 'mo_issue_qty',
-                'label'       => "Issue Qty",
-                'type'        => 'number',
-            ]);
-            
+            $this->crud->addField(
+                [
+                    'name'  => 'material_issues',
+                    'label' => 'Material Issue',
+                    'type'  => 'upload_material_issue',
+                    'fields' => [
+                        [
+                            'name'        => 'material_ids[]',
+                            'label'       => "Material",
+                            'type'        => 'select2_from_array',
+                            'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
+                            'allows_null' => false,
+                            'wrapper'   => [ 
+                                'class'      => 'form-group col-md-6'
+                             ],
+                        ],
+                        [   // select2_from_array
+                            'name'        => 'mo_issue_qty[]',
+                            'label'       => "Issue Qty",
+                            'type'        => 'number',
+                            'wrapper'   => [ 
+                                'class'      => 'form-group col-md-6'
+                             ],
+                        ]
+                    ],
+                ],
+            );
         }
 
         $data['crud'] = $this->crud;
@@ -232,10 +245,11 @@ class PurchaseOrderLineCrudController extends CrudController
 
 
     private function optionMaterial($po_num, $po_line){
-        $mos = MaterialOuthouse::where('po_num', $po_num)->where('po_line', $po_line)->get();
+        $mos = MaterialOuthouse::where('po_num', $po_num)->where('po_line', $po_line)
+                ->groupBy('matl_item')->get();
         $arr_opt = [];
         foreach ($mos as $key => $mo) {
-            $arr_opt[$mo->id] = $mo->matl_item.' - '.$mo->description .' ('.$mo->lot.')';
+            $arr_opt[$mo->id] = $mo->matl_item.' - '.$mo->description;
         }
         return $arr_opt;
     }

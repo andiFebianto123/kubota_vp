@@ -50,6 +50,14 @@ class Sidebar
         'childrens' => []
       ],
       [
+        'name' => 'Material Outhouse',
+        'url' => backpack_url('material-outhouse'),
+        'icon' => 'la-cube',
+        'key' => 'material-outhouse',
+        'roles' => ['admin', 'vendor'],
+        'childrens' => []
+      ],
+      [
         'name' => 'Forecast',
         'url' => backpack_url('forecast'),
         'icon' => 'la-chart-bar',

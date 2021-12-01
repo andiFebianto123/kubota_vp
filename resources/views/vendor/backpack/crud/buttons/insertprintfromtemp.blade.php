@@ -1,6 +1,6 @@
-<a href="javascript:void(0)" onclick="insertToDb(this)" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertfromtemp">
+<button onclick="insertToDb(this)" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertfromtemp">
     <i class="la la-file-pdf"></i> Insert + PDF
-</a>
+</button>
 
 @push('after_scripts')
 <script>

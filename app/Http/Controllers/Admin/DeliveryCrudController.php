@@ -196,11 +196,11 @@ class DeliveryCrudController extends CrudController
         $request = $this->crud->getRequest();
 
         $po_line_id = $request->input('po_line_id');
-        $order_qty = $request->input('order_qty');
+        $shipped_qty = $request->input('shipped_qty');
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
-        $material_id = $request->input('material_id');
-        $mo_issue_qty = $request->input('mo_issue_qty');
+        $material_ids = $request->input('material_ids');
+        $mo_issue_qtys = $request->input('mo_issue_qty');
         $sn_childs = $request->input('sn_childs');
 
         $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
@@ -234,9 +234,9 @@ class DeliveryCrudController extends CrudController
         $insert_d->location = $po_line->location;
         $insert_d->tax_status = $po_line->tax_status;
         $insert_d->currency = $po_line->currency;
-        $insert_d->shipped_qty = $po_line->order_qty;
+        $insert_d->shipped_qty = $shipped_qty;
         $insert_d->shipped_date = now();
-        $insert_d->order_qty = $order_qty;
+        $insert_d->order_qty = $po_line->order_qty;
         $insert_d->w_serial = $po_line->w_serial;
         $insert_d->petugas_vendor = $petugas_vendor;
         $insert_d->no_surat_jalan_vendor = $no_surat_jalan_vendor;
@@ -261,18 +261,22 @@ class DeliveryCrudController extends CrudController
         }
 
         if ( $po_line->outhouse_flag == 1) {
-            $materil_outhouse = MaterialOuthouse::where('id', $material_id)->first();
-            $insert_imo = new IssuedMaterialOuthouse();
-            $insert_imo->ds_num = $insert_d->ds_num;
-            $insert_imo->ds_line = $insert_d->ds_line;
-            $insert_imo->ds_detail = 123;
-            $insert_imo->matl_item = $materil_outhouse->matl_item;
-            $insert_imo->description = $materil_outhouse->description;
-            $insert_imo->lot =  $materil_outhouse->lot;
-            $insert_imo->issue_qty = $mo_issue_qty;
-            $insert_imo->created_by = backpack_auth()->user()->id;
-            $insert_imo->updated_by = backpack_auth()->user()->id;
-            $insert_imo->save();
+            foreach ($material_ids as $key => $material_id) {
+                $mo = MaterialOuthouse::where('id', $material_id)->first();
+                $mo_issue_qty = $mo_issue_qtys[$key];
+
+                $insert_imo = new IssuedMaterialOuthouse();
+                $insert_imo->ds_num = $insert_d->ds_num;
+                $insert_imo->ds_line = $insert_d->ds_line;
+                $insert_imo->ds_detail = 123;
+                $insert_imo->matl_item = $mo->matl_item;
+                $insert_imo->description = $mo->description;
+                $insert_imo->lot =  $mo->lot;
+                $insert_imo->issue_qty = $mo_issue_qty;
+                $insert_imo->created_by = backpack_auth()->user()->id;
+                $insert_imo->updated_by = backpack_auth()->user()->id;
+                $insert_imo->save();
+            }
         }
 
         $message = 'Delivery Sheet Created';

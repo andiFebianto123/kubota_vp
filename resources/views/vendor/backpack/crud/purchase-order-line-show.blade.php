@@ -160,11 +160,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->ds_num}}</td>
                                 <td>{{$delivery->ds_line}}</td>
                                 <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
-                                <td>{{$delivery->order_qty}}</td>
+                                <td>{{$delivery->shipped_qty}}</td>
                                 <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
-                                <td>
+                                <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
@@ -172,15 +172,15 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </td>
                             </tr>
                             @php
-                                $total_qty += $delivery->order_qty;
-                                $total_price += $delivery->unit_price*$delivery->order_qty;
+                                $total_qty += $delivery->shipped_qty;
+                                $total_price += $delivery->unit_price*$delivery->shipped_qty;
                             @endphp
                             @endforeach
 
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="5" class="text-center font-weight-bold">
+                                <td colspan="6" class="text-center font-weight-bold">
                                     Total
                                 </td>
                                 <td>

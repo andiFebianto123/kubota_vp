@@ -44,4 +44,5 @@ Route::group([
     Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
     // route untuk ajax filter di nomor item di po
     Route::get('test/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
+    Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
 });

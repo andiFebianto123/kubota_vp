@@ -74,7 +74,7 @@
                             <td width="25%">Part No.<br><strong>-</strong></td>
                             <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
                             <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
-                            <td width="25%">Amount<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
+                            <td width="25%">Amount<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
                         </tr>
                         <tr>
                             <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>
