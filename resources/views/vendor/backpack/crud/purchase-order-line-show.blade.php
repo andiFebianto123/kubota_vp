@@ -121,6 +121,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                <label class="font-weight-bold mb-0">Delivery Sheet Detail</label> 
             </div>
             <div class="card-body">
+                @if(sizeof($deliveries) > 0)
+
                 <table id="ds-table" class="table table-striped mb-0">
                     <thead>
                         <tr>
@@ -180,6 +182,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </tr>
                     </tfoot>
                 </table>
+                @else
+                <p>No Data Available</p>
+                @endif
             </div>
 
         </div><!-- /.box-body -->
