@@ -15,7 +15,7 @@ class CreateDeliveriesTable extends Migration
     {
         Schema::create('delivery', function (Blueprint $table) {
             $table->integer('id');
-            $table->string('ds_num')->length(10);
+            $table->string('ds_num')->length(15);
             $table->integer('ds_line');
             $table->string('ds_type')->default('00');
             $table->string('po_num');

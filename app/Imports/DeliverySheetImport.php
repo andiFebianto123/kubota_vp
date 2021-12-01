@@ -20,16 +20,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 HeadingRowFormatter::default('none');
 
-class DeliverySheetImport implements WithMultipleSheets, SkipsUnknownSheets
+class DeliverySheetImport implements ToCollection, WithHeadingRow
 {
-    
     use Importable;
 
     public function __construct($filename)
@@ -37,25 +34,47 @@ class DeliverySheetImport implements WithMultipleSheets, SkipsUnknownSheets
         $this->filename = $filename;
     }
 
-    public function sheets(): array
+    public function collection(Collection $rows)
     {
-        $sheets = [];
-        $filters = [];
-        if (backpack_auth()->user()->role == 'vendor') {
-            $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num];
+        foreach ($rows as $key => $row) {
+           $this->singleRow($row);
         }
-        $pos = PurchaseOrder::where($filters)->get();
-        foreach ($pos as $po) {
-            $sheets[$po->po_num] = new DeliverySheetSingleImport();
-        }
-
-        return $sheets;
-
     }
-    
-    public function onUnknownSheet($sheetName)
+
+    private function singleRow($row)
     {
-        // E.g. you can log that a sheet was not found.
-        info("Sheet {$sheetName} was skipped");
+        $row_po_num = $row['PO'];
+        $row_po_line = $row['PO LINE'];
+        $row_qty = $row['Qty'];
+        $row_delivery_date = $row['DS Delivery Date'];
+        $row_petugas_vendor = $row['Petugas Vendor'];
+        $row_do_number_vendor = $row['No Surat Jalan'];
+
+        if ($row_po_num) {
+            $insert = new TempUploadDelivery();
+            $insert->po_num = $row_po_num;
+            $insert->po_line = $row_po_line;
+            $insert->user_id = backpack_auth()->user()->id;
+            $insert->order_qty = $row_qty;
+            $insert->delivery_date = $this->transformDate($row_delivery_date);
+            $insert->petugas_vendor	 = $row_petugas_vendor;
+            $insert->no_surat_jalan_vendor	 = $row_do_number_vendor;
+            $insert->save();
+        }
+        
+    }
+
+    private function transformDate($value, $format = 'Y-m-d')
+    {
+        try {
+            return \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+        } catch (\ErrorException $e) {
+            return \Carbon\Carbon::createFromFormat($format, $value);
+        }
+    }
+
+    public function headingRow(): int
+    {
+        return 1;
     }
 }

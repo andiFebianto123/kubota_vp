@@ -13,10 +13,14 @@
             <th>No</th>
             <th>PO</th>
             <th>PO LINE</th>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Unit Price</th>
+            <th>Order Qty</th>
+            <th>Qty</th>
             <th>DS Delivery Date</th>
             <th>Petugas Vendor</th>
             <th>No Surat Jalan</th>
-            <th>Order Qty</th>
         </tr>
         </thead>
         <tbody>
@@ -25,6 +29,10 @@
                 <td>{{ $key+1 }}</td>
                 <td>{{ $po_line->po_num }}</td>
                 <td>{{ $po_line->po_line }}</td>
+                <td>{{ $po_line->item }}</td>
+                <td>{{ $po_line->description }}</td>
+                <td>{{ $po_line->unit_price }}</td>
+                <td>{{ $po_line->order_qty }}</td>
                 <td></td>
                 <td></td>
                 <td></td>

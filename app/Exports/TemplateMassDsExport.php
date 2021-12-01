@@ -10,28 +10,31 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class TemplateMassDsExport implements WithMultipleSheets
+class TemplateMassDsExport implements  FromView, WithEvents
 {
-    use Exportable;
-
-    public function __construct($auth)
+    public function registerEvents(): array
     {
-        $this->auth = $auth;
+        return [
+            AfterSheet::class    => function(AfterSheet $event) {
+                $arr_columns = range('A', 'K');
+                foreach ($arr_columns as $key => $col) {
+                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                }
+            },
+        ];
+
     }
 
 
-    public function sheets(): array
+    public function view(): View
     {
-        $sheets = [];
-        $filters = [];
-        if ($this->auth->role == 'vendor') {
-            $filters[] = ['vend_num', '=', $this->auth->vendor->vend_num];
-        }
-        $pos = PurchaseOrder::where($filters)->get();
-        foreach ($pos as $po) {
-            $sheets[] = new TemplateMassDsSingleSheetExport($po->po_num, $po->po_num);
-        }
+        $po_lines = PurchaseOrderLine::where('status', 'O')
+                ->where('accept_flag', 1)
+                ->get();
 
-        return $sheets;
+        $data['po_lines'] = $po_lines;
+    
+        return view('exports.excel.template-mass-ds', $data);
     }
 }
