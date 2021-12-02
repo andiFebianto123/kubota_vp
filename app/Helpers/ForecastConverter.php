@@ -208,6 +208,14 @@ class forecastConverter {
                 }	
                 break;
             case 'week':
+                foreach($this->dataDatePerWeek as $key => $weekDate){
+                    foreach($weekDate as $week){
+                        
+                    }
+                }
+                break;
+            case 'weeks':
+                dd($this->dataDatePerWeek);
                 foreach ($this->dataDatePerWeek as $weekDate) {
                     # $weekDate --> data array harian perminggu
                     $dateArray = collect($weekDate);
@@ -228,6 +236,7 @@ class forecastConverter {
                         $date = $dateSplit->first()[2]; // hari
                         $moon = $dateSplit->first()[1]; // bulan
                         $year = $dateSplit->first()[0]; // tahun
+                        // dd("{$date} {$moon} {$year}");
                         array_push($dataColumn, "{$date} {$moon} {$year}");
                     }
                 }
@@ -412,12 +421,130 @@ class forecastConverter {
     /**
      * Method untuk menyaring tanggal foreacast per minggu dari semua tanggal
      * pada method forecastDateToConvert, method ini hanya berlaku jika type forecast
+     * hasil yang diberikan pada method ini yaitu berupa data dengan object per bulan yang berisi data range tgl perminggu sebanyak 7 hari
      * week
      * @param void
      * @throws void
      * @return void
      */
     private function forecastDateToConvertToWeek(){
+        $moonsReverences = [
+            '01' => 'Jan',
+            '02' => 'Feb',
+            '03' => 'Marc',
+            '04' => 'Apr',
+            '05' => 'May',
+            '06' => 'Jun',
+            '07' => 'Jul',
+            '08' => 'Augs',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Dec'
+        ];
+        $dateCustomExplode = collect($this->dataTglPerDay)
+        ->map(function($date){
+            $e = explode('-',$date);
+            return $e;
+        });
+        // date per week format
+        // $week = [
+        //     'Nov 21' => [
+        //         ['01-11-21', '02-nov-21', ..., '07-nov-21'], // per 7 hari
+        //         ['08-nov-21', '09-nov-21', ..., '14-nov-21'],
+        //         ...,
+        //         ['25-nov-21', '26-nov-21', ..., '31-nov-21']
+        //     ]
+        // ];
+        
+        // sample
+        // array:62 [▼
+        //     0 => "2021-12-01-Wed"
+        //     1 => "2021-12-02-Thu"
+        //     2 => "2021-12-03-Fri"
+
+        $dateArrayPerMonth = [];
+        $dateArrayForWeekAll = [];
+        $datePerWeek = [];
+        $bulanPertama = '';
+        $monthName = '';
+        
+        $iteration = 1;
+        foreach($dateCustomExplode->all() as $dateCustom){
+            # $dateCustom = [Y, m, d, D]
+            if($bulanPertama == '' || $bulanPertama == $dateCustom[1]){
+                // jika masih berada di bulan yang sama
+                $bulanPertama = $dateCustom[1];
+                $monthName = "{$moonsReverences[$bulanPertama]} {$dateCustom[0]}"; // --> Nov 2021
+                if($iteration < 7){
+                    # jika iterasi kurang dari 7 hari
+                    array_push($datePerWeek, "{$dateCustom[0]}-{$dateCustom[1]}-{$dateCustom[2]}");
+                }else if($iteration == 7){
+                    # jika sudah ada 7 hari
+                    array_push($datePerWeek, "{$dateCustom[0]}-{$dateCustom[1]}-{$dateCustom[2]}");
+                    array_push($dateArrayForWeekAll, $datePerWeek);
+                    $datePerWeek = [];
+                    $iteration = 0;
+                }
+            }else{
+                // jika tgl sudah memasuki tanggal 1 dan telah ganti bulan
+                if(count($datePerWeek) > 0){
+                    // jika data per week terdapat sisa yang masih ada maka kondisi ini akan berlaku
+                    array_push($dateArrayForWeekAll, $datePerWeek);
+                    $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
+                    // kosongkan data per week
+                    $datePerWeek = [];
+                    // kosongkan data per bulan
+                    $dateArrayForWeekAll = [];
+                }else{
+                    // jika data kosong brati sudah 7 hari tapi sekarang sudah ganti bulan
+                    $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
+                    $datePerWeek = [];
+                    $dateArrayForWeekAll = [];
+                }
+                // set nama bulan
+                $bulanPertama = $dateCustom[1];
+                // set nama key data
+                $monthName = "{$moonsReverences[$bulanPertama]} {$dateCustom[0]}";
+                array_push($datePerWeek, "{$dateCustom[0]}-{$dateCustom[1]}-{$dateCustom[2]}");
+                $iteration = 1;
+            }
+            $iteration++;
+        }
+        if(count($datePerWeek) > 0){
+            // jika looping telah selesai tapi masih meninggalkan sisa data perminggu
+            array_push($dateArrayForWeekAll, $datePerWeek);
+            $datePerWeek = [];
+            $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
+            $dateArrayForWeekAll = [];
+        }else{
+            $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
+            $dateArrayForWeekAll = [];
+        }
+
+        $this->dataDatePerWeek = $dateArrayPerMonth;
+        // dd($dateArrayPerMonth);
+    }
+
+    /**
+     * Method untuk menyaring tanggal foreacast per minggu dari semua tanggal
+     * pada method forecastDateToConvert, method ini hanya berlaku jika type forecast
+     * week
+     * @param void
+     * @throws void
+     * @return void
+     */
+    private function forecastDateToConvertToWeek_(){
+
+        // $week = [
+        //     'Nov 21' => [
+        //         ['01-nov-21', '02-nov-21', ..., '07-nov-21'], // per 7 hari
+        //         ['08-nov-21', '09-nov-21', ..., '14-nov-21'],
+        //         ...,
+        //         ['25-nov-21', '26-nov-21', ..., '31-nov-21']
+        //     ]
+        // ];
+
         $dateArrayForWeekAll = []; // ini berguna untuk menampung semua data per minggu
         $dateRangeForWeek = []; // ini berguna untuk menampung tgl per minggu
         $bulanPertama = 0; // ini berguna untuk menandai bulan untuk pengecekan data
@@ -475,13 +602,14 @@ class forecastConverter {
                 }
             }
         }
-        /*
-          Jika looping telah selesai maka sisa data perminggu akan ditambahakan
-          ke $dateArrayForWeekAll
-        */
-        array_push($dateArrayForWeekAll, $dateRangeForWeek);
-        $dateRangeForWeek = [];
-
+        if(count($dateRangeForWeek) > 0){
+            /*
+                Jika looping telah selesai maka sisa data perminggu dan terdapat data per week akan ditambahakan
+                ke $dateArrayForWeekAll
+            */
+            array_push($dateArrayForWeekAll, $dateRangeForWeek);
+            $dateRangeForWeek = [];
+        }
         // ubah data $this->dataDatePerWeek berisi range data perminggu
         $this->dataDatePerWeek = $dateArrayForWeekAll;
     }
@@ -506,16 +634,18 @@ class forecastConverter {
         $monthNowTrigger = (int) $targetDate['explode'][1]; // bulan pertama
         $yearNowTrigger = (int) $targetDate['explode'][0]; // tahun tahun pertama
 
+        $monthTarget = (int) $targetDate['explode_target'][1]; // bulan target
+        $yearTarget = (int) $targetDate['explode_target'][0];
+
         $jumlahhariSetahun = 0;
 
         for($v = 1; $v<=(13); $v++){
             /*
               Lopping sebanyak 13x untuk menghitung bulan dalam 1 tahun ditambah 1 bulan
             */
-
             if($monthNowTrigger > 12){
                 /*
-                 Jika looping lebih dari 12x
+                 Jika bulan sekarang looping lebih dari 12
                 */
                 $monthNowTrigger = 1; // bulan akan di set bulan awal
                 $yearNowTrigger += 1; // tahun ditambah 1 sebagai ganti tahun
@@ -576,12 +706,22 @@ class forecastConverter {
 
                 }
             }
+
             if ($picu > 0){
                 /*
                     jika picu adalah 1 maka looping dihentikan
                 */
                 break;
             }
+
+            // cek jika tahun looping dan bulan looping sama dengan bulan, tahun target maka iterasi berhenti
+            // ini khusus untuk type minggu
+            if($this->type == 'week'){
+                if( ($yearNowTrigger == $yearTarget) && ($monthNowTrigger == $monthTarget)){
+                    break;
+                }
+            }
+
             $monthNowTrigger += 1; // ganti bulan ke berikutnya
         }
 
@@ -615,11 +755,12 @@ class forecastConverter {
             $date_ = new DateTime("last day of {$convertYear}-{$getDate['date'][1]}");
             $maxDate = $date_->format("Y-m-d");
         }
-        # $maxDate = "2021-11-28";
+        $maxDate = "2022-03-20";
         return [
             'now' => $minDate,
             'target' => $maxDate,
             'explode' => $getDate['date'],
+            'explode_target' => explode('-',$maxDate)
         ];
     }
 

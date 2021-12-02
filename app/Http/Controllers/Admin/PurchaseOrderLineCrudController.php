@@ -204,4 +204,11 @@ class PurchaseOrderLineCrudController extends CrudController
 
         return redirect()->back();
     }
+
+    public function exportPdfLabel($id){
+        $pdf = PDF::loadview('exports.pdf.delivery-sheet-label')->setPaper('A4');
+        // return view('exports.pdf.delivery-sheet-label');
+        // return $pdf->download('label-'.now().'.pdf');
+        return $pdf->stream();
+    }
 }

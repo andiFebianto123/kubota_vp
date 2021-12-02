@@ -84,12 +84,14 @@ class ForecastCrudController extends CrudController
             Session::put("forecast_type", $forecast->type);
         }
         $start = $forecast->forecastStart();
+
         $columns = $start->getColumns();
 
-        CRUD::addColumn([
-            'label'     => 'Nama Item', // Table column heading
-            'name'      => 'name_item',
-        ]);
+        // CRUD::addColumn([
+        //     'label'     => 'Nama Item', // Table column heading
+        //     'name'      => 'name_item',
+        //     'orderable' => true,
+        // ]);
         foreach($columns as $column){
             CRUD::addColumn([
                 'label' => "{$column}",
@@ -305,29 +307,28 @@ class ForecastCrudController extends CrudController
 
         $entries = $this->crud->getEntries();
 
+        # mengambil semua nama item data dari tabel forecast
         $getItem = $entries->map(function($item){
             return $item->item;
         });
 
-        // dd($totalRows);
-        // dd($getItem->values()->all());
-
         $forecast = new forecastConverter;
-
+        # tambah model tabel forecast
         $forecast->model = $this->crud->model;
+        # set nama item kedalam perhitungan forecast
+        $forecast->name_items = $getItem->values()->all(); 
 
-        $forecast->name_items = $getItem->values()->all();
-
+        # pilih berdasarkan filter penentuan type perhitungan forecast
         if(Session::get('forecast_type') == 'days'){
             $forecast->type = 'days';
         }else{
             $forecast->type = 'week';
         }
-
         // $forecast->getQuery();
 
+        # memulai forecast
         $start = $forecast->forecastStart();
-
+        # menampilkan hasil forecast
         $resultForecast =  $start->getResultForecast();
 
 
@@ -345,16 +346,12 @@ class ForecastCrudController extends CrudController
             // $resultForecast = $start->getResultWithOrderBy($orderBy);
         }
 
-
         $callback = array(
             'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
             'recordsTotal' => $totalRows, // total dari semua row
             'recordsFiltered' => $filteredRows,
             'data' => $resultForecast,
         );
-        // echo "<pre>";
-        // print_r($start->getResultForecast());
-        // echo "</pre>";
         return $callback;
     }
 

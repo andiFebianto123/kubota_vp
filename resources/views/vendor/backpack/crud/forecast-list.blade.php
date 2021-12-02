@@ -94,58 +94,67 @@
             <h5>Data Forecast <b> {{Session::get("week")}} {{Session::get("month")}} {{Session::get("year")}}</b></h5>
         </div>
 
-        <table id="crudTable" class="bg-white table table-striped table-hover nowrap rounded shadow-xs border-xs mt-2" cellspacing="0">
+        <table id="crudTable" class="bg-white table table-striped table-hover nowrap rounded shadow-xs border-xs mt-2" style="border-collapse: collapse;" cellspacing="0">
             <thead>
+              <tr>
+                <th rowspan="2">Name Item</th>
+                <th colspan="2" style="border: 1px solid #ddd; text-align:center;">Bulan 1</th>
+                <th colspan="2" style="border: 1px solid #ddd; text-align:center;">Bulan 2</th>
+                <th></th>
+              </tr>
               <tr>
                 {{-- Table columns --}}
                 @foreach ($crud->columns() as $column)
-                  <th
-                    data-orderable="{{ var_export($column['orderable'], true) }}"
-                    data-priority="{{ $column['priority'] }}"
-                     {{--
+                  @if($column['label'])
+                    <th
+                      style="border:1px solid #ddd;"
+                      data-orderable="{{ var_export($column['orderable'], true) }}"
+                      data-priority="{{ $column['priority'] }}"
+                      {{--
 
-                        data-visible-in-table => if developer forced field in table with 'visibleInTable => true'
-                        data-visible => regular visibility of the field
-                        data-can-be-visible-in-table => prevents the column to be loaded into the table (export-only)
-                        data-visible-in-modal => if column apears on responsive modal
-                        data-visible-in-export => if this field is exportable
-                        data-force-export => force export even if field are hidden
+                          data-visible-in-table => if developer forced field in table with 'visibleInTable => true'
+                          data-visible => regular visibility of the field
+                          data-can-be-visible-in-table => prevents the column to be loaded into the table (export-only)
+                          data-visible-in-modal => if column apears on responsive modal
+                          data-visible-in-export => if this field is exportable
+                          data-force-export => force export even if field are hidden
 
-                    --}}
+                      --}}
 
-                    {{-- If it is an export field only, we are done. --}}
-                    @if(isset($column['exportOnlyField']) && $column['exportOnlyField'] === true)
-                      data-visible="false"
-                      data-visible-in-table="false"
-                      data-can-be-visible-in-table="false"
-                      data-visible-in-modal="false"
-                      data-visible-in-export="true"
-                      data-force-export="true"
-                    @else
-                      data-visible-in-table="{{var_export($column['visibleInTable'] ?? false)}}"
-                      data-visible="{{var_export($column['visibleInTable'] ?? true)}}"
-                      data-can-be-visible-in-table="true"
-                      data-visible-in-modal="{{var_export($column['visibleInModal'] ?? true)}}"
-                      @if(isset($column['visibleInExport']))
-                         @if($column['visibleInExport'] === false)
-                           data-visible-in-export="false"
-                           data-force-export="false"
-                         @else
-                           data-visible-in-export="true"
-                           data-force-export="true"
-                         @endif
-                       @else
-                         data-visible-in-export="true"
-                         data-force-export="false"
-                       @endif
+                      {{-- If it is an export field only, we are done. --}}
+                      @if(isset($column['exportOnlyField']) && $column['exportOnlyField'] === true)
+                        data-visible="false"
+                        data-visible-in-table="false"
+                        data-can-be-visible-in-table="false"
+                        data-visible-in-modal="false"
+                        data-visible-in-export="true"
+                        data-force-export="true"
+                      @else
+                        data-visible-in-table="{{var_export($column['visibleInTable'] ?? false)}}"
+                        data-visible="{{var_export($column['visibleInTable'] ?? true)}}"
+                        data-can-be-visible-in-table="true"
+                        data-visible-in-modal="{{var_export($column['visibleInModal'] ?? true)}}"
+                        @if(isset($column['visibleInExport']))
+                          @if($column['visibleInExport'] === false)
+                            data-visible-in-export="false"
+                            data-force-export="false"
+                          @else
+                            data-visible-in-export="true"
+                            data-force-export="true"
+                          @endif
+                        @else
+                          data-visible-in-export="true"
+                          data-force-export="false"
+                        @endif
+                      @endif
+                    >
+                      @if(isset($column['link']))
+                      <a href="{{url('admin/forecast')}}{{$column['link']}}{{$column['label']}}">{{$column['label']}}</a>
+                      @else
+                      {!! $column['label'] !!}
+                      @endif
+                    </th>
                     @endif
-                  >
-                    @if(isset($column['link']))
-                    <a href="{{url('admin/forecast')}}{{$column['link']}}{{$column['label']}}">{{$column['label']}}</a>
-                    @else
-                    {!! $column['label'] !!}
-                    @endif
-                  </th>
                 @endforeach
 
                 @if ( $crud->buttons()->where('stack', 'line')->count() )
@@ -161,6 +170,7 @@
             <tfoot>
               <tr>
                 {{-- Table columns --}}
+                <th>Name Item</th>
                 @foreach ($crud->columns() as $column)
                   <th>{!! $column['label'] !!}</th>
                 @endforeach
