@@ -19,7 +19,7 @@ class CreateForecastsTable extends Migration
             $table->integer('forecast_change')->nullable();
             $table->dateTime('forecast_date')->nullable();
             $table->string('vend_num')->nullable();
-            $table->integer('item')->nullable();
+            $table->string('item')->nullable();
             $table->string('description')->nullable();
             $table->string('u_m')->nullable();
             $table->dateTime('due_date')->nullable();
