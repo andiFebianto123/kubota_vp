@@ -77,14 +77,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
                                 <td width="25%">Order QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
                                 <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
-                                <td width="25%">Unit Price<br><strong class="right">{{"IDR " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
+                                <td width="25%">Unit Price<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
                             </tr>
 
                             <tr>
                                 <td width="25%">Part No.<br><strong>-</strong></td>
                                 <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
                                 <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
-                                <td width="25%">Amount<br><strong class="right">-</strong></td>
+                                <td width="25%">Amount<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
                             </tr>
                             <tr>
                                 <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>
@@ -130,6 +130,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
         </div>
     </div><!-- /.box -->
+    @if($delivery_status)
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-secondary">
@@ -142,19 +143,19 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <table class="table table-striped table-hover">
                             <tr>
                                 <td>PO Number</td>
-                                <td>: PU00016842</td>
+                                <td>: {{$delivery_status->po_num}}</td>
                             </tr>
                             <tr>
                                 <td>PO Line</td>
-                                <td>: 2</td>
+                                <td>: {{$delivery_status->po_line}}</td>
                             </tr>
                             <tr>
                                 <td>Item</td>
-                                <td>: SP.04.CSWDV.02.271020</td>
+                                <td>: {{$delivery_status->item}}</td>
                             </tr>
                             <tr>
                                 <td>Description</td>
-                                <td>: GOOGLE MAP PLUGIN</td>
+                                <td>: {{$delivery_status->description}}</td>
                             </tr>
                         </table>
 
@@ -164,23 +165,35 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <table class="table table-striped table-hover">
                             <tr>
                                 <td>Received</td>
-                                <td>: <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                                <td>: 
+                                    @if($delivery_status->received_flag == 1)
+                                    <i class="la la-check text-success font-weight-bold"></i>
+                                    @else
+                                    <i class="la la-times text-danger font-weight-bold"></i>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>Received Date</td>
-                                <td>: 2021-04-09	</td>
+                                <td>: 
+                                    @if($delivery_status->received_date)
+                                    {{$delivery_status->received_date}}
+                                    @else
+                                    -
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>Received QTY</td>
-                                <td>: 0.4</td>
+                                <td>: {{$delivery_status->received_qty}}</td>
                             </tr>
                             <tr>
                                 <td>Shipped</td>
-                                <td>: 0.4</td>
+                                <td>: {{$delivery_status->shipped_qty}}</td>
                             </tr>
                             <tr>
                                 <td>Rejected QTY</td>
-                                <td>: <button type="button" class="btn btn-sm btn-danger">2</button></td>
+                                <td>: <span class="text-danger"> {{$delivery_status->rejected_qty}}</span></td>
                             </tr>
                         </table>
 
@@ -189,40 +202,52 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <strong>PAYMENT STATUS</strong>
                         <table class="table table-striped table-hover">
                             <tr>
-                                <td>Unit Price</td>
-                                <td>Rp 20.0000.000 </td>
+                                <td width="20%">Unit Price</td>
+                                <td>: {{$delivery_show->currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                             </tr>
                             <tr>
                                 <td>Payment Plan Date</td>
-                                <td></td>
+                                <td>: {{$delivery_status->payment_plan_date}}</td>
                             </tr>
                             <tr>
-                                <td>Payment Est Date	</td>
-                                <td>2021-04-09	</td>
+                                <td>Payment Est Date</td>
+                                <td>: {{$delivery_status->payment_plan_date}}</td>
                             </tr>
                             <tr>
                                 <td>Validated</td>
-                                <td><button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                                <td>:
+                                    @if($delivery_status->received_flag == 1)
+                                    <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>Payment in Proses</td>
-                                <td><button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button></td>
+                                <td>: 
+                                    @if($delivery_status->payment_in_process_flag == 1)
+                                    <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>Executed</td>
-                                <td><button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button></td>
+                                <td> :
+                                    @if($delivery_status->executed_flag == 1)
+                                    <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>Bank</td>
-                                <td>B35-BANK RESONA PERDANIA IDR</td>
+                                <td>: {{$delivery_status->bank}}</td>
                             </tr>
                             <tr>
                                 <td>Payment Ref Number</td>
-                                <td>210535079-RESONA</td>
+                                <td>: {{$delivery_status->payment_ref_num}}</td>
                             </tr>
                             <tr>
                                 <td>Total</td>
-                                <td>6,000,000.00</td>
+                                <td>: {{$delivery_show->currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                             </tr>
                         </table>
 
@@ -232,6 +257,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
         </div>
     </div>
+    @else
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary">
+                Delivery Status
+            </div>
+            <div class="card-body">
+                Tidak Ada Data!
+            </div
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
 

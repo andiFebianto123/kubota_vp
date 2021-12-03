@@ -15,11 +15,12 @@ class CreateDeliveriesTable extends Migration
     {
         Schema::create('delivery', function (Blueprint $table) {
             $table->integer('id');
-            $table->string('ds_num')->length(10);
+            $table->string('ds_num')->length(15);
             $table->integer('ds_line');
             $table->string('ds_type')->default('00');
             $table->string('po_num');
             $table->integer('po_line');
+            $table->string('item')->nullable();
             $table->integer('po_release')->nullable();
             $table->string('description')->nullable();
             $table->double('order_qty')->nullable();
@@ -28,13 +29,13 @@ class CreateDeliveriesTable extends Migration
             $table->dateTime('due_date')->nullable();
             $table->double('unit_price')->nullable();
             $table->string('wh')->nullable();
-            $table->string('location');
-            $table->string('tax_status');
-            $table->string('currency');
-            $table->double('shipped_qty');
-            $table->dateTime('shipped_date');
-            $table->string('petugas_vendor');
-            $table->string('no_surat_jalan_vendor');
+            $table->string('location')->nullable();
+            $table->string('tax_status')->nullable();
+            $table->string('currency')->nullable();
+            $table->double('shipped_qty')->nullable();
+            $table->dateTime('shipped_date')->nullable();
+            $table->string('petugas_vendor')->nullable();
+            $table->string('no_surat_jalan_vendor')->nullable();
             $table->string('group_ds_num')->nullable();
             $table->string('ref_ds_num')->nullable();
             $table->integer('ref_ds_line')->nullable();

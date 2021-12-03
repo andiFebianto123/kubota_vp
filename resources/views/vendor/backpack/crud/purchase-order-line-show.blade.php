@@ -6,6 +6,7 @@ trans('backpack::crud.admin') => url(config('backpack.base.route_prefix'), 'dash
 $crud->entity_name_plural => url($crud->route),
 trans('backpack::crud.preview') => false,
 ];
+$action = 'create';
 
 // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
 $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
@@ -56,138 +57,147 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         <div class="card no-padding no-border">
             <table class="table">
                 <tr>
+                    <td>PO</td>
+                    <td width="2px">:</td>
+                    <td>{{$entry->po_num}}</td>
+                </tr>
+                <tr>
+                    <td>PO Line</td>
+                    <td>:</td>
+                    <td>{{$entry->po_line}}</td>
+                </tr>
+                <tr>
                     <td>Item</td>
-                    <td>: {{$entry->item}}</td>
+                    <td>:</td>
+                    <td>{{$entry->item}}<br>{{$entry->description}}</td>
                 </tr>
                 <tr>
                     <td>Qty Order</td>
-                    <td>: {{$entry->order_qty}}</td>
+                    <td>:</td>
+                    <td>{{$entry->order_qty}}</td>
                 </tr>
                 <tr>
                     <td>Status</td>
-                    <td>:   <span class="{{$arr_po_line_status[$entry->status]['color']}}">
+                    <td>:</td>
+                    <td>    <span class="{{$arr_po_line_status[$entry->status]['color']}}">
                             {{$arr_po_line_status[$entry->status]['text']}}
                             </span>
                     </td>
                 </tr>
                 <tr>
-                    <td>Description</td>
-                    <td>: {{$entry->description}}</td>
-                </tr>
-                <tr>
                     <td>Unit Price</td>
-                    <td>: {{"IDR " . number_format($entry->unit_price,0,',','.')}}</td>
+                    <td>:</td>
+                    <td>{{$entry->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
     </div><!-- /.box -->
+
+    <div class="col-md-8">
+        <div class="card-header bg-secondary">
+            <label class="font-weight-bold mb-0">Create Delivery Sheet</label> 
+        </div>
+        <div class="card no-padding no-border">
+                <form id="form-delivery" method="post"
+                        action="{{ url('admin/delivery') }}"
+                        @if ($crud->hasUploadFields('create'))
+                        enctype="multipart/form-data"
+                        @endif
+                        >
+                    {!! csrf_field() !!}
+                    <!-- load the view from the application if it exists, otherwise load the one in the package -->
+                    <div class="m-2">
+                    @include('crud::inc.show_fields', ['fields' => $crud->fields()])
+                    </div>
+
+                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" type="button" onclick="submitAfterValid('form-delivery')">Submit</button>
+                </form>
+        </div>
+    </div>
+
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-secondary">
                <label class="font-weight-bold mb-0">Delivery Sheet Detail</label> 
             </div>
             <div class="card-body">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>DS Number</th>
-                            <th>Shipped Date</th>
-                            <th>Shipped Qty</th>
-                            <th>Amount</th>
-                            <th>DO Number</th>
-                            <th>Operator</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $total_price = 0;
-                            $total_qty = 0;
-                        @endphp
-                        @foreach ($deliveries as $key => $delivery)
-                        <tr>
-                            <td>{{$delivery->ds_num}}</td>
-                            <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
-                            <td>{{$delivery->shipped_qty}}</td>
-                            <td>{{"IDR " . number_format($delivery->unit_price,0,',','.')}}</td>
-                            <td>{{$delivery->petugas_vendor}}</td>
-                            <td>{{$delivery->no_surat_jalan_vendor}}</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                                <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
-                                <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-primary"><i class="la la-qrcode"></i> Detail</a>
-                                <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-link" data-button-type="delete"><i class="la la-trash"></i> {{ trans('backpack::crud.delete') }}</a>
-                            </td>
-                        </tr>
-                        @php
-                            $total_qty += $delivery->order_qty;
-                            $total_price += $delivery->unit_price*$delivery->order_qty;
-                        @endphp
-                        @endforeach
+                @if(sizeof($deliveries) > 0)
+                <form id="form-print-mass-ds" action="{{url('admin/delivery-export-mass-pdf-post')}}" method="post">
+                    @csrf
+                    <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
+                    <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
 
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2" class="text-center font-weight-bold">
-                                Total
-                            </td>
-                            <td>
-                                {{$total_qty}}</td>
-                            </td>
-                            <td>
-                                {{"IDR " . number_format($total_price,0,',','.')}}</td>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+                    <table id="ds-table" class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="check-all-cb" name="print_deliveries" class="check-all" data-delivery="{{sizeof($deliveries)}}" >
+                                </th>
+                                <th>PO</th>
+                                <th>PO Line</th>
+                                <th>DS Number</th>
+                                <th>DS Line</th>
+                                <th>Shipped Date</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>DO Number</th>
+                                <th>Operator</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $total_price = 0;
+                                $total_qty = 0;
+                            @endphp
+                            @foreach ($deliveries as $key => $delivery)
+                            <tr>
+                                <td>
+                                    <input type="checkbox" value="{{$delivery->id}}" name="print_delivery[]" class="check-delivery check-{{$delivery->id}}">
+                                </td>
+                                <td>{{$delivery->po_num}}</td>
+                                <td>{{$delivery->po_line}}</td>
+                                <td>{{$delivery->ds_num}}</td>
+                                <td>{{$delivery->ds_line}}</td>
+                                <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
+                                <td>{{$delivery->shipped_qty}}</td>
+                                <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
+                                <td>{{$delivery->no_surat_jalan_vendor}}</td>
+                                <td>{{$delivery->petugas_vendor}}</td>
+                                <td style="white-space: nowrap;">
+                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
+                                    <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                </td>
+                            </tr>
+                            @php
+                                $total_qty += $delivery->shipped_qty;
+                                $total_price += $delivery->unit_price*$delivery->shipped_qty;
+                            @endphp
+                            @endforeach
 
-        </div><!-- /.box-body -->
-    </div>
-    
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-secondary">
-               <label class="font-weight-bold mb-0">Delivery Sheet, Receive dan Reject</label> 
-            </div>
-            <div class="card-body">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>DS Number</th>
-                            <th>Shipped Qty</th>
-                            <th>Received Qty</th>
-                            <th>Reject Qty</th>
-                            <th>On Process Qty (DS)</th>
-                            <th>Due Date PO</th>
-                            <th>DO Number</th>
-                            <th>Operator</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $total_price = 0;
-                            $total_qty = 0;
-                        @endphp
-                        @foreach ($delivery_statuses as $key => $delivery)
-                        <tr>
-                            <td>{{$delivery->ds_num}}</td>
-                            <td>{{$delivery->shipped_qty}}</td>
-                            <td>{{$delivery->received_qty}}</td>
-                            <td>{{$delivery->rejected_qty}}</td>
-                            <td>{{$delivery->no_surat_jalan_vendor}}</td>
-                            <td>{{$delivery->no_surat_jalan_vendor}}</td>
-                           
-                        </tr>
-                        @php
-                            $total_qty += $delivery->order_qty;
-                            $total_price += $delivery->unit_price*$delivery->order_qty;
-                        @endphp
-                        @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" class="text-center font-weight-bold">
+                                    Total
+                                </td>
+                                <td>
+                                    {{$total_qty}}</td>
+                                </td>
+                                <td>
+                                {{$delivery->currency}} {{ number_format($total_price,0,',','.')}}</td>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="submitAfterValid('form-print-mass-ds')"><i class="la la-file-pdf"></i> <span>PDF</span></button>
+                </form>
 
-                    </tbody>
-                    
-                </table>
+                @else
+                <p>No Data Available</p>
+                @endif
             </div>
 
         </div><!-- /.box-body -->
@@ -197,15 +207,94 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
 
 @section('after_styles')
+<link rel="stylesheet" type="text/css" href="{{asset('packages/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{asset('packages/datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{asset('packages/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}">
+
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/form.css').'?v='.config('backpack.base.cachebusting_string') }}">
+<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/create.css').'?v='.config('backpack.base.cachebusting_string') }}">
+
+@stack('crud_fields_styles')
+    <style>
+      .form-group.required label:not(:empty):not(.form-check-label)::after {
+        content: '';
+      }
+      .form-group.required > label:not(:empty):not(.form-check-label)::after {
+        content: ' *';
+        color: #ff0000;
+      }
+    </style>
 @endsection
 
 @section('after_scripts')
+<script type="text/javascript" src="{{ asset('packages/datatables.net/js/jquery.dataTables.min.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('packages/datatables.net-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('packages/datatables.net-responsive/js/dataTables.responsive.min.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('packages/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.min.js')}}"></script>
+
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+<script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+<script src="{{ asset('packages/backpack/crud/js/create.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 
+@stack('crud_fields_scripts')
 <script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+    $(document).ready( function () {
+        $('#ds-table').DataTable();
+        initializeFieldsWithJavascript('form');
+    } );
+
+    var totalChecked = 0
+
+    $('#check-all-cb').change(function () {
+        totalChecked = 0
+        $(".check-delivery").prop('checked', $(this).prop('checked'))
+        anyChecked = $(this).prop('checked')
+        $(this).val($(this).prop('checked'))
+        if ($(this).prop('checked')) {
+            totalChecked = $(this).data('delivery')
+        }
+        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+    })
+
+    $('.check-delivery').change(function () {
+        if ($(this).prop('checked')==true){
+            $(this).prop('checked', true) 
+            totalChecked ++
+        }else{
+            $(this).prop('checked', false)
+            totalChecked --
+        }
+
+        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+    })
+
+    function initializeFieldsWithJavascript(container) {
+      var selector;
+      if (container instanceof jQuery) {
+        selector = container;
+      } else {
+        selector = $(container);
+      }
+      selector.find("[data-init-function]").not("[data-initialized=true]").each(function () {
+        var element = $(this);
+        var functionName = element.data('init-function');
+
+        if (typeof window[functionName] === "function") {
+          window[functionName](element);
+
+          // mark the element as initialized, so that its function is never called again
+          element.attr('data-initialized', 'true');
+        }
+      });
+    }
 
 	if (typeof deleteEntry != 'function') {
 	  $("[data-button-type=delete]").unbind('click');

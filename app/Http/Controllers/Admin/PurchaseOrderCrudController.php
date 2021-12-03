@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\OrderSheetExport;
 use App\Exports\PurchaseOrderExport;
+use App\Exports\TemplateMassDsExport;
+use App\Helpers\Constant;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Imports\DeliverySheetImport;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -12,6 +16,7 @@ use Prologue\Alerts\Facades\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use PDF;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\DB;
@@ -46,15 +51,14 @@ class PurchaseOrderCrudController extends CrudController
         $current_role = backpack_auth()->user()->role->name;
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
-        $this->crud->removeButton('delete');
-
-        // 
+        $this->crud->removeButton('delete');        
         $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
         $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
+        $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if($current_role == 'vendor'){
-            $this->crud->addClause('where', 'vendor_number', '=', backpack_auth()->user()->vendor->number);
+            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
 
@@ -94,7 +98,11 @@ class PurchaseOrderCrudController extends CrudController
                 return ($entry->email_flag) ? "✓":"-";
             }
         ]);        
-        CRUD::column('po_change');
+        CRUD::addColumn([
+            'label'     => 'PO Change', // Table column heading
+            'name'      => 'po_change', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
 
         // function() {
         //     return PurchaseOrderLine::groupBy('item')->select('item')->get()->mapWithKeys(function($item){
@@ -200,12 +208,8 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('accept_flag', 2)
                                 ->get();
         */
-        $arr_po_line_status = [ 'O' => ['text' => 'Ordered', 'color' => ''], 
-                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                                'C' => ['text' => 'Complete', 'color' => 'text-success']
-                            ];
- 
-
+        $arr_po_line_status = (new Constant())->statusOFC();
+        
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         // $data['po_line_read_accs'] = $po_line_read_accs;
@@ -215,6 +219,27 @@ class PurchaseOrderCrudController extends CrudController
         $data['arr_po_line_status'] = $arr_po_line_status;
 
         return view('vendor.backpack.crud.purchase-order-show', $data);
+    }
+
+    public function detailChange($po_num, $line)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                ->where('po_line', $line)
+                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                ->orderBy('po_line.id', 'desc')
+                ->get();
+                
+        $arr_po_line_status = (new Constant())->statusOFC();
+
+        $data['po'] = $po;
+        $data['crud'] = $this->crud;
+        $data['po_lines'] = $po_lines;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        return view('vendor.backpack.crud.purchase-order-detail-change', $data);
     }
 
 
@@ -306,6 +331,12 @@ class PurchaseOrderCrudController extends CrudController
 
     }
 
+    public function templateMassDs()
+    {
+        return Excel::download(new TemplateMassDsExport(backpack_auth()->user()), 'template-mass-ds-'.date('YmdHis').'.xlsx');
+
+    }
+
     public function importDs(Request $request)
     {
         $rules = [
@@ -368,6 +399,50 @@ class PurchaseOrderCrudController extends CrudController
         ], 200);
     }
 
+    public function exportPdfOrderSheet($po_num)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $arr_po_line_status = (new Constant())->statusOFC();
+        
+        $data['po_lines'] = $collection_po_lines;
+        $data['po'] = $po;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        $pdf = PDF::loadview('exports.pdf.order-sheet',$data);
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->stream();
+    }
+
+
+    public function exportExcelOrderSheet($po_num)
+    {
+        $po = PurchaseOrder::where('po_num', $po_num)->first();
+
+        $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->get();
+        $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+        $arr_po_line_status = (new Constant())->statusOFC();
+        
+        $data['po_lines'] = $collection_po_lines;
+        $data['po'] = $po;
+        $data['arr_po_line_status'] = $arr_po_line_status;
+
+        return Excel::download(new OrderSheetExport($data), 'order-sheet-'.date('YmdHis').'.xlsx');
+    }
+
     private function validationMessage($validator,$rules)
     {
         $message_errors = [];
@@ -419,4 +494,5 @@ class PurchaseOrderCrudController extends CrudController
             return [$item->item => $item->item];
         });
     }
+
 }

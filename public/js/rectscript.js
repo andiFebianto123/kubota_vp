@@ -32,7 +32,15 @@ function submitAfterValid(formId, massError = false) {
                     messageStatusGeneral("#"+formId, response.message, 'success')
 
                     if (response.redirect_to) {
-                        window.location.href = response.redirect_to
+                        if (response.newtab) {
+                            window.open(response.redirect_to, '_blank');
+                        }else{
+                            window.location.href = response.redirect_to
+                        }
+                    }else{
+                        setTimeout(function() { 
+                            location.reload(true)
+                        }, 3000);
                     }
                 } else {
                     messageStatusGeneral("#"+formId, response.message)
@@ -55,13 +63,19 @@ function submitAfterValid(formId, massError = false) {
                 }
             },
             error: function(xhr, status, error) {
+                console.log(xhr.responseJSON.errors);
                 $('#btn-for-'+formId).html(initText)
                 $('#btn-for-'+formId).removeAttr('disabled')
                 $(".progress-loading").remove()
                 var messageErr = "Something Went Wrong"
                 if (xhr.responseJSON) {
                     messageErr = xhr.responseJSON.message
+                    $.each(xhr.responseJSON.errors,function(field_name,error){
+                        messageErr += "<li>"+error+"</li>"
+                        //$("#"+formId+' [name='+field_name+']').append('<span class="text-strong textdanger">' +error+ '</span>')
+                    })
                 }
+                
                 messageStatusGeneral("#"+formId, messageErr)
             }
         });
@@ -80,6 +94,6 @@ function messageErrorForm(currentID, message) {
 }
 
 function messageStatusGeneral(currentID,message ,status = 'danger' ) {
-    $("<div class='error-message alert alert-"+status+"'>" +message + "</div>")
+    $("<div class='error-message alert alert-"+status+" alert-dismissible fade show'>" +message + " <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>")
                         .insertBefore(currentID).hide().show('medium')
 }

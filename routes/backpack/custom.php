@@ -13,6 +13,12 @@ Route::group([
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');
     Route::get('delivery-export-pdf', 'DeliveryCrudController@exportPdf');
+    Route::get('delivery-export-mass-pdf', 'DeliveryCrudController@exportMassPdf');
+    Route::post('delivery-export-mass-pdf-post', 'DeliveryCrudController@exportMassPdfPost');
+    Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
+    Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
+    Route::get('template-serial-numbers', 'DeliveryCrudController@exportTemplateSerialNumber');
+    Route::post('serial-number-import', 'DeliveryCrudController@importSn');
 
     Route::crud('forecast', 'ForecastCrudController');
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
@@ -26,8 +32,11 @@ Route::group([
     Route::get('purchase-order-line-export-excel-accept', 'PurchaseOrderLineCrudController@exportExcelAccept');
     Route::get('purchase-order-line-export-pdf-accept', 'PurchaseOrderLineCrudController@exportPdfAccept');
     Route::get('purchase-order-line/{id}/unread', 'PurchaseOrderLineCrudController@unread');
+    Route::get('purchase-order/{id}/{line}/detail-change', 'PurchaseOrderCrudController@detailChange');
     Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
+    Route::post('temp-upload-delivery/print-insert-to-db', 'TempUploadDeliveryCrudController@printInsertToDb');
     Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
+    Route::get('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
@@ -40,4 +49,6 @@ Route::group([
 
     // Route untuk export PDF print label delivery sheet detail
     Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabel');
+
+    Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
 });

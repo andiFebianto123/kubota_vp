@@ -15,10 +15,12 @@ class CreateTempUploadDeliveriesTable extends Migration
     {
         Schema::create('temp_upload_deliveries', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('po_line_id');
+            $table->string('po_num');
+            $table->integer('po_line');
             $table->integer('user_id');
-            $table->double('order_qty');
-            $table->string('serial_number');
+            $table->double('order_qty')->nullable();
+            $table->string('serial_number')->nullable();
+            $table->dateTime('delivery_date')->nullable();
             $table->string('petugas_vendor')->nullable();
             $table->string('no_surat_jalan_vendor')->nullable();
             $table->integer('created_by')->nullable();

@@ -11,6 +11,7 @@ use App\Models\Personel;
 use App\Models\StructureChurch;
 use App\Models\CoordinatorChurch;
 use App\Models\MinistryRole;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\StatusHistoryChurch;
 use App\Models\TempUploadDelivery;
@@ -28,9 +29,9 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
-    public function  __construct($attrs)
+    public function __construct($filename)
     {
-      $this->filename = $attrs['filename'];
+        $this->filename = $filename;
     }
 
     public function collection(Collection $rows)
@@ -42,31 +43,34 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
 
     private function singleRow($row)
     {
-        $row_po_line = $row['PO Line'];
-        $row_delivery_sheet_number = $row['Delivery Sheet Number'];
-        $row_item_number = $row['Item Number'];
+        $row_po_num = $row['PO'];
+        $row_po_line = $row['PO LINE'];
         $row_qty = $row['Qty'];
+        $row_delivery_date = $row['DS Delivery Date'];
         $row_petugas_vendor = $row['Petugas Vendor'];
-        $row_serial_number = $row['Serial Number'];
-        $row_do_number_vendor = $row['DO Number Vendor'];
+        $row_do_number_vendor = $row['No Surat Jalan'];
 
-        $expl_po_line = explode("-",$row_po_line);
+        if ($row_po_num) {
+            $insert = new TempUploadDelivery();
+            $insert->po_num = $row_po_num;
+            $insert->po_line = $row_po_line;
+            $insert->user_id = backpack_auth()->user()->id;
+            $insert->order_qty = $row_qty;
+            $insert->delivery_date = $this->transformDate($row_delivery_date);
+            $insert->petugas_vendor	 = $row_petugas_vendor;
+            $insert->no_surat_jalan_vendor	 = $row_do_number_vendor;
+            $insert->save();
+        }
+        
+    }
 
-        $po_line = PurchaseOrderLine::leftJoin('purchase_orders',  'purchase_order_lines.purchase_order_id', 'purchase_orders.id')    
-                    ->where('purchase_orders.number', $expl_po_line[0])
-                    ->where('purchase_order_lines.po_line', $expl_po_line[1])
-                    ->get('purchase_order_lines.id as id')
-                    ->first();
-
-        $insert = new TempUploadDelivery();
-        $insert->po_line_id = $po_line->id;
-        $insert->user_id = backpack_auth()->user()->id;
-        $insert->order_qty = $row_qty;
-        $insert->ds_num= $row_delivery_sheet_number;
-        $insert->serial_number= $row_serial_number;
-        $insert->petugas_vendor	 = $row_petugas_vendor;
-        $insert->no_surat_jalan_vendor	 = $row_do_number_vendor;
-        $insert->save();
+    private function transformDate($value, $format = 'Y-m-d')
+    {
+        try {
+            return \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+        } catch (\ErrorException $e) {
+            return \Carbon\Carbon::createFromFormat($format, $value);
+        }
     }
 
     public function headingRow(): int

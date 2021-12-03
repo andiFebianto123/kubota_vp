@@ -31,6 +31,13 @@ class DashboardController extends Controller
         $data['general_message_info'] = $general_message_info;
 
         return view('vendor.backpack.base.dashboard', $data);
+        // return $this->justTest();
+    }
 
+    private function justTest()
+    {
+        if (!extension_loaded('imagick')){
+            return 'imagick not installed';
+        }
     }
 }

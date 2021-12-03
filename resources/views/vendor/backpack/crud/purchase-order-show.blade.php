@@ -71,6 +71,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>Email Sent</td>
                     <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
                 </tr>
+                <tr>
+                    <td>Order Sheet</td>
+                    <td>: 
+                        <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                        <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                    </td>
+                </tr>
             </table>
         </div><!-- /.box-body -->
     </div><!-- /.box -->
@@ -84,14 +91,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <div class="card-body">
                 @if(sizeof($po_lines) > 0)
                 <div>
-                    <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/purchase-order-line-export-excel-accept')}}"><i class="la la-file-excel"></i> Excel</a>
-                    <a class="btn btn-sm btn-danger" target="_blank" href="{{url('admin/purchase-order-line-export-pdf-accept')}}"><i class="la la-file-pdf"></i> PDF</a>
-                    <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button>
+                    <!-- <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button> -->
                 </div>
                 <table class="table table-striped mb-0 table-responsive">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all-cb" class="check-all"></th>
+                            <th>
+                                @if(backpack_auth()->user()->role->name != 'admin')
+                                <input type="checkbox" id="check-all-cb" class="check-all">
+                                @endif
+                            </th>
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
@@ -116,7 +125,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->read_at == null)
+                                @if($po_line->read_at == null && backpack_auth()->user()->role->name != 'admin')
                                 <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
@@ -145,16 +154,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
-                                        @if($po_line->count_ds == 0)
-                                        <a href="{{url('admin/delivery/create?po_line_id='.$po_line->id)}}" class="btn btn-sm btn-link"><i class="la la-plus"></i> Create</a>
-                                        @else
-                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="createDs({{$po_line->count_ds}}, '{{url('admin/delivery/create?po_line_id='.$po_line->id)}}')" data-target="#modalCreate"><i class="la la-plus"></i> Create</button>
-                                        @endif
+                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
                                     @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                        @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                        @endif
                                     @endif    
-                                    <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @else
                                     @if(backpack_auth()->user()->role->name != 'admin')
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
@@ -194,6 +200,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>PO Line</th>
                             <th>Issued Date</th>
                             <th>Change</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -203,6 +210,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->po_line}}</td>
                             <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
                             <td>{{$po_line->po_change}}</td>
+                            <td>
+                                <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -229,29 +239,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 
 <!-- Modal -->
-<div id="importMassDS" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Import Mass Delivery Sheet</h5>
-        </div>
-        <div class="modal-body">
-            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{asset('docs/template-delivery-sheet.xlsx')}}">template-delivery-sheet.xlsx</a></p>
-            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
-                @csrf
-                <input type="file" name="file_po" class="form-control py-1 rect-validation">
-
-                <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
-                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
-                </div>      
-            </form>
-        </div>
-    </div>
-  </div>
-</div>
 
 <div id="modalAccept" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -297,23 +284,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
-        </div>
-    </div>
-  </div>
-</div>
-
-<div id="modalCreate" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Warning!</h5>
-        </div>
-        <div class="modal-body">
-            <p class="text-count-ds"></p>
-            <a href="{{url('admin/delivery/create')}}" type="button" class="btn btn-sm btn-outline-primary goto-create">Submit</a>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
         </div>
     </div>
   </div>

@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\PurchaseOrderLineAcceptExport;
+use App\Helpers\Constant;
+use App\Http\Requests\DeliveryRequest;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\MaterialOuthouse;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -141,21 +145,113 @@ class PurchaseOrderLineCrudController extends CrudController
 
     function show()
     {
+        CRUD::setValidation(DeliveryRequest::class);
+
         $entry = $this->crud->getCurrentEntry();
+        $po = PurchaseOrder::where("po_num", $entry->po_num)
+                ->join('vendor', 'vendor.vend_num', 'po.vend_num')
+                ->get('vendor.currency as vendor_currency')
+                ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
+        $realtime_ds_qty = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->sum('shipped_qty');
         $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
-        $arr_po_line_status = [ 'O' => ['text' => 'Ordered', 'color' => ''], 
-                                'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-                                'C' => ['text' => 'Complete', 'color' => 'text-success']
-                            ];
+        $arr_po_line_status = (new Constant())->statusOFC();
+
+        $current_qty = ($entry->order_qty < $realtime_ds_qty)? 0 : $entry->order_qty -  $realtime_ds_qty;
+
+        $this->crud->addField([
+            'label' => 'Delivery Date From Vendor',
+            'type' => 'date_picker',
+            'name' => 'shipped_date',
+            'default' => date("Y-m-d"),
+            'date_picker_options' => [
+                'todayBtn' => 'linked',
+                'format'   => 'dd/mm/yyyy',
+                'language' => 'en'
+             ],
+        ]);  
+        $this->crud->addField([
+            'type' => 'hidden',
+            'name' => 'po_line_id',
+            'value' => $entry->id
+        ]);        
+        CRUD::field('petugas_vendor');
+        CRUD::field('no_surat_jalan_vendor');
+        $this->crud->addField([
+            'type' => 'number_qty',
+            'name' => 'shipped_qty',
+            'label' => 'Qty',
+            'actual_qty' => $entry->shipped_qty,
+            'default' => $current_qty
+        ]);
+        if($entry->w_serial == 1){
+            $this->crud->addField(
+                [
+                    'name'  => 'serial_numbers',
+                    'label' => 'Serial Number',
+                    'type'  => 'upload_serial_number',
+                    'fields' => [
+                        [
+                            'name'    => 'sn_childs[]',
+                            'type'    => 'text',
+                            'label'   => 'Number',
+                            'wrapper' => ['class' => 'form-group col-md-6'],
+                        ],
+                        
+                    ],
+                ],
+            );
+        }
+
+        if($entry->outhouse_flag == 1){
+            $this->crud->addField(
+                [
+                    'name'  => 'material_issues',
+                    'label' => 'Material Issue',
+                    'type'  => 'upload_material_issue',
+                    'fields' => [
+                        [
+                            'name'        => 'material_ids[]',
+                            'label'       => "Material",
+                            'type'        => 'select2_from_array',
+                            'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
+                            'allows_null' => false,
+                            'wrapper'   => [ 
+                                'class'      => 'form-group col-md-6'
+                             ],
+                        ],
+                        [   // select2_from_array
+                            'name'        => 'mo_issue_qty[]',
+                            'label'       => "Issue Qty",
+                            'type'        => 'number',
+                            'wrapper'   => [ 
+                                'class'      => 'form-group col-md-6'
+                             ],
+                        ]
+                    ],
+                ],
+            );
+        }
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
+        $data['po'] = $po;
         $data['arr_po_line_status'] = $arr_po_line_status;
         $data['deliveries'] = $deliveries;
         $data['delivery_statuses'] = $delivery_statuses;
 
         return view('vendor.backpack.crud.purchase-order-line-show', $data);
+    }
+
+
+    private function optionMaterial($po_num, $po_line){
+        $mos = MaterialOuthouse::where('po_num', $po_num)->where('po_line', $po_line)
+                ->groupBy('matl_item')->get();
+        $arr_opt = [];
+        foreach ($mos as $key => $mo) {
+            $arr_opt[$mo->id] = $mo->matl_item.' - '.$mo->description;
+        }
+        return $arr_opt;
     }
 
 

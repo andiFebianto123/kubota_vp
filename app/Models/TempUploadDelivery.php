@@ -15,13 +15,13 @@ class TempUploadDelivery extends Model
         return $this->belongsTo('App\Models\PurchaseOrderLine', 'po_line_id', 'id');
     }
 
-    public function insertToDB($crud = false)
-    {
-        return '<button class="btn btn-sm btn-primary-vp" onclick="window.history.back()"><i class="la la-file-pdf"></i> Insert</button>';
-    }
-
     public function cancelInsert($crud = false)
     {
         return '<button class="btn btn-sm btn-danger" onclick="window.history.back()"><i class="la la-file-pdf"></i> Cancel</button>';
+    }
+
+    public function getDeliveryDateAttribute($value)
+    {
+        return date('Y-m-d', strtotime($value));
     }
 }
