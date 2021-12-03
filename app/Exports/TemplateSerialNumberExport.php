@@ -9,6 +9,10 @@ use Maatwebsite\Excel\Events\AfterSheet;
 
 class TemplateSerialNumberExport implements FromView, WithEvents
 {
+    public function __construct($qty)
+    {
+        $this->qty = $qty;
+    }
 
     public function registerEvents(): array
     {
@@ -27,7 +31,8 @@ class TemplateSerialNumberExport implements FromView, WithEvents
 
     public function view(): View
     {
+        $data['qty'] = $this->qty;
     
-        return view('exports.excel.template-serial-number');
+        return view('exports.excel.template-serial-number', $data);
     }
 }

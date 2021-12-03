@@ -15,22 +15,13 @@
             </tr>
         </thead>
         <tbody>
+            @if($qty > 0)
+            @for($i = 0; $i < $qty; $i++)
             <tr>
-                <td>1</td>
-                <td>SN00001</td>
+                <td>{{$i+1}}</td>
             </tr>
-            <tr>
-                <td>2</td>
-                <td>SN00002</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>SN00003</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>SN00004</td>
-            </tr>
+            @endfor
+            @endif
         </tbody>
     </table>
 </body>

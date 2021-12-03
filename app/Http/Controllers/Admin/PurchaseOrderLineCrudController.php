@@ -187,18 +187,9 @@ class PurchaseOrderLineCrudController extends CrudController
         if($entry->w_serial == 1){
             $this->crud->addField(
                 [
-                    'name'  => 'serial_numbers',
+                    'name'  => 'sn_childs[]',
                     'label' => 'Serial Number',
                     'type'  => 'upload_serial_number',
-                    'fields' => [
-                        [
-                            'name'    => 'sn_childs[]',
-                            'type'    => 'text',
-                            'label'   => 'Number',
-                            'wrapper' => ['class' => 'form-group col-md-6'],
-                        ],
-                        
-                    ],
                 ],
             );
         }

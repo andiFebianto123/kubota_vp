@@ -140,3 +140,21 @@
     border-radius: 4px;
 }
 
+.solid-red-circle{
+    background: #df4759;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 10px;
+    padding: 4px;
+    border-radius: 50%;
+    position: relative;
+    bottom: -4px;
+    margin: 0px;
+}
+
+.form-control{
+    border: 1px solid #b8c2db;
+}
+

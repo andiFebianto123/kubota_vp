@@ -398,7 +398,9 @@ class DeliveryCrudController extends CrudController
 
     public function exportTemplateSerialNumber()
     {
-        return Excel::download(new TemplateSerialNumberExport, 'template-sn-'.date('YmdHis').'.xlsx');
+        $qty = request('qty');
+
+        return Excel::download(new TemplateSerialNumberExport($qty), 'template-sn-'.date('YmdHis').'.xlsx');
 
     }
 
@@ -408,6 +410,7 @@ class DeliveryCrudController extends CrudController
             'file_sn' => 'required|mimes:xlsx,xls',
         ];
 
+        $allowed_qty = $request->allowed_qty;
         $file = $request->file('file_sn');
         
 
@@ -417,14 +420,27 @@ class DeliveryCrudController extends CrudController
 
         unset($rows[0]);
         $value_row = [];
+        $valid_row = 0;
         foreach ($rows as $key => $value) {
-            $value_row[] = ['serial_number' => $value[1]];
+            if (isset($value[1])) {
+                $value_row[] = ['serial_number' => $value[1]];
+                $valid_row ++;
+            }
         }
-        return response()->json([
-            'status' => true,
-            'alert' => 'success',
-            'datas' => $value_row
-        ], 200);
+        if ($allowed_qty <= sizeof($rows) && $allowed_qty > 0) {
+            
+            return response()->json([
+                'status' => true,
+                'alert' => 'success',
+                'datas' => $value_row
+            ], 200);
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'Jumlah Qty dan Serial Number tidak sama!'
+                ], 200);
+        }
+        
 
     }
 

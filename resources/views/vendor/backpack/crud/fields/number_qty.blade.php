@@ -26,6 +26,10 @@
 <script>
     var actualQty = "{{$field['default']}}"
 $( "#current-qty" ).keyup(function() {
+    var initUrl = $('#template-upload-sn').attr('init-url')
+    $('#template-upload-sn').attr('href', initUrl+'?qty='+$(this).val())
+    $('#allowed-qty').val($(this).val())
+    
     if (parseFloat(actualQty) < parseFloat($(this).val())) {
         $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+actualQty+')</small>')
     }else{
