@@ -206,7 +206,18 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
     public function exportPdfLabel($id){
-        $pdf = PDF::loadview('exports.pdf.delivery-sheet-label')->setPaper('A4');
+        // SELECT  d.id, po.po_num, d.po_line, po_line.item, po_line.description, d.ds_num, d.po_num FROM `delivery` d 
+        // JOIN po_line ON po_line.po_line = d.po_line
+        // JOIN po ON po.po_num = d.po_num
+        // WHERE d.id = 1 GROUP BY po.po_num
+        $db = Delivery::join('po_line', 'po_line.po_line', 'delivery.po_line')
+        ->join('po', 'po.po_num', 'delivery.po_num')
+        ->whereIn('delivery.id', [$id, 6])
+        ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'po_line.item as item', 'po_line.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty')
+        ->groupBy('delivery.id')->get();
+        $data['data'] = $db;
+
+        $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
         // return view('exports.pdf.delivery-sheet-label');
         // return $pdf->download('label-'.now().'.pdf');
         return $pdf->stream();
