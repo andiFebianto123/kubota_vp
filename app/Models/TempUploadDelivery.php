@@ -9,7 +9,12 @@ class TempUploadDelivery extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-
+    protected $fillable = [
+        'petugas_vendor',
+        'no_surat_jalan_vendor',
+        'order_qty',
+    ];
+    
     public function purchaseOrderLine()
     {
         return $this->belongsTo('App\Models\PurchaseOrderLine', 'po_line_id', 'id');

@@ -47,7 +47,6 @@ class TempUploadDeliveryCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('create');
-        $this->crud->removeButton('update');
         $this->crud->removeButton('show');
         $this->crud->addButtonFromView('top', 'insertfromtemp', 'insertfromtemp', 'beginning');
         $this->crud->addButtonFromView('top', 'insertprintfromtemp', 'insertprintfromtemp', 'beginning');
@@ -103,16 +102,12 @@ class TempUploadDeliveryCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(TempUploadDeliveryRequest::class);
-
-        
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+  
+        CRUD::field('petugas_vendor');
+        CRUD::field('no_surat_jalan_vendor');
+        CRUD::field('order_qty');
+        CRUD::field('serial_number');
     }
-
     /**
      * Define what happens when the Update operation is loaded.
      * 
@@ -122,11 +117,6 @@ class TempUploadDeliveryCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
-    }
-
-    public function destroy($id)
-    {
-        return true;
     }
 
     public function insertToDb(Request $request)
