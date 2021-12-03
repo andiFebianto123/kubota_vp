@@ -127,7 +127,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
                     <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
 
-                    <table id="ds-table" class="table table-striped mb-0">
+                    <table id="ds-table" class="table table-striped mb-0 table-responsive">
                         <thead>
                             <tr>
                                 <th>

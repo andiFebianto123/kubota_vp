@@ -193,7 +193,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($po_changes_lines) > 0)
-                <table class="table table-striped mb-0">
+                <table class="table table-striped mb-0 table-responsive">
                     <thead>
                         <tr>
                             <th>PO Number</th>
