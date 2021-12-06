@@ -68,6 +68,9 @@ class forecastConverter {
     // data hasil perhitungan perminggu
     private $resultForecastForWeeks = [];
 
+    // menyimpan data colom header pada type week
+    public $columnHeader = [];
+
     function getQuery(){
         // SELECT id, 
         // item, 
@@ -88,12 +91,13 @@ class forecastConverter {
             $query->from('forecasts as f2')
             ->select(DB::raw('MAX(id)'))
             // ->where('item', $this->item)
-            ->where('f2.item', 'f1.item')
-            ->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = ?', ['SUBSTR(f1.forecast_date, 1, 10)']);
+            // ->where('f2.item', 'f1.item')
+            ->whereRaw('f2.item = f1.item')
+            ->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
         })
-        ->whereBetween('f1.forecast_date', ['2021-11-12', '2021-12-01']);
-        //dd($this->model::select('id', 'item', 'forecast_date')->get());
-        dd($db->get());
+        ->whereRaw("f1.forecast_date BETWEEN '2021-11-12' AND '2021-12-01'");
+        //->whereBetween('f1.forecast_date', ['2021-11-12', '2021-12-01']);
+        dd($db->get()->values()->all());
 
     }
 
@@ -207,12 +211,19 @@ class forecastConverter {
                 }	
                 break;
             case 'week':
-                dd($this->dataDatePerWeek);
+                $rome = ['I', 'II', 'III', 'IV'];
                 foreach($this->dataDatePerWeek as $key => $weekDate){
-                    foreach($weekDate as $week){
-                        
+                    array_push($this->columnHeader, $key);
+                    foreach($weekDate as $keyRome => $week){
+                        array_push($dataColumn, $rome[$keyRome]);
                     }
                 }
+                /*
+                    KETERANGAN :
+                     $this->columnHeader --> untuk membuat header colspan margin pada datatable yang terdiri dari 13 colom pertahun
+                     $dataColumn --> sebagai kolom yang pasti dipakai buat data table yang terdiri dari 53 colom per tahun
+                */
+                // dd([$this->columnHeader, $dataColumn, $this->dataDatePerWeek]);
                 break;
             case 'weeks':
                 foreach ($this->dataDatePerWeek as $weekDate) {
@@ -489,12 +500,19 @@ class forecastConverter {
                 // jika tgl sudah memasuki tanggal 1 dan telah ganti bulan
                 if(count($datePerWeek) > 0){
                     // jika data per week terdapat sisa yang masih ada maka kondisi ini akan berlaku
-                    array_push($dateArrayForWeekAll, $datePerWeek);
+                    if(count($dateArrayForWeekAll) > 3){
+                        // jika sudah memasuki minggu ke 4 tapi masih ada sisa data tgl nya maka hal itu perlu digabung 
+                        // ke dalam minggu ke - 4
+                        $merge = array_merge($dateArrayForWeekAll[3], $datePerWeek);
+                        $dateArrayForWeekAll[3] = $merge;
+                    }
+                    // array_push($dateArrayForWeekAll, $datePerWeek);
                     $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
                     // kosongkan data per week
                     $datePerWeek = [];
                     // kosongkan data per bulan
                     $dateArrayForWeekAll = [];
+
                 }else{
                     // jika data kosong brati sudah 7 hari tapi sekarang sudah ganti bulan
                     $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
@@ -512,9 +530,15 @@ class forecastConverter {
         }
         if(count($datePerWeek) > 0){
             // jika looping telah selesai tapi masih meninggalkan sisa data perminggu
-            array_push($dateArrayForWeekAll, $datePerWeek);
-            $datePerWeek = [];
+            if(count($dateArrayForWeekAll) > 3){
+                // jika sudah memasuki minggu ke 4 tapi masih ada sisa data tgl nya maka hal itu perlu digabung 
+                // ke dalam minggu ke - 4
+                $merge = array_merge($dateArrayForWeekAll[3], $datePerWeek);
+                $dateArrayForWeekAll[3] = $merge;
+            }
+            // array_push($dateArrayForWeekAll, $datePerWeek);
             $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
+            $datePerWeek = [];
             $dateArrayForWeekAll = [];
         }else{
             $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
@@ -754,7 +778,7 @@ class forecastConverter {
             $date_ = new DateTime("last day of {$convertYear}-{$getDate['date'][1]}");
             $maxDate = $date_->format("Y-m-d");
         }
-        $maxDate = "2022-03-20";
+        // $maxDate = "2022-03-20";
         return [
             'now' => $minDate,
             'target' => $maxDate,

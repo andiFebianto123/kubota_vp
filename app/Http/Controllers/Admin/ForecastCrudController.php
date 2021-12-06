@@ -329,7 +329,7 @@ class ForecastCrudController extends CrudController
         }else{
             $forecast->type = 'week';
         }
-        // $forecast->getQuery();
+        $forecast->getQuery();
 
         # memulai forecast
         $start = $forecast->forecastStart();
