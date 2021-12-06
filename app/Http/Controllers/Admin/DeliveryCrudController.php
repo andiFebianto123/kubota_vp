@@ -359,6 +359,8 @@ class DeliveryCrudController extends CrudController
         $data['deliveries'] = $arr_deliveries;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet-multiple',$data);
+        // return $pdf->stream();
+
         return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
 

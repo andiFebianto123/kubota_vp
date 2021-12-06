@@ -122,7 +122,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
-                <form id="form-table-delivery-print" action="{{url('admin/delivery-print-label-all')}}" method="post">
+                <form id="form-print-mass-ds" action="{{url('admin/delivery-print-label-all')}}" method="post">
                     @csrf
                     <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
                     <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
@@ -193,7 +193,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                         </tfoot>
                     </table>
-                    <button type="submit" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> <span>PDF</span></button>
+                    <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
+                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
                 </form>
                 @else
                 <p>No Data Available</p>
@@ -243,6 +244,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
 @stack('crud_fields_scripts')
 <script>
+    var urlMassDs = "{{url('admin/delivery-export-mass-pdf-post')}}"
+    var urlPrintLabel = "{{url('admin/delivery-print-label-all')}}"
+
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
@@ -250,6 +254,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         $('#ds-table').DataTable();
         initializeFieldsWithJavascript('form');
     } );
+
+    function printLabel(){
+        $("#form-print-mass-ds").attr('action', urlPrintLabel)
+        $("#form-print-mass-ds").submit();
+    }
+
+    function printMassDs(){
+        $("#form-print-mass-ds").attr('action', urlMassDs)
+        submitAfterValid('form-print-mass-ds')
+    }
 
     var totalChecked = 0
 
@@ -261,7 +275,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         if ($(this).prop('checked')) {
             totalChecked = $(this).data('delivery')
         }
-        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+        $('#btn-for-form-print-label span').text('PDF Label ('+totalChecked+')')
+        $('#btn-for-form-print-mass-ds span').text('PDF DS ('+totalChecked+')')
     })
 
     $('.check-delivery').change(function () {
@@ -273,7 +288,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             totalChecked --
         }
 
-        $('#btn-for-form-print-mass-ds span').text('PDF ('+totalChecked+')')
+        $('#btn-for-form-print-label span').text('PDF Label ('+totalChecked+')')
+        $('#btn-for-form-print-mass-ds span').text('PDF DS ('+totalChecked+')')
     })
 
     function initializeFieldsWithJavascript(container) {
