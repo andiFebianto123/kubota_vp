@@ -93,32 +93,22 @@
         <div>
             <h5>Data Forecast <b> {{Session::get("week")}} {{Session::get("month")}} {{Session::get("year")}}</b></h5>
         </div>
-
         <table id="crudTable" class="bg-white table table-striped table-hover nowrap rounded shadow-xs border-xs mt-2" style="border-collapse: collapse;" cellspacing="0">
             <thead>
-              <tr>
-                <th rowspan="2">Name Item</th>
-                <th colspan="2" style="border: 1px solid #ddd; text-align:center;">Bulan 1</th>
-                <th colspan="2" style="border: 1px solid #ddd; text-align:center;">Bulan 2</th>
-                <th></th>
-              </tr>
               <tr>
                 {{-- Table columns --}}
                 @foreach ($crud->columns() as $column)
                   @if($column['label'])
                     <th
-                      style="border:1px solid #ddd;"
                       data-orderable="{{ var_export($column['orderable'], true) }}"
                       data-priority="{{ $column['priority'] }}"
                       {{--
-
                           data-visible-in-table => if developer forced field in table with 'visibleInTable => true'
                           data-visible => regular visibility of the field
                           data-can-be-visible-in-table => prevents the column to be loaded into the table (export-only)
                           data-visible-in-modal => if column apears on responsive modal
                           data-visible-in-export => if this field is exportable
                           data-force-export => force export even if field are hidden
-
                       --}}
 
                       {{-- If it is an export field only, we are done. --}}
@@ -170,7 +160,6 @@
             <tfoot>
               <tr>
                 {{-- Table columns --}}
-                <th>Name Item</th>
                 @foreach ($crud->columns() as $column)
                   <th>{!! $column['label'] !!}</th>
                 @endforeach

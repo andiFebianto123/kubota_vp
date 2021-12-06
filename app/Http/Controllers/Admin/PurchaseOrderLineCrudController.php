@@ -16,6 +16,8 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use PDF;
 use Prologue\Alerts\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 /**
  * Class PurchaseOrderLineCrudController
@@ -292,21 +294,32 @@ class PurchaseOrderLineCrudController extends CrudController
         return redirect()->back();
     }
 
-    public function exportPdfLabel($id){
-        // SELECT  d.id, po.po_num, d.po_line, po_line.item, po_line.description, d.ds_num, d.po_num FROM `delivery` d 
-        // JOIN po_line ON po_line.po_line = d.po_line
-        // JOIN po ON po.po_num = d.po_num
-        // WHERE d.id = 1 GROUP BY po.po_num
-        $db = Delivery::join('po_line', 'po_line.po_line', 'delivery.po_line')
-        ->join('po', 'po.po_num', 'delivery.po_num')
-        ->whereIn('delivery.id', [$id, 6])
-        ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'po_line.item as item', 'po_line.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty')
-        ->groupBy('delivery.id')->get();
-        $data['data'] = $db;
+    public function exportPdfLabel($id = 0, Request $request){
+
+        // SELECT d.id, po.po_num, d.po_line, d.item, d.description, d.ds_num, po.vend_num, d.shipped_qty, vendor_item.qty_per_box FROM `delivery` d JOIN po ON po.po_num = d.po_num JOIN vendor_item ON vendor_item.item = d.item WHERE d.id = 1
+        if($request->input('print_delivery') != null){
+            $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+            ->join('po', 'po.po_num', 'delivery.po_num')
+            ->whereIn('delivery.id', $request->input('print_delivery'))
+            ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+            ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
+            // ->groupBy('delivery.id')->get();
+        }else{
+            if($id != 0){
+                $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+                ->join('po', 'po.po_num', 'delivery.po_num')
+                ->where('delivery.id', $id)
+                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
+            // ->groupBy('delivery.id')->get();
+            }
+        }
+
+        $data['data'] = $db->get();
 
         $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
-        // return view('exports.pdf.delivery-sheet-label');
-        // return $pdf->download('label-'.now().'.pdf');
-        return $pdf->stream();
+        // return view('exports.pdf.delivery-sheet-label', $data);
+        return $pdf->download('print-label-'.now().'.pdf');
+        // return $pdf->stream();
     }
 }

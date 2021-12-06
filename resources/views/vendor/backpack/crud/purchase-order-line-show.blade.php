@@ -122,7 +122,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
-                <form id="form-print-mass-ds" action="{{url('admin/delivery-export-mass-pdf-post')}}" method="post">
+                <form id="form-table-delivery-print" action="{{url('admin/delivery-print-label-all')}}" method="post">
                     @csrf
                     <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
                     <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
@@ -168,6 +168,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-secondary"><i class="la la-print"></i></a>
                                     <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                 </td>
                             </tr>
@@ -192,9 +193,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                         </tfoot>
                     </table>
-                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="submitAfterValid('form-print-mass-ds')"><i class="la la-file-pdf"></i> <span>PDF</span></button>
+                    <button type="submit" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> <span>PDF</span></button>
                 </form>
-
                 @else
                 <p>No Data Available</p>
                 @endif

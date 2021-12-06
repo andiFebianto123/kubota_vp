@@ -49,6 +49,7 @@ Route::group([
 
     // Route untuk export PDF print label delivery sheet detail
     Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabel');
+    Route::post('delivery-print-label-all', 'PurchaseOrderLineCrudController@exportPdfLabel');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
 });

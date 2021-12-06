@@ -207,6 +207,7 @@ class forecastConverter {
                 }	
                 break;
             case 'week':
+                dd($this->dataDatePerWeek);
                 foreach($this->dataDatePerWeek as $key => $weekDate){
                     foreach($weekDate as $week){
                         
@@ -214,7 +215,6 @@ class forecastConverter {
                 }
                 break;
             case 'weeks':
-                dd($this->dataDatePerWeek);
                 foreach ($this->dataDatePerWeek as $weekDate) {
                     # $weekDate --> data array harian perminggu
                     $dateArray = collect($weekDate);

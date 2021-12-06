@@ -2,14 +2,38 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo "Hallo semua"; ?></title>
-
-    <style type="text/css" media="all">
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <title><?php echo "Print Label"; ?></title>
+    <style type="text/css">
+        #header {
+            font-size: 26px;
+            color: black;
+            font-weight: 800;
+        }
+        /* #tableA {
+            width: 100%; 
+            border-collapse: collapse;
+        }
+        #tableA tr th {
+            border: 1px solid gray;
+            text-align: left;
+        }
+        #tableA tr td{
+            border: 1px solid gray;
+            height: 38.1px;
+        } */
+    </style>
+    <style type="text/css">
+        /* #tableB tr th {
+            border: 1px solid gray;
+            text-align: left;
+        } */
     </style>
 </head>
+
+@php
+    $background = "background-color: red;";
+@endphp
 
 <body style="padding:0px; margin:0px">
       <div class="container" style="width:100%; height: auto; background-color:transparent; display:block;">
@@ -41,7 +65,7 @@
                 # nomor label
                 $increment = 1;
                 # jumlah pembagiannya
-                $dbagi = 24;
+                $dbagi = $delivery->qty_per_box;
                 # jumlah qty per ds delivery
                 $jumlahQtyData = $delivery->qty;
                 # lakukan pembagian agar mengetahui jumlah looping sebanyak
@@ -70,36 +94,120 @@
                 // jika increment adalah bilangan ganjil
         ?>
                 <div class="box" style="
-                    width: 49%; 
-                    height: 240px; 
-                    border: 1px solid black;
-                    margin-bottom: 10px;
-                    display: block;
-                    float:left; "
-                >
-                    <strong>{{ $increment }}</strong>
-                    <p>{{ $delivery->id }}</p>
-                    <p>{{ $delivery->ds_num }}</p>
-                    <p>{{ $qtyAsli }}</p>
-                </div>
-                <div style="clear:both;"></div>
+                width: 49%; 
+                height: 240px; 
+                border: 1px solid black;
+                display: block;
+                margin-bottom: 8px;
+                float:left;"
+            >
+                
+            <table style="width: 100%; border-spacing:0px;" cellpadding="0">
+                    <tr>
+                        <th colspan="2"><div id="header" style="text-align: left; height:32px;">No. {{ $increment }}</div></th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div><strong>PO</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div>{{ $delivery->po_num }}-{{ $delivery->po_line }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div><strong>DS Number</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div>{{ $delivery->ds_num }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div><strong>Item Code</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div>{{ $delivery->item }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div><strong>Item Description</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 39.1px;">
+                            <div>{{ $delivery->description }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 41.1px;">
+                            <div><strong>Qty</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 41.1px;">
+                            <div>{{ $qtyAsli }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="clear:both;"></div>
         <?php
             }else{
-                // jika increment adalah bilangan genap
+                // jika increment adalah bilangan ganjil
         ?>
             <div class="box" style="
                 width: 49%; 
                 height: 240px; 
                 border: 1px solid black;
                 display: block;
-                margin-bottom: 10px;
-                margin-right: 10px;
+                margin-bottom: 8px;
+                margin-right: 8px;
                 float:left;"
             >
-                <strong>{{ $increment }}</strong>
-                <p>{{ $delivery->id }}</p>
-                <p>{{ $delivery->ds_num }}</p>
-                <p>{{ $qtyAsli }}</p>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th colspan="2"><div id="header" style="text-align: left;">No. {{ $increment }}</div></th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div><strong>PO</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div>{{ $delivery->po_num }}-{{ $delivery->po_line }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div><strong>DS Number</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div>{{ $delivery->ds_num }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div><strong>Item Code</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div>{{ $delivery->item }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div><strong>Item Description</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 38.1px;">
+                            <div>{{ $delivery->description }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid gray; height: 38.7px;">
+                            <div><strong>Qty</strong></div>
+                        </td>
+                        <td style="border: 1px solid gray; height: 38.7px;">
+                            <div>{{ $qtyAsli }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         <?php } ?>
         <?php

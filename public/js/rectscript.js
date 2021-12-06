@@ -18,6 +18,18 @@ function submitAfterValid(formId, massError = false) {
         blinkElement('.btn')
         setInterval(blinkElement, 1000);
 
+        // console.log(datastring);
+
+        if(formId == 'form-table-delivery-print'){
+            formData = new FormData();
+            // console.log($("#"+formId));
+            $(`#${formId} .check-delivery`).map(function(i, v){
+                if(v.checked){
+                    formData.append(`delivery_id[${i}]`, v.value);
+                }
+            });
+        }
+
         $.ajax({
             type: "POST",
             url: url,

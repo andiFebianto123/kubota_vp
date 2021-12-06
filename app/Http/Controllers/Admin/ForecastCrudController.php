@@ -83,15 +83,15 @@ class ForecastCrudController extends CrudController
             $forecast->type = 'days';
             Session::put("forecast_type", $forecast->type);
         }
+
         $start = $forecast->forecastStart();
 
         $columns = $start->getColumns();
 
-        // CRUD::addColumn([
-        //     'label'     => 'Nama Item', // Table column heading
-        //     'name'      => 'name_item',
-        //     'orderable' => true,
-        // ]);
+        CRUD::addColumn([
+            'label'     => 'Nama Item', // Table column heading
+            'name'      => 'name_item',
+        ]);
         foreach($columns as $column){
             CRUD::addColumn([
                 'label' => "{$column}",
@@ -99,6 +99,11 @@ class ForecastCrudController extends CrudController
                 // 'orderable' => false,
             ]);
         }
+
+        // dd($columns);
+
+        // dd($start->getResultForecast());
+
 
         // if (request("filter_forecast_by") != null) {
         //     $ffb = request("filter_forecast_by");
@@ -331,7 +336,6 @@ class ForecastCrudController extends CrudController
         # menampilkan hasil forecast
         $resultForecast =  $start->getResultForecast();
 
-
         // overwrite any order set in the setup() method with the datatables order
         if (request()->input('order')) {
             // clear any past orderBy rules
@@ -345,7 +349,6 @@ class ForecastCrudController extends CrudController
             }
             // $resultForecast = $start->getResultWithOrderBy($orderBy);
         }
-
         $callback = array(
             'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
             'recordsTotal' => $totalRows, // total dari semua row
