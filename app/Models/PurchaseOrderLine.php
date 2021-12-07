@@ -35,14 +35,14 @@ class PurchaseOrderLine extends Model
     public function getChangeUnitPriceAttribute()
     {
         $value = number_format($this->unit_price,0,',','.');
-        $html_row =  $this->currency." ".$value; 
+        $html_row = $value; 
         if($this->po_change > 0){
             $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
 
             $change = number_format($last_po_line->unit_price,0,',','.')." -> ".$value;
 
             if(number_format($last_po_line->unit_price,0,',','.') != $value){
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$this->currency." ".$value."</b></button>";
+                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
             }
         }
 
@@ -70,14 +70,14 @@ class PurchaseOrderLine extends Model
     {
         $value = number_format($this->unit_price*$this->order_qty,0,',','.');
 
-        $html_row = $this->currency." " .$value; 
+        $html_row = $value; 
         if($this->po_change > 0){
             $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
             $from = $last_po_line->unit_price*$last_po_line->order_qty;
 
             $change = number_format($from,0,',','.')." -> ".$value;
             if(number_format($from,0,',','.') != $value){
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$this->currency." ".$value."</b></button>";
+                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
             }
         }
 

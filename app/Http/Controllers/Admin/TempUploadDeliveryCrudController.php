@@ -58,13 +58,12 @@ class TempUploadDeliveryCrudController extends CrudController
         $this->crud->orderBy('po_line', 'asc');        
 
         CRUD::addColumn([
-            'label'     => 'PO', // Table column heading
-            'name'      => 'po_num', 
-        ]);
-
-        CRUD::addColumn([
-            'label'     => 'PO Line', // Table column heading
-            'name'      => 'po_line',
+            'name'     => 'po_po_line',
+            'label'    => 'PO',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                return $entry->po_num. '-'.$entry->po_line;
+            }
         ]);
 
         CRUD::addColumn([
@@ -75,10 +74,6 @@ class TempUploadDeliveryCrudController extends CrudController
         CRUD::addColumn([
             'label'     => 'Qty', // Table column heading
             'name'      => 'order_qty', 
-        ]);
-        CRUD::addColumn([
-            'label'     => 'Serial Number', // Table column heading
-            'name'      => 'serial_number', 
         ]);
         CRUD::addColumn([
             'label'     => 'Petugas Vendor', // Table column heading

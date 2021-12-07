@@ -104,14 +104,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>PO Number</th>
                             <th>Status</th>
                             <th>Item</th>
-                            <th>Vendor Name</th>
                             <th>Description</th>
                             <th>Qty</th>
                             <th>UM</th>
                             <th>Due Date</th>
                             <th>Tax (%)</th>
-                            <th>Unit Price</th>
-                            <th>Total Price</th>
+                            <th>Unit Price ({{$entry->vendor->currency}})</th>
+                            <th>Total Price ({{$entry->vendor->currency}})</th>
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
@@ -137,7 +136,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </span>
                             </td>
                             <td>{{$po_line->item}}</td>
-                            <td>{{$po_line->vendor_name}}</td>
                             <td>{{$po_line->description}}</td>
                             <td>{!! $po_line->change_order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
