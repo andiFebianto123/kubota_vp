@@ -18,10 +18,11 @@
             border: 1px solid gray;
             text-align: left;
         }
-        #tableA tr td{
-            border: 1px solid gray;
-            height: 38.1px;
-        } */
+        */
+        #tableA tr td, th{
+            box-sizing:border-box;
+            padding-left: 5px;
+        }
     </style>
     <style type="text/css">
         /* #tableB tr th {
@@ -102,7 +103,7 @@
                 float:left;"
             >
                 
-            <table style="width: 100%; border-spacing:0px;" cellpadding="0">
+            <table id="tableA" style="width: 100%; border-spacing:0px;" cellpadding="0">
                     <tr>
                         <th colspan="2"><div id="header" style="text-align: left; height:32px;">No. {{ $increment }}</div></th>
                     </tr>
@@ -163,7 +164,7 @@
                 float:left;"
             >
                 
-                <table style="width: 100%; border-collapse: collapse;">
+                <table id="tableA" style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <th colspan="2"><div id="header" style="text-align: left;">No. {{ $increment }}</div></th>
                     </tr>
