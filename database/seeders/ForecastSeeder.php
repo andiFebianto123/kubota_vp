@@ -15,7 +15,7 @@ class ForecastSeeder extends Seeder
             [
              "id" => 1,
              "forecast_num" => "Forecast 1",
-             "forecast_date" => "2021-11-17 14:33:33",
+             "forecast_date" => "2021-12-17 14:33:33",
              "item" => "Item 1",
              "qty" => 12,
             ],
@@ -35,7 +35,8 @@ class ForecastSeeder extends Seeder
             [
              "id" => 3,
              "forecast_num" => "Forecast 3",
-             "forecast_date" => "2021-11-29 14:34:13",
+             "forecast_date" => "2021-12-10 14:34:13",
+             "vend_num" => "V001303",
              "item" => "Item 2",
              "qty" => 23,
             ],
@@ -45,7 +46,7 @@ class ForecastSeeder extends Seeder
             [
              "id" => 4,
              "forecast_num" => "Forecast 4",
-             "forecast_date" => "2021-11-29 14:34:13",
+             "forecast_date" => "2021-12-08 14:34:13",
              "item" => "Item 2",
              "qty" => 11,
             ],
@@ -55,8 +56,9 @@ class ForecastSeeder extends Seeder
             [
              "id" => 5,
              "forecast_num" => "Forecast 5",
-             "forecast_date" => "2021-11-30 14:34:13",
+             "forecast_date" => "2022-01-30 14:34:13",
              "item" => "Item 1",
+             "vend_num" => "V001303",
              "qty" => 10,
             ],
             ["id" => 5],
@@ -65,7 +67,7 @@ class ForecastSeeder extends Seeder
             [
              "id" => 6,
              "forecast_num" => "Forecast 6",
-             "forecast_date" => "2021-11-30 14:35:13",
+             "forecast_date" => "2022-01-30 16:18:36",
              "item" => "Item 1",
              "qty" => 65,
             ],
@@ -75,11 +77,41 @@ class ForecastSeeder extends Seeder
             [
              "id" => 7,
              "forecast_num" => "Forecast 7",
-             "forecast_date" => "2021-12-02 15:11:35",
+             "forecast_date" => "2021-12-07 15:11:35",
              "item" => "Item 4",
              "qty" => 98,
             ],
             ["id" => 7],
+          ],
+          [
+            [
+             "id" => 8,
+             "forecast_num" => "Forecast 8",
+             "forecast_date" => "2021-12-08 15:11:35",
+             "item" => "Item 4",
+             "qty" => 40,
+            ],
+            ["id" => 8],
+          ],
+          [
+            [
+             "id" => 9,
+             "forecast_num" => "Forecast 9",
+             "forecast_date" => "2021-12-13 14:34:13",
+             "item" => "Item 2",
+             "qty" => 9,
+            ],
+            ["id" => 9],
+          ],
+          [
+            [
+             "id" => 10,
+             "forecast_num" => "Forecast 10",
+             "forecast_date" => "2021-12-20 14:33:33",
+             "item" => "Item 1",
+             "qty" => 15,
+            ],
+            ["id" => 10],
           ],
         ];
 

@@ -41,6 +41,35 @@ class ForecastCrudController extends CrudController
         // $this->crud->query = $this->crud->query
     }
 
+    protected function getFieldAccess(){
+    
+        if(request('vendor_submit')){
+            if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
+                Session::put("vendor_name", request('filter_vendor'));
+                $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
+                Session::put('vendor_text', $db->vend_name);
+            }else{
+                Session::forget('vendor_name');
+                Session::forget('vendor_text');
+            }
+        }
+    }
+
+    protected function setQuery(){
+        if(Session::get('vendor_name')){
+            $this->crud->query = $this->crud->query
+            ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+            ->where('vend_num', Session::get('vendor_name'))
+            ->groupBy('item')
+            ->orderBy('id', 'DESC');
+        }else{
+            $this->crud->query = $this->crud->query
+            ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+            ->groupBy('item')
+            ->orderBy('id', 'DESC');
+        }
+    }
+
     /**
      * Define what happens when the List operation is loaded.
      * 
@@ -57,10 +86,7 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
-        $this->crud->query = $this->crud->query
-        ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
-        ->groupBy('item')
-        ->orderBy('id', 'DESC');
+        
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
         // $ar_month = ["Januari","Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -75,10 +101,23 @@ class ForecastCrudController extends CrudController
 
         // $this->crud->allowResponsive();
 
+        $this->getFieldAccess();
+
+        $this->setQuery();
+
         $forecast = new forecastConverter;
-        if(request("filter_forecast_by") != null){
-            $forecast->type = (request("filter_forecast_by") == 'day') ? 'days' : 'week';
-            Session::put("forecast_type", $forecast->type);
+
+        if(request("filter_forecast_by") != null){ 
+            if(request('filter_forecast_by') == 'day'){
+                $forecast->type = 'days';
+                Session::put("forecast_type", $forecast->type);
+            }else if(request('filter_forecast_by') == 'week'){
+                $forecast->type = 'week';
+                Session::put("forecast_type", $forecast->type);
+            }else{
+                $forecast->type = 'moon';
+                Session::put("forecast_type", $forecast->type);
+            }
         }else{
             $forecast->type = 'days';
             Session::put("forecast_type", $forecast->type);
@@ -88,22 +127,23 @@ class ForecastCrudController extends CrudController
 
         $columns = $start->getColumns();
 
+        $this->crud->columnHeader = $start->columnHeader;
+
+        $this->crud->type = $start->type;
+
         CRUD::addColumn([
             'label'     => 'Nama Item', // Table column heading
             'name'      => 'name_item',
         ]);
-        foreach($columns as $column){
+        foreach($columns as $key => $column){
             CRUD::addColumn([
-                'label' => "{$column}",
-                'name' => "column_" . $column,
+                'label' => ($forecast->type == 'week') ? "{$column['value']}" : $column,
+                'name' => "column_" . "{$key}",
+                'rome_symbol' => ($forecast->type == 'week') ? $column['rome_symbol'] : '',
+                'type' => 'forecast',
                 // 'orderable' => false,
             ]);
         }
-
-        // dd($columns);
-
-        // dd($start->getResultForecast());
-
 
         // if (request("filter_forecast_by") != null) {
         //     $ffb = request("filter_forecast_by");
@@ -112,7 +152,7 @@ class ForecastCrudController extends CrudController
         //     $this->dynamicColumns('year');
         // }
         $this->crud->andi = 'Andi febianto';
-        $this->crud->urlAjaxFilterVendor = url('admin/filter/ajax-vendor-options');
+        $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
         
     }
@@ -199,95 +239,95 @@ class ForecastCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    public function searchCustom()
-    {
-        $this->crud->hasAccessOrFail('list');
-        $this->crud->applyUnappliedFilters();
-        $totalRows = $this->crud->model->count();
-        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
-        $startIndex = request()->input('start') ?: 0;
-        // if a search term was present
-        if (request()->input('search') && request()->input('search')['value']) {
-            // filter the results accordingly
-            $this->crud->applySearchTerm(request()->input('search')['value']);
-            // recalculate the number of filtered rows
-            $filteredRows = $this->crud->count();
-        }
-        // start the results according to the datatables pagination
-        if (request()->input('start')) {
-            $this->crud->skip((int) request()->input('start'));
-        }
-        // limit the number of results according to the datatables pagination
-        if (request()->input('length')) {
-            $this->crud->take((int) request()->input('length'));
-        }
-        // overwrite any order set in the setup() method with the datatables order
-        if (request()->input('order')) {
-            // clear any past orderBy rules
-            $this->crud->query->getQuery()->orders = null;
-            foreach ((array) request()->input('order') as $order) {
-                $column_number = (int) $order['column'];
-                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
-                $column = $this->crud->findColumnById($column_number);
-                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
-                    // apply the current orderBy rules
-                    $this->crud->orderByWithPrefix($column['name'], $column_direction);
-                }
-                // check for custom order logic in the column definition
-                if (isset($column['orderLogic'])) {
-                    $this->crud->customOrderBy($column, $column_direction);
-                }
-            }
-        }
-        // show newest items first, by default (if no order has been set for the primary column)
-        // if there was no order set, this will be the only one
-        // if there was an order set, this will be the last one (after all others were applied)
-        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
-        $orderBy = $this->crud->query->toBase()->orders;
-        $table = $this->crud->model->getTable();
-        $key = $this->crud->model->getKeyName();
-        $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
-            return (isset($item['column']) && $item['column'] === $key)
-                || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
-        });
-        if (! $hasOrderByPrimaryKey) {
-            $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
-        }
-        $entries = $this->crud->getEntries();
+    // public function searchCustom()
+    // {
+    //     $this->crud->hasAccessOrFail('list');
+    //     $this->crud->applyUnappliedFilters();
+    //     $totalRows = $this->crud->model->count();
+    //     $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+    //     $startIndex = request()->input('start') ?: 0;
+    //     // if a search term was present
+    //     if (request()->input('search') && request()->input('search')['value']) {
+    //         // filter the results accordingly
+    //         $this->crud->applySearchTerm(request()->input('search')['value']);
+    //         // recalculate the number of filtered rows
+    //         $filteredRows = $this->crud->count();
+    //     }
+    //     // start the results according to the datatables pagination
+    //     if (request()->input('start')) {
+    //         $this->crud->skip((int) request()->input('start'));
+    //     }
+    //     // limit the number of results according to the datatables pagination
+    //     if (request()->input('length')) {
+    //         $this->crud->take((int) request()->input('length'));
+    //     }
+    //     // overwrite any order set in the setup() method with the datatables order
+    //     if (request()->input('order')) {
+    //         // clear any past orderBy rules
+    //         $this->crud->query->getQuery()->orders = null;
+    //         foreach ((array) request()->input('order') as $order) {
+    //             $column_number = (int) $order['column'];
+    //             $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+    //             $column = $this->crud->findColumnById($column_number);
+    //             if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+    //                 // apply the current orderBy rules
+    //                 $this->crud->orderByWithPrefix($column['name'], $column_direction);
+    //             }
+    //             // check for custom order logic in the column definition
+    //             if (isset($column['orderLogic'])) {
+    //                 $this->crud->customOrderBy($column, $column_direction);
+    //             }
+    //         }
+    //     }
+    //     // show newest items first, by default (if no order has been set for the primary column)
+    //     // if there was no order set, this will be the only one
+    //     // if there was an order set, this will be the last one (after all others were applied)
+    //     // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+    //     $orderBy = $this->crud->query->toBase()->orders;
+    //     $table = $this->crud->model->getTable();
+    //     $key = $this->crud->model->getKeyName();
+    //     $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+    //         return (isset($item['column']) && $item['column'] === $key)
+    //             || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+    //     });
+    //     if (! $hasOrderByPrimaryKey) {
+    //         $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
+    //     }
+    //     $entries = $this->crud->getEntries();
 
-        $dataCobaCoba = [
-            [
-                'Muhammad Andi febianto',
-                23,
-                ''
-            ],
-            [
-                'Faiz Irfan Setiawan',
-                17,
-                ''
-            ],
-            [
-                'Aditya Rafli',
-                13,
-                ''
-            ],
-        ];
-        // $entries = $dataCobaCoba;
-        // $startIndex => adalah offsetnya
-        // $totalRows => adalah jumlah total baris semua datanya
-        // dd([$totalRows, $filteredRows, $startIndex]);
-        // $this->latihanCollect();
-        $this->implementForecastConverter();
+    //     $dataCobaCoba = [
+    //         [
+    //             'Muhammad Andi febianto',
+    //             23,
+    //             ''
+    //         ],
+    //         [
+    //             'Faiz Irfan Setiawan',
+    //             17,
+    //             ''
+    //         ],
+    //         [
+    //             'Aditya Rafli',
+    //             13,
+    //             ''
+    //         ],
+    //     ];
+    //     // $entries = $dataCobaCoba;
+    //     // $startIndex => adalah offsetnya
+    //     // $totalRows => adalah jumlah total baris semua datanya
+    //     // dd([$totalRows, $filteredRows, $startIndex]);
+    //     // $this->latihanCollect();
+    //     $this->implementForecastConverter();
 
-        $callback = array(
-            'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
-            'recordsTotal' => 3, // total dari semua row
-            'recordsFiltered' => 3,
-            'data' => $dataCobaCoba
-        );
-        // return $callback;
-        // return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
-    }
+    //     $callback = array(
+    //         'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
+    //         'recordsTotal' => 3, // total dari semua row
+    //         'recordsFiltered' => 3,
+    //         'data' => $dataCobaCoba
+    //     );
+    //     // return $callback;
+    //     // return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
+    // }
 
     public function search(){
         $this->crud->hasAccessOrFail('list');
@@ -312,10 +352,11 @@ class ForecastCrudController extends CrudController
 
         $entries = $this->crud->getEntries();
 
-        # mengambil semua nama item data dari tabel forecast
         $getItem = $entries->map(function($item){
             return $item->item;
         });
+        # mengambil semua nama item data dari tabel forecast
+        
 
         $forecast = new forecastConverter;
         # tambah model tabel forecast
@@ -326,10 +367,13 @@ class ForecastCrudController extends CrudController
         # pilih berdasarkan filter penentuan type perhitungan forecast
         if(Session::get('forecast_type') == 'days'){
             $forecast->type = 'days';
-        }else{
+        }else if(Session::get('forecast_type') == 'week'){
             $forecast->type = 'week';
+        }else{
+            $forecast->type = 'moon';
+
         }
-        $forecast->getQuery();
+        // $forecast->getQuery();
 
         # memulai forecast
         $start = $forecast->forecastStart();
@@ -347,7 +391,7 @@ class ForecastCrudController extends CrudController
                 $perfix = $order['dir'];
                 array_push($orderBy, [$columnIndex, $perfix]);
             }
-            // $resultForecast = $start->getResultWithOrderBy($orderBy);
+            $resultForecast = $start->getResultWithOrderBy($orderBy);
         }
         $callback = array(
             'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
@@ -358,84 +402,5 @@ class ForecastCrudController extends CrudController
         return $callback;
     }
 
-    function latihanCollect(){
-        $contohData = [
-			[
-                'id' => 1,
-				'name_item' => 'Item 1',
-				'tgl_request_update' => '17-11-2021 01:00:00',
-				'qty' => 12
-			],
-			[
-                'id' => 10,
-				'name_item' => 'Item 3',
-				'tgl_request_update' => '17-11-2021 05:00:89',
-				'qty' => 40
-			],
-			[
-                'id' => 4,
-				'name_item' => 'Item 2',
-				'tgl_request_update' => '19-11-2021 03:00:00',
-				'qty' => 10
-			],
-			[
-                'id' => 5,
-				'name_item' => 'Item 2',
-				'tgl_request_update' => '20-12-2021 04:00:00',
-				'qty' => 78
-			],
-			[
-                'id' => 2,
-				'name_item' => 'Item 1',
-				'tgl_request_update' => '17-11-2021 01:03:00',
-				'qty' => 5
-			],
-			[
-                'id' => 3,
-				'name_item' => 'Item 1',
-				'tgl_request_update' => '07-12-2021 02:00:00',
-				'qty' => 65
-			],
-		];
-        // di bawah ini dipakai buat pencarian berdasarkan like '%$search%'
-        $u = collect($contohData);
-        $sorted = $u->sortBy([
-            ['id', 'desc']
-        ]);
-
-        $filterU = $u->filter(function ($value){
-            return false !== stristr($value['name_item'], 'Item 1');
-        });
-        // pencarian bersarkan tanggal
-        $tgl = '17-11-2021';
-        $filterSearch = $filterU->filter(function ($value) use($tgl){
-            return false !== stristr($value['tgl_request_update'], $tgl);           
-        });
-        # ingin mencari data item dari tanggal sebelumnya 
-        $searchBeforeDate = $filterU->filter(function ($value) use($tgl){
-            return $value['tgl_request_update'] < $tgl;
-        });
-        // dd((int) $filterSearch->sortBy([
-        //     ['id', 'desc']
-        // ])->first()['qty']);
-        dd($searchBeforeDate);
-
-        dd($filterU->values()->all());
-        dd($filterU->last());
-        // $this->implementForecastConverter();
-        die();
-    }
-
-    function implementForecastConverter(){
-        $forecast = new forecastConverter;
-        $forecast->type = 'days';
-        $start = $forecast->forecastStart();
-        echo "<pre>";
-        print_r($start->getColumns());
-        // print_r($start->dataDatePerWeek);
-        print_r($start->getResultForecast());
-        echo "</pre>";
-        die();
-    }
 
 }

@@ -31,6 +31,7 @@
               <strong>Filter</strong>
           </div>
           <div class="card-body">
+            <form action="" method="GET">
               <div class="form-group">
                 <label>Filter By Vendor</label>
                 <select 
@@ -38,10 +39,15 @@
                   style="width: 100;"
                   name="filter_vendor"
                 >
-                  <option value="hallo" selected>-</option>
+                  @if(Session::get('vendor_name'))
+                    <option value="{{ Session::get('vendor_name') }}" selected>{{ Session::get('vendor_text') }}</option>
+                  @else
+                    <option value="hallo" selected>-</option>
+                  @endif
                 </select>
               </div>
-              <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+              <button type="submit" name="vendor_submit" value='1' class="btn btn-sm btn-primary">Submit</button>
+            </form>
             </div>
         </div>
     </div>
@@ -89,17 +95,41 @@
         @if ($crud->filtersEnabled())
           @include('crud::inc.filters_navbar')
         @endif
-
+        @php
+          // dd($crud->columns()); 
+        @endphp
         <div>
             <h5>Data Forecast <b> {{Session::get("week")}} {{Session::get("month")}} {{Session::get("year")}}</b></h5>
         </div>
         <table id="crudTable" class="bg-white table table-striped table-hover nowrap rounded shadow-xs border-xs mt-2" style="border-collapse: collapse;" cellspacing="0">
             <thead>
+              @if($crud->type == 'week')
+                <tr>
+                  <th></th>
+                @foreach($crud->columnHeader as $header)
+                  <th colspan="4" style="text-align:center; border:1px solid #ddd;">
+                      {!! $header !!}
+                  </th>
+                @endforeach
+                 {{-- <th></th> --}}
+                </tr>
+              @endif
               <tr>
                 {{-- Table columns --}}
                 @foreach ($crud->columns() as $column)
                   @if($column['label'])
+                    @php
+                      $style = "";
+                      if($column['type'] == 'forecast'){
+                        if($column['rome_symbol'] == 'I'){
+                          $style = "border-left: 1px solid #ddd;";
+                        }else if($column['rome_symbol'] == 'IV'){
+                          $style = "border-right: 1px solid #ddd;";
+                        }
+                      }
+                    @endphp
                     <th
+                      style="{{ $style }}"
                       data-orderable="{{ var_export($column['orderable'], true) }}"
                       data-priority="{{ $column['priority'] }}"
                       {{--
@@ -147,12 +177,12 @@
                     @endif
                 @endforeach
 
-                @if ( $crud->buttons()->where('stack', 'line')->count() )
+                {{-- @if ( $crud->buttons()->where('stack', 'line')->count() )
                   <th data-orderable="false"
                       data-priority="{{ $crud->getActionsColumnPriority() }}"
                       data-visible-in-export="false"
                       >{{ trans('backpack::crud.actions') }}</th>
-                @endif
+                @endif --}}
               </tr>
             </thead>
             <tbody>
@@ -164,9 +194,9 @@
                   <th>{!! $column['label'] !!}</th>
                 @endforeach
 
-                @if ( $crud->buttons()->where('stack', 'line')->count() )
+                {{-- @if ( $crud->buttons()->where('stack', 'line')->count() )
                   <th>{{ trans('backpack::crud.actions') }}</th>
-                @endif
+                @endif --}}
               </tr>
             </tfoot>
           </table>
@@ -214,22 +244,28 @@
   @endif
   <script type="text/javascript">
     $(function(){
+       $('[data-toggle="tooltip"]').tooltip();
        $('.select2_filter_vendor').select2({
            minimumInputLength: 3,
            allowClear: true,
            placeholder: 'Select Vendor',
            ajax: {
               dataType: 'json',
-              url: 'action/daftarProvinsi.php',
-              delay: 800,
+              url: jobs.urlAjaxFilterVendor,
+              delay: 500,
               data: function(params) {
                 return {
-                  search: params.term
+                  term: params.term
                 }
               },
               processResults: function (data, page) {
               return {
-                results: data
+                results: $.map(data, function(item, key){
+                    return {
+                      text:item,
+                      id:key
+                    }
+                })
               };
             },
           }

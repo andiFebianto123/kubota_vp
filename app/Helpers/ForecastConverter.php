@@ -1,10 +1,15 @@
 <?php
 namespace App\Helpers;
+use App\Http\Traits\ForecastTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use DateTime;
+
 
 class forecastConverter {
 
+    // tambahkan trait di converternya
+    use ForecastTrait;
     # menyimpan data array semua tanggal dari tgl awal sampai target
     var $dataTglPerDay = [];
 
@@ -16,6 +21,8 @@ class forecastConverter {
 
     # type forecast
     var $type = '';
+    
+    private $querySearchRangeForecast;
 
     var $contohData = [
         [
@@ -67,40 +74,74 @@ class forecastConverter {
     private $resultForecastForDays = [];
     // data hasil perhitungan perminggu
     private $resultForecastForWeeks = [];
+    // data hasil perhitungan perbulan
+    private $resultForecastForMoons = [];
 
     // menyimpan data colom header pada type week
     public $columnHeader = [];
 
-    function getQuery(){
-        // SELECT id, 
-        // item, 
-        // forecast_date, 
-        // SUBSTR(forecast_date, 1, 10) AS tanggal, 
-        // qty FROM `forecasts` f1 where id = (
-        //     SELECT max(id) FROM forecasts f2 WHERE f2.item = f1.item AND SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)
-        // ) AND f1.forecast_date BETWEEN '2021-11-12' AND '2021-12-01' 
-        $db = $this->model::from('forecasts as f1')
-        ->select(
-            'id', 
-            'item', 
-            'forecast_date', 
-            DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
-            'qty'
-        )
+    /**
+     * Method yang bertugas untuk mengambil semua data forecast per item antara $this->fromDate sampai $this->targetDate
+     * data yang diambil oleh query tersebut merupakan data update terbaru pada setiap tanggalnya
+     * @param String $value --> adalah nama item
+     * @throws void
+     * @return void
+     */
+    function searchEntries($value){
+        $this->querySearchRangeForecast = $this->model::from('forecasts as f1');
+        if($this->type == 'days' || $this->type == 'week'){
+            $this->querySearchRangeForecast = $this->querySearchRangeForecast
+            ->select(
+                'id', 
+                'item', 
+                'forecast_date', 
+                DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
+                'qty'
+            );
+        }else{
+            $this->querySearchRangeForecast = $this->querySearchRangeForecast
+            ->select(
+                'id', 
+                'item', 
+                'forecast_date', 
+                DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
+                DB::raw('SUBSTR(forecast_date, 1, 7) as bulan'),
+                DB::raw('SUM(qty) as qty')
+            );
+        }
+        $this->querySearchRangeForecast = $this->querySearchRangeForecast
         ->where('id', function($query){
             $query->from('forecasts as f2')
             ->select(DB::raw('MAX(id)'))
-            // ->where('item', $this->item)
-            // ->where('f2.item', 'f1.item')
-            ->whereRaw('f2.item = f1.item')
-            ->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
+            ->whereRaw('f2.item = f1.item');
+            if(Session::get('vendor_name')){
+                $query->whereRaw('f2.vend_num = f1.vend_num');
+            }
+            $query->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
         })
-        ->whereRaw("f1.forecast_date BETWEEN '2021-11-12' AND '2021-12-01'");
-        //->whereBetween('f1.forecast_date', ['2021-11-12', '2021-12-01']);
-        dd($db->get()->values()->all());
+        ->whereRaw("f1.forecast_date BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'")
+        ->where("f1.item", $value);
 
+        if(Session::get('vendor_name')){
+            // jika terdapat nama vendor
+            $this->querySearchRangeForecast = $this->querySearchRangeForecast
+            ->where('f1.vend_num', Session::get('vendor_name'));
+        }
+
+        if($this->type == 'moon'){
+            $this->querySearchRangeForecast = $this->querySearchRangeForecast
+            ->groupBy(DB::raw('SUBSTR(forecast_date, 1, 7)'));
+        }
+        $this->querySearchRangeForecast = $this->querySearchRangeForecast
+        ->get();
     }
 
+    /**
+     * Method ini digunakan untuk melakukan pengurutan atau order data, tapi penggunaan method ini hanya diperlukan saja
+     * @param Array $order --> data order dari column datatable
+     * @throws void
+     * @return void
+     */
     function getResultWithOrderBy($order){
         $colectDataMerge = [];
         if($this->type == 'days'){
@@ -109,7 +150,15 @@ class forecastConverter {
                 array_push($colectDataMerge, $mergeData->all());
             }
         }else if($this->type == 'week'){
-
+            foreach($this->resultForecastForOriginal as $key => $dataForecastOri){
+                $mergeData = collect($dataForecastOri)->merge($this->resultForecastForWeeks[$key]);
+                array_push($colectDataMerge, $mergeData->all());
+            }
+        }else if($this->type == 'moon'){
+            foreach($this->resultForecastForOriginal as $key => $dataForecastOri){
+                $mergeData = collect($dataForecastOri)->merge($this->resultForecastForMoons[$key]);
+                array_push($colectDataMerge, $mergeData->all());
+            }
         }
        $colectDataMerge = collect($colectDataMerge)->sortBy($order)->map(function($item){
            $cut = array_slice($item, (count($item) / 2));
@@ -127,22 +176,6 @@ class forecastConverter {
     function forecastStart(){
         # Mendapatkan semua data tanggal
         $this->forecastDateToConvert();
-
-        #proses mendapatkan data $contohData
-            // $this->contohData = [];
-        #end
-
-        #proses mendapatkan aggregat data termasuk olahan data aggregation berdasarkan pagination
-            // $u = collect($this->contohData);
-            // $unique = $u->unique('name_item');
-            // $unique_sort = $unique->sortBy([
-            //     ['id', 'desc']
-            // ])
-            // ->map(function($value, $key){
-            //     return $value['name_item'];
-            // });
-            // $this->name_items = $unique_sort->all(); // ['Item 3', 'Item 2', 'Item 1']
-        #end
 
         $d = $this->dateNow();
         if($this->type == 'days'){
@@ -177,15 +210,25 @@ class forecastConverter {
         if($this->type == 'days'){
             # jika tipe adalah hari
             foreach ($this->name_items as $value) {
-                $this->prosesDataPerItem($value);
+                $this->searchEntries($value);
+                // $this->prosesDataPerItem($value);
+                $this->prosesDataPerItem2($value);
             }
             return $this->resultForecastForDays;
         }else if($this->type == 'week'){
             #jika tipe adalah mingguan
             foreach ($this->name_items as $value) {
-                $this->prosesDataPerItemForWeek($value);
+                // $this->prosesDataPerItemForWeek($value);
+                $this->searchEntries($value);
+                $this->prosesDataPerItemForWeek2($value);
             }
             return $this->resultForecastForWeeks;
+        }else if($this->type == 'moon'){
+            foreach($this->name_items as $value){
+                $this->searchEntries($value);
+                $this->prosesDataPerItemForMoon($value);
+            }
+            return $this->resultForecastForMoons;
         }
         return 0;
     }
@@ -215,7 +258,15 @@ class forecastConverter {
                 foreach($this->dataDatePerWeek as $key => $weekDate){
                     array_push($this->columnHeader, $key);
                     foreach($weekDate as $keyRome => $week){
-                        array_push($dataColumn, $rome[$keyRome]);
+                        $first = $week[0];
+                        $last = $week[count($week)-1];
+                        $tooltip = $first."  >  ".$last;
+                        // array_push($dataColumn, $rome[$keyRome]);
+                        $column = [
+                            'rome_symbol' => $rome[$keyRome],
+                            'value' => "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='{$tooltip}'><b>{$rome[$keyRome]}</b></button>",
+                        ];
+                        array_push($dataColumn, $column);
                     }
                 }
                 /*
@@ -255,7 +306,7 @@ class forecastConverter {
                 foreach($this->dataTglPerDay as $moonYear){
                     // contoh output dari $moonYear "2021-11"
                     $date = new DateTime($moonYear);
-                    array_push($dataColumn, $date->format('y-M'));
+                    array_push($dataColumn, $date->format('M Y'));
                 }
                 break;
             default:
@@ -441,7 +492,7 @@ class forecastConverter {
         $moonsReverences = [
             '01' => 'Jan',
             '02' => 'Feb',
-            '03' => 'Marc',
+            '03' => 'March',
             '04' => 'Apr',
             '05' => 'May',
             '06' => 'Jun',
@@ -457,22 +508,7 @@ class forecastConverter {
             $e = explode('-',$date);
             return $e;
         });
-        // date per week format
-        // $week = [
-        //     'Nov 21' => [
-        //         ['01-11-21', '02-nov-21', ..., '07-nov-21'], // per 7 hari
-        //         ['08-nov-21', '09-nov-21', ..., '14-nov-21'],
-        //         ...,
-        //         ['25-nov-21', '26-nov-21', ..., '31-nov-21']
-        //     ]
-        // ];
         
-        // sample
-        // array:62 [▼
-        //     0 => "2021-12-01-Wed"
-        //     1 => "2021-12-02-Thu"
-        //     2 => "2021-12-03-Fri"
-
         $dateArrayPerMonth = [];
         $dateArrayForWeekAll = [];
         $datePerWeek = [];
@@ -544,6 +580,17 @@ class forecastConverter {
             $dateArrayPerMonth[$monthName] = $dateArrayForWeekAll;
             $dateArrayForWeekAll = [];
         }
+
+        // OUTPUT
+        // date per week format
+        // $week = [
+        //     'Nov 21' => [
+        //         ['01-11-21', '02-nov-21', ..., '07-nov-21'], // per 7 hari
+        //         ['08-nov-21', '09-nov-21', ..., '14-nov-21'],
+        //         ...,
+        //         ['25-nov-21', '26-nov-21', ..., '31-nov-21']
+        //     ]
+        // ];
 
         $this->dataDatePerWeek = $dateArrayPerMonth;
         // dd($dateArrayPerMonth);
@@ -678,11 +725,14 @@ class forecastConverter {
 
             #mendapatkan jumlah tanggal dalam 1 bulan berdasarkan kalender georgian
             $totalDayofMonth = cal_days_in_month(CAL_GREGORIAN, $monthNowTrigger, $yearNowTrigger);
+            $dayCountTarget = $totalDayofMonth;
 
             if($this->type == 'moon'){
                 // jika Tipe forecast adalah perbulan
                 $totalDayofMonth = 0;
-                array_push($this->dataTglPerDay, "{$yearNowTrigger}-{$monthNowTrigger}");
+                $stringMoon = "{$yearNowTrigger}-{$monthNowTrigger}";
+                $getDateToMoon = new DateTime($stringMoon);
+                array_push($this->dataTglPerDay, $getDateToMoon->format('Y-m'));
             }
 
             $picu = 0; // trigger untuk menghentikan proses looping
@@ -739,8 +789,10 @@ class forecastConverter {
 
             // cek jika tahun looping dan bulan looping sama dengan bulan, tahun target maka iterasi berhenti
             // ini khusus untuk type minggu
-            if($this->type == 'week'){
+            if($this->type == 'week' || $this->type == 'moon'){
                 if( ($yearNowTrigger == $yearTarget) && ($monthNowTrigger == $monthTarget)){
+                    $this->fromDate = "{$targetDate['explode'][0]}-{$targetDate['explode'][1]}-01";
+                    $this->targetDate = "{$targetDate['explode_target'][0]}-{$targetDate['explode_target'][1]}-{$dayCountTarget}";
                     break;
                 }
             }
@@ -778,7 +830,7 @@ class forecastConverter {
             $date_ = new DateTime("last day of {$convertYear}-{$getDate['date'][1]}");
             $maxDate = $date_->format("Y-m-d");
         }
-        // $maxDate = "2022-03-20";
+        // $maxDate = "2022-02-20";
         return [
             'now' => $minDate,
             'target' => $maxDate,
