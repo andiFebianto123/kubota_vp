@@ -184,7 +184,10 @@ class PurchaseOrderLineCrudController extends CrudController
             'name' => 'shipped_qty',
             'label' => 'Qty',
             'actual_qty' => $entry->shipped_qty,
-            'default' => $current_qty
+            'default' => $current_qty,
+            'attributes' => [
+                'data-max' =>  $current_qty,
+              ], 
         ]);
         if($entry->w_serial == 1){
             $this->crud->addField(

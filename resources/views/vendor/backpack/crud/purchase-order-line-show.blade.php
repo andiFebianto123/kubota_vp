@@ -110,7 +110,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @include('crud::inc.show_fields', ['fields' => $crud->fields()])
                     </div>
 
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" type="button" onclick="submitAfterValid('form-delivery')">Submit</button>
+                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" type="button" onclick="submitNewDs()">Submit</button>
                 </form>
         </div>
     </div>
@@ -202,6 +202,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div><!-- /.box-body -->
     </div>
 </div>
+
 @endsection
 
 
@@ -228,6 +229,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @endsection
 
 @section('after_scripts')
+
 <script type="text/javascript" src="{{ asset('packages/datatables.net/js/jquery.dataTables.min.js')}}"></script>
   <script type="text/javascript" src="{{ asset('packages/datatables.net-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
   <script type="text/javascript" src="{{ asset('packages/datatables.net-responsive/js/dataTables.responsive.min.js')}}"></script>
@@ -239,7 +241,24 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/create.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+<div id="modalWarningQty" class="modal fade" role="dialog">
+  <div class="modal-dialog">
 
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Peringatan!</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-accept">
+                Jumlah quantity melebihi maksimum, apakah Anda yakin akan melanjutkan?
+            </p>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-dismiss="modal" onclick="submitAfterValid('form-delivery')">Ya</a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
+        </div>
+    </div>
+  </div>
+</div>
 @stack('crud_fields_scripts')
 <script>
     var urlMassDs = "{{url('admin/delivery-export-mass-pdf-post')}}"
@@ -261,6 +280,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     function printMassDs(){
         $("#form-print-mass-ds").attr('action', urlMassDs)
         submitAfterValid('form-print-mass-ds')
+    }
+
+    function submitNewDs(){
+        if($('#current-qty').val() > $('#current-qty').data('max')){
+            $('#modalWarningQty').modal("show")
+        }else{
+            submitAfterValid('form-delivery')
+        }
     }
 
     var totalChecked = 0
