@@ -23,6 +23,12 @@ class Delivery extends Model
         return '<a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>';
     }
 
+    public function purchaseOrderLine()
+    {
+        return $this->belongsTo('App\Models\PurchaseOrderLine', ['po_num', 'po_line'],  ['po_num', 'po_line']);
+
+    }
+
     public function pdfCheck($crud = false)
     {
         return "<div class='group-price-check'><input type='checkbox'> Dengan Harga</div>";

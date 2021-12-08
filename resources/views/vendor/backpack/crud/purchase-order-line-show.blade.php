@@ -87,7 +87,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <tr>
                     <td>Unit Price</td>
                     <td>:</td>
-                    <td>{{$entry->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
+                    <td>{{$entry->purchaseOrder->vendor->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
@@ -134,12 +134,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <input type="checkbox" id="check-all-cb" name="print_deliveries" class="check-all" data-delivery="{{sizeof($deliveries)}}" >
                                 </th>
                                 <th>PO</th>
-                                <th>PO Line</th>
                                 <th>DS Number</th>
                                 <th>DS Line</th>
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
-                                <th>Amount</th>
+                                <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
                                 <th>DO Number</th>
                                 <th>Operator</th>
                                 <th>Action</th>
@@ -155,20 +154,19 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>
                                     <input type="checkbox" value="{{$delivery->id}}" name="print_delivery[]" class="check-delivery check-{{$delivery->id}}">
                                 </td>
-                                <td>{{$delivery->po_num}}</td>
-                                <td>{{$delivery->po_line}}</td>
+                                <td style="white-space: nowrap;">{{$delivery->po_num}}-{{$delivery->po_line}}</td>
                                 <td>{{$delivery->ds_num}}</td>
                                 <td>{{$delivery->ds_line}}</td>
                                 <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                                 <td>{{$delivery->shipped_qty}}</td>
-                                <td>{{$delivery->currency}} {{number_format($delivery->unit_price,0,',','.')}}</td>
+                                <td>{{number_format($delivery->unit_price,0,',','.')}}</td>
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-secondary"><i class="la la-print"></i></a>
+                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary"><i class="la la-print"></i></a>
                                     <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                 </td>
                             </tr>
@@ -181,14 +179,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="6" class="text-center font-weight-bold">
+                                <td colspan="5" class="text-center font-weight-bold">
                                     Total
                                 </td>
                                 <td>
                                     {{$total_qty}}</td>
                                 </td>
                                 <td>
-                                {{$delivery->currency}} {{ number_format($total_price,0,',','.')}}</td>
+                                 {{ number_format($total_price,0,',','.')}}</td>
                                 </td>
                             </tr>
                         </tfoot>
