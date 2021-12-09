@@ -70,6 +70,15 @@ class TempUploadDeliveryCrudController extends CrudController
             'label'     => 'Delivery Date', // Table column heading
             'name'      => 'delivery_date',
         ]);
+        CRUD::addColumn([
+            'label'     => 'Item', // Table column heading
+            'name'      => 'po_item', 
+
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Description', // Table column heading
+            'name'    => 'po_description', 
+        ]);
 
         CRUD::addColumn([
             'label'     => 'Qty', // Table column heading
