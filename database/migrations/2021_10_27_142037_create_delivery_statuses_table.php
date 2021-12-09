@@ -30,6 +30,8 @@ class CreateDeliveryStatusesTable extends Migration
             $table->dateTime('payment_plan_date')->nullable();
             $table->integer('payment_in_process_flag')->default(0);
             $table->integer('executed_flag')->default(0);
+            $table->integer('confirm_flag')->default(0);
+            $table->dateTime('confirm_date')->nullable();
             $table->dateTime('payment_date')->nullable();
             $table->string('tax_status')->nullable();
             $table->string('payment_ref_num')->nullable();
@@ -40,23 +42,28 @@ class CreateDeliveryStatusesTable extends Migration
             $table->double('unit_price')->nullable();
             $table->double('total')->default(0);
             $table->string('petugas_vendor')->nullable();
-            $table->string('no_faktur_pajak')->nullable();
             $table->string('no_surat_jalan_vendor')->nullable();
+            $table->string('no_faktur_pajak')->length(50)->nullable();
+            $table->string('no_faktur_pajak_vendor')->length(50)->nullable();
+            $table->string('no_voucher')->length(50)->nullable();
+            $table->double('harga_sebelum_pajak')->nullable();
+            $table->double('ppn')->nullable();
+            $table->double('pph')->nullable();
             $table->string('ref_ds_num')->nullable();
+            $table->string('file_faktur_pajak')->nullable();
             $table->integer('ref_ds_line')->nullable();
             $table->integer('created_by')->nullable();
+            $table->integer('confirm_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
-
             $table->primary(['id', 'ds_num', 'ds_line']);
         });
         Schema::table('delivery_status', function (Blueprint $table) {
             $table->integer('id', true, true)->change();
         });
-
     }
-
+	
     /**
      * Reverse the migrations.
      *

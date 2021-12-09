@@ -52,4 +52,5 @@ Route::group([
     Route::post('delivery-print-label-all', 'PurchaseOrderLineCrudController@exportPdfLabel');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
+    Route::crud('tax-invoice', 'TaxInvoiceCrudController');
 });

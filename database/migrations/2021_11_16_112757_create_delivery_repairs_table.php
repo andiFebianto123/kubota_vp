@@ -15,8 +15,8 @@ class CreateDeliveryRepairsTable extends Migration
     {
         Schema::create('delivery_repair', function (Blueprint $table) {
             $table->integer('id');
-            $table->string('ds_num')->length(15);
-            $table->integer('ds_line');
+            $table->string('ds_num_reject')->length(15);
+            $table->integer('ds_line_reject');
             $table->string('reason_num')->length(5);
             $table->string('repair_num')->length(15);
             $table->string('repair_type');
@@ -30,7 +30,7 @@ class CreateDeliveryRepairsTable extends Migration
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
 
-            $table->primary(['id', 'ds_num', 'ds_line', 'reason_num', 'repair_num']);
+            $table->primary(['id', 'reason_num', 'repair_num']);
         });
         Schema::table('delivery_repair', function (Blueprint $table) {
             $table->integer('id', true, true)->change();

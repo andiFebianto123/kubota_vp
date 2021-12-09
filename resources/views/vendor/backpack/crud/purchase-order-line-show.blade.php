@@ -136,6 +136,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>PO</th>
                                 <th>DS Number</th>
                                 <th>DS Line</th>
+                                <th>Group DS</th>
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
                                 <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
@@ -157,6 +158,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td style="white-space: nowrap;">{{$delivery->po_num}}-{{$delivery->po_line}}</td>
                                 <td>{{$delivery->ds_num}}</td>
                                 <td>{{$delivery->ds_line}}</td>
+                                <td>{{$delivery->group_ds_num}}</td>
                                 <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                                 <td>{{$delivery->shipped_qty}}</td>
                                 <td>{{number_format($delivery->unit_price,0,',','.')}}</td>
@@ -179,7 +181,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="5" class="text-center font-weight-bold">
+                                <td colspan="6" class="text-center font-weight-bold">
                                     Total
                                 </td>
                                 <td>
