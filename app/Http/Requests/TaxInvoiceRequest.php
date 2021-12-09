@@ -26,7 +26,8 @@ class TaxInvoiceRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+            'file_faktur_pajak' => 'required',
+            'ds_nums' => 'required'
         ];
     }
 

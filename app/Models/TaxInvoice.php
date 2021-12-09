@@ -52,4 +52,8 @@ class TaxInvoice extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+    public function download()
+    {
+        return '<a class="btn btn-sm btn-link" target="_blank" href="'.$this->file_faktur_pajak.'" download><i class="la la-cloud-download-alt"></i> Download</a>';
+    }
 }

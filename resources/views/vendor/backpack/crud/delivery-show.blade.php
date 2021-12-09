@@ -277,6 +277,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     @endif
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Faktur Pajak</td>
+                                <td> :
+                                    @if(isset($delivery_status->file_faktur_pajak))
+                                    <a class="btn btn-sm btn-link" target="_blank" href="{{$delivery_status->file_faktur_pajak}}" download><i class="la la-cloud-download-alt"></i> Download</a>
+                                    @else
+                                    Belum Ada
+                                    @endif
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>

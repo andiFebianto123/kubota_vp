@@ -6,6 +6,10 @@ use App\Http\Requests\TaxInvoiceRequest;
 use App\Models\DeliveryStatus;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class TaxInvoiceCrudController
@@ -40,6 +44,10 @@ class TaxInvoiceCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        $this->crud->removeButton('show');
+        $this->crud->removeButton('update');
+        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'beginning');
+
         $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
 
         CRUD::addColumn([
@@ -130,22 +138,6 @@ class TaxInvoiceCrudController extends CrudController
     {
         CRUD::setValidation(TaxInvoiceRequest::class);
 
-        
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
-        CRUD::addField([ 
-            'name'        => 'ds_num_arr',
-            'label'       => "Delivery Status",
-            'type'        => 'select2_from_array',
-            'options'     => $this->deliveryStatus(),
-            'allows_null' => true,
-            'allows_multiple' => true, // OPTIONAL; needs you to cast this to array in your model;
-        ]);
-
         CRUD::addField([   // Upload
             'name'      => 'file_faktur_pajak',
             'label'     => 'Faktur Pajak',
@@ -154,16 +146,38 @@ class TaxInvoiceCrudController extends CrudController
             'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
             // optional:
             'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
-        ]);  
+        ]); 
+
+        CRUD::addField([ 
+            'name'        => 'ds_nums',
+            'label'       => "Delivery Status",
+            'type'        => 'checklist_table',
+            'table'       =>  ['table_header' => $this->deliveryStatus()['header'], 'table_body'=> $this->deliveryStatus()['body']]
+        ]);
+
     }
 
     private function deliveryStatus(){
+        $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
         $delivery_statuses = DeliveryStatus::get();
-        $arr_del = [];
+        $table_body = [];
         foreach ($delivery_statuses as $key => $ds) {
-            $arr_del[$ds->id] = $ds->ds_num.'-'.$ds->ds_line;
+            $table_body[] =[
+                'column' => [
+                    $ds->po_num.'-'.$ds->po_line, 
+                    $ds->ds_num.'-'.$ds->ds_line, 
+                    $ds->item, 
+                    $ds->description,
+                    $ds->unit_price 
+                ],
+                'value' => $ds->id
+            ];
         }
-        return $arr_del;
+
+        $table['header'] = $table_header;
+        $table['body'] = $table_body;
+
+        return $table;
     }
     /**
      * Define what happens when the Update operation is loaded.
@@ -175,4 +189,53 @@ class TaxInvoiceCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+
+    public function store(Request $request)
+    {
+        $this->crud->setRequest($this->crud->validateRequest());
+        $request = $this->crud->getRequest();
+
+        $urlfile = $request->file_faktur_pajak;
+        $ds_nums = $request->input('ds_nums');
+
+        $filename = "";
+        if ($urlfile) {
+            $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlfile->getClientOriginalExtension();
+            $urlfile->move('files', $filename);
+            $filename = asset('files/'.$filename);
+            
+            foreach ($ds_nums as $key => $ds) {
+                $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
+                if (isset($old_files)) {
+                    $base_url = url('/');
+                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    unlink(public_path($will_unlink_file));
+                }
+                $change = DeliveryStatus::where('id', $ds)->first();
+                $change->file_faktur_pajak = $filename;
+                $change->save();
+            }
+        }
+
+        $message = 'Delivery Sheet Created';
+
+        Alert::success($message)->flash();
+
+        return redirect()->route('tax-invoice.index');
+    }
+
+
+    public function destroy($id)
+    {
+        $this->crud->hasAccessOrFail('delete');
+
+        $id = $this->crud->getCurrentEntryId() ?? $id;
+       
+        $change = DeliveryStatus::where('id', $id)->first();
+        $change->file_faktur_pajak = null;
+        $success = $change->save();
+        return $success;
+    }
+
 }
