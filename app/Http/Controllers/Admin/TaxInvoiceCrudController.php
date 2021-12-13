@@ -99,6 +99,11 @@ class TaxInvoiceCrudController extends CrudController
             'type' => 'text',
         ]);
         CRUD::addColumn([
+            'label'     => 'GRN Num', // Table column heading
+            'name'      => 'grn_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
             'label'     => 'PPN', // Table column heading
             'name'      => 'ppn', // the column that contains the ID of that connected entity;
             'type' => 'text',
@@ -118,13 +123,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'no_faktur_pajak', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-        CRUD::addColumn([
-            'label'     => 'No Voucher', // Table column heading
-            'name'      => 'no_voucher', // the column that contains the ID of that connected entity;
-            'type' => 'text',
-        ]);
 
-        CRUD::column('created_at');
         CRUD::column('updated_at');
     }
 

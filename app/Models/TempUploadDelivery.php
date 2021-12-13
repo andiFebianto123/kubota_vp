@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\DsValidation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,7 +16,7 @@ class TempUploadDelivery extends Model
         'order_qty',
     ];
 
-    protected $appends = ['po_item', 'po_description'];
+    protected $appends = ['po_item', 'po_description', 'category_validation'];
     
     // public function purchaseOrderLine()
     // {
@@ -48,5 +49,45 @@ class TempUploadDelivery extends Model
     public function getPoDescriptionAttribute()
     {
         return $this->purchaseOrderLine->description;
+    }
+
+    public function getValidationText(){
+        $str_validation = "";
+
+        foreach ($this->rowValidation() as $key => $v) {
+            $str_validation .= "<li><span class='text-". $v['mode']."'>".$v['message']."</span></li>";
+        }
+        
+        return $str_validation;
+    }
+
+    public function getCategoryValidationAttribute(){
+        $mode_danger = '';
+
+        foreach ($this->rowValidation() as $key => $v) {
+            if ($v['mode'] == 'danger') {
+                $mode_danger = $v['mode'];
+            }
+        }
+        
+        return $mode_danger;
+    }
+
+    private function rowValidation(){
+        $arr_filters = [];
+        $arr_filters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
+        $args1 = ['filters' => $arr_filters, 'due_date' => $this->purchaseOrderLine->due_date ];
+        $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->purchaseOrderLine->order_qty ];
+
+        $ds_validation = new DsValidation();
+        $unfinished_po_line = $ds_validation->unfinishedPoLine( $args1);
+        $current_max_qty = $ds_validation->currentMaxQty($args2);
+        
+        if (sizeof($unfinished_po_line['datas']) > 0 ) {
+            $arr_validation[] = ['mode' => $unfinished_po_line['mode'], 'message' => $unfinished_po_line['message']];
+        }
+        $arr_validation[] = ['mode' => $current_max_qty['mode'], 'message' => $current_max_qty['message']];
+    
+        return $arr_validation;
     }
 }

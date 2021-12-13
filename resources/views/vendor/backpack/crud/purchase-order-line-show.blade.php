@@ -98,6 +98,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <label class="font-weight-bold mb-0">Create Delivery Sheet</label> 
         </div>
         <div class="card no-padding no-border">
+                @if(sizeof($unfinished_po_line['datas']) > 0)
+                <div class="m-4 p-2" style="border:1px solid #ff9800; color:#ff9800;">
+                    <b> PO Line yang belum selesai:</b><br>
+                    @foreach($unfinished_po_line['datas'] as $key => $upl)
+                    {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
+                    @endforeach
+                </div>
+                @endif
                 <form id="form-delivery" method="post"
                         action="{{ url('admin/delivery') }}"
                         @if ($crud->hasUploadFields('create'))
@@ -110,7 +118,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @include('crud::inc.show_fields', ['fields' => $crud->fields()])
                     </div>
 
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" type="button" onclick="submitNewDs()">Submit</button>
+                    @if(sizeof($unfinished_po_line['datas']) > 0)
+                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
+                    @else
+                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
+                    @endif
                 </form>
         </div>
     </div>
@@ -233,11 +245,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 
 <script type="text/javascript" src="{{ asset('packages/datatables.net/js/jquery.dataTables.min.js')}}"></script>
-  <script type="text/javascript" src="{{ asset('packages/datatables.net-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
-  <script type="text/javascript" src="{{ asset('packages/datatables.net-responsive/js/dataTables.responsive.min.js')}}"></script>
-  <script type="text/javascript" src="{{ asset('packages/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js')}}"></script>
-  <script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js')}}"></script>
-  <script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('packages/datatables.net-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('packages/datatables.net-responsive/js/dataTables.responsive.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('packages/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('packages/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.min.js')}}"></script>
 
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
@@ -245,7 +257,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <script src="{{ asset('packages/backpack/crud/js/create.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <div id="modalWarningQty" class="modal fade" role="dialog">
   <div class="modal-dialog">
-
     <!-- Modal content-->
     <div class="modal-content">
         <div class="modal-header">
@@ -261,10 +272,27 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+<div id="modalAlertDueDate" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-danger">Peringatan!</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-accept">
+                {{$unfinished_po_line['message']}}
+            </p>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+  </div>
+</div>
 @stack('crud_fields_scripts')
 <script>
     var urlMassDs = "{{url('admin/delivery-export-mass-pdf-post')}}"
-    var urlPrintLabel = "{{url('admin/delivery-print-label-all')}}"
+    var urlPrintLabel = "{{url('admin/delivery-print-label-post')}}"
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
@@ -276,7 +304,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
     function printLabel(){
         $("#form-print-mass-ds").attr('action', urlPrintLabel)
-        $("#form-print-mass-ds").submit();
+        submitAfterValid('form-print-mass-ds')
     }
 
     function printMassDs(){

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\PurchaseOrderLineAcceptExport;
 use App\Helpers\Constant;
+use App\Helpers\DsValidation;
 use App\Http\Requests\DeliveryRequest;
 use App\Http\Requests\PurchaseOrderLineRequest;
 use App\Models\Delivery;
@@ -147,6 +148,7 @@ class PurchaseOrderLineCrudController extends CrudController
 
     function show()
     {
+
         CRUD::setValidation(DeliveryRequest::class);
 
         $entry = $this->crud->getCurrentEntry();
@@ -171,7 +173,8 @@ class PurchaseOrderLineCrudController extends CrudController
                 'format'   => 'dd/mm/yyyy',
                 'language' => 'en'
              ],
-        ]);  
+        ]); 
+         
         $this->crud->addField([
             'type' => 'hidden',
             'name' => 'po_line_id',
@@ -200,39 +203,78 @@ class PurchaseOrderLineCrudController extends CrudController
         }
 
         if($entry->outhouse_flag == 1){
+            // $this->crud->addField(
+            //     [
+            //         'name'  => 'material_issues',
+            //         'label' => 'Material Issue',
+            //         'type'  => 'upload_material_issue',
+            //         'fields' => [
+            //             [
+            //                 'name'        => 'material_ids[]',
+            //                 'label'       => "Material",
+            //                 'type'        => 'select2_from_array',
+            //                 'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
+            //                 'allows_null' => false,
+            //                 'wrapper'   => [ 
+            //                     'class'      => 'form-group col-md-6'
+            //                  ],
+            //             ],
+            //             [   // select2_from_array
+            //                 'name'        => 'mo_issue_qty[]',
+            //                 'label'       => "Issue Qty",
+            //                 'type'        => 'number',
+            //                 'wrapper'   => [ 
+            //                     'class'      => 'form-group col-md-6'
+            //                  ],
+            //             ]
+            //         ],
+            //     ],
+            // );
+            $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
+                                    ->where('po_line', $entry->po_line);
+
             $this->crud->addField(
                 [
                     'name'  => 'material_issues',
                     'label' => 'Material Issue',
-                    'type'  => 'upload_material_issue',
-                    'fields' => [
-                        [
-                            'name'        => 'material_ids[]',
-                            'label'       => "Material",
-                            'type'        => 'select2_from_array',
-                            'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
-                            'allows_null' => false,
-                            'wrapper'   => [ 
-                                'class'      => 'form-group col-md-6'
-                             ],
-                        ],
-                        [   // select2_from_array
-                            'name'        => 'mo_issue_qty[]',
-                            'label'       => "Issue Qty",
-                            'type'        => 'number',
-                            'wrapper'   => [ 
-                                'class'      => 'form-group col-md-6'
-                             ],
-                        ]
-                    ],
+                    'type'  => 'outhouse_table',
+                    'current_qty' => $current_qty,
+                    'total_qty_per' => $outhouse_materials->sum('qty_per'),
+                    'table_body' => $outhouse_materials->get()
+                    // 'fields' => [
+                    //     [
+                    //         'name'        => 'material_ids[]',
+                    //         'label'       => "Material",
+                    //         'type'        => 'select2_from_array',
+                    //         'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
+                    //         'allows_null' => false,
+                    //         'wrapper'   => [ 
+                    //             'class'      => 'form-group col-md-6'
+                    //          ],
+                    //     ],
+                    //     [   // select2_from_array
+                    //         'name'        => 'mo_issue_qty[]',
+                    //         'label'       => "Issue Qty",
+                    //         'type'        => 'number',
+                    //         'wrapper'   => [ 
+                    //             'class'      => 'form-group col-md-6'
+                    //          ],
+                    //     ]
+                    // ],
                 ],
             );
         }
+        $arr_filters = [];
+        $arr_filters[] = ['po_line.item', '=', $entry->item];
+        $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date ];
+        // $arr_filters[] = ['po_line.po_num', '!=', null];
+        $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['po'] = $po;
         $data['arr_po_line_status'] = $arr_po_line_status;
+        $data['unfinished_po_line'] = $unfinished_po_line;
         $data['deliveries'] = $deliveries;
         $data['delivery_statuses'] = $delivery_statuses;
 
@@ -263,6 +305,7 @@ class PurchaseOrderLineCrudController extends CrudController
     {
         return true;
     }
+    
 
     public function exportExcelAccept()
     {
@@ -297,13 +340,50 @@ class PurchaseOrderLineCrudController extends CrudController
         return redirect()->back();
     }
 
-    public function exportPdfLabel($id = 0, Request $request){
+
+    public function exportPdfLabelPost(Request $request)
+    {
+        $print_all = $request->print_deliveries;
+        $po_num = $request->po_num;
+        $po_line = $request->po_line;
+        $print_deliveries = $request->print_delivery;
+        $with_price = 'yes';
+        
+        $arr_param['print_all'] = $print_all;
+        $arr_param['po_num'] = $po_num;
+        $arr_param['po_line'] = $po_line;
+        $arr_param['print_delivery'] = $print_deliveries;
+
+        $str_param = base64_encode(serialize($arr_param));
+
+        if (!isset($print_deliveries)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pilih Minimal 1 DS'
+                ], 200);
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Sukses Generate PDF',
+            'newtab' => true,
+            'redirect_to' => url('admin/delivery-print-label').'?param='.$str_param ,
+            'validation_errors' => []
+        ], 200);
+    }
+
+
+    public function exportPdfLabel(){
+        $str_param = request('param');
+        $arr_param = unserialize(base64_decode($str_param));
+        $print_delivery = $arr_param['print_delivery'];
+        $id = 0 ; //$arr_param['id'];
 
         // SELECT d.id, po.po_num, d.po_line, d.item, d.description, d.ds_num, po.vend_num, d.shipped_qty, vendor_item.qty_per_box FROM `delivery` d JOIN po ON po.po_num = d.po_num JOIN vendor_item ON vendor_item.item = d.item WHERE d.id = 1
-        if($request->input('print_delivery') != null){
+        if($print_delivery  != null){
             $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
             ->join('po', 'po.po_num', 'delivery.po_num')
-            ->whereIn('delivery.id', $request->input('print_delivery'))
+            ->whereIn('delivery.id', $print_delivery )
             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
             // ->groupBy('delivery.id')->get();

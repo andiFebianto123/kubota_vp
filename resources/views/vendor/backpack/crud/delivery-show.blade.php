@@ -223,6 +223,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>: {{$delivery_status->no_faktur_pajak}}</td>
                             </tr>
                             <tr>
+                                <td>No Voucher</td>
+                                <td>: {{$delivery_status->no_voucher}}</td>
+                            </tr>
+                            <tr>
                                 <td>Bank</td>
                                 <td>: {{$delivery_status->bank}}</td>
                             </tr>
@@ -245,7 +249,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                             <tr>
                                 <td>Payment Est Date</td>
-                                <td>: {{$delivery_status->payment_plan_date}}</td>
+                                <td>: {{date('Y-m-d', strtotime($delivery_status->payment_plan_date))}}</td>
                             </tr>
                             <tr>
                                 <td>Validated</td>

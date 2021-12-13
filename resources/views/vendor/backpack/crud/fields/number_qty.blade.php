@@ -5,7 +5,7 @@
 
     @if(isset($field['prefix']) || isset($field['suffix'])) <div class="input-group"> @endif
         @if(isset($field['prefix'])) <div class="input-group-prepend"><span class="input-group-text">{!! $field['prefix'] !!}</span></div> @endif
-        <span class="info-qty text-danger">@if($field['default'] <= 0)<small> Jumlah Qty Sudah Penuh </small>@endif</span>
+        <span class="info-qty text-danger"></span>
         <input
             id="current-qty"
         	type="number"
@@ -24,18 +24,36 @@
 @include('crud::fields.inc.wrapper_end')
 @push('crud_fields_scripts')
 <script>
-    var actualQty = "{{$field['default']}}"
-$( "#current-qty" ).keyup(function() {
-    var initUrl = $('#template-upload-sn').attr('init-url')
-    $('#template-upload-sn').attr('href', initUrl+'?qty='+$(this).val())
-    $('#allowed-qty').val($(this).val())
-    
-    if (parseFloat(actualQty) < parseFloat($(this).val())) {
-        $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+actualQty+')</small>')
-    }else{
-        $('.info-qty').html('')
+    var maxQty = parseFloat( $( "#current-qty" ).data('max'))
+    var initCurrent = parseFloat( $( "#current-qty" ).val())
+    if (parseFloat(initCurrent) > parseFloat(maxQty)) {
+        $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQty+')</small>')
     }
-});
+
+    $( "#current-qty" ).keyup(function() {
+        var initUrl = $('#template-upload-sn').attr('init-url')
+        var currentQty = parseFloat($(this).val())
+
+        $('#template-upload-sn').attr('href', initUrl+'?qty='+currentQty)
+        $('#allowed-qty').val(currentQty)
+
+        if (parseFloat(currentQty) > parseFloat(maxQty)) {
+            $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQty+')</small>')
+        }else{
+            $('.info-qty').html('')
+        }
+        if($('*').hasClass('form-issued')){
+            $.each($('.form-issued'), function( k, v ) {
+                var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
+                var qtyper = parseFloat($('.form-issued:eq('+k+')').data('qtyper'))
+                var totalQtyPer = parseFloat($('.form-issued:eq('+k+')').data('totalqtyper'))
+                var issuedQty =  currentQty*qtyper
+                var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
+                    fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
+                    $('.form-issued:eq('+k+')').val(fixedIssuedQty)
+            })
+        } 
+    });
 </script>
 
 @endpush

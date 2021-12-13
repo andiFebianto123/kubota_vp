@@ -40,6 +40,7 @@ Route::group([
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
+    Route::get('validate-ds-po', 'DeliveryCrudController@addOnValidatePo');
     // route untuk accept all PO
     Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
     // route untuk ajax filter di nomor item di po
@@ -48,8 +49,9 @@ Route::group([
     Route::get('test/ajax-vendor-options', 'VendorCrudController@itemVendorOptions');
 
     // Route untuk export PDF print label delivery sheet detail
-    Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabel');
-    Route::post('delivery-print-label-all', 'PurchaseOrderLineCrudController@exportPdfLabel');
+    // Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabel');
+    Route::get('delivery-print-label', 'PurchaseOrderLineCrudController@exportPdfLabel');
+    Route::post('delivery-print-label-post', 'PurchaseOrderLineCrudController@exportPdfLabelPost');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
     Route::crud('tax-invoice', 'TaxInvoiceCrudController');
