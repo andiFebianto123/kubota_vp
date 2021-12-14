@@ -13,7 +13,7 @@ class Vendor extends Model
     protected $table = 'vendor';
 
     protected $fillable = [
-        'vend_name','vend_num', 'vend_addr', 'currency'
+        'vend_name','vend_num', 'vend_addr', 'currency', 'buyer', 'vend_email', 'buyer_email'
     ];
 
     // public function purchase()

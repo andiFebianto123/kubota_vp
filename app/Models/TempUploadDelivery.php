@@ -52,13 +52,13 @@ class TempUploadDelivery extends Model
     }
 
     public function getValidationText(){
-        $str_validation = "";
+        $str_validation = "<label class='validation-row-temp p-0 m-0'>";
 
         foreach ($this->rowValidation() as $key => $v) {
             $str_validation .= "<li><span class='text-". $v['mode']."'>".$v['message']."</span></li>";
         }
         
-        return $str_validation;
+        return $str_validation."</label>";
     }
 
     public function getCategoryValidationAttribute(){

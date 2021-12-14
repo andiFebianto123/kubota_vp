@@ -1,4 +1,5 @@
 var baseUrl = $("meta[name=base_url]").attr("content");    
+blockTempValidation()
 
 function submitAfterValid(formId, massError = false) {
         var initText = $('#btn-for-'+formId).html()
@@ -154,4 +155,16 @@ function messageErrorForm(currentID, message) {
 function messageStatusGeneral(currentID,message ,status = 'danger' ) {
     $("<div class='error-message alert alert-"+status+" alert-dismissible fade show'>" +message + " <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>")
                         .insertBefore(currentID).hide().show('medium')
+}
+
+function blockTempValidation() {
+    if ($('.validation-row-temp').find('text-danger')) {
+        console.log('bener');
+    }
+    $.each($('.validation-row-temp'), function( k, v ) {
+        console.log(k);
+        if ($('.validation-row-temp:eq('+k+') li span').find('text-danger')) {
+            console.log(k);
+        }
+    })
 }
