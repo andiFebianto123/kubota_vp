@@ -180,7 +180,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary"><i class="la la-print"></i></a>
+                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement="top" title="Print Label"><i class="la la-print"></i></a>
                                     <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                 </td>
                             </tr>

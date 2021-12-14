@@ -96,7 +96,6 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
-
         // dd([
         //     'cek_role_admin' => backpack_user()->hasRole('Admin PTKI'),
         //     'cek_permision_create' => backpack_user()->hasDirectPermission('create'),

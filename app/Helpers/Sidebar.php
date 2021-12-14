@@ -14,7 +14,7 @@ class Sidebar
         'url' => backpack_url('dashboard'),
         'icon' => 'la-home',
         'key' => 'dashboard',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -22,7 +22,7 @@ class Sidebar
         'url' => backpack_url('purchase-order'),
         'icon' => 'la-newspaper',
         'key' => 'purchase-order',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -30,7 +30,7 @@ class Sidebar
         'url' => backpack_url('delivery'),
         'icon' => 'la-file',
         'key' => 'delivery',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -38,7 +38,7 @@ class Sidebar
         'url' => backpack_url('delivery-status'),
         'icon' => 'la-stream',
         'key' => 'delivery-status',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -46,7 +46,7 @@ class Sidebar
         'url' => backpack_url('delivery-serial'),
         'icon' => 'la-qrcode',
         'key' => 'delivery-serial',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -54,7 +54,7 @@ class Sidebar
         'url' => backpack_url('material-outhouse'),
         'icon' => 'la-cube',
         'key' => 'material-outhouse',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [
@@ -62,7 +62,7 @@ class Sidebar
         'url' => backpack_url('tax-invoice'),
         'icon' => 'la-file-invoice-dollar',
         'key' => 'tax-invoice',
-        'roles' => ['admin', 'vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       
@@ -71,7 +71,7 @@ class Sidebar
         'url' => backpack_url('forecast'),
         'icon' => 'la-chart-bar',
         'key' => 'forecast',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [

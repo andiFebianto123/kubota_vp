@@ -66,30 +66,11 @@ class RolesAndPermissionsSeeder extends Seeder
         $arrPermission = [
             [
                 [
-                  'id' => 1,
-                  "name" => "create",
+                  "name" => "Show Payment Status DS",
                   "guard_name" => "web",
-                  "description" => "Mempunyai akses untuk membuat data semua jenis transaksi"
+                  "description" => "Mempunyai akses untuk melihat panel Payment Status pada Delivery Sheet"
                 ],
-                ['id' => 1],
-            ],
-            [
-                [
-                  'id' => 2,
-                  "name" => "update",
-                  "guard_name" => "web",
-                  "description" => "Mempunyai akses untuk mengubah data transaksi"
-                ],
-                ['id' => 2],
-            ],
-            [
-                [
-                  'id' => 3,
-                  "name" => "delete",
-                  "guard_name" => "web",
-                  "description" => "Mempunyai akses untuk menghapus data transaksi"
-                ],
-                ['id' => 3],
+                ['name' => 'Show Payment Status DS'],
             ],
         ];
         foreach($arrPermission as $key => $seed) {
@@ -100,9 +81,7 @@ class RolesAndPermissionsSeeder extends Seeder
     function assignRolePermission(){
         // memberikan permission pada role
         $adminRole = Role::findByName('Admin PTKI');
-        $adminRole->givePermissionTo('create');
-        $adminRole->givePermissionTo('update');
-        $adminRole->givePermissionTo('delete');
+        $adminRole->givePermissionTo('Show Payment Status DS');
         // dd($adminRole->permissions);
 
     }
