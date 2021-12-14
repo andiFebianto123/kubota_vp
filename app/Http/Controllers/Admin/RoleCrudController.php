@@ -149,38 +149,38 @@ class RoleCrudController extends CrudController
             // dapatkan id role
             $role = $request->input('role');
             $nameRole = Role::where('id', $role)->first();
-            if($request->input('permission') != null){
                 // dapatkan id permission
-                DB::beginTransaction();
-                try {
-                    DB::table('role_has_permissions')->where('role_id', $role)->delete();
+            DB::beginTransaction();
+            try {
+                DB::table('role_has_permissions')->where('role_id', $role)->delete();
+                if($request->input('permission') != null){
                     $insertData = collect($request->input('permission'))->map(function($value) use($role){
                         return ['permission_id' => $value, 'role_id' => $role];
                     });
                     DB::table('role_has_permissions')->insert($insertData->values()->all());
-                    DB::commit();
-                    return response()->json([
-                        'status' => true,
-                        'alert' => 'success',
-                        'message' => 'Berhasil lakukan perubahan permission pada role '.$nameRole->name
-                    ], 200);
-                }catch(\Exception $e){
-                    DB::rollback();
-                    return response()->json([
-                        'status' => false,
-                        'alert' => 'danger',
-                        'message' => $e->getMessage()
-                    ], 400);
                 }
-                
-            }else{
-                // jika permission kosong
+                DB::commit();
+                return response()->json([
+                    'status' => true,
+                    'alert' => 'success',
+                    'message' => 'Berhasil lakukan perubahan permission pada role '.$nameRole->name
+                ], 200);
+            }catch(\Exception $e){
+                DB::rollback();
                 return response()->json([
                     'status' => false,
-                    'alert' => 'warning',
-                    'message' => 'Permission tidak ada yang dipilih'
-                ], 200);
+                    'alert' => 'danger',
+                    'message' => $e->getMessage()
+                ], 400);
             }
+            // }else{
+            //     // jika permission kosong
+            //     return response()->json([
+            //         'status' => false,
+            //         'alert' => 'warning',
+            //         'message' => 'Permission tidak ada yang dipilih'
+            //     ], 200);
+            // }
         }else{
             // jika role kosong
             return response()->json([
