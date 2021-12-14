@@ -97,8 +97,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>
-                                @if(backpack_auth()->user()->role->name != 'admin')
-                                <input type="checkbox" id="check-all-cb" class="check-all">
+                                @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                    <input type="checkbox" id="check-all-cb" class="check-all">
                                 @endif
                             </th>
                             <th>PO Number</th>
@@ -114,8 +114,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
-                            @if(backpack_auth()->user()->role->name == 'admin')
-                            <th>Created At</th>
+                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                <th>Created At</th>
                             @endif
                             <th>Action</th>
                         </tr>
@@ -146,15 +146,15 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{!! $po_line->reformat_flag_accept !!}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
-                            @if(backpack_auth()->user()->role->name == 'admin')
-                            <td>{{$po_line->created_at}}</td>
+                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                <td>{{$po_line->created_at}}</td>
                             @endif
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
-                                    @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                    @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
                                         @endif

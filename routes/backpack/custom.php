@@ -52,4 +52,10 @@ Route::group([
     Route::post('delivery-print-label-all', 'PurchaseOrderLineCrudController@exportPdfLabel');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
+    Route::crud('role', 'RoleCrudController');
+    Route::crud('permission', 'PermissionCrudController');
+
+    Route::post('role/get-role-permission', 'RoleCrudController@getPermissionOfRole');
+    Route::post('role/change-role-permission', 'RoleCrudController@changeRolePermission');
+    Route::get('role/show-role-permission', 'RoleCrudController@showPermission');
 });

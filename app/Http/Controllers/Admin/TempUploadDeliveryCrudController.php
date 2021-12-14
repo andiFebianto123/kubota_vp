@@ -119,7 +119,7 @@ class TempUploadDeliveryCrudController extends CrudController
         $data_temps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
 
         $code = "";
-            switch (backpack_auth()->user()->role->name) {
+            switch (backpack_auth()->user()->roles->hasRole('Admin PTKI')) {
                 case 'admin':
                     $code = "01";
                     break;

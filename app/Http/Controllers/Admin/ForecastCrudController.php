@@ -42,29 +42,39 @@ class ForecastCrudController extends CrudController
     }
 
     protected function getFieldAccess(){
-    
-        if(request('vendor_submit')){
-            if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
-                Session::put("vendor_name", request('filter_vendor'));
-                $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
-                Session::put('vendor_text', $db->vend_name);
-            }else{
-                Session::forget('vendor_name');
-                Session::forget('vendor_text');
+        if(backpack_user()->hasRole('Admin PTKI')){
+            if(request('vendor_submit')){
+                if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
+                    Session::put("vendor_name", request('filter_vendor'));
+                    $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
+                    Session::put('vendor_text', $db->vend_name);
+                }else{
+                    Session::forget('vendor_name');
+                    Session::forget('vendor_text');
+                }
             }
         }
     }
 
     protected function setQuery(){
-        if(Session::get('vendor_name')){
-            $this->crud->query = $this->crud->query
-            ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
-            ->where('vend_num', Session::get('vendor_name'))
-            ->groupBy('item')
-            ->orderBy('id', 'DESC');
+        if(backpack_user()->hasRole('Admin PTKI')){
+            if(Session::get('vendor_name')){
+                $this->crud->query = $this->crud->query
+                ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+                ->where('vend_num', Session::get('vendor_name'))
+                ->groupBy('item')
+                ->orderBy('id', 'DESC');
+            }else{
+                $this->crud->query = $this->crud->query
+                ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+                ->groupBy('item')
+                ->orderBy('id', 'DESC');
+            }
         }else{
+            // jika vendor biasa
             $this->crud->query = $this->crud->query
             ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+            ->where('vend_num', backpack_user()->vendor->vend_num)
             ->groupBy('item')
             ->orderBy('id', 'DESC');
         }
@@ -86,6 +96,15 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
+
+        // dd([
+        //     'cek_role_admin' => backpack_user()->hasRole('Admin PTKI'),
+        //     'cek_permision_create' => backpack_user()->hasDirectPermission('create'),
+        //     'cek_permission_update' => backpack_user()->hasDirectPermission('update'),
+        //     'all_direct_permission' => backpack_user()->getDirectPermissions()->values()->all(),
+        //     'all_permission_via_role' => backpack_user()->getPermissionsViaRoles()->values()->all(),
+        //     'all_permission' => backpack_user()->getAllPermissions()->values()->all(),
+        // ]);
         
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -153,6 +172,7 @@ class ForecastCrudController extends CrudController
         // }
         $this->crud->andi = 'Andi febianto';
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
+        $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
         
     }

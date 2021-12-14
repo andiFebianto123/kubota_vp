@@ -41,7 +41,8 @@ class DeliverySheetImport implements WithMultipleSheets, SkipsUnknownSheets
     {
         $sheets = [];
         $filters = [];
-        if (backpack_auth()->user()->role == 'vendor') {
+        $role = backpack_auth()->user()->roles->pluck('name')->first();
+        if (in_array($role, ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])) {
             $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num];
         }
         $pos = PurchaseOrder::where($filters)->get();

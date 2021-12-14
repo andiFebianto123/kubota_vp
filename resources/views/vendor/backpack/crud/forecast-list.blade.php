@@ -24,34 +24,36 @@
 
 @section('content')
   <!-- Filter Box -->
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card">
-          <div class="card-header bg-secondary">
-              <strong>Filter</strong>
-          </div>
-          <div class="card-body">
-            <form action="" method="GET">
-              <div class="form-group">
-                <label>Filter By Vendor</label>
-                <select 
-                  class="form-control select2 select2_filter_vendor" 
-                  style="width: 100;"
-                  name="filter_vendor"
-                >
-                  @if(Session::get('vendor_name'))
-                    <option value="{{ Session::get('vendor_name') }}" selected>{{ Session::get('vendor_text') }}</option>
-                  @else
-                    <option value="hallo" selected>-</option>
-                  @endif
-                </select>
-              </div>
-              <button type="submit" name="vendor_submit" value='1' class="btn btn-sm btn-primary">Submit</button>
-            </form>
+  @if($filter_vendor)
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary">
+                <strong>Filter</strong>
             </div>
-        </div>
+            <div class="card-body">
+              <form action="" method="GET">
+                <div class="form-group">
+                  <label>Filter By Vendor</label>
+                  <select 
+                    class="form-control select2 select2_filter_vendor" 
+                    style="width: 100;"
+                    name="filter_vendor"
+                  >
+                    @if(Session::get('vendor_name'))
+                      <option value="{{ Session::get('vendor_name') }}" selected>{{ Session::get('vendor_text') }}</option>
+                    @else
+                      <option value="hallo" selected>-</option>
+                    @endif
+                  </select>
+                </div>
+                <button type="submit" name="vendor_submit" value='1' class="btn btn-sm btn-primary">Submit</button>
+              </form>
+              </div>
+          </div>
+      </div>
     </div>
-  </div>
+  @endif
   <!-- Default box -->
   <div class="row">
 
@@ -83,7 +85,6 @@
                     </form>
                 </div>
             </div>
-            
           </div>
         
           <div class="col-md-6">

@@ -226,7 +226,7 @@ class DeliveryCrudController extends CrudController
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
         $code = "";
-        switch (backpack_auth()->user()->role->name) {
+        switch (backpack_auth()->user()->roles->hasRole('Admin PTKI')) {
             case 'admin':
                 $code = "01";
                 break;

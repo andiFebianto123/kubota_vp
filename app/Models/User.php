@@ -8,11 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
 
 class User extends Authenticatable
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -52,9 +54,17 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Vendor', 'vendor_id', 'id');
     }
 
-    public function role()
-    {
-        return $this->belongsTo('App\Models\Role', 'role_id', 'id');
+    // public function role()
+    // {
+    //     return $this->belongsTo('App\Models\Role', 'role_id', 'id');
+    // }
+
+    public function showRole(){
+        $roleName = $this->getRoleNames();
+        if(count($roleName) > 0){
+            return '<span>'.$roleName[0].'</span>';
+        }
+        return '-';
     }
 
     // public function setPasswordAttribute($value) {
