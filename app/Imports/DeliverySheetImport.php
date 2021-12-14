@@ -49,16 +49,30 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
         $row_delivery_date = $row['DS Delivery Date'];
         $row_petugas_vendor = $row['Petugas Vendor'];
         $row_do_number_vendor = $row['No Surat Jalan'];
+        
+        $filled = 0;
 
-        if ($row_po_num) {
+        if (isset($row_qty) ) {
+            $filled ++;
+        }
+        if (isset($row_delivery_date) ) {
+            $filled ++;
+        }
+        if (isset($row_petugas_vendor) ) {
+            $filled ++;
+        }
+        if (isset($row_do_number_vendor) ) {
+            $filled ++;
+        }
+        if (isset($row_po_num) && isset($row_po_line) && $filled > 0   ) {
             $insert = new TempUploadDelivery();
             $insert->po_num = $row_po_num;
             $insert->po_line = $row_po_line;
             $insert->user_id = backpack_auth()->user()->id;
-            $insert->order_qty = $row_qty;
-            $insert->delivery_date = $this->transformDate($row_delivery_date);
+            $insert->shipped_qty = $row_qty;
+            $insert->delivery_date = (isset($row_delivery_date)) ? $this->transformDate($row_delivery_date):now();
             $insert->petugas_vendor	 = $row_petugas_vendor;
-            $insert->no_surat_jalan_vendor	 = $row_do_number_vendor;
+            $insert->no_surat_jalan_vendor = $row_do_number_vendor;
             $insert->save();
         }
         

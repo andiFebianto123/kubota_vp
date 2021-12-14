@@ -58,6 +58,15 @@ class Sidebar
         'childrens' => []
       ],
       [
+        'name' => 'Faktur Pajak',
+        'url' => backpack_url('tax-invoice'),
+        'icon' => 'la-file-invoice-dollar',
+        'key' => 'tax-invoice',
+        'roles' => ['admin', 'vendor'],
+        'childrens' => []
+      ],
+      
+      [
         'name' => 'Forecast',
         'url' => backpack_url('forecast'),
         'icon' => 'la-chart-bar',

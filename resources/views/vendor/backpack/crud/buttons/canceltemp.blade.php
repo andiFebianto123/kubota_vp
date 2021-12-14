@@ -4,10 +4,7 @@
 
 @push('after_scripts')
 <script>
-    if (typeof cancelTemp != 'function') {
-      $("[data-button-type=canceltemp]").unbind('click');
-
-      function cancelTemp(button) {
+    function cancelTemp(button) {
           // ask for confirmation before deleting an item
           // e.preventDefault();
           var button = $(button);
@@ -32,7 +29,7 @@
                     function() 
                     {
                         window.history.back()
-                    }, 3000);
+                    }, 2000);
 
               },
               error: function(result) {
@@ -44,6 +41,5 @@
               }
           });
       }
-    }
 </script>
 @endpush

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
-class VendorRequest extends FormRequest
+class TaxInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,12 +26,8 @@ class VendorRequest extends FormRequest
     public function rules()
     {
         return [
-            'vend_name' => 'required|min:5|max:255',
-            'vend_email' => 'required',
-            'buyer_name' => 'required',
-            'buyer_email' => 'required',
-            'vend_addr' => 'required',
-            'vend_num' => 'required|string|unique:vendor,vend_num,'.$this->id.',id',
+            'file_faktur_pajak' => 'required',
+            'ds_nums' => 'required'
         ];
     }
 

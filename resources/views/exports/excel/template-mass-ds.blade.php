@@ -17,6 +17,7 @@
             <th>Description</th>
             <th>Unit Price</th>
             <th>Order Qty</th>
+            <th>Change</th>
             <th>Qty</th>
             <th>DS Delivery Date</th>
             <th>Petugas Vendor</th>
@@ -27,12 +28,13 @@
         @foreach($po_lines as $key => $po_line)
             <tr>
                 <td>{{ $key+1 }}</td>
-                <td>{{ $po_line->po_num }}</td>
-                <td>{{ $po_line->po_line }}</td>
-                <td>{{ $po_line->item }}</td>
-                <td>{{ $po_line->description }}</td>
-                <td>{{ $po_line->unit_price }}</td>
-                <td>{{ $po_line->order_qty }}</td>
+                <td>{{ $po_line['po_num'] }}</td>
+                <td>{{ $po_line['po_line'] }}</td>
+                <td>{{ $po_line['item'] }}</td>
+                <td>{{ $po_line['description'] }}</td>
+                <td>{{ $po_line['unit_price'] }}</td>
+                <td>{{ $po_line['order_qty'] }}</td>
+                <td>{{ $po_line['po_change'] }}</td>
                 <td></td>
                 <td></td>
                 <td></td>

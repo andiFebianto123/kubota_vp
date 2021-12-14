@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\TemplateSerialNumberExport;
+use App\Helpers\Constant;
 use App\Http\Requests\DeliveryRequest;
 use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
@@ -56,8 +57,8 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
 
-        $this->crud->addButtonFromModelFunction('top', 'pdf_check', 'pdfCheck', 'beginning');
-        $this->crud->addButtonFromModelFunction('top', 'pdf_export', 'pdfExport', 'end');
+        $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'beginning');
+        $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
 
         $this->crud->enableBulkActions();
 
@@ -216,6 +217,7 @@ class DeliveryCrudController extends CrudController
 
         $po_line_id = $request->input('po_line_id');
         $shipped_qty = $request->input('shipped_qty');
+        $shipped_date = $request->input('shipped_date');
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
         $material_ids = $request->input('material_ids');
@@ -225,26 +227,15 @@ class DeliveryCrudController extends CrudController
         $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
-        $code = "";
-        switch (backpack_auth()->user()->roles->hasRole('Admin PTKI')) {
-            case 'admin':
-                $code = "01";
-                break;
-            case 'vendor':
-                $code = "00";
-                break;
-            default:
-                # code...
-                break;
-        }
+        
+        $ds_num =  (new Constant())->codeDs($po_line->po_num, $po_line->po_line, $shipped_date);
 
-        $ds_num = $po_line->vendor_number.date("ymd").$code;
         $insert_d = new Delivery();
-        $insert_d->ds_num = $ds_num;
+        $insert_d->ds_num = $ds_num['single'];
         $insert_d->po_num = $po_line->po_num;
         $insert_d->po_line = $po_line->po_line;
         $insert_d->po_release = $po_line->po_release;
-        $insert_d->ds_line = Delivery::where('po_num', $po_line->po_num)->where('po_line', $po_line->po_line)->count()+1;
+        $insert_d->ds_line = $ds_num['line'];
         $insert_d->description = $po_line->description;
         $insert_d->u_m = $po_line->u_m;
         $insert_d->due_date = $po_line->due_date;
@@ -254,7 +245,7 @@ class DeliveryCrudController extends CrudController
         $insert_d->tax_status = $po_line->tax_status;
         $insert_d->currency = $po_line->currency;
         $insert_d->shipped_qty = $shipped_qty;
-        $insert_d->shipped_date = now();
+        $insert_d->shipped_date = $shipped_date;
         $insert_d->order_qty = $po_line->order_qty;
         $insert_d->w_serial = $po_line->w_serial;
         $insert_d->petugas_vendor = $petugas_vendor;
@@ -325,6 +316,7 @@ class DeliveryCrudController extends CrudController
 
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
+    
 
     public function exportMassPdf()
     {

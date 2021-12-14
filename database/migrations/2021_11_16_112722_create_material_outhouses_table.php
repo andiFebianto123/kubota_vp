@@ -24,6 +24,7 @@ class CreateMaterialOuthousesTable extends Migration
             $table->integer('lot_seq');
             $table->string('lot');
             $table->double('lot_qty');
+            $table->double('qty_per');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->dateTime('created_at')->nullable();

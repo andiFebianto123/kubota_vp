@@ -185,6 +185,7 @@ class PurchaseOrderCrudController extends CrudController
     {
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
+        
         $po_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
                                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
@@ -192,6 +193,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->orderBy('po_line.id', 'desc')
                                 ->get();
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
+
         $po_changes_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
                     ->leftJoin('po', 'po.po_num',  'po_line.po_num')
                     ->where('po_line.po_change', '>', 0)

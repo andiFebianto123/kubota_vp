@@ -1,17 +1,15 @@
-<button onclick="insertToDb(this)" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertfromtemp">
+<button onclick="insertPrintToDb(this)" type="button" data-redirect="{{url('admin/purchase-order')}}" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertprintfromtemp">
     <i class="la la-file-pdf"></i> Insert + PDF
 </button>
 
 @push('after_scripts')
 <script>
-    if (typeof insertToDb != 'function') {
-      $("[data-button-type=insertfromtemp]").unbind('click');
-
-      function insertToDb(button) {
+    function insertPrintToDb(button) {
           // ask for confirmation before deleting an item
           // e.preventDefault();
           var button = $(button);
-          var route = button.attr('data-route');
+          var route = button.attr('data-route');          
+          var redirectTo = button.attr('data-redirect');
 
           $.ajax({
               url: route,
@@ -30,11 +28,10 @@
                         }, 3000);
                     } 
                     setTimeout(
-                        function() 
-                        {
-                            window.history.back()
-                        }, 
-                    3000); 
+                    function() 
+                    {
+                        window.location.replace(redirectTo);
+                    }, 2000); 
                 }              
               },
               error: function(result) {
@@ -45,7 +42,6 @@
                   }).show();
               }
           });
-      }
     }
 </script>
 @endpush
