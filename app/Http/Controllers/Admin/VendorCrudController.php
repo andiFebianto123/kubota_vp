@@ -61,7 +61,7 @@ class VendorCrudController extends CrudController
         
         CRUD::addColumn([
             'label'     => 'Buyer Name', // Table column heading
-            'name'      => 'buyer_name', // the column that contains the ID of that connected entity;
+            'name'      => 'buyer', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
         CRUD::addColumn([
@@ -108,13 +108,6 @@ class VendorCrudController extends CrudController
     {
         CRUD::setValidation(VendorRequest::class);
         $this->myFields('create');
-
-        // $this->currencyCrud();
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
     /**
@@ -147,7 +140,7 @@ class VendorCrudController extends CrudController
         ]);
         CRUD::addField([
             'label'     => 'Buyer Name', // Table column heading
-            'name'      => 'buyer_name', // the column that contains the ID of that connected entity;
+            'name'      => 'buyer', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
         CRUD::addField([
