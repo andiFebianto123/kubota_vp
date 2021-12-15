@@ -18,14 +18,14 @@ class Constant
   public function codeDs($po_num, $po_line, $delivery_date){
     $code = "";
     switch (backpack_auth()->user()->role->name) {
-        case 'admin':
+        case 'Admin PTKI':
             $code = "01";
             break;
-        case 'vendor':
-            $code = "00";
-            break;
+        // case 'vendor':
+        //     $code = "00";
+        //     break;
         default:
-            # code...
+            $code = "00";
             break;
     }
     $po = PurchaseOrder::where('po_num', $po_num)->first();
