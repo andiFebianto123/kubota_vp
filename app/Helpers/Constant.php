@@ -17,7 +17,7 @@ class Constant
 
   public function codeDs($po_num, $po_line, $delivery_date){
     $code = "";
-    switch (backpack_auth()->user()->role->name) {
+    switch (backpack_auth()->user()->roles->pluck('name')->first()) {
         case 'Admin PTKI':
             $code = "01";
             break;
