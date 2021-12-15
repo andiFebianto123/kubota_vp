@@ -58,6 +58,14 @@ class Sidebar
         'childrens' => []
       ],
       [
+        'name' => 'Summary MO',
+        'url' => backpack_url('material-outhouse-summary'),
+        'icon' => 'la-cube',
+        'key' => 'material-outhouse-summary',
+        'roles' => ['admin', 'vendor'],
+        'childrens' => []
+      ],
+      [
         'name' => 'Faktur Pajak',
         'url' => backpack_url('tax-invoice'),
         'icon' => 'la-file-invoice-dollar',
