@@ -2,7 +2,13 @@
 	@if (!$crud->model->translationEnabled())
 
 	<!-- Single edit button -->
-	<a href="{{ url($crud->route.'/'.$entry->getKey().'/edit') }}" class="btn btn-sm btn-link"><i class="la la-edit"></i> {{ trans('backpack::crud.edit') }}</a>
+		@if ($entry->getTable() != 'roles') 
+			<a href="{{ url($crud->route.'/'.$entry->getKey().'/edit') }}" class="btn btn-sm btn-link"><i class="la la-edit"></i> {{ trans('backpack::crud.edit') }}</a>
+		@else
+			@if ($entry->name != 'Admin PTKI')
+				<a href="{{ url($crud->route.'/'.$entry->getKey().'/edit') }}" class="btn btn-sm btn-link"><i class="la la-edit"></i> {{ trans('backpack::crud.edit') }}</a>
+			@endif
+		@endif
 
 	@else
 
