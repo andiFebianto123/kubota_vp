@@ -124,7 +124,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->read_at == null && backpack_auth()->user()->role->name != 'admin')
+                                @if($po_line->read_at == null && backpack_auth()->user()->hasRole('Admin PTKI'))
                                 <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
@@ -160,7 +160,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                         @endif
                                     @endif    
                                 @else
-                                    @if(backpack_auth()->user()->role->name != 'admin')
+                                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                     @endif
