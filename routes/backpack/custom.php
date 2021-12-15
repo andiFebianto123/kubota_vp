@@ -54,6 +54,7 @@ Route::group([
     Route::post('delivery-print-label-post', 'PurchaseOrderLineCrudController@exportPdfLabelPost');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
+    Route::crud('material-outhouse-summary', 'MaterialOuthouseSummaryCrudController');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
 
@@ -61,4 +62,6 @@ Route::group([
     Route::post('role/change-role-permission', 'RoleCrudController@changeRolePermission');
     Route::get('role/show-role-permission', 'RoleCrudController@showPermission');
     Route::crud('tax-invoice', 'TaxInvoiceCrudController');
+    
+    Route::get('export-db', 'ConfigurationCrudController@exportDb');
 });

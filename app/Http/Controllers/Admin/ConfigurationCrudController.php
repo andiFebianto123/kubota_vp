@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\ConfigurationRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class ConfigurationCrudController
@@ -78,5 +79,13 @@ class ConfigurationCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    public function exportDb()
+    {
+        $filename = asset('docs/'.date('YmdHis').'.sql');
+        DB::unprepared(file_get_contents($filename));
+        
+        return $filename;
     }
 }
