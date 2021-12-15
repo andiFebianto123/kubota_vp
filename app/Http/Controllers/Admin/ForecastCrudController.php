@@ -42,29 +42,39 @@ class ForecastCrudController extends CrudController
     }
 
     protected function getFieldAccess(){
-    
-        if(request('vendor_submit')){
-            if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
-                Session::put("vendor_name", request('filter_vendor'));
-                $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
-                Session::put('vendor_text', $db->vend_name);
-            }else{
-                Session::forget('vendor_name');
-                Session::forget('vendor_text');
+        if(backpack_user()->hasRole('Admin PTKI')){
+            if(request('vendor_submit')){
+                if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
+                    Session::put("vendor_name", request('filter_vendor'));
+                    $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
+                    Session::put('vendor_text', $db->vend_name);
+                }else{
+                    Session::forget('vendor_name');
+                    Session::forget('vendor_text');
+                }
             }
         }
     }
 
     protected function setQuery(){
-        if(Session::get('vendor_name')){
-            $this->crud->query = $this->crud->query
-            ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
-            ->where('vend_num', Session::get('vendor_name'))
-            ->groupBy('item')
-            ->orderBy('id', 'DESC');
+        if(backpack_user()->hasRole('Admin PTKI')){
+            if(Session::get('vendor_name')){
+                $this->crud->query = $this->crud->query
+                ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+                ->where('vend_num', Session::get('vendor_name'))
+                ->groupBy('item')
+                ->orderBy('id', 'DESC');
+            }else{
+                $this->crud->query = $this->crud->query
+                ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+                ->groupBy('item')
+                ->orderBy('id', 'DESC');
+            }
         }else{
+            // jika vendor biasa
             $this->crud->query = $this->crud->query
             ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
+            ->where('vend_num', backpack_user()->vendor->vend_num)
             ->groupBy('item')
             ->orderBy('id', 'DESC');
         }
@@ -86,6 +96,14 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
+        // dd([
+        //     'cek_role_admin' => backpack_user()->hasRole('Admin PTKI'),
+        //     'cek_permision_create' => backpack_user()->hasDirectPermission('create'),
+        //     'cek_permission_update' => backpack_user()->hasDirectPermission('update'),
+        //     'all_direct_permission' => backpack_user()->getDirectPermissions()->values()->all(),
+        //     'all_permission_via_role' => backpack_user()->getPermissionsViaRoles()->values()->all(),
+        //     'all_permission' => backpack_user()->getAllPermissions()->values()->all(),
+        // ]);
         
         // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
         // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -153,6 +171,7 @@ class ForecastCrudController extends CrudController
         // }
         $this->crud->andi = 'Andi febianto';
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
+        $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
         
     }
@@ -239,96 +258,6 @@ class ForecastCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    // public function searchCustom()
-    // {
-    //     $this->crud->hasAccessOrFail('list');
-    //     $this->crud->applyUnappliedFilters();
-    //     $totalRows = $this->crud->model->count();
-    //     $filteredRows = $this->crud->query->toBase()->getCountForPagination();
-    //     $startIndex = request()->input('start') ?: 0;
-    //     // if a search term was present
-    //     if (request()->input('search') && request()->input('search')['value']) {
-    //         // filter the results accordingly
-    //         $this->crud->applySearchTerm(request()->input('search')['value']);
-    //         // recalculate the number of filtered rows
-    //         $filteredRows = $this->crud->count();
-    //     }
-    //     // start the results according to the datatables pagination
-    //     if (request()->input('start')) {
-    //         $this->crud->skip((int) request()->input('start'));
-    //     }
-    //     // limit the number of results according to the datatables pagination
-    //     if (request()->input('length')) {
-    //         $this->crud->take((int) request()->input('length'));
-    //     }
-    //     // overwrite any order set in the setup() method with the datatables order
-    //     if (request()->input('order')) {
-    //         // clear any past orderBy rules
-    //         $this->crud->query->getQuery()->orders = null;
-    //         foreach ((array) request()->input('order') as $order) {
-    //             $column_number = (int) $order['column'];
-    //             $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
-    //             $column = $this->crud->findColumnById($column_number);
-    //             if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
-    //                 // apply the current orderBy rules
-    //                 $this->crud->orderByWithPrefix($column['name'], $column_direction);
-    //             }
-    //             // check for custom order logic in the column definition
-    //             if (isset($column['orderLogic'])) {
-    //                 $this->crud->customOrderBy($column, $column_direction);
-    //             }
-    //         }
-    //     }
-    //     // show newest items first, by default (if no order has been set for the primary column)
-    //     // if there was no order set, this will be the only one
-    //     // if there was an order set, this will be the last one (after all others were applied)
-    //     // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
-    //     $orderBy = $this->crud->query->toBase()->orders;
-    //     $table = $this->crud->model->getTable();
-    //     $key = $this->crud->model->getKeyName();
-    //     $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
-    //         return (isset($item['column']) && $item['column'] === $key)
-    //             || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
-    //     });
-    //     if (! $hasOrderByPrimaryKey) {
-    //         $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
-    //     }
-    //     $entries = $this->crud->getEntries();
-
-    //     $dataCobaCoba = [
-    //         [
-    //             'Muhammad Andi febianto',
-    //             23,
-    //             ''
-    //         ],
-    //         [
-    //             'Faiz Irfan Setiawan',
-    //             17,
-    //             ''
-    //         ],
-    //         [
-    //             'Aditya Rafli',
-    //             13,
-    //             ''
-    //         ],
-    //     ];
-    //     // $entries = $dataCobaCoba;
-    //     // $startIndex => adalah offsetnya
-    //     // $totalRows => adalah jumlah total baris semua datanya
-    //     // dd([$totalRows, $filteredRows, $startIndex]);
-    //     // $this->latihanCollect();
-    //     $this->implementForecastConverter();
-
-    //     $callback = array(
-    //         'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
-    //         'recordsTotal' => 3, // total dari semua row
-    //         'recordsFiltered' => 3,
-    //         'data' => $dataCobaCoba
-    //     );
-    //     // return $callback;
-    //     // return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
-    // }
-
     public function search(){
         $this->crud->hasAccessOrFail('list');
         // $this->crud->applyUnappliedFilters();
@@ -401,6 +330,8 @@ class ForecastCrudController extends CrudController
         );
         return $callback;
     }
+
+    
 
 
 }

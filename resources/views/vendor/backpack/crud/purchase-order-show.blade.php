@@ -97,8 +97,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>
-                                @if(backpack_auth()->user()->role->name != 'admin')
-                                <input type="checkbox" id="check-all-cb" class="check-all">
+                                @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                    <input type="checkbox" id="check-all-cb" class="check-all">
                                 @endif
                             </th>
                             <th>PO Number</th>
@@ -114,8 +114,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
-                            @if(backpack_auth()->user()->role->name == 'admin')
-                            <th>Created At</th>
+                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                <th>Created At</th>
                             @endif
                             <th>Action</th>
                         </tr>
@@ -124,7 +124,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->read_at == null && backpack_auth()->user()->role->name != 'admin')
+                                @if($po_line->read_at == null && backpack_auth()->user()->hasRole('Admin PTKI'))
                                 <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
@@ -146,21 +146,21 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{!! $po_line->reformat_flag_accept !!}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
-                            @if(backpack_auth()->user()->role->name == 'admin')
-                            <td>{{$po_line->created_at}}</td>
+                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                <td>{{$po_line->created_at}}</td>
                             @endif
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
-                                    @if(backpack_auth()->user()->role->name == 'admin' && sizeof($po_line->delivery) == 0)
+                                    @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
                                         <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
                                         @endif
                                     @endif    
                                 @else
-                                    @if(backpack_auth()->user()->role->name != 'admin')
+                                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
                                     <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                     @endif

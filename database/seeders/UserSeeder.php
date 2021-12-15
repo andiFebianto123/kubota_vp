@@ -17,7 +17,6 @@ class UserSeeder extends Seeder
               "username" => "admin",
               "email" => "admin@ptki.com",
               "password" => bcrypt("qwerty"),
-              "role_id" => 1
             ],
             ["username" => "admin"],
           ],
@@ -28,7 +27,6 @@ class UserSeeder extends Seeder
               "email" => "V001303@ptki.com",
               "password" => bcrypt("qwerty"),
               "vendor_id" => "2",
-              "role_id" => 2
             ],
             ["username" => "V001303"],
           ],
@@ -39,7 +37,6 @@ class UserSeeder extends Seeder
               "email" => "V002011@ptki.com",
               "password" => bcrypt("qwerty"),
               "vendor_id" => "3",
-              "role_id" => 2
             ],
             ["username" => "V002011"],
           ],
@@ -50,7 +47,6 @@ class UserSeeder extends Seeder
               "email" => "V002062@ptki.com",
               "password" => bcrypt("qwerty"),
               "vendor_id" => "4",
-              "role_id" => 2
             ],
             ["username" => "V002062"],
           ],
@@ -61,7 +57,6 @@ class UserSeeder extends Seeder
               "email" => "V002073@ptki.com",
               "password" => bcrypt("qwerty"),
               "vendor_id" => "5",
-              "role_id" => 2
             ],
             ["username" => "V002073"],
           ],

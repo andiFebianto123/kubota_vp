@@ -10,6 +10,8 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
+use Spatie\Permission\Models\Role as RoleSpatie;
+
 
 /**
  * Class UserCrudController
@@ -34,6 +36,10 @@ class UserCrudController extends CrudController
         CRUD::setModel(\App\Models\User::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/user');
         CRUD::setEntityNameStrings('user', 'users');
+        $this->crud->query = $this->crud->query
+        ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+        ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        ->select('users.*', 'roles.name as nama_role');
     }
 
     /**
@@ -56,12 +62,22 @@ class UserCrudController extends CrudController
             'attribute' => 'vend_num',
         ]);
         CRUD::addColumn([
-            'label'     => 'Role', // Table column heading
-            'name'      => 'role_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'role', 
-            'type' => 'relationship',
-            'attribute' => 'name',
+            'label' => 'Role',
+            'name' => 'nama_role',
+            'type' => 'model_function',
+            'function_name' => 'showRole',
+            'searchLogic' => function($query, $column, $searchTerm){
+                $query->orWhere('roles.name', 'like', "%{$searchTerm}%");
+            }
         ]);
+
+        // CRUD::addColumn([
+        //     'label'     => 'Role', // Table column heading
+        //     'name'      => 'role_id', // the column that contains the ID of that connected entity;
+        //     'entity'    => 'role', 
+        //     'type' => 'relationship',
+        //     'attribute' => 'name',
+        // ]);
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -79,14 +95,25 @@ class UserCrudController extends CrudController
     {
         CRUD::setValidation(UserRequest::class);
        
+        // $this->crud->addField([
+        //     'label'     => 'Role', // Table column heading
+        //     'type'      => 'select',
+        //     'name'      => 'role_id', // the column that contains the ID of that connected entity;
+        //     'entity'    => 'role', // the method that defines the relationship in your Model
+        //     'attribute' => 'name', // foreign key attribute that is shown to user
+        //     'model'     => "App\Models\Role",
+        // ]);
+
+
         $this->crud->addField([
-            'label'     => 'Role', // Table column heading
-            'type'      => 'select',
-            'name'      => 'role_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'role', // the method that defines the relationship in your Model
-            'attribute' => 'name', // foreign key attribute that is shown to user
-            'model'     => "App\Models\Role",
+            'label' => 'Role',
+            'name' => 'roles',
+            'attribute' => 'name',
+            'multiple' => false,
+            'pivot' => false,
         ]);
+
+        
         $this->crud->addField([
             'label'     => 'Vendor', // Table column heading
             'type'      => 'select2',
@@ -131,7 +158,14 @@ class UserCrudController extends CrudController
         $this->crud->setRequest($request);
         $this->crud->unsetValidation(); // Validation has already been run
 
+        $role = $request->input('roles');
+
+        // hapus key roles nya
+        unset($this->crud->getStrippedSaveRequest()['roles']);
+        // insert data usert
         $item = $this->crud->create($this->crud->getStrippedSaveRequest());
+        // setelah insert tambahkan rolenya
+        $item->assignRole(RoleSpatie::where('id', $role)->first());
 
         Alert::success(trans('backpack::crud.insert_success'))->flash();
 
@@ -155,10 +189,27 @@ class UserCrudController extends CrudController
             $request->request->remove('password');
         }
 
+        // dd($request);
         $this->crud->setRequest($request);
         $this->crud->unsetValidation(); // Validation has already been run
 
-            
+        $role = $request->input('roles');
+
+        $id_user = $request->get($this->crud->model->getKeyName());
+
+        $getUsers = $this->crud->model::where('id', $id_user)->first();
+
+        // dd([ 
+        //     'id' => $request->get($this->crud->model->getKeyName()), 
+        //     'update' => $this->crud->getStrippedSaveRequest()
+        // ]);
+
+        DB::table('model_has_roles')->where('model_id', $id_user)->delete();
+
+        $getUsers->assignRole(RoleSpatie::where('id', $role)->first());
+
+        unset($this->crud->getStrippedSaveRequest()['roles']);
+        
         $item = $this->crud->update($request->get($this->crud->model->getKeyName()),
         $this->crud->getStrippedSaveRequest());
         $this->data['entry'] = $this->crud->entry = $item;

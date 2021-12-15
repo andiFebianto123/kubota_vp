@@ -140,7 +140,7 @@ class forecastConverter {
      * Method ini digunakan untuk melakukan pengurutan atau order data, tapi penggunaan method ini hanya diperlukan saja
      * @param Array $order --> data order dari column datatable
      * @throws void
-     * @return void
+     * @return Array() # data hasil forecast yang telah di sorting
      */
     function getResultWithOrderBy($order){
         $colectDataMerge = [];

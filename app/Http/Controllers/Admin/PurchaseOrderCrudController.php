@@ -48,7 +48,7 @@ class PurchaseOrderCrudController extends CrudController
 
     protected function setupListOperation()
     {
-        $current_role = backpack_auth()->user()->role->name;
+        $current_role = backpack_auth()->user()->roles->pluck('name')->first();
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');        
@@ -57,7 +57,7 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
-        if($current_role == 'vendor'){
+        if(in_array($current_role, ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
             $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 

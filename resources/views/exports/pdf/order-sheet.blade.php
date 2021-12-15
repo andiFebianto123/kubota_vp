@@ -54,8 +54,8 @@
                     <th>Status Accept</th>
                     <th>Read By</th>
                     <th>Read At</th>
-                    @if(backpack_auth()->user()->role->name == 'admin')
-                    <th>Created At</th>
+                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                        <th>Created At</th>
                     @endif
                 </tr>
             </thead>
@@ -80,8 +80,8 @@
                     <td>{!! $po_line->flag_accept !!}</td>
                     <td>{{$po_line->read_by_user}}</td>
                     <td>{{$po_line->read_at}}</td>
-                    @if(backpack_auth()->user()->role->name == 'admin')
-                    <td>{{$po_line->created_at}}</td>
+                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                        <td>{{$po_line->created_at}}</td>
                     @endif
                    
                 </tr>
