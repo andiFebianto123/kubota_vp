@@ -71,7 +71,8 @@ class reminderPo extends Command
                 $id = $po_line['ID'];
                 $poNumber = $po_line['po_number'];
 
-                $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$id}/show");
+                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$id}/show";
+                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$id}/show");
                 $details = [
                     'type' => 'reminder_po',
                     'title' => 'Reminder accept PO',
