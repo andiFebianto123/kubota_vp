@@ -255,6 +255,7 @@ class DeliveryCrudController extends CrudController
         $insert_d->save();
 
         if ( $po_line->w_serial == 1) {
+
             foreach ($sn_childs as $key => $sn_child) {
                 if (isset($sn_child)) {
                     $insert_sn = new DeliverySerial();

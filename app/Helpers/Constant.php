@@ -8,11 +8,17 @@ class Constant
 {
  
   public function statusOFC(){
-    return [ 
-        'O' => ['text' => 'Ordered', 'color' => ''], 
-        'F' => ['text' => 'Filled', 'color' => 'text-primary'], 
-        'C' => ['text' => 'Complete', 'color' => 'text-success']
-    ];
+
+    $status = [];   
+    foreach(range('A','Z') as $alpha){
+        $status[$alpha] = ['text' => 'Ordered', 'color' => ''];
+    }
+
+    $status['O'] = ['text' => 'Ordered', 'color' => ''];
+    $status['F'] = ['text' => 'Filled', 'color' => 'text-primary'];
+    $status['C'] = ['text' => 'Complete', 'color' => 'text-success'];
+
+    return $status;
   }
 
   public function codeDs($po_num, $po_line, $delivery_date){

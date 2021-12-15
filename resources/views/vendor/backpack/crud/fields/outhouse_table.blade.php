@@ -31,7 +31,7 @@
                 <td>{{$data->lot}}</td>
                 <td>{{$data->lot_qty}}</td>
                 <td> 
-                    <input type="hidden" name="outhouse_ids[]" value="{{$data->id}}"> 
+                    <input type="hidden" name="material_ids[]" value="{{$data->id}}"> 
                     <input type="number" class="form-control form-issued" data-totalqtyper="{{$field['total_qty_per']}}" data-lotqty="{{$data->lot_qty}}" data-qtyper="{{$data->qty_per}}" name="{{$field['name']}}[]" value="{{$fixed_issued_qty}}"> 
                 </td>
                 <td>{{$data->qty_per}}</td>
