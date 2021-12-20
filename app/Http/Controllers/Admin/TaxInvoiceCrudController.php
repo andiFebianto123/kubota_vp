@@ -10,6 +10,8 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
+use App\Helpers\Constant;
+use \App\Models\TaxInvoice;
 
 /**
  * Class TaxInvoiceCrudController
@@ -33,7 +35,15 @@ class TaxInvoiceCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\TaxInvoice::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/tax-invoice');
-        CRUD::setEntityNameStrings('faktur pajak', 'faktur pajak');
+        CRUD::setEntityNameStrings('faktur pajak', 'List Payment');
+        $this->crud->query = $this->crud->query->select('*', 
+            DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as comment"),
+            DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as user"),
+            DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as status"),
+            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as id_comment")
+        );
+        // ->orderBy('id_comment', 'DESC');
+
     }
 
     /**
@@ -46,9 +56,12 @@ class TaxInvoiceCrudController extends CrudController
     {
         $this->crud->removeButton('show');
         $this->crud->removeButton('update');
-        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'beginning');
+        $this->crud->addButtonFromView('line', 'accept_faktur_pajak', 'accept_faktur_pajak', 'begining');
+        $this->crud->addButtonFromView('line', 'reject_faktur_pajak', 'reject_faktur_pajak', 'end');
+        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
 
         $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
+        // dd($this->crud->getEntries());
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -86,7 +99,10 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::addColumn([
             'label'     => 'Unit Price', // Table column heading
             'name'      => 'unit_price', // the column that contains the ID of that connected entity;
-            'type' => 'text',
+            'type' => 'closure',
+            'function' => function($entry){
+                return Constant::getPrice($entry->unit_price);
+            }
         ]);
         CRUD::addColumn([
             'label'     => 'Qty Received', // Table column heading
@@ -99,32 +115,92 @@ class TaxInvoiceCrudController extends CrudController
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'GRN Num', // Table column heading
-            'name'      => 'grn_num', // the column that contains the ID of that connected entity;
-            'type' => 'text',
-        ]);
-        CRUD::addColumn([
-            'label'     => 'PPN', // Table column heading
-            'name'      => 'ppn', // the column that contains the ID of that connected entity;
-            'type' => 'text',
-        ]);
-        CRUD::addColumn([
-            'label'     => 'PPH', // Table column heading
-            'name'      => 'pph', // the column that contains the ID of that connected entity;
-            'type' => 'text',
-        ]);
-        CRUD::addColumn([
-            'label'     => 'Harga Sebelum Pajak', // Table column heading
-            'name'      => 'harga_sebelum_pajak', // the column that contains the ID of that connected entity;
-            'type' => 'text',
-        ]);
-        CRUD::addColumn([
             'label'     => 'No Faktur', // Table column heading
             'name'      => 'no_faktur_pajak', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-
+        CRUD::addColumn([
+            'label' => 'No Surat Jalan Vendor',
+            'name' => 'no_surat_jalan_vendor',
+            'type' => 'text'
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Harga Sebelum Pajak', // Table column heading
+            'name'      => 'harga_sebelum_pajak', // the column that contains the ID of that connected entity;
+            'type' => 'closure',
+            'function' => function($entry){
+                return Constant::getPrice($entry->harga_sebelum_pajak);
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'PPN', // Table column heading
+            'name'      => 'ppn', // the column that contains the ID of that connected entity;
+            'type' => 'closure',
+            'function' => function($entry){
+                return Constant::getPrice($entry->ppn);
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'PPH', // Table column heading
+            'name'      => 'pph', // the column that contains the ID of that connected entity;
+            'type' => 'closure',
+            'function' => function($entry){
+                return Constant::getPrice($entry->pph);
+            }
+        ]);
+        CRUD::addColumn([
+            'label' => 'Total',
+            'name' => 'total_ppn',
+            'type' => 'closure',
+            'function' => function($entry){
+                return Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+            }
+        ]);
+        CRUD::addColumn([
+            'label' => 'Comments',
+            'name' => 'comment',
+            'type' => 'comment'
+        ]);
         CRUD::column('updated_at');
+        $this->crud->addFilter([
+            'name'        => 'vendor',
+            'type'        => 'select2_ajax',
+            'label'       => 'Name Vendor',
+            'placeholder' => 'Pick a vendor'
+        ],
+        url('admin/test/ajax-vendor-options'),
+        function($value) { 
+            $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
+            ->select('delivery_status.id as id')
+            ->where('po.vend_num', $value)
+            ->get()
+            ->mapWithKeys(function($po, $index){
+                return [$index => $po->id];
+            });
+            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
+        });
+        $this->crud->addFilter([
+            'type'  => 'date_range',
+            'name'  => 'from_to',
+            'label' => 'Payment Plan Date'
+          ],
+          false,
+          function ($value) { // if the filter is active, apply these constraints
+            $dates = json_decode($value);
+            $this->crud->addClause('where', 'payment_plan_date', '>=', $dates->from);
+            $this->crud->addClause('where', 'payment_plan_date', '<=', $dates->to);
+          });
+        // $this->data['button_create'] = 'Invoice';
+        $this->crud->button_create = 'Invoice and Tax';
+
+        // COMING SOON
+        // $results = $this->crud->model->select('*', 
+        //     DB::raw("(SELECT vend_num FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as nama_vendor"),
+        //     DB::raw("(SELECT po.po_date FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as po_date"),
+        //     DB::raw("(SELECT po.id FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as id_po")
+        // );
+        // dd($results->get());
+
     }
 
     /**
@@ -140,6 +216,26 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::addField([   // Upload
             'name'      => 'file_faktur_pajak',
             'label'     => 'Faktur Pajak',
+            'type'      => 'upload',
+            'upload'    => true,
+            'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
+            // optional:
+            'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
+        ]); 
+
+        CRUD::addField([   // Upload
+            'name'      => 'invoice',
+            'label'     => 'Invoice',
+            'type'      => 'upload',
+            'upload'    => true,
+            'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
+            // optional:
+            'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
+        ]); 
+
+        CRUD::addField([   // Upload
+            'name'      => 'file_surat_jalan',
+            'label'     => 'Surat Jalan',
             'type'      => 'upload',
             'upload'    => true,
             'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
@@ -216,6 +312,43 @@ class TaxInvoiceCrudController extends CrudController
                 $change->save();
             }
         }
+        // input invoice
+        if(isset($request->invoice)){
+            $filenameInvoice = 'faktur_pajak_invoice'.date('ymdhis').'.'.$request->invoice->getClientOriginalExtension();
+            $request->invoice->move('files', $filenameInvoice);
+            $filenameInvoice = asset('files/'.$filenameInvoice);
+
+            foreach ($ds_nums as $key => $ds) {
+                $old_files = DeliveryStatus::where('id', $ds)->first()->invoice;
+                if (isset($old_files)) {
+                    $base_url = url('/');
+                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    unlink(public_path($will_unlink_file));
+                }
+                $change = DeliveryStatus::where('id', $ds)->first();
+                $change->invoice = $filenameInvoice;
+                $change->save();
+            }
+        }
+
+        // input file surat jalan
+        if(isset($request->file_surat_jalan)){
+            $filenameSuratJalan = 'faktur_pajak_surat_jalan'.date('ymdhis').'.'.$request->file_surat_jalan->getClientOriginalExtension();
+            $request->file_surat_jalan->move('files', $filenameSuratJalan);
+            $filenameSuratJalan = asset('files/'.$filenameSuratJalan);
+
+            foreach ($ds_nums as $key => $ds) {
+                $old_files = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
+                if (isset($old_files)) {
+                    $base_url = url('/');
+                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    unlink(public_path($will_unlink_file));
+                }
+                $change = DeliveryStatus::where('id', $ds)->first();
+                $change->invoice = $filenameSuratJalan;
+                $change->save();
+            }
+        }
 
         $message = 'Delivery Sheet Created';
 
@@ -235,6 +368,22 @@ class TaxInvoiceCrudController extends CrudController
         $change->file_faktur_pajak = null;
         $success = $change->save();
         return $success;
+    }
+
+    public function confirmFakturPajak($id){
+        $db = $this->crud->model::where('id', $id)->first();
+        $db->confirm_flag = 1;
+        $db->confirm_date = now();
+        $status = $db->save();
+        return $status;
+    }
+
+    public function confirmRejectFakturPajak($id){
+        $db = $this->crud->model::where('id', $id)->first();
+        $db->confirm_flag = 2;
+        $db->confirm_date = now();
+        $status = $db->save();
+        return $status;
     }
 
 }

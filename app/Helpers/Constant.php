@@ -40,5 +40,9 @@ class Constant
     return $ds_num;
 }
 
+  public static function getPrice($nominal){
+   return number_format($nominal, 0, ',', '.');
+  }
+
   
 }

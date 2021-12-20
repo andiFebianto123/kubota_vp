@@ -12,6 +12,7 @@ use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
+use App\Models\PurchaseOrder;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -167,12 +168,19 @@ class DeliveryCrudController extends CrudController
         $delivery_status = DeliveryStatus::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)
                             ->first();
-        
+
+        $vendor = PurchaseOrder::join('vendor', 'vendor.vend_num', 'po.vend_num')
+        ->where('po.po_num', $delivery_status->po_num)
+        ->select('vendor.currency as currency')
+        ->first();
+
+        $data['format_currency'] = $vendor->currency;
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
         $data['delivery_status'] = $delivery_status;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
+
 
         return view('vendor.backpack.crud.delivery-show', $data);
     }

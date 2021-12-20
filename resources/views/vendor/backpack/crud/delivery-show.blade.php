@@ -217,7 +217,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Vend. Dlv No</td>
-                                    <td>: {{$delivery_status->no_surat_jalan_vendor}}</td>
+                                    <td>: {{$delivery_status->no_surat_jalan_vendor}}</td> 
                                 </tr>
                                 <tr>
                                     <td>No Faktur Pajak</td>
@@ -237,7 +237,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Total</td>
-                                    <td>: {{$delivery_status->currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
+                                    <td>: {{$format_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
                             </table>
 

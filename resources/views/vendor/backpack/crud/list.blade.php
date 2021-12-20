@@ -146,11 +146,67 @@
   <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/list.css').'?v='.config('backpack.base.cachebusting_string') }}">
 
   <!-- CRUD LIST CONTENT - crud_list_styles stack -->
+  <style>
+    .comment-modal .modal-dialog .modal-content .modal-body .modal-message {
+      height: 370px;
+      overflow: auto;
+    }
+    .comment-modal .modal-dialog .modal-content .modal-body .modal-message {
+      /* background-color: #DDDDDD;*/
+    }
+    .comment-modal .modal-dialog .modal-content .modal-body .modal-message .message{
+      background: white;
+      height: 50px;
+      margin: 12px;
+    }
+    .comment-modal .modal-dialog .modal-content .modal-body .input-message {
+      padding-top: 12px;
+    }
+  </style>
   @stack('crud_list_styles')
 @endsection
 
 @section('after_scripts')
   @include('crud::inc.datatables_logic')
+  <div class="modal fade comment-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-message bg-light">
+            <div class="message">
+              <div class="message-head">
+                
+              </div>
+              <div class="message-body">
+
+              </div>
+            </div>
+          </div>
+          <div class="input-message">
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">Message</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $('.comment-modal').on('shown.bs.modal', function (e) {
+      console.log($(this));
+    })
+  </script>
   <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/list.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>

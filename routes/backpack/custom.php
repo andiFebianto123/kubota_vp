@@ -64,4 +64,6 @@ Route::group([
     Route::crud('tax-invoice', 'TaxInvoiceCrudController');
     
     Route::get('export-db', 'ConfigurationCrudController@exportDb');
+    Route::get('confirm-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmFakturPajak');
+    Route::get('confirm-reject-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmRejectFakturPajak');
 });
