@@ -373,7 +373,7 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
 
-    public function exportPdfLabel(){
+    public function exportPdfLabel(){ 
         $str_param = request('param');
         $arr_param = unserialize(base64_decode($str_param));
         $print_delivery = $arr_param['print_delivery'];
@@ -407,20 +407,31 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
 
-    public function exportPdfLabelSingle($id){
-        if($id != 0){
-                $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-                ->join('po', 'po.po_num', 'delivery.po_num')
-                ->where('delivery.id', $id)
-                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
-        }
+    // public function exportPdfLabelSingle($id){
+    //     if($id != 0){
+    //             $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+    //             ->join('po', 'po.po_num', 'delivery.po_num')
+    //             ->where('delivery.id', $id)
+    //             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+    //             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
+    //     }
 
+    //     $data['data'] = $db->get();
+
+    //     $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
+    //     // return view('exports.pdf.delivery-sheet-label', $data);
+    //     return $pdf->download('print-label-'.now().'.pdf');
+    //     // return $pdf->stream();
+    // }
+
+    function exportPdfLabelInstant($id){
+        $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+        ->join('po', 'po.po_num', 'delivery.po_num')
+        ->where('delivery.id', $id)
+        ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+        ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
         $data['data'] = $db->get();
-
         $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
-        // return view('exports.pdf.delivery-sheet-label', $data);
         return $pdf->download('print-label-'.now().'.pdf');
-        // return $pdf->stream();
     }
 }

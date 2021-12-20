@@ -62,7 +62,7 @@ class Sidebar
         'url' => backpack_url('material-outhouse-summary'),
         'icon' => 'la-cube',
         'key' => 'material-outhouse-summary',
-        'roles' => ['admin', 'vendor'],
+        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
       [

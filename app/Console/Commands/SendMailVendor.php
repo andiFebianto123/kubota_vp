@@ -47,7 +47,8 @@ class SendMailVendor extends Command
             # alias terdapat data yang kosong
             $getPo = $pos->get();
             foreach($getPo as $po){
-                $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
+                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
                 $details = [
                     'type' => 'reminder_po',
                     'title' => 'Ada PO baru',

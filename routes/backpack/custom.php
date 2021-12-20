@@ -49,7 +49,8 @@ Route::group([
     Route::get('test/ajax-vendor-options', 'VendorCrudController@itemVendorOptions');
 
     // Route untuk export PDF print label delivery sheet detail
-    Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelSingle');
+    // Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelSingle');
+    Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelInstant');
     Route::get('delivery-print-label', 'PurchaseOrderLineCrudController@exportPdfLabel');
     Route::post('delivery-print-label-post', 'PurchaseOrderLineCrudController@exportPdfLabelPost');
 
