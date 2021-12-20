@@ -66,7 +66,7 @@ class Sidebar
         'childrens' => []
       ],
       [
-        'name' => 'Faktur Pajak',
+        'name' => 'List Payment',
         'url' => backpack_url('tax-invoice'),
         'icon' => 'la-file-invoice-dollar',
         'key' => 'tax-invoice',
