@@ -235,7 +235,7 @@ class PurchaseOrderLineCrudController extends CrudController
 
             $this->crud->addField(
                 [
-                    'name'  => 'material_issues',
+                    'name'  => 'mo_issue_qty',
                     'label' => 'Material Issue',
                     'type'  => 'outhouse_table',
                     'current_qty' => $current_qty,
@@ -405,6 +405,24 @@ class PurchaseOrderLineCrudController extends CrudController
         return $pdf->download('print-label-'.now().'.pdf');
         // return $pdf->stream();
     }
+
+
+    // public function exportPdfLabelSingle($id){
+    //     if($id != 0){
+    //             $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+    //             ->join('po', 'po.po_num', 'delivery.po_num')
+    //             ->where('delivery.id', $id)
+    //             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+    //             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
+    //     }
+
+    //     $data['data'] = $db->get();
+
+    //     $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
+    //     // return view('exports.pdf.delivery-sheet-label', $data);
+    //     return $pdf->download('print-label-'.now().'.pdf');
+    //     // return $pdf->stream();
+    // }
 
     function exportPdfLabelInstant($id){
         $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')

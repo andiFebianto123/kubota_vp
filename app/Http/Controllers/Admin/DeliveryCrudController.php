@@ -244,6 +244,7 @@ class DeliveryCrudController extends CrudController
         $insert_d->po_line = $po_line->po_line;
         $insert_d->po_release = $po_line->po_release;
         $insert_d->ds_line = $ds_num['line'];
+        $insert_d->item = $po_line->item;
         $insert_d->description = $po_line->description;
         $insert_d->u_m = $po_line->u_m;
         $insert_d->due_date = $po_line->due_date;
@@ -263,6 +264,7 @@ class DeliveryCrudController extends CrudController
         $insert_d->save();
 
         if ( $po_line->w_serial == 1) {
+
             foreach ($sn_childs as $key => $sn_child) {
                 if (isset($sn_child)) {
                     $insert_sn = new DeliverySerial();

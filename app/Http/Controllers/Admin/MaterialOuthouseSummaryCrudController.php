@@ -27,7 +27,7 @@ class MaterialOuthouseSummaryCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\MaterialOuthouseSummary::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary');
-        CRUD::setEntityNameStrings('summary mo', 'summary mo');
+        CRUD::setEntityNameStrings('material outhouse summary', 'material outhouses summaries');
     }
 
     /**
