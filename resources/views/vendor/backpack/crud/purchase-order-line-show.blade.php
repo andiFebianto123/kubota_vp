@@ -123,6 +123,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @else
                     <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
                     @endif
+                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
+
                 </form>
         </div>
     </div>

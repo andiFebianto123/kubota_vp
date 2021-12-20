@@ -40,12 +40,28 @@ class DeliverySerialCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+        $this->crud->removeButton('create');
+        $this->crud->removeButton('delete');
 
         CRUD::column('id');
         CRUD::column('ds_num');
         CRUD::column('ds_line');
         CRUD::column('ds_detail');
         CRUD::column('no_mesin');
+        CRUD::addColumn([
+            'label'     => 'Created By', // Table column heading
+            'name'      => 'created_by', // the column that contains the ID of that connected entity;
+            'entity'    => 'userCreate', 
+            'type' => 'relationship',
+            'attribute' => 'name',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Updated By', // Table column heading
+            'name'      => 'updated_by', // the column that contains the ID of that connected entity;
+            'entity'    => 'userUpdate', 
+            'type' => 'relationship',
+            'attribute' => 'name',
+        ]);
         CRUD::column('created_by');
         CRUD::column('updated_by');
         CRUD::column('created_at');
@@ -68,15 +84,12 @@ class DeliverySerialCrudController extends CrudController
     {
         CRUD::setValidation(DeliverySerialRequest::class);
 
-        CRUD::field('id');
-        CRUD::field('ds_num');
-        CRUD::field('ds_line');
-        CRUD::field('ds_detail');
         CRUD::field('no_mesin');
-        CRUD::field('created_by');
-        CRUD::field('updated_by');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
+        $this->crud->addField([
+            'name'  => 'updated_by', 
+            'type'  => 'hidden', 
+            'value' => backpack_auth()->user()->id
+        ]);
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -84,7 +97,6 @@ class DeliverySerialCrudController extends CrudController
          * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
          */
     }
-
     /**
      * Define what happens when the Update operation is loaded.
      * 

@@ -203,33 +203,6 @@ class PurchaseOrderLineCrudController extends CrudController
         }
 
         if($entry->outhouse_flag == 1){
-            // $this->crud->addField(
-            //     [
-            //         'name'  => 'material_issues',
-            //         'label' => 'Material Issue',
-            //         'type'  => 'upload_material_issue',
-            //         'fields' => [
-            //             [
-            //                 'name'        => 'material_ids[]',
-            //                 'label'       => "Material",
-            //                 'type'        => 'select2_from_array',
-            //                 'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
-            //                 'allows_null' => false,
-            //                 'wrapper'   => [ 
-            //                     'class'      => 'form-group col-md-6'
-            //                  ],
-            //             ],
-            //             [   // select2_from_array
-            //                 'name'        => 'mo_issue_qty[]',
-            //                 'label'       => "Issue Qty",
-            //                 'type'        => 'number',
-            //                 'wrapper'   => [ 
-            //                     'class'      => 'form-group col-md-6'
-            //                  ],
-            //             ]
-            //         ],
-            //     ],
-            // );
             $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
                                     ->where('po_line', $entry->po_line);
 
@@ -241,26 +214,6 @@ class PurchaseOrderLineCrudController extends CrudController
                     'current_qty' => $current_qty,
                     'total_qty_per' => $outhouse_materials->sum('qty_per'),
                     'table_body' => $outhouse_materials->get()
-                    // 'fields' => [
-                    //     [
-                    //         'name'        => 'material_ids[]',
-                    //         'label'       => "Material",
-                    //         'type'        => 'select2_from_array',
-                    //         'options'     => $this->optionMaterial($entry->po_num, $entry->po_line),
-                    //         'allows_null' => false,
-                    //         'wrapper'   => [ 
-                    //             'class'      => 'form-group col-md-6'
-                    //          ],
-                    //     ],
-                    //     [   // select2_from_array
-                    //         'name'        => 'mo_issue_qty[]',
-                    //         'label'       => "Issue Qty",
-                    //         'type'        => 'number',
-                    //         'wrapper'   => [ 
-                    //             'class'      => 'form-group col-md-6'
-                    //          ],
-                    //     ]
-                    // ],
                 ],
             );
         }

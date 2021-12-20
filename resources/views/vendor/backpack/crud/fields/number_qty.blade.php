@@ -26,14 +26,16 @@
 <script>
     var maxQty = parseFloat( $( "#current-qty" ).data('max'))
     var initCurrent = parseFloat( $( "#current-qty" ).val())
+    var initUrl = $('#template-upload-sn').attr('init-url')
     if (parseFloat(initCurrent) > parseFloat(maxQty)) {
         $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQty+')</small>')
     }
+    $( document ).ready(function() {
+        $('#template-upload-sn').attr('href', initUrl+'?qty='+maxQty)
+    });
 
     $( "#current-qty" ).keyup(function() {
-        var initUrl = $('#template-upload-sn').attr('init-url')
         var currentQty = parseFloat($(this).val())
-
         $('#template-upload-sn').attr('href', initUrl+'?qty='+currentQty)
         $('#allowed-qty').val(currentQty)
 
@@ -51,6 +53,7 @@
                 var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
                     fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
                     $('.form-issued:eq('+k+')').val(fixedIssuedQty)
+                    $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
             })
         } 
     });
