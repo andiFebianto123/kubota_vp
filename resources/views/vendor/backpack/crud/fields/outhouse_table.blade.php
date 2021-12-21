@@ -1,5 +1,6 @@
 @include('crud::fields.inc.wrapper_start')
     <label>{!! $field['label'] !!}</label>
+    @if(sizeof($field['table_body']) > 0)
     <table class="table table-stripped table-sm outhouse-table">
         <thead>
             <tr>
@@ -9,8 +10,8 @@
             <th style="white-space: nowrap;">Desc</th>
             <th style="white-space: nowrap;">Lot</th>
             <th style="white-space: nowrap;">Lot Qty</th>
+            <th style="white-space: nowrap;">Qty Req</th>
             <th style="white-space: nowrap;">Issued Qty</th>
-            <th style="white-space: nowrap;">Qty Per</th>
             </tr>
         </thead>
         <tbody>
@@ -30,15 +31,18 @@
                 <td>{{$data->description}}</td>
                 <td>{{$data->lot}}</td>
                 <td>{{$data->lot_qty}}</td>
+                <td><span class="qty-requirement">{{$fixed_issued_qty}}</span></td>
                 <td> 
                     <input type="hidden" name="material_ids[]" value="{{$data->id}}"> 
                     <input type="number" class="form-control form-issued" data-totalqtyper="{{$field['total_qty_per']}}" data-lotqty="{{$data->lot_qty}}" data-qtyper="{{$data->qty_per}}" name="{{$field['name']}}[]" value="{{$fixed_issued_qty}}"> 
                 </td>
-                <td>{{$data->qty_per}}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
+    @else 
+    <p class="text-danger form-control">Material Belum Tersedia</p>
+    @endif
 @include('crud::fields.inc.wrapper_end')
 
 

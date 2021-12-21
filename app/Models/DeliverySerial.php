@@ -23,6 +23,17 @@ class DeliverySerial extends Model
     // protected $hidden = [];
     // protected $dates = [];
 
+    public function userCreate()
+    {
+        return $this->belongsTo('App\Models\User', 'created_by', 'id');
+    }
+
+    public function userUpdate()
+    {
+        return $this->belongsTo('App\Models\User', 'updated_by', 'id');
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | FUNCTIONS

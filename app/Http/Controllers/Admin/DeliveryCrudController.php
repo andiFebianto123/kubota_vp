@@ -21,6 +21,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Endroid\QrCode\Writer\PngWriter;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class DeliveryCrudController
@@ -238,78 +239,95 @@ class DeliveryCrudController extends CrudController
         
         $ds_num =  (new Constant())->codeDs($po_line->po_num, $po_line->po_line, $shipped_date);
 
-        $insert_d = new Delivery();
-        $insert_d->ds_num = $ds_num['single'];
-        $insert_d->po_num = $po_line->po_num;
-        $insert_d->po_line = $po_line->po_line;
-        $insert_d->po_release = $po_line->po_release;
-        $insert_d->ds_line = $ds_num['line'];
-        $insert_d->item = $po_line->item;
-        $insert_d->description = $po_line->description;
-        $insert_d->u_m = $po_line->u_m;
-        $insert_d->due_date = $po_line->due_date;
-        $insert_d->unit_price = $po_line->unit_price;
-        $insert_d->wh = $po_line->wh;
-        $insert_d->location = $po_line->location;
-        $insert_d->tax_status = $po_line->tax_status;
-        $insert_d->currency = $po_line->currency;
-        $insert_d->shipped_qty = $shipped_qty;
-        $insert_d->shipped_date = $shipped_date;
-        $insert_d->order_qty = $po_line->order_qty;
-        $insert_d->w_serial = $po_line->w_serial;
-        $insert_d->petugas_vendor = $petugas_vendor;
-        $insert_d->no_surat_jalan_vendor = $no_surat_jalan_vendor;
-        $insert_d->created_by = backpack_auth()->user()->id;
-        $insert_d->updated_by = backpack_auth()->user()->id;
-        $insert_d->save();
+        DB::beginTransaction();
 
-        if ( $po_line->w_serial == 1) {
+        try{
+            $insert_d = new Delivery();
+            $insert_d->ds_num = $ds_num['single'];
+            $insert_d->po_num = $po_line->po_num;
+            $insert_d->po_line = $po_line->po_line;
+            $insert_d->po_release = $po_line->po_release;
+            $insert_d->ds_line = $ds_num['line'];
+            $insert_d->item = $po_line->item;
+            $insert_d->description = $po_line->description;
+            $insert_d->u_m = $po_line->u_m;
+            $insert_d->due_date = $po_line->due_date;
+            $insert_d->unit_price = $po_line->unit_price;
+            $insert_d->wh = $po_line->wh;
+            $insert_d->location = $po_line->location;
+            $insert_d->tax_status = $po_line->tax_status;
+            $insert_d->currency = $po_line->currency;
+            $insert_d->shipped_qty = $shipped_qty;
+            $insert_d->shipped_date = $shipped_date;
+            $insert_d->order_qty = $po_line->order_qty;
+            $insert_d->w_serial = $po_line->w_serial;
+            $insert_d->petugas_vendor = $petugas_vendor;
+            $insert_d->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+            $insert_d->created_by = backpack_auth()->user()->id;
+            $insert_d->updated_by = backpack_auth()->user()->id;
+            $insert_d->save();
 
-            foreach ($sn_childs as $key => $sn_child) {
-                if (isset($sn_child)) {
-                    $insert_sn = new DeliverySerial();
-                    $insert_sn->ds_num = $insert_d->ds_num;
-                    $insert_sn->ds_line = $insert_d->ds_line;
-                    $insert_sn->ds_detail = 123;
-                    $insert_sn->no_mesin = $sn_child;
-                    $insert_sn->created_by = backpack_auth()->user()->id;
-                    $insert_sn->updated_by = backpack_auth()->user()->id;
-                    $insert_sn->save();
+            if ( $po_line->w_serial == 1) {
+
+                foreach ($sn_childs as $key => $sn_child) {
+                    if (isset($sn_child)) {
+                        $count = DeliverySerial::where('ds_num', $insert_d->ds_num)->where('ds_line', $insert_d->ds_line)->count();
+                        $ds_detail = $count+1;
+
+                        $insert_sn = new DeliverySerial();
+                        $insert_sn->ds_num = $insert_d->ds_num;
+                        $insert_sn->ds_line = $insert_d->ds_line;
+                        $insert_sn->ds_detail = $ds_detail;
+                        $insert_sn->no_mesin = $sn_child;
+                        $insert_sn->created_by = backpack_auth()->user()->id;
+                        $insert_sn->updated_by = backpack_auth()->user()->id;
+                        $insert_sn->save();
+                    }
+                    
                 }
-                
             }
-        }
 
-        if ( $po_line->outhouse_flag == 1) {
-            foreach ($material_ids as $key => $material_id) {
-                $mo = MaterialOuthouse::where('id', $material_id)->first();
-                $mo_issue_qty = $mo_issue_qtys[$key];
+            if ( $po_line->outhouse_flag == 1) {
+                foreach ($material_ids as $key => $material_id) {
+                    $mo = MaterialOuthouse::where('id', $material_id)->first();
+                    $mo_issue_qty = $mo_issue_qtys[$key];
 
-                $insert_imo = new IssuedMaterialOuthouse();
-                $insert_imo->ds_num = $insert_d->ds_num;
-                $insert_imo->ds_line = $insert_d->ds_line;
-                $insert_imo->ds_detail = 123;
-                $insert_imo->matl_item = $mo->matl_item;
-                $insert_imo->description = $mo->description;
-                $insert_imo->lot =  $mo->lot;
-                $insert_imo->issue_qty = $mo_issue_qty;
-                $insert_imo->created_by = backpack_auth()->user()->id;
-                $insert_imo->updated_by = backpack_auth()->user()->id;
-                $insert_imo->save();
+                    $insert_imo = new IssuedMaterialOuthouse();
+                    $insert_imo->ds_num = $insert_d->ds_num;
+                    $insert_imo->ds_line = $insert_d->ds_line;
+                    $insert_imo->ds_detail = 123;
+                    $insert_imo->matl_item = $mo->matl_item;
+                    $insert_imo->description = $mo->description;
+                    $insert_imo->lot =  $mo->lot;
+                    $insert_imo->issue_qty = $mo_issue_qty;
+                    $insert_imo->created_by = backpack_auth()->user()->id;
+                    $insert_imo->updated_by = backpack_auth()->user()->id;
+                    $insert_imo->save();
+                }
             }
+            DB::commit();
+
+            $message = 'Delivery Sheet Created';
+
+            Alert::success($message)->flash();
+
+            return response()->json([
+                'status' => true,
+                'alert' => 'success',
+                'message' => $message,
+                'redirect_to' => url('admin/purchase-order-line/'.$po_line_id.'/show'),
+                'validation_errors' => []
+            ], 200);
+
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => $e->getMessage(),
+                'validation_errors' => []
+            ], 500);
         }
-
-        $message = 'Delivery Sheet Created';
-
-        Alert::success($message)->flash();
-
-        return response()->json([
-            'status' => true,
-            'alert' => 'success',
-            'message' => $message,
-            'redirect_to' => url('admin/purchase-order-line/'.$po_line_id.'/show'),
-            'validation_errors' => []
-        ], 200);
     }
 
     public function exportPdf()
