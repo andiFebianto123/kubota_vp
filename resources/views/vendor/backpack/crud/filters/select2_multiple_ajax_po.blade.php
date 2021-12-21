@@ -169,7 +169,8 @@
 	                $('#filter_'+filter_key).val(null).trigger('change.select2');
 				});
             });
-
+		});
+		$( document ).ajaxStop(function() {
 			$('.select2-search__field').removeAttr('style');
 		});
 	</script>
