@@ -159,7 +159,7 @@ function messageStatusGeneral(currentID,message ,status = 'danger' ) {
 
 function blockTempValidation() {
     if ($('.validation-row-temp').find('text-danger')) {
-        console.log('bener');
+        // console.log('bener');
     }
     $.each($('.validation-row-temp'), function( k, v ) {
         console.log(k);
