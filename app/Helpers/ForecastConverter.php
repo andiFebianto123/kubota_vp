@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Session;
 use DateTime;
 
 
-class forecastConverter {
+class ForecastConverter {
 
     // tambahkan trait di converternya
     use ForecastTrait;

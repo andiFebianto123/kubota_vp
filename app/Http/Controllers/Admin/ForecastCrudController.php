@@ -123,7 +123,7 @@ class ForecastCrudController extends CrudController
 
         $this->setQuery();
 
-        $forecast = new forecastConverter;
+        $forecast = new ForecastConverter;
 
         if(request("filter_forecast_by") != null){ 
             if(request('filter_forecast_by') == 'day'){
@@ -287,7 +287,7 @@ class ForecastCrudController extends CrudController
         # mengambil semua nama item data dari tabel forecast
         
 
-        $forecast = new forecastConverter;
+        $forecast = new ForecastConverter;
         # tambah model tabel forecast
         $forecast->model = $this->crud->model;
         # set nama item kedalam perhitungan forecast
