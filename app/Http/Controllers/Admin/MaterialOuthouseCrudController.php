@@ -44,16 +44,16 @@ class MaterialOuthouseCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
 
-        CRUD::column('id');
-        CRUD::column('instruction_num');
-        CRUD::column('po_num');
-        CRUD::column('po_line');
+        CRUD::column('id')->label('ID');
+        CRUD::column('instruction_num')->label('Instruction Num');
+        CRUD::column('po_num')->label('PO Num');
+        CRUD::column('po_line')->label('PO Line');
         CRUD::column('seq');
-        CRUD::column('matl_item');
+        CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('lot_seq');
+        CRUD::column('lot_seq')->label('Lot Seq');
         CRUD::column('lot');
-        CRUD::column('lot_qty');
+        CRUD::column('lot_qty')->label('Lot Qty');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:

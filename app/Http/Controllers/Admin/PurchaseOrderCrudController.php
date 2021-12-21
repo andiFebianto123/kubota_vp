@@ -62,7 +62,7 @@ class PurchaseOrderCrudController extends CrudController
         }
 
 
-        CRUD::column('id');
+        CRUD::column('id')->label('ID');
         if($current_role == 'admin'){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor', // Table column heading
