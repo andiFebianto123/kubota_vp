@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use Log;
 
-class reminderPo extends Command
+class ReminderPo extends Command
 {
     /**
      * The name and signature of the console command.
