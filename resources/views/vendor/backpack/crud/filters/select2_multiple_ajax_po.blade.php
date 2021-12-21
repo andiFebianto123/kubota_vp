@@ -77,7 +77,6 @@
 		var Filter = {!! json_encode($filter) !!};
         jQuery(document).ready(function($) {
             // trigger select2 for each untriggered select2 box
-			$('.select2-search__field').removeAttr('style');
             $('select[name=filter_{{ $filter->key }}]').not('[data-filter-enabled]').each(function () {
             	var filterName = $(this).attr('data-filter-name');
                 var filter_key = $(this).attr('data-filter-key');
@@ -170,6 +169,8 @@
 	                $('#filter_'+filter_key).val(null).trigger('change.select2');
 				});
             });
+
+			$('.select2-search__field').removeAttr('style');
 		});
 	</script>
 @endpush
