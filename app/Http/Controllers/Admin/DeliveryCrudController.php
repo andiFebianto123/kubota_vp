@@ -167,12 +167,6 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $entry->ds_line)
                             ->first();
 
-        $vendor = PurchaseOrder::join('vendor', 'vendor.vend_num', 'po.vend_num')
-        ->where('po.po_num', $delivery_status->po_num)
-        ->select('vendor.currency as currency')
-        ->first();
-
-        $data['format_currency'] = $vendor->currency;
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
