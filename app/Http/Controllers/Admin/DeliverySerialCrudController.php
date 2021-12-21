@@ -43,11 +43,11 @@ class DeliverySerialCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('delete');
 
-        CRUD::column('id');
-        CRUD::column('ds_num');
-        CRUD::column('ds_line');
-        CRUD::column('ds_detail');
-        CRUD::column('no_mesin');
+        CRUD::column('id')->label('ID');
+        CRUD::column('ds_num')->label('DS Num');
+        CRUD::column('ds_line')->label('DS Line');
+        CRUD::column('ds_detail')->label('DS Detail');
+        CRUD::column('no_mesin')->label('No Mesin');
         CRUD::addColumn([
             'label'     => 'Created By', // Table column heading
             'name'      => 'created_by', // the column that contains the ID of that connected entity;

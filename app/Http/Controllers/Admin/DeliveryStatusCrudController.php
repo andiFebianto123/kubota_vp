@@ -45,13 +45,13 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('show');
 
         CRUD::column('id')->label('ID');
-        CRUD::column('ds_num')->label('DS Number');
+        CRUD::column('ds_num')->label('DS Num');
         CRUD::column('ds_line')->label('DS Line');
         CRUD::column('ds_type')->label('DS Type');
         CRUD::column('po_line_id')->label('PO Line ID');
         CRUD::column('po_release')->label('PO Release');
         CRUD::column('description')->label('Desc');
-        CRUD::column('grn_num')->label('GRN Number');
+        CRUD::column('grn_num')->label('GRN Num');
         CRUD::column('grn_line')->label('GRN Line');
         CRUD::column('received_flag')->label('Received Flag');
         CRUD::column('received_date')->label('Received Date');
@@ -67,7 +67,7 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('rejected_qty')->label('Rejected Qty');
         CRUD::column('unit_price')->label('Unit Price');
         CRUD::column('total');
-        CRUD::column('petugas_vendor')->label('Petugas Vendo');
+        CRUD::column('petugas_vendor')->label('Petugas Vendor');
         CRUD::column('no_faktur_pajak')->label('No Faktur Pajak');
         CRUD::column('no_surat_jalan_vendor')->label('No Surat Jalan Vendor');
         CRUD::column('ref_ds_num')->label('Ref DS Num');
