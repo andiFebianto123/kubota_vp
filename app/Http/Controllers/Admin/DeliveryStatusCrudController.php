@@ -45,13 +45,13 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('show');
 
         CRUD::column('id')->label('ID');
-        CRUD::column('ds_num')->label('DS Number');
+        CRUD::column('ds_num')->label('DS Num');
         CRUD::column('ds_line')->label('DS Line');
         CRUD::column('ds_type')->label('DS Type');
         CRUD::column('po_line_id')->label('PO Line ID');
         CRUD::column('po_release')->label('PO Release');
         CRUD::column('description')->label('Desc');
-        CRUD::column('grn_num')->label('GRN Number');
+        CRUD::column('grn_num')->label('GRN Num');
         CRUD::column('grn_line')->label('GRN Line');
         CRUD::addColumn([
             'label'     => 'Received Flag', // Table column heading
