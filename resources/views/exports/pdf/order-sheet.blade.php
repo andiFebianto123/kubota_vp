@@ -159,13 +159,14 @@
                 <tbody>
                     @php
                     $total = 0;
+                    $num = 1;
                     @endphp
                     @foreach ($po_lines as $key => $po_line)
                     @php
                     $total += $po_line->order_qty*$po_line->unit_price;
                     @endphp
                     <tr>
-                        <td align="center">{{$key+1}}</td>
+                        <td align="center">{{$num++}}</td>
                         <td align="center" class="text-nowrap">{{$po_line->po_num}}-{{$po_line->po_line}}</td>
                         <td align="center">00</td>
                         <td>{{$po_line->item}}</td>
