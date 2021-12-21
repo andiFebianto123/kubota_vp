@@ -45,7 +45,7 @@ class DeliveryCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
-        CRUD::setEntityNameStrings('delivery', 'deliveries');
+        CRUD::setEntityNameStrings('delivery sheet', 'delivery sheet');
     }
 
     /**
