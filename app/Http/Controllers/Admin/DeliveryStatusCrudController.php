@@ -53,11 +53,23 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('description')->label('Desc');
         CRUD::column('grn_num')->label('GRN Num');
         CRUD::column('grn_line')->label('GRN Line');
-        CRUD::column('received_flag')->label('Received Flag');
+        CRUD::addColumn([
+            'label'     => 'Received Flag', // Table column heading
+            'name'      => 'received_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
         CRUD::column('received_date')->label('Received Date');
         CRUD::column('payment_plan_date')->label('Due Date');
-        CRUD::column('payment_in_process_flag')->label('Payment in Process Flag');
-        CRUD::column('executed_flag')->label('Executed Flag');
+        CRUD::addColumn([
+            'label'     => 'Payment in Process Flag', // Table column heading
+            'name'      => 'payment_in_process_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Executed Flag', // Table column heading
+            'name'      => 'executed_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
         CRUD::column('payment_date')->label('Payment Date');
         CRUD::column('tax_status')->label('Tax Status');
         CRUD::column('payment_ref_num')->label('Payment Ref Num');
@@ -65,8 +77,26 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('shipped_qty')->label('Shipped Qty');
         CRUD::column('received_qty')->label('Received Qty');
         CRUD::column('rejected_qty')->label('Rejected Qty');
-        CRUD::column('unit_price')->label('Unit Price');
-        CRUD::column('total');
+        CRUD::addColumn([
+            'label'     => 'Unit Price', // Table column heading
+            'name'      => 'unit_price', // the column that contains the ID of that connected entity;
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $currency = $entry->purchaseOrder->vendor->currency;
+                $val = number_format($entry->unit_price, 0, ',', '.');
+                return $currency." ".$val;
+            }
+        ]);
+        CRUD::addColumn([
+            'name'     => 'total',
+            'label'    => 'Total',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $currency = $entry->purchaseOrder->vendor->currency;
+                $val = number_format($entry->total, 0, ',', '.');
+                return $currency." ".$val;
+            }
+        ]);
         CRUD::column('petugas_vendor')->label('Petugas Vendor');
         CRUD::column('no_faktur_pajak')->label('No Faktur Pajak');
         CRUD::column('no_surat_jalan_vendor')->label('No Surat Jalan Vendor');
