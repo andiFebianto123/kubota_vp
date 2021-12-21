@@ -337,25 +337,33 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         }
     }
 
-    function outhouseTableManager(currentQty = null){
+    function outhouseTableManager(currentQty){
         $.each($('.form-issued'), function( k, v ) {
             var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
             var qtyper = parseFloat($('.form-issued:eq('+k+')').data('qtyper'))
             var totalQtyPer = parseFloat($('.form-issued:eq('+k+')').data('totalqtyper'))
-            if (currentQty != null) {
-                var issuedQty =  currentQty*qtyper
-                var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
-                    fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
-                $('.form-issued:eq('+k+')').val(fixedIssuedQty)
-                $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
-            }
+            var issuedQty =  currentQty*qtyper
+            var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
+                fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
+            $('.form-issued:eq('+k+')').val(fixedIssuedQty)
+            $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
             
             $( '.form-issued:eq('+k+')' ).keyup(function() {
-                var messageError = "<br>"
+                var messageErrorHtml = "<br>"
+                var messageError = ""
+                var anyError = false
                 if ($(this).val() > lotqty) {
-                    messageError = "<span class='has-error-form-issued'>Jumlah qty melebihi batas (max. "+lotqty+")</span>"
+                    anyError = true
+                    messageError += "Lot ("+lotqty+") & "
                 }
-                $( '.error-form-issued:eq('+k+')' ).html(messageError)
+                if ($(this).val() > issuedQty) {
+                    anyError = true
+                    messageError += "Req ("+fixedIssuedQty+") & "
+                }
+                if (anyError) {
+                    messageErrorHtml = "<span class='has-error-form-issued'>Qty melebihi "+messageError.slice(0, -2)+"</span>"
+                }
+                $( '.error-form-issued:eq('+k+')' ).html(messageErrorHtml)
             })
          })        
     }

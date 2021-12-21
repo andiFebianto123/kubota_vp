@@ -237,10 +237,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Total</td>
-                                    <td>: {{$format_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
+                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
                             </table>
-
                         </div>
                         <div class="col-md-6">
                             <table class="table table-striped table-hover">

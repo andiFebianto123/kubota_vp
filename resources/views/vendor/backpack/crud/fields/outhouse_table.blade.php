@@ -59,7 +59,8 @@
         <script>
             $(document).ready( function () {
                 $('#checklist-table').DataTable();
-                outhouseTableManager()
+                var initCurrent = parseFloat( $( "#current-qty" ).val())
+                outhouseTableManager(initCurrent)
             } );
         </script>
     @endpush
