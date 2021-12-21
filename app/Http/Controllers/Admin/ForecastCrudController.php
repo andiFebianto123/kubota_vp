@@ -169,7 +169,6 @@ class ForecastCrudController extends CrudController
         // }else{
         //     $this->dynamicColumns('year');
         // }
-        $this->crud->andi = 'Andi febianto';
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
