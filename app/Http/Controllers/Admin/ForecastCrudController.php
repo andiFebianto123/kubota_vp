@@ -123,7 +123,7 @@ class ForecastCrudController extends CrudController
 
         $this->setQuery();
 
-        $forecast = new forecastConverter;
+        $forecast = new ForecastConverter;
 
         if(request("filter_forecast_by") != null){ 
             if(request('filter_forecast_by') == 'day'){
@@ -169,7 +169,6 @@ class ForecastCrudController extends CrudController
         // }else{
         //     $this->dynamicColumns('year');
         // }
-        $this->crud->andi = 'Andi febianto';
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
@@ -287,7 +286,7 @@ class ForecastCrudController extends CrudController
         # mengambil semua nama item data dari tabel forecast
         
 
-        $forecast = new forecastConverter;
+        $forecast = new ForecastConverter;
         # tambah model tabel forecast
         $forecast->model = $this->crud->model;
         # set nama item kedalam perhitungan forecast

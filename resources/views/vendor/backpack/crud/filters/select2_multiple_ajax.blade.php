@@ -16,7 +16,6 @@
 				data-filter-type="select2_multiple_ajax"
 				data-filter-name="{{ $filter->name }}"
 				data-language="{{ str_replace('_', '-', app()->getLocale()) }}"
-                data-from-by="andi febianto"
 				data-url="{{ $filter->options['url'] }}"
 				multiple
 				>
