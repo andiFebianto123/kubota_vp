@@ -75,6 +75,15 @@ class DeliveryCrudController extends CrudController
             'type' => 'text',
         ]);
         CRUD::addColumn([
+            'label'     => 'PO', // Table column heading
+            'name'      => 'po_po_line', // the column that contains the ID of that connected entity;
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $val = $entry->po_num."-".$entry->po_line;
+                return $val;
+            }
+        ]);
+        CRUD::addColumn([
             'label'     => 'Order Qty', // Table column heading
             'name'      => 'order_qty', // the column that contains the ID of that connected entity;
             'type' => 'text',
