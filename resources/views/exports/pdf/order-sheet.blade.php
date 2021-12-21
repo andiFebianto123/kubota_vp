@@ -65,7 +65,6 @@
         font-size: 12px;
         padding: 4px;
         text-align: center;
-        border-bottom: 1px solid #000000;
     }
 
     .doc-req {
@@ -179,11 +178,19 @@
                     </tr>
                     @endforeach
                     <tr>
-                        <td colspan="5" valign="bottom" style="border-top: 1px solid #000000; padding:4px;">
+                        <td colspan="5" rowspan="2" valign="bottom" style="border-top: 1px solid #000000; padding:4px;">
                             <b>*) Computer direct to PDF Format, No Signature is required</b>
                         </td>
+                        <td colspan="3" style="border-top: 1px solid #000000;">
+                            <div class="total-price">TOTAL </div>
+
+                        </td>
+                        <td colspan="2" style="border-top: 1px solid #000000;">
+                            <div class="total-price"><b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td colspan="5" style="border-top: 1px solid #000000;">
-                            <div class="total-price">TOTAL <b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
                             <div class="doc-req">
                                 <p>NOTE : Document's Requirements :</p>
                                 <div>
