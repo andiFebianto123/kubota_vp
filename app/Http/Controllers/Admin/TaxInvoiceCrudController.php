@@ -169,6 +169,20 @@ class TaxInvoiceCrudController extends CrudController
             'name' => 'comment',
             'type' => 'comment'
         ]);
+        CRUD::addColumn([
+            'label' => 'Confirm',
+            'name' => 'confirm_flag',
+            'type' => 'closure',
+            'function' => function($entry){
+                if($entry->confirm_flag == 0){
+                    return 'Waiting';
+                }else if($entry->confirm_flag == 1){
+                    return 'Accept';
+                }else {
+                    return 'Reject';
+                }
+            }
+        ]);
         CRUD::column('updated_at');
         $this->crud->addFilter([
             'name'        => 'vendor',
