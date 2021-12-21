@@ -19,7 +19,8 @@ class CreateCommentsTable extends Migration
             $table->unsignedBigInteger('tax_invoice_id');
             $table->unsignedBigInteger('user_id');
             $table->integer('status');
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

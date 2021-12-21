@@ -3,6 +3,7 @@ namespace App\Helpers;
 
 use App\Models\Delivery;
 use App\Models\PurchaseOrder;
+use Carbon\Carbon;
 
 class Constant
 {
@@ -48,6 +49,21 @@ class Constant
 
   public static function getPrice($nominal){
    return number_format($nominal, 0, ',', '.');
+  }
+
+  public static function formatDateComment($date){
+      $arrDate = explode(' ', $date);
+      $created = Carbon::parse($arrDate[0]);
+      $now = Carbon::now();
+      $difference = ($created->diff($now)->days < 1)
+          ? 'today'
+          : $created->diffForHumans($now);
+      if($difference == 'today'){
+        $dateTime = Carbon::parse($date);
+        return $difference.' '.$dateTime->format('H:i');
+      }else{
+        return Carbon::parse($date)->format('d M Y H:i');
+      }
   }
 
   
