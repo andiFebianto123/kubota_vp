@@ -6,7 +6,7 @@
 	class="nav-item dropdown {{ Request::get($filter->name)?'active':'' }}">
     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ $filter->label }} <span class="caret"></span></a>
     <div class="dropdown-menu p-0">
-      <div class="form-group backpack-filter mb-0">
+      <div class="form-group backpack-filter mb-0" id="custom-po" data-filter="po">
 			<select 
 				id="filter_{{ $filter->key }}"
 				name="filter_{{ $filter->key }}"
@@ -58,6 +58,9 @@
 	  .select2-container--bootstrap {
 	  	position: relative!important;
 	  	top: 0px!important;
+	  }
+	  #custom-po .select2-search__field{
+		  width: 145px!important;
 	  }
     </style>
 @endpush
@@ -169,9 +172,6 @@
 	                $('#filter_'+filter_key).val(null).trigger('change.select2');
 				});
             });
-		});
-		$( document ).ajaxStop(function() {
-			$('.select2-search__field').removeAttr('style');
 		});
 	</script>
 @endpush
