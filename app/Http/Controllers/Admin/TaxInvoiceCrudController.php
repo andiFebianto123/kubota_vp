@@ -9,9 +9,16 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request as req;
 use Prologue\Alerts\Facades\Alert;
 use App\Helpers\Constant;
-use \App\Models\TaxInvoice;
+use App\Models\TaxInvoice;
+use App\Models\Comment;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+use Carbon\Carbon;
+
 
 /**
  * Class TaxInvoiceCrudController
@@ -37,11 +44,12 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/tax-invoice');
         CRUD::setEntityNameStrings('faktur pajak', 'List Payment');
         $this->crud->query = $this->crud->query->select('*', 
-            DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as comment"),
-            DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as user"),
-            DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as status"),
-            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id)) as id_comment")
+            DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
+            DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
+            DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
+            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment")
         );
+        // $c = Comment::where('id', 5)->delete();
         // ->orderBy('id_comment', 'DESC');
 
     }
@@ -160,6 +168,20 @@ class TaxInvoiceCrudController extends CrudController
             'label' => 'Comments',
             'name' => 'comment',
             'type' => 'comment'
+        ]);
+        CRUD::addColumn([
+            'label' => 'Confirm',
+            'name' => 'confirm_flag',
+            'type' => 'closure',
+            'function' => function($entry){
+                if($entry->confirm_flag == 0){
+                    return 'Waiting';
+                }else if($entry->confirm_flag == 1){
+                    return 'Accept';
+                }else {
+                    return 'Reject';
+                }
+            }
         ]);
         CRUD::column('updated_at');
         $this->crud->addFilter([
@@ -384,6 +406,88 @@ class TaxInvoiceCrudController extends CrudController
         $db->confirm_date = now();
         $status = $db->save();
         return $status;
+    }
+
+    public function showComments(req $request){
+        if($request->input('id_payment')){
+            $id_invoice = $request->input('id_payment');
+            $comments = Comment::join('users', 'users.id', 'comments.user_id')
+            ->where('tax_invoice_id', $id_invoice)
+            ->select('comments.id', 'comment', 'name', 'user_id', 'comments.created_at')
+            ->get();
+            $data = $comments->mapWithKeys(function($data, $index){
+                return [$index => [
+                    'id' => $data->id,
+                    'comment' => $data->comment,
+                    'time' => Constant::formatDateComment($data->created_at),
+                    'user' => $data->name,
+                    'status_user' => ($data->user_id == backpack_user()->id) ? 'You' : 'Other',
+                    'style' => ($data->user_id == backpack_user()->id) ? 'text-success' : 'text-info'
+                ]];
+            });
+
+            $editComments = Comment::where('tax_invoice_id', $id_invoice)
+            ->where('user_id', '!=', backpack_user()->id)
+            ->update(['status' => 0]);
+
+            return response()->json([
+                'result' => $data,
+                'status' => 'success',
+            ]);
+        }
+        return response()->json([
+            'message' => 'ID payment not found in the sistem',
+            'alert' => 'warning'
+        ], 404);
+    }
+
+    public function sendMessage(req $request){
+
+        $me = backpack_user()->id;
+
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required',
+            'id_payment' => [
+                'required',
+                'integer',
+                'exists:App\Models\TaxInvoice,id',
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $messageErrors = [];
+            foreach ($errors->all() as $message) {
+                array_push($messageErrors, $message);
+            }
+            return response()->json([
+                'status' => 'failed',
+                'type' => 'warning',
+                'message' => $messageErrors
+            ], 200);
+        }
+
+        $comment = new Comment;
+        $comment->comment = $request->input('comment');
+        $comment->tax_invoice_id = $request->input('id_payment');
+        $comment->user_id = $me;
+        $comment->status = 1;
+        $saving = $comment->save();
+        if($saving){
+            return response()->json([
+                'status' => 'success',
+            ], 200);
+        }
+
+    }
+
+    public function deleteMessage(req $request){
+        $mesage = Comment::where('id', $request->input('id'))->delete();
+        if($mesage){
+            return response()->json([
+                'status' => 'success',
+            ], 200);
+        }
     }
 
 }

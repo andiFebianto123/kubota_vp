@@ -23,13 +23,13 @@
                         <strong>{{ $column['text'] }}</strong>
                     </a>
                 @else
-                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-target=".bd-example-modal-lg" id="comment"><strong>{{ $column['text'] }}</strong></span>
+                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-id-tax-invoice="{{ $entry->id }}" data-target=".bd-example-modal-lg" id="comment"><strong>{{ $column['text'] }}</strong></span>
                 @endif
             @else
                 <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-dark">{{ $column['text'] }}</span>
             @endif
             @if($entry->comment == null)
-                <a href="javascript:void(0)" id="comment" class="text-info"><i>Add Comment</i></a>
+                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-info"><i>Add Comment</i></a>
             @endif
         @else
             {!! $column['text'] !!}
@@ -37,8 +37,8 @@
     @includeWhen(!empty($column['wrapper']), 'crud::columns.inc.wrapper_end')
 </div>
 <script>
-    var entries = {!! json_encode($entry) !!};
-    console.log(entries);
+    // var entries = {!! json_encode($entry) !!};
+    // console.log(entries);
     if(typeof openCommentModal != 'function'){
         function openCommentModal(){
             $('a#comment').click(function(e){

@@ -6,7 +6,7 @@
 	class="nav-item dropdown {{ Request::get($filter->name)?'active':'' }}">
     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ $filter->label }} <span class="caret"></span></a>
     <div class="dropdown-menu p-0">
-      <div class="form-group backpack-filter mb-0">
+      <div class="form-group backpack-filter mb-0" id="custom-po" data-filter="po">
 			<select 
 				id="filter_{{ $filter->key }}"
 				name="filter_{{ $filter->key }}"
@@ -59,6 +59,9 @@
 	  	position: relative!important;
 	  	top: 0px!important;
 	  }
+	  #custom-po .select2-search__field{
+		  width: 145px!important;
+	  }
     </style>
 @endpush
 
@@ -75,7 +78,6 @@
 
     <script>
 		var Filter = {!! json_encode($filter) !!};
-		// console.log(Filter);
         jQuery(document).ready(function($) {
             // trigger select2 for each untriggered select2 box
             $('select[name=filter_{{ $filter->key }}]').not('[data-filter-enabled]').each(function () {

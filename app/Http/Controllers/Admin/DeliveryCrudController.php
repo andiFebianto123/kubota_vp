@@ -45,7 +45,7 @@ class DeliveryCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
-        CRUD::setEntityNameStrings('delivery', 'deliveries');
+        CRUD::setEntityNameStrings('delivery sheet', 'delivery sheets');
     }
 
     /**
@@ -64,14 +64,11 @@ class DeliveryCrudController extends CrudController
 
         $this->crud->enableBulkActions();
 
-        CRUD::column('ds_num');
-        // CRUD::addColumn([
-        //     'label'     => 'PO', // Table column heading
-        //     'name'      => 'purchaseOrder', // the column that contains the ID of that connected entity;
-        //     'entity'    => 'vendor', 
-        //     'type' => 'relationship',
-        //     'attribute' => 'number',
-        // ]);
+        CRUD::addColumn([
+            'label'     => 'DS Number', // Table column heading
+            'name'      => 'ds_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
         CRUD::addColumn([
             'label'     => 'Shipped Date', // Table column heading
             'name'      => 'shipped_date', // the column that contains the ID of that connected entity;

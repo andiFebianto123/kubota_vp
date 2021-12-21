@@ -112,7 +112,7 @@ class PurchaseOrderCrudController extends CrudController
 
         $this->crud->addFilter([
             'name'  => 'item',
-            'type'  => 'select2_multiple_ajax',
+            'type'  => 'select2_multiple_ajax_po',
             'label' => 'Number Items',
             'url' => url('admin/test/ajax-itempo-options'),
             'placeholder' => 'Pilih item number',

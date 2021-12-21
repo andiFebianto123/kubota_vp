@@ -26,7 +26,9 @@ class TaxInvoiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'file_faktur_pajak' => 'required',
+            'file_faktur_pajak' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,png,jpg,jpeg',
+            'invoice' => 'mimes:zip, pdf, doc, docx, xls, xlsx, png, jpg, jpeg',
+            'file_surat_jalan' => 'mimes:zip, pdf, doc, docx, xls, xlsx, png, jpg, jpeg',
             'ds_nums' => 'required'
         ];
     }

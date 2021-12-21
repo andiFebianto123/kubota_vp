@@ -67,4 +67,7 @@ Route::group([
     Route::get('export-db', 'ConfigurationCrudController@exportDb');
     Route::get('confirm-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmFakturPajak');
     Route::get('confirm-reject-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmRejectFakturPajak');
+    Route::post('get-comments', 'TaxInvoiceCrudController@showComments');
+    Route::post('send-comments', 'TaxInvoiceCrudController@sendMessage');
+    Route::post('delete-comments', 'TaxInvoiceCrudController@deleteMessage');
 });
