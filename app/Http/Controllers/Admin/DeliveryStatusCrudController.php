@@ -44,34 +44,64 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
 
-        CRUD::column('id');
-        CRUD::column('ds_num');
-        CRUD::column('ds_line');
-        CRUD::column('ds_type');
-        CRUD::column('po_line_id');
-        CRUD::column('po_release');
-        CRUD::column('description');
-        CRUD::column('grn_num');
-        CRUD::column('grn_line');
-        CRUD::column('received_flag');
-        CRUD::column('received_date');
-        CRUD::column('payment_plan_date');
-        CRUD::column('payment_in_process_flag');
-        CRUD::column('executed_flag');
-        CRUD::column('payment_date');
-        CRUD::column('tax_status');
-        CRUD::column('payment_ref_num');
+        CRUD::column('id')->label('ID');
+        CRUD::column('ds_num')->label('DS Num');
+        CRUD::column('ds_line')->label('DS Line');
+        CRUD::column('ds_type')->label('DS Type');
+        CRUD::column('po_line_id')->label('PO Line ID');
+        CRUD::column('po_release')->label('PO Release');
+        CRUD::column('description')->label('Desc');
+        CRUD::column('grn_num')->label('GRN Num');
+        CRUD::column('grn_line')->label('GRN Line');
+        CRUD::addColumn([
+            'label'     => 'Received Flag', // Table column heading
+            'name'      => 'received_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
+        CRUD::column('received_date')->label('Received Date');
+        CRUD::column('payment_plan_date')->label('Due Date');
+        CRUD::addColumn([
+            'label'     => 'Payment in Process Flag', // Table column heading
+            'name'      => 'payment_in_process_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Executed Flag', // Table column heading
+            'name'      => 'executed_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
+        CRUD::column('payment_date')->label('Payment Date');
+        CRUD::column('tax_status')->label('Tax Status');
+        CRUD::column('payment_ref_num')->label('Payment Ref Num');
         CRUD::column('bank');
-        CRUD::column('shipped_qty');
-        CRUD::column('received_qty');
-        CRUD::column('rejected_qty');
-        CRUD::column('unit_price');
-        CRUD::column('total');
-        CRUD::column('petugas_vendor');
-        CRUD::column('no_faktur_pajak');
-        CRUD::column('no_surat_jalan_vendor');
-        CRUD::column('ref_ds_num');
-        CRUD::column('ref_ds_line');
+        CRUD::column('shipped_qty')->label('Shipped Qty');
+        CRUD::column('received_qty')->label('Received Qty');
+        CRUD::column('rejected_qty')->label('Rejected Qty');
+        CRUD::addColumn([
+            'label'     => 'Unit Price', // Table column heading
+            'name'      => 'unit_price', // the column that contains the ID of that connected entity;
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $currency = $entry->purchaseOrder->vendor->currency;
+                $val = number_format($entry->unit_price, 0, ',', '.');
+                return $currency." ".$val;
+            }
+        ]);
+        CRUD::addColumn([
+            'name'     => 'total',
+            'label'    => 'Total',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $currency = $entry->purchaseOrder->vendor->currency;
+                $val = number_format($entry->total, 0, ',', '.');
+                return $currency." ".$val;
+            }
+        ]);
+        CRUD::column('petugas_vendor')->label('Petugas Vendor');
+        CRUD::column('no_faktur_pajak')->label('No Faktur Pajak');
+        CRUD::column('no_surat_jalan_vendor')->label('No Surat Jalan Vendor');
+        CRUD::column('ref_ds_num')->label('Ref DS Num');
+        CRUD::column('ref_ds_line')->label('Ref DS Line');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 

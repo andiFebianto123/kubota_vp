@@ -43,12 +43,12 @@ class MaterialOuthouseSummaryCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
 
-        CRUD::column('id');
-        CRUD::column('matl_item');
+        CRUD::column('id')->label('ID');;
+        CRUD::column('matl_item')->label('Matl Item');;
         CRUD::column('description');
-        CRUD::column('lot_qty');
-        CRUD::column('qty_issued');
-        CRUD::column('remaining_qty');
+        CRUD::column('lot_qty')->label('Lot Qty');;
+        CRUD::column('qty_issued')->label('Qty Issued');;
+        CRUD::column('remaining_qty')->label('Remaining Qty');;
        
         // CRUD::column([
         //     'name'     => 'remaining_qty',

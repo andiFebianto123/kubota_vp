@@ -264,7 +264,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-accept">
-                Jumlah quantity melebihi maksimum, apakah Anda yakin akan melanjutkan?
+               Apakah Anda yakin akan melanjutkan pembuatan DS?
+               <p class="list-error"></p>
             </p>
             <button type="button" class="btn btn-sm btn-outline-primary" data-dismiss="modal" onclick="submitAfterValid('form-delivery')">Ya</a>
             <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
@@ -313,11 +314,58 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     }
 
     function submitNewDs(){
+        var showModal = false
+        var htmlErrorMsg = ""
         if($('#current-qty').val() > $('#current-qty').data('max')){
+            showModal = true
+            htmlErrorMsg += "<li>[DS] Jumlah Qty melebihi batas (max. "+$('#current-qty').val()+")</li>"
+        }
+
+        if($('*').hasClass('form-issued')){
+            $.each($('.has-error-form-issued'), function( k, v ) {
+                var num = k+1
+                showModal = true
+                htmlErrorMsg += "<li>[MI-"+num+"] "+$(this).text()+"</li>"
+            })
+        } 
+
+        if(showModal){
+            $('.list-error').html(htmlErrorMsg)
             $('#modalWarningQty').modal("show")
         }else{
             submitAfterValid('form-delivery')
         }
+    }
+
+    function outhouseTableManager(currentQty){
+        $.each($('.form-issued'), function( k, v ) {
+            var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
+            var qtyper = parseFloat($('.form-issued:eq('+k+')').data('qtyper'))
+            var totalQtyPer = parseFloat($('.form-issued:eq('+k+')').data('totalqtyper'))
+            var issuedQty =  currentQty*qtyper
+            var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
+                fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
+            $('.form-issued:eq('+k+')').val(fixedIssuedQty)
+            $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
+            
+            $( '.form-issued:eq('+k+')' ).keyup(function() {
+                var messageErrorHtml = "<br>"
+                var messageError = ""
+                var anyError = false
+                if ($(this).val() > lotqty) {
+                    anyError = true
+                    messageError += "Lot ("+lotqty+") & "
+                }
+                if ($(this).val() > issuedQty) {
+                    anyError = true
+                    messageError += "Req ("+fixedIssuedQty+") & "
+                }
+                if (anyError) {
+                    messageErrorHtml = "<span class='has-error-form-issued'>Qty melebihi "+messageError.slice(0, -2)+"</span>"
+                }
+                $( '.error-form-issued:eq('+k+')' ).html(messageErrorHtml)
+            })
+         })        
     }
 
     var totalChecked = 0

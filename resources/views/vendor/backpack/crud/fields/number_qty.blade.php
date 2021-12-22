@@ -40,21 +40,15 @@
             $('#allowed-qty').val(currentQty)
 
             if (parseFloat(currentQty) > parseFloat(maxQty)) {
-                $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQty+')</small>')
+                var message = "Jumlah qty melebihi batas (max. "+maxQty+")"
+                $('.info-qty').html('<small>'+message+'</small>')
+                $('.list-error').html('<li>'+message+'</li>')
             }else{
                 $('.info-qty').html('')
+                $('.list-error').html('')
             }
             if($('*').hasClass('form-issued')){
-                $.each($('.form-issued'), function( k, v ) {
-                    var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
-                    var qtyper = parseFloat($('.form-issued:eq('+k+')').data('qtyper'))
-                    var totalQtyPer = parseFloat($('.form-issued:eq('+k+')').data('totalqtyper'))
-                    var issuedQty =  currentQty*qtyper
-                    var fixedIssuedQty = (lotqty > issuedQty) ? issuedQty : lotqty
-                        fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
-                        $('.form-issued:eq('+k+')').val(fixedIssuedQty)
-                        $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
-                })
+                outhouseTableManager(currentQty)
             } 
         });
     });

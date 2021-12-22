@@ -45,7 +45,7 @@ class DeliveryCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
-        CRUD::setEntityNameStrings('delivery', 'deliveries');
+        CRUD::setEntityNameStrings('delivery sheet', 'delivery sheets');
     }
 
     /**
@@ -64,18 +64,24 @@ class DeliveryCrudController extends CrudController
 
         $this->crud->enableBulkActions();
 
-        CRUD::column('ds_num');
-        // CRUD::addColumn([
-        //     'label'     => 'PO', // Table column heading
-        //     'name'      => 'purchaseOrder', // the column that contains the ID of that connected entity;
-        //     'entity'    => 'vendor', 
-        //     'type' => 'relationship',
-        //     'attribute' => 'number',
-        // ]);
+        CRUD::addColumn([
+            'label'     => 'DS Number', // Table column heading
+            'name'      => 'ds_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
         CRUD::addColumn([
             'label'     => 'Shipped Date', // Table column heading
             'name'      => 'shipped_date', // the column that contains the ID of that connected entity;
             'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'PO', // Table column heading
+            'name'      => 'po_po_line', // the column that contains the ID of that connected entity;
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $val = $entry->po_num."-".$entry->po_line;
+                return $val;
+            }
         ]);
         CRUD::addColumn([
             'label'     => 'Order Qty', // Table column heading
@@ -170,12 +176,6 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $entry->ds_line)
                             ->first();
 
-        $vendor = PurchaseOrder::join('vendor', 'vendor.vend_num', 'po.vend_num')
-        ->where('po.po_num', $delivery_status->po_num)
-        ->select('vendor.currency as currency')
-        ->first();
-
-        $data['format_currency'] = $vendor->currency;
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];

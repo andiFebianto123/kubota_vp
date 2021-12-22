@@ -77,14 +77,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
                                 <td width="25%">Order QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
                                 <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
-                                <td width="25%">Unit Price<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
+                                <td width="25%">Unit Price<br><strong class="right">{{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
                             </tr>
 
                             <tr>
                                 <td width="25%">Part No.<br><strong>{{$delivery_show->item}}</strong></td>
-                                <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
+                                <td width="25%">Currency<br><strong>{{$delivery_show->vendor_currency}}</strong></td>
                                 <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
-                                <td width="25%">Amount<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
+                                <td width="25%">Amount<br><strong class="right">{{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
                             </tr>
                             <tr>
                                 <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>
@@ -213,7 +213,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <table class="table table-striped table-hover">
                                 <tr>
                                     <td>Unit Price</td>
-                                    <td>: {{$delivery_status->currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
+                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                                 </tr>
                                 <tr>
                                     <td>Vend. Dlv No</td>
@@ -237,10 +237,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Total</td>
-                                    <td>: {{$format_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
+                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
                             </table>
-
                         </div>
                         <div class="col-md-6">
                             <table class="table table-striped table-hover">
