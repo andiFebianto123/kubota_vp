@@ -23,10 +23,10 @@
                         <strong>{{ $column['text'] }}</strong>
                     </a>
                 @else
-                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-id-tax-invoice="{{ $entry->id }}" data-target=".bd-example-modal-lg" id="comment"><strong>{{ $column['text'] }}</strong></span>
+                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-id-tax-invoice="{{ $entry->id }}" data-target=".bd-example-modal-lg" id="comment"><strong>{{ $column['text'] }}</strong></a>
                 @endif
             @else
-                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-dark">{{ $column['text'] }}</span>
+                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-dark">{{ $column['text'] }}</a>
             @endif
             @if($entry->comment == null)
                 <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-info"><i>Add Comment</i></a>
