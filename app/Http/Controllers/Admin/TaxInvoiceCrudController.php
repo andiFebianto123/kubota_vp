@@ -276,7 +276,7 @@ class TaxInvoiceCrudController extends CrudController
 
     private function deliveryStatus(){
         $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
-        $delivery_statuses = DeliveryStatus::get();
+        $delivery_statuses = DeliveryStatus::where('file_faktur_pajak', null)->get();
         $table_body = [];
         foreach ($delivery_statuses as $key => $ds) {
             $table_body[] =[
