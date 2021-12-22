@@ -50,6 +50,6 @@
                 $('.comment-modal').modal('show');
             });
         }
-        openCommentModal();
     }
+    openCommentModal();
 </script>
