@@ -47,6 +47,15 @@ class DeliverySerialCrudController extends CrudController
         CRUD::column('ds_num')->label('DS Num');
         CRUD::column('ds_line')->label('DS Line');
         CRUD::column('ds_detail')->label('DS Detail');
+        CRUD::addColumn([
+            'label'     => 'PO', // Table column heading
+            'name'      => 'po_po_line', // the column that contains the ID of that connected entity;
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $val = $entry->delivery->po_num."-".$entry->delivery->po_line;
+                return $val;
+            }
+        ]);
         CRUD::column('no_mesin')->label('No Mesin');
         CRUD::addColumn([
             'label'     => 'Created By', // Table column heading

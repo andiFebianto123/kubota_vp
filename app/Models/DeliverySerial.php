@@ -33,6 +33,12 @@ class DeliverySerial extends Model
         return $this->belongsTo('App\Models\User', 'updated_by', 'id');
     }
 
+    public function delivery()
+    {
+        return $this->belongsTo('App\Models\Delivery', 'ds_num', 'ds_num');
+
+    }
+
 
     /*
     |--------------------------------------------------------------------------
