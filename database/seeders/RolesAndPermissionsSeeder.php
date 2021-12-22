@@ -16,9 +16,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $this->createPermission();
 
-        $this->assignRolePermission();
+        // $this->assignRolePermission();
 
-        $this->assignUserRole();
+        // $this->assignUserRole();
     }
 
     function createRole(){
@@ -71,6 +71,118 @@ class RolesAndPermissionsSeeder extends Seeder
                   "description" => "Mempunyai akses untuk melihat panel Payment Status pada Delivery Sheet"
                 ],
                 ['name' => 'Show Payment Status DS'],
+            ],
+            [
+              [
+                "name" => "Read dashboard",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses untuk melihat halaman dashboard"
+              ],
+              ['name' => 'Read dashboard'],
+            ],
+            [
+              [
+                "name" => "Read Purchase Order",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses untuk melihat data di halaman purchase order"
+              ],
+              ['name' => 'Read Purchase Order'],
+            ],
+            [
+              [
+                "name" => "Export Purchase Order",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses untuk export data purchase order"
+              ],
+              ['name' => 'Export Purchase Order'],
+            ],
+            [
+              [
+                "name" => "Import Purchase Order",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses untuk import data purchase order"
+              ],
+              ['name' => 'Import Purchase Order'],
+            ],
+            [
+              [
+                "name" => "Send Mail New PO",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses kirim email di semua vendor jika ada new PO"
+              ],
+              ['name' => 'Send Mail New PO'],
+            ],
+            [
+              [
+                "name" => "Read PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses print order sheet, accept, reject, view detail PO Line dan view detail PO Change History"
+              ],
+              ['name' => 'Read PO Detail'],
+            ],
+            [
+              [
+                "name" => "Unread PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses unread pada PO detail"
+              ],
+              ['name' => 'Unread PO Detail'],
+            ],
+            [
+              [
+                "name" => "Read PO Line Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses melihat halaman detail Po Line & Delivery Sheet Detail"
+              ],
+              ['name' => 'Read PO Line Detail'],
+            ],
+            [
+              [
+                "name" => "Create Delivery Sheet",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses membuat data Delivery Sheet"
+              ],
+              ['name' => 'Create Delivery Sheet'],
+            ],
+            [
+              [
+                "name" => "Print Label Delivery Sheet",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses mencetak label data Delivery Sheet"
+              ],
+              ['name' => 'Print Label Delivery Sheet'],
+            ],
+            [
+              [
+                "name" => "Delete Delivery Sheet",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses menghapus data Delivery Sheet"
+              ],
+              ['name' => 'Delete Delivery Sheet'],
+            ],
+            [
+              [
+                "name" => "Read Delivery Sheet",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses melihat Delivery Sheet"
+              ],
+              ['name' => 'Read Delivery Sheet'],
+            ],
+            [
+              [
+                "name" => "Print DS with Price",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses mencetak DS dengan harga"
+              ],
+              ['name' => 'Print DS with Price'],
+            ],
+            [
+              [
+                "name" => "Print DS without Price",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses mencetak DS tanpa menyertakan harga"
+              ],
+              ['name' => 'Print DS without Price'],
             ],
         ];
         foreach($arrPermission as $key => $seed) {
