@@ -1,0 +1,1 @@
+</<?php echo e($field['wrapper']['element'] ?? 'div'); ?>><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/kubota_vp/kubota-vendor-portal/resources/views/vendor/backpack/crud/fields/inc/wrapper_end.blade.php ENDPATH**/ ?>
