@@ -1,3 +1,4 @@
+@inject('constant', 'App\Helpers\Constant')
 @extends(backpack_view('blank'))
 
 @php
@@ -74,8 +75,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <tr>
                     <td>Order Sheet</td>
                     <td>: 
-                        <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
-                        <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                        @if($constant::checkPermission('Read PO Detail'))
+                            <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                        @endif
                     </td>
                 </tr>
             </table>
@@ -152,17 +155,23 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if($po_line->read_at)
                                     @if($po_line->status == "O" && $po_line->accept_flag == 1)
-                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                        @if($constant::checkPermission('Read PO Detail'))
+                                            <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                        @endif
                                     @endif
                                     @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
-                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                            @if($constant::checkPermission('Unread PO Detail'))
+                                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                            @endif
                                         @endif
                                     @endif    
                                 @else
                                     @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
-                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                        @if($constant::checkPermission('Read PO Detail'))
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                        @endif
                                     @endif
                                 @endif
                             </td>
@@ -209,7 +218,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
                             <td>{{$po_line->po_change}}</td>
                             <td>
-                                <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                @if($constant::checkPermission('Read PO Detail'))
+                                    <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

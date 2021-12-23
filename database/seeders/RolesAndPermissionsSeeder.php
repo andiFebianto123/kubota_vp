@@ -178,12 +178,37 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             [
               [
-                "name" => "Print DS without Price",
+                "name" => "Read Delivery Sheet in Table",
                 "guard_name" => "web",
-                "description" => "Mempunyai akses mencetak DS tanpa menyertakan harga"
+                "description" => "Mempunyai akses melihat detail delivery sheet"
               ],
-              ['name' => 'Print DS without Price'],
+              ['name' => 'Read Delivery Sheet in Table'],
             ],
+            [
+              [
+                "name" => "Delete Delivery Sheet in Table",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses menghapus tombol delete di delivery sheet"
+              ],
+              ['name' => 'Delete Delivery Sheet in Table'],
+            ],
+            [
+              [
+                "name" => "Print Label",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses mencetak label data delivery sheet"
+              ],
+              ['name' => 'Print Label'],
+            ],
+            [
+              [
+                "name" => 'Read Delivery Status in Table',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat detail delivery status'
+              ],
+              ['name' => 'Read Delivery Status in Table']
+            ]
+
         ];
         foreach($arrPermission as $key => $seed) {
           Permission::updateOrCreate($seed[0],$seed[1]);

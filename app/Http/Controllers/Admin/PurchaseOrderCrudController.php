@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\OrderSheetExport;
 use App\Exports\PurchaseOrderExport;
 use App\Exports\TemplateMassDsExport;
-use App\Helpers\Constant;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Imports\DeliverySheetImport;
 use App\Models\PurchaseOrder;
@@ -20,6 +19,7 @@ use PDF;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\Constant;
 
 /**
  * Class PurchaseOrderCrudController
@@ -51,10 +51,20 @@ class PurchaseOrderCrudController extends CrudController
         $current_role = backpack_auth()->user()->roles->pluck('name')->first();
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
-        $this->crud->removeButton('delete');        
-        $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
-        $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
-        $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
+        $this->crud->removeButton('delete');     
+        
+        if(!Constant::checkPermission('Read Purchase Order')){
+            $this->crud->removeButton('show');
+        }
+        if(Constant::checkPermission('Export Purchase Order')){
+            $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
+        }
+        if(Constant::checkPermission('Send Mail New PO')){
+            $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
+        }
+        if(Constant::checkPermission('Import Purchase Order')){
+            $this->crud->addButtonFromView('top', 'massds', 'massds', 'end');
+        }
         // $this->crud->enableExportButtons(); 
         $this->crud->orderBy('id', 'asc');
         if(in_array($current_role, ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){

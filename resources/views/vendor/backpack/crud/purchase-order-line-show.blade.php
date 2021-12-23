@@ -1,3 +1,4 @@
+@inject('constant', 'App\Helpers\Constant')
 @extends(backpack_view('blank'))
 
 @php
@@ -94,6 +95,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div><!-- /.box -->
 
     <div class="col-md-8">
+        @if($constant::checkPermission('Create Delivery Sheet'))
         <div class="card-header bg-secondary">
             <label class="font-weight-bold mb-0">Create Delivery Sheet</label> 
         </div>
@@ -125,9 +127,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @endif
                 </form>
         </div>
+        @endif
     </div>
 
     <div class="col-md-12">
+        @if($constant::checkPermission('Read PO Line Detail'))
         <div class="card">
             <div class="card-header bg-secondary">
                <label class="font-weight-bold mb-0">Delivery Sheet Detail</label> 
@@ -180,8 +184,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    @if($constant::checkPermission('Print Label Delivery Sheet'))
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement="top" title="Print Label"><i class="la la-print"></i></a>
+                                    @endif
+                                    @if($constant::checkPermission('Delete Delivery Sheet'))
                                     <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                    @endif
                                 </td>
                             </tr>
                             @php
@@ -214,6 +222,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
 
         </div><!-- /.box-body -->
+        @endif
     </div>
 </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\DeliveryStatusRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use App\Helpers\Constant;
 
 /**
  * Class DeliveryStatusCrudController
@@ -29,6 +30,12 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::setModel(\App\Models\DeliveryStatus::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery-status');
         CRUD::setEntityNameStrings('delivery status', 'delivery statuses');
+        if(Constant::checkPermission('Read Delivery Status in Table')){
+            $this->crud->allowAccess('list');
+
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**

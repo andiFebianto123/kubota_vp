@@ -1,3 +1,4 @@
+@inject('constant', 'App\Helpers\Constant')
 @extends(backpack_view('blank'))
 
 @php
@@ -50,6 +51,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
 
     <div class="col-md-12">
+    @if($constant::checkPermission('Read Delivery Sheet'))
         <div class="card-header bg-secondary">
             <label class="font-weight-bold mb-0">Delivery Sheet</label>
         </div>
@@ -77,14 +79,32 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
                                 <td width="25%">Order QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
                                 <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
-                                <td width="25%">Unit Price<br><strong class="right">{{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
+                                <td width="25%">
+                                    Unit Price<br>
+                                    @if(!$constant::checkPermission('Print DS without Price'))
+                                        <strong class="right">
+                                            {{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}
+                                        </strong>
+                                    @else
+                                        <strong> - </strong>
+                                    @endif
+                                </td>
                             </tr>
 
                             <tr>
                                 <td width="25%">Part No.<br><strong>{{$delivery_show->item}}</strong></td>
                                 <td width="25%">Currency<br><strong>{{$delivery_show->vendor_currency}}</strong></td>
                                 <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
-                                <td width="25%">Amount<br><strong class="right">{{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
+                                <td width="25%">
+                                    Amount<br/>
+                                    @if(!$constant::checkPermission('Print DS without Price'))
+                                        <strong class="right">
+                                            {{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}
+                                        </strong>
+                                    @else
+                                        <strong> - </strong>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>
@@ -125,10 +145,21 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="text-center mt-4">
-                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                @if($constant::getRole() == 'Admin PTKI')
+                    <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                    <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                @else
+                    @if($constant::checkPermission('Print DS with Price'))
+                        <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                    @endif
+                    @if($constant::checkPermission('Print DS without Price'))
+                        <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                    @endif
+                @endif
             </div>
         </div>
+    
+    @endif
     </div><!-- /.box -->
     @if($delivery_status)
     <div class="col-md-12">

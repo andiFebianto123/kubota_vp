@@ -15,6 +15,7 @@ Route::group([
     Route::get('delivery-export-pdf', 'DeliveryCrudController@exportPdf');
     Route::get('delivery-export-mass-pdf', 'DeliveryCrudController@exportMassPdf');
     Route::post('delivery-export-mass-pdf-post', 'DeliveryCrudController@exportMassPdfPost');
+    Route::post('delivery-export-mass-pdf-post2', 'DeliveryCrudController@exportMassPdfPost2');
     Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
     Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
     Route::get('template-serial-numbers', 'DeliveryCrudController@exportTemplateSerialNumber');

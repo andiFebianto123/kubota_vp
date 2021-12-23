@@ -46,6 +46,10 @@ class DeliveryCrudController extends CrudController
         CRUD::setModel(\App\Models\Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
         CRUD::setEntityNameStrings('delivery sheet', 'delivery sheets');
+        $this->crud->denyAccess('list');
+        if(Constant::checkPermission('Read Delivery Sheet in Table')){
+            $this->crud->allowAccess('list');
+        }
     }
 
     /**
@@ -59,8 +63,28 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
 
-        $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'beginning');
-        $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
+        // khusus role adminPTKI
+        if(Constant::getRole() == 'Admin PTKI'){
+            $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
+            $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'end');
+            $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
+        }else{
+            if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
+                $this->crud->removeButton('delete');
+            }
+    
+            if(Constant::checkPermission('Print DS with Price')){
+                $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'beginning');
+            }
+    
+            if(Constant::checkPermission('Print DS without Price')){
+                $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
+            }
+    
+            if(Constant::checkPermission('Print Label')){
+                $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
+            }
+        }
 
         $this->crud->enableBulkActions();
 
@@ -333,7 +357,7 @@ class DeliveryCrudController extends CrudController
     public function exportPdf()
     {
         $id = request('id');
-        $with_price = request('wp');
+        $with_price = request('wh');
 
         $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
         $data['qr_code'] = $this->detailDS($id)['qr_code'];
@@ -392,6 +416,38 @@ class DeliveryCrudController extends CrudController
         $po_line = $request->po_line;
         $print_deliveries = $request->print_delivery;
         $with_price = 'yes';
+        
+        $arr_param['print_all'] = $print_all;
+        $arr_param['po_num'] = $po_num;
+        $arr_param['po_line'] = $po_line;
+        $arr_param['print_delivery'] = $print_deliveries;
+        $arr_param['with_price'] = $with_price;
+
+        $str_param = base64_encode(serialize($arr_param));
+
+        if (!isset($print_deliveries)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pilih Minimal 1 DS'
+                ], 200);
+        }
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Sukses Generate PDF',
+            'newtab' => true,
+            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
+            'validation_errors' => []
+        ], 200);
+    }
+
+    public function exportMassPdfPost2(Request $request)
+    {
+        $print_all = $request->print_deliveries;
+        $po_num = $request->po_num;
+        $po_line = $request->po_line;
+        $print_deliveries = $request->print_delivery;
+        $with_price = 'no';
         
         $arr_param['print_all'] = $print_all;
         $arr_param['po_num'] = $po_num;

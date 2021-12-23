@@ -1,3 +1,4 @@
+@inject('constant', 'App\Helpers\Constant')
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,14 +68,44 @@
                             <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
                             <td width="25%">Order QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
                             <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
-                            <td width="25%">Unit Price<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong></td>
+                            <td width="25%">
+                                Unit Price<br>
+                                @if($constant::getRole() == 'Admin PTKI')
+                                    @if(isset($with_price) && $with_price == 'yes')
+                                        <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong>
+                                    @else
+                                        <strong> - </strong>
+                                    @endif
+                                @else
+                                    @if($constant::checkPermission('Print DS with Price'))
+                                        <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong>
+                                    @elseif($constant::checkPermission('Print DS without Price'))
+                                        <strong> - </strong>
+                                    @endif
+                                @endif
+                            </td>
                         </tr>
 
                         <tr>
                             <td width="25%">Part No.<br><strong>-</strong></td>
                             <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
                             <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
-                            <td width="25%">Amount<br><strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong></td>
+                            <td width="25%">
+                                Amount<br>
+                                @if($constant::getRole() == 'Admin PTKI')
+                                    @if(isset($with_price) && $with_price == 'yes')
+                                        <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong>
+                                    @else
+                                        <strong> - </strong>
+                                    @endif
+                                @else
+                                    @if($constant::checkPermission('Print DS with Price'))
+                                        <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong>
+                                    @elseif($constant::checkPermission('Print DS without Price'))
+                                        <strong> - </strong>
+                                    @endif
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td width="50%" colspan="2">Part Name<br><strong>{{$delivery_show->description}}</strong></td>

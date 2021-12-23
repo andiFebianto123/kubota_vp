@@ -389,6 +389,10 @@ class TaxInvoiceCrudController extends CrudController
         $change = DeliveryStatus::where('id', $id)->first();
         $change->file_faktur_pajak = null;
         $success = $change->save();
+
+        $deleteComments = Comment::where('tax_invoice_id', $id)
+            ->forcedelete();
+
         return $success;
     }
 
