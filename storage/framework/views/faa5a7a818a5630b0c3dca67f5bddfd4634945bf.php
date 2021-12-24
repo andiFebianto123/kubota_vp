@@ -22,7 +22,8 @@
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     <?php endif; ?>
     <link rel="stylesheet" type="text/css" href="<?php echo e(asset('css/rectstyle.css')); ?>">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script> -->
+    <script src="<?php echo e(asset('js/jquery-3.6.0.min.js')); ?>"></script>
     <script src="<?php echo e(asset('js/rectscript.js')); ?>"></script>
 
     <?php echo $__env->yieldContent('after_styles'); ?>

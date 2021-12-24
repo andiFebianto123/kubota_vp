@@ -18,7 +18,9 @@
   </nav>
 
 @push('crud_list_scripts')
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.18.2/URI.min.js" type="text/javascript"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.18.2/URI.min.js" type="text/javascript"></script> -->
+  <script src="{{ asset('js/URI.min.js') }}" type="text/javascript"></script>
+
     <script>
       function addOrUpdateUriParameter(uri, parameter, value) {
             var new_url = normalizeAmpersand(uri);
