@@ -50,6 +50,17 @@ class TaxInvoiceCrudController extends CrudController
             DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
+
+        if(Constant::getRole() != 'Admin PTKI'){
+            // jika user bukan admin ptki
+            $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+        }
+
+        if(Constant::checkPermission('Read List Payment')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
         // $c = Comment::where('id', 5)->delete();
         // ->orderBy('id_comment', 'DESC');
 
@@ -65,9 +76,13 @@ class TaxInvoiceCrudController extends CrudController
     {
         $this->crud->removeButton('show');
         $this->crud->removeButton('update');
+        if(!Constant::checkPermission('Create Invoice and Tax')){
+            $this->crud->removeButton('create');
+        }
         $this->crud->addButtonFromView('line', 'accept_faktur_pajak', 'accept_faktur_pajak', 'begining');
         $this->crud->addButtonFromView('line', 'reject_faktur_pajak', 'reject_faktur_pajak', 'end');
-        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        // $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        $this->crud->addButtonFromModelFunction('line', 'downloadV2', 'downloadV2', 'end');
 
         $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
         // dd($this->crud->getEntries());
@@ -276,7 +291,13 @@ class TaxInvoiceCrudController extends CrudController
 
     private function deliveryStatus(){
         $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
-        $delivery_statuses = DeliveryStatus::where('file_faktur_pajak', null)->get();
+        $delivery_statuses = DeliveryStatus::where('file_faktur_pajak', null);
+        if(Constant::getRole() != 'Admin PTKI'){
+            $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
+            ->get();
+        }else{
+            $delivery_statuses = $delivery_statuses->get();
+        }
         $table_body = [];
         foreach ($delivery_statuses as $key => $ds) {
             $table_body[] =[

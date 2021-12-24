@@ -12,7 +12,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->createRole();
+        // $this->createRole();
 
         $this->createPermission();
 
@@ -178,6 +178,14 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             [
               [
+                "name" => "Print DS without Price",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses mencetak DS tanpa harga"
+              ],
+              ['name' => 'Print DS without Price'],
+            ],
+            [
+              [
                 "name" => "Read Delivery Sheet in Table",
                 "guard_name" => "web",
                 "description" => "Mempunyai akses melihat detail delivery sheet"
@@ -204,14 +212,56 @@ class RolesAndPermissionsSeeder extends Seeder
               [
                 "name" => 'Read Delivery Status in Table',
                 "guard_name" => 'web',
-                "description" => 'Mempunyai akses melihat detail delivery status'
+                "description" => 'Mempunyai akses membuka delivery status'
               ],
               ['name' => 'Read Delivery Status in Table']
-            ]
-
+            ],
+            [
+              [
+                "name" => 'Read Summary MO',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuka Summary MO'
+              ],
+              ['name' => 'Read Summary MO']
+            ],
+            [
+              [
+                "name" => 'Read List Payment',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuka List Payment'
+              ],
+              ['name' => 'Read List Payment']
+            ],
+            [
+              [
+                "name" => 'Download Button List Payment',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses download file faktur pajak, invoice dan surat jalan'
+              ],
+              ['name' => 'Download Button List Payment']
+            ],
+            [
+              [
+                "name" => 'Create Invoice and Tax',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat faktur pajak'
+              ],
+              ['name' => 'Create Invoice and Tax']
+            ],
+            
         ];
         foreach($arrPermission as $key => $seed) {
-          Permission::updateOrCreate($seed[0],$seed[1]);
+          // Permission::updateOrCreate($seed[0],$seed[1]);
+          $cari = Permission::where('name', $seed[1]['name']);
+          if($cari->count() > 0){
+            $cari->update($seed[0]);
+          }else{
+            $permission = new Permission;
+            $permission->name = $seed[0]['name'];
+            $permission->guard_name = $seed[0]['guard_name'];
+            $permission->description = $seed[0]['description'];
+            $permission->save();
+          }
         }
     }
 

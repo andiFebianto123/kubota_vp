@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use App\Helpers\Constant;
 
 /**
  * Class MaterialOuthouseCrudController
@@ -28,6 +29,12 @@ class MaterialOuthouseSummaryCrudController extends CrudController
         CRUD::setModel(\App\Models\MaterialOuthouseSummary::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary');
         CRUD::setEntityNameStrings('material outhouse summary', 'material outhouses summaries');
+
+        if(Constant::checkPermission('Read Summary MO')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**
