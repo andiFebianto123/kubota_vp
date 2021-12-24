@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\Mail;
 use DateTime;
-
+use App\Helpers\Constant;
 
 
 /**
@@ -38,6 +38,11 @@ class ForecastCrudController extends CrudController
         CRUD::setModel(\App\Models\Forecast::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/forecast');
         CRUD::setEntityNameStrings('forecast', 'forecasts');
+        if(Constant::checkPermission('Read Forecast')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
         // $this->crud->query = $this->crud->query
     }
 

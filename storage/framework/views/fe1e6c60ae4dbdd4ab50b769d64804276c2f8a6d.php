@@ -216,6 +216,7 @@
                       <i class="la la-trash"></i> Delete
                     </a>
                   </div>`;
+                footerDelete = '';
 
                 var createCommentHtml = $(`
                 <div class="message">

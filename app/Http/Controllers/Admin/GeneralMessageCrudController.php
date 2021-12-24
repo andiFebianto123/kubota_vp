@@ -6,6 +6,7 @@ use App\Http\Requests\GeneralMessageRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
+use App\Helpers\Constant;
 
 /**
  * Class GeneralMessageCrudController
@@ -30,6 +31,11 @@ class GeneralMessageCrudController extends CrudController
         CRUD::setModel(\App\Models\GeneralMessage::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/general-message');
         CRUD::setEntityNameStrings('general message', 'general messages');
+        if(Constant::checkPermission('Read General Message')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**
@@ -41,6 +47,15 @@ class GeneralMessageCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+        if(!Constant::checkPermission('Update General Message')){
+            $this->crud->removeButton('update');
+        }
+        if(!Constant::checkPermission('Create General Message')){
+            $this->crud->removeButton('create');
+        }
+        if(!Constant::checkPermission('Delete General Message')){
+            $this->crud->removeButton('delete');
+        }
         
         CRUD::column('title');
         CRUD::column('content');

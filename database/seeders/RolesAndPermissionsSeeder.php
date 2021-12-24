@@ -248,7 +248,185 @@ class RolesAndPermissionsSeeder extends Seeder
               ],
               ['name' => 'Create Invoice and Tax']
             ],
-            
+            [
+              [
+                "name" => 'Read Forecast',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuka halaman Forecast'
+              ],
+              ['name' => 'Read Forecast']
+            ],
+            [
+              [
+                "name" => 'Read Vendor',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuka halaman Vendor'
+              ],
+              ['name' => 'Read Vendor']
+            ],
+            [
+              [
+                "name" => 'Update Vendor',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses edit data vendor'
+              ],
+              ['name' => 'Update Vendor']
+            ],
+            [
+              [
+                "name" => 'Create Vendor',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat data vendor'
+              ],
+              ['name' => 'Create Vendor']
+            ],
+            [
+              [
+                "name" => 'Delete Vendor',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses menghapus data vendor'
+              ],
+              ['name' => 'Delete Vendor']
+            ],
+            [
+              [
+                "name" => 'Read User',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat halaman User'
+              ],
+              ['name' => 'Read User']
+            ],
+            [
+              [
+                "name" => 'Update User',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses mengubah data User'
+              ],
+              ['name' => 'Update User']
+            ],
+            [
+              [
+                "name" => 'Create User',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat data User'
+              ],
+              ['name' => 'Create User']
+            ],
+            [
+              [
+                "name" => 'Delete User',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses menghapus data User'
+              ],
+              ['name' => 'Delete User']
+            ],
+            [
+              [
+                "name" => 'Read General Message',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat halaman General Message'
+              ],
+              ['name' => 'Read General Message']
+            ],
+            [
+              [
+                "name" => 'Update General Message',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses mengubah data General Message'
+              ],
+              ['name' => 'Update General Message']
+            ],
+            [
+              [
+                "name" => 'Create General Message',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat data General Message'
+              ],
+              ['name' => 'Create General Message']
+            ],
+            [
+              [
+                "name" => 'Delete General Message',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses menghapus data General Message'
+              ],
+              ['name' => 'Delete General Message']
+            ],
+            //
+            [
+              [
+                "name" => 'Read Configuration',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat halaman Configuration'
+              ],
+              ['name' => 'Read Configuration']
+            ],
+            [
+              [
+                "name" => 'Update Configuration',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses mengubah data Configuration'
+              ],
+              ['name' => 'Update Configuration']
+            ],
+            [
+              [
+                "name" => 'Create Configuration',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat data Configuration'
+              ],
+              ['name' => 'Create Configuration']
+            ],
+            [
+              [
+                "name" => 'Delete Configuration',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses menghapus data Configuration'
+              ],
+              ['name' => 'Delete Configuration']
+            ],
+            // permission role
+            [
+              [
+                "name" => 'Read Role',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat halaman Role'
+              ],
+              ['name' => 'Read Role']
+            ],
+            [
+              [
+                "name" => 'Update Role',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses mengubah data Role'
+              ],
+              ['name' => 'Update Role']
+            ],
+            [
+              [
+                "name" => 'Create Role',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses membuat data Role'
+              ],
+              ['name' => 'Create Role']
+            ],
+            [
+              [
+                "name" => 'Delete Role',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses menghapus data Role'
+              ],
+              ['name' => 'Delete Role']
+            ],
+            // permission for Permission
+            [
+              [
+                "name" => 'Read Permission',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat data Permission'
+              ],
+              ['name' => 'Read Permission']
+            ],
         ];
         foreach($arrPermission as $key => $seed) {
           // Permission::updateOrCreate($seed[0],$seed[1]);

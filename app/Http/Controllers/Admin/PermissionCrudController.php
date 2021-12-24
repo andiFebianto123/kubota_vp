@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\PermissionRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use App\Helpers\Constant;
 
 /**
  * Class PermissionCrudController
@@ -29,6 +30,11 @@ class PermissionCrudController extends CrudController
         CRUD::setModel(\App\Models\Permission::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/permission');
         CRUD::setEntityNameStrings('permission', 'permissions');
+        if(Constant::checkPermission('Read Permission')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**

@@ -81,8 +81,8 @@ class TaxInvoiceCrudController extends CrudController
         }
         $this->crud->addButtonFromView('line', 'accept_faktur_pajak', 'accept_faktur_pajak', 'begining');
         $this->crud->addButtonFromView('line', 'reject_faktur_pajak', 'reject_faktur_pajak', 'end');
-        // $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
-        $this->crud->addButtonFromModelFunction('line', 'downloadV2', 'downloadV2', 'end');
+        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        // $this->crud->addButtonFromModelFunction('line', 'downloadV2', 'downloadV2', 'end');
 
         $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
         // dd($this->crud->getEntries());

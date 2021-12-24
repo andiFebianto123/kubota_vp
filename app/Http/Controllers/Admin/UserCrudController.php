@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 use Spatie\Permission\Models\Role as RoleSpatie;
+use App\Helpers\Constant;
 
 
 /**
@@ -40,6 +41,11 @@ class UserCrudController extends CrudController
         ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
         ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
         ->select('users.*', 'roles.name as nama_role');
+        if(Constant::checkPermission('Read User')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**
@@ -51,6 +57,15 @@ class UserCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+        if(!Constant::checkPermission('Update User')){
+            $this->crud->removeButton('update');
+        }
+        if(!Constant::checkPermission('Create User')){
+            $this->crud->removeButton('create');
+        }
+        if(!Constant::checkPermission('Delete User')){
+            $this->crud->removeButton('delete');
+        }
         CRUD::column('name');
         CRUD::column('username');
         CRUD::column('email');

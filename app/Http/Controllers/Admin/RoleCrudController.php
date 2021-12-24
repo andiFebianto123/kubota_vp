@@ -10,6 +10,7 @@ use Spatie\Permission\Models\Role as RoleSpatie;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\Constant;
 
 
 /**
@@ -36,6 +37,12 @@ class RoleCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/role');
         CRUD::setEntityNameStrings('role', 'roles');
 
+        if(Constant::checkPermission('Read Role')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
+
         $this->data['option_role'] = Role::get()->pluck('name', 'id');
         $this->crud->setListView('backpack::crud.role', $this);
     }
@@ -52,6 +59,18 @@ class RoleCrudController extends CrudController
         CRUD::column('name');
         $this->crud->addButtonFromView('top', 'update_role', 'update_role', 'end');
         $this->crud->addButtonFromModelFunction('line', 'permission', 'permission', 'end');
+
+        if(!Constant::checkPermission('Update Role')){
+            $this->crud->removeButton('update');
+            $this->crud->removeButton('update_role');
+        }
+        if(!Constant::checkPermission('Create Role')){
+            $this->crud->removeButton('create');
+        }
+        if(!Constant::checkPermission('Delete Role')){
+            $this->crud->removeButton('delete');
+        }
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');

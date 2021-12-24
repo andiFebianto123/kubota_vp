@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
+use App\Helpers\Constant;
 
 /**
  * Class VendorCrudController
@@ -31,6 +32,11 @@ class VendorCrudController extends CrudController
         CRUD::setModel(\App\Models\Vendor::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/vendor');
         CRUD::setEntityNameStrings('vendor', 'vendors');
+        if(Constant::checkPermission('Read Vendor')){
+           $this->crud->allowAccess('list'); 
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**
@@ -42,6 +48,16 @@ class VendorCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
+
+        if(!Constant::checkPermission('Update Vendor')){
+            $this->crud->removeButton('update');
+        }
+        if(!Constant::checkPermission('Create Vendor')){
+            $this->crud->removeButton('create');
+        }
+        if(!Constant::checkPermission('Delete Vendor')){
+            $this->crud->removeButton('delete');
+        }
 
         CRUD::addColumn([
             'label'     => 'Number', // Table column heading

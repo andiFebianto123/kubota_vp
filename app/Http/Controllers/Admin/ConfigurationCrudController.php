@@ -6,6 +6,7 @@ use App\Http\Requests\ConfigurationRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\Constant;
 
 /**
  * Class ConfigurationCrudController
@@ -30,6 +31,11 @@ class ConfigurationCrudController extends CrudController
         CRUD::setModel(\App\Models\Configuration::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/configuration');
         CRUD::setEntityNameStrings('configuration', 'configurations');
+        if(Constant::checkPermission('Read Configuration')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     /**
@@ -43,6 +49,9 @@ class ConfigurationCrudController extends CrudController
         $this->crud->removeButton('show');
         $this->crud->removeButton('create');
         $this->crud->removeButton('delete');
+        if(!Constant::checkPermission('Update Configuration')){
+            $this->crud->removeButton('update');
+        }
 
         CRUD::column('label');
         CRUD::column('value');
