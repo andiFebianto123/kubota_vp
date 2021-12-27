@@ -446,7 +446,11 @@ class RolesAndPermissionsSeeder extends Seeder
     function assignRolePermission(){
         // memberikan permission pada role
         $adminRole = Role::findByName('Admin PTKI');
-        $adminRole->givePermissionTo('Show Payment Status DS');
+        // $adminRole->givePermissionTo('Show Payment Status DS');
+        $adminRole->givePermissionTo('Read Role');
+        $adminRole->givePermissionTo('Create Role');
+        $adminRole->givePermissionTo('Update Role');
+        $adminRole->givePermissionTo('Delete Role');
         // dd($adminRole->permissions);
 
     }
