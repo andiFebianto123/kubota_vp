@@ -44,6 +44,11 @@ class PurchaseOrderCrudController extends CrudController
         CRUD::setModel(\App\Models\PurchaseOrder::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/purchase-order');
         CRUD::setEntityNameStrings('purchase order', 'purchase orders');
+        if(Constant::checkPermission('Read Purchase Order')){
+            $this->crud->allowAccess('list');
+        }else{
+            $this->crud->denyAccess('list');
+        }
     }
 
     protected function setupListOperation()

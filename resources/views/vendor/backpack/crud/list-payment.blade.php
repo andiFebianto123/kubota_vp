@@ -132,7 +132,6 @@
     </div>
 
   </div>
-
 @endsection
 
 @section('after_styles')
