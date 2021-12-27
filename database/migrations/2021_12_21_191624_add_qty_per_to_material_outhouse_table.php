@@ -14,7 +14,7 @@ class AddQtyPerToMaterialOuthouseTable extends Migration
     public function up()
     {
         Schema::table('material_outhouse', function (Blueprint $table) {
-            $table->double('qty_per')->after('lot_qty');
+            // $table->double('qty_per')->after('lot_qty');
         });
     }
 

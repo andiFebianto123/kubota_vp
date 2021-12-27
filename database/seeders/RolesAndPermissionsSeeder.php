@@ -12,13 +12,13 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // $this->createRole();
+        $this->createRole();
 
         $this->createPermission();
 
-        // $this->assignRolePermission();
+        $this->assignRolePermission();
 
-        // $this->assignUserRole();
+        $this->assignUserRole();
     }
 
     function createRole(){
