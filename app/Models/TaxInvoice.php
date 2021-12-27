@@ -54,7 +54,14 @@ class TaxInvoice extends Model
     */
     public function download()
     {
-        return '<a class="btn btn-sm btn-link" target="_blank" href="'.$this->file_faktur_pajak.'" download><i class="la la-cloud-download-alt"></i> Download</a>';
+        $invoice = ($this->invoice != null) ? '<a class="btn btn-sm btn-link" target="_blank" href="'.$this->invoice.'" download><i class="la la-cloud-download-alt"></i> Download Invoice</a>' : '';
+        $surat_jalan = ($this->file_surat_jalan != null) ? '<a class="btn btn-sm btn-link" target="_blank" href="'.$this->file_surat_jalan.'" download><i class="la la-cloud-download-alt"></i> Download Surat Jalan</a>
+        ' : '';
+        return '
+            <a class="btn btn-sm btn-link" target="_blank" href="'.$this->file_faktur_pajak.'" download><i class="la la-cloud-download-alt"></i> Download Faktur</a>
+            '.$invoice.'
+            '.$surat_jalan.'
+        ';
     }
 
     public function downloadV2(){

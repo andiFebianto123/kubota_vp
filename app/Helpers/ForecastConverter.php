@@ -22,7 +22,7 @@ class ForecastConverter {
     # type forecast
     var $type = '';
     
-    private $querySearchRangeForecast;
+    private $querySearchRangeForecast; 
 
     var $contohData = [
         [
