@@ -63,6 +63,9 @@ class DashboardController extends Controller
         $data['general_message_help'] = $general_message_help;
         $data['general_message_info'] = $general_message_info;
 
+        if(!Constant::checkPermission('Read dashboard')){
+            abort(403);
+        }
         return view('vendor.backpack.base.dashboard', $data);
         // return $this->justTest();
     }

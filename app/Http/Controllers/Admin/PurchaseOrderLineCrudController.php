@@ -43,6 +43,7 @@ class PurchaseOrderLineCrudController extends CrudController
         CRUD::setModel(\App\Models\PurchaseOrderLine::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/purchase-order-line');
         CRUD::setEntityNameStrings('purchase order line', 'purchase order lines');
+        
     }
 
     /**
@@ -148,6 +149,10 @@ class PurchaseOrderLineCrudController extends CrudController
 
     function show()
     {
+
+        if(!Constant::checkPermission('Read PO Line Detail')){
+            abort(403);
+        }
 
         CRUD::setValidation(DeliveryRequest::class);
 

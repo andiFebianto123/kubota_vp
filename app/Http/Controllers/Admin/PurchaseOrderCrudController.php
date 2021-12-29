@@ -49,6 +49,9 @@ class PurchaseOrderCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
+        if(!Constant::checkPermission('Read PO Detail')){
+            $this->crud->denyAccess('show');
+        }
     }
 
     protected function setupListOperation()

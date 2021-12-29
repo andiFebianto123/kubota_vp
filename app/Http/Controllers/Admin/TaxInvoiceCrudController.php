@@ -33,6 +33,8 @@ class TaxInvoiceCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
+    public $crud2;
+
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
      * 
@@ -51,6 +53,8 @@ class TaxInvoiceCrudController extends CrudController
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
 
+        $this->setup2();
+        
         if(Constant::getRole() != 'Admin PTKI'){
             // jika user bukan admin ptki
             $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
@@ -61,8 +65,7 @@ class TaxInvoiceCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
-        // $c = Comment::where('id', 5)->delete();
-        // ->orderBy('id_comment', 'DESC');
+
         $this->crud->setListView('vendor.backpack.crud.list-payment');
     }
 
@@ -74,18 +77,23 @@ class TaxInvoiceCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->removeButton('show');
+        // $this->crud->removeButton('show');
         $this->crud->removeButton('update');
         if(!Constant::checkPermission('Create Invoice and Tax')){
             $this->crud->removeButton('create');
         }
         $this->crud->addButtonFromView('line', 'accept_faktur_pajak', 'accept_faktur_pajak', 'begining');
         $this->crud->addButtonFromView('line', 'reject_faktur_pajak', 'reject_faktur_pajak', 'end');
-        $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        if(Constant::checkPermission('Download Button List Payment')){
+            $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        }
         // $this->crud->addButtonFromModelFunction('line', 'downloadV2', 'downloadV2', 'end'); 
 
-        $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
-        // dd($this->crud->getEntries());
+        $this->crud->addButtonFromView('line_2', 'show2', 'show', 'begining');
+
+       // $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
+       $this->crud->addClause('where', 'payment_in_process_flag', '=', 1);
+       $this->crud->addClause('where', 'executed_flag', '=', 0);
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -217,6 +225,7 @@ class TaxInvoiceCrudController extends CrudController
             });
             $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
         });
+
         $this->crud->addFilter([
             'type'  => 'date_range',
             'name'  => 'from_to',
@@ -229,6 +238,38 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud->addClause('where', 'payment_plan_date', '<=', $dates->to);
           });
         $this->crud->button_create = 'Invoice and Tax';
+
+        // ini buat table yang ke 2
+        $this->crud->addFilter([
+            'name'        => 'vendor2',
+            'type'        => 'select2_ajax_custom',
+            'label'       => 'Name Vendor',
+            'placeholder' => 'Pick a vendor',
+            'custom_table' => true,
+        ],
+        url('admin/test/ajax-vendor-options'),
+        function($value) { 
+            $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
+            ->select('delivery_status.id as id')
+            ->where('po.vend_num', $value)
+            ->get()
+            ->mapWithKeys(function($po, $index){
+                return [$index => $po->id];
+            });
+            $this->crud2 = $this->crud2->whereIn('id', $dbGet->unique()->toArray());
+        });
+        $this->crud->addFilter([
+            'type'  => 'date_range_custom',
+            'name'  => 'from_to_2',
+            'label' => 'Payment Plan Date',
+            'custom_table' => true,
+        ],
+        false,
+        function ($value) { // if the filter is active, apply these constraints
+            $dates = json_decode($value);
+            $this->crud2 = $this->crud2->where('payment_plan_date','>=', $dates->from)
+            ->where('payment_plan_date', '<=', $dates->to);
+        });
 
         // COMING SOON
         // $results = $this->crud->model->select('*', 
@@ -291,7 +332,9 @@ class TaxInvoiceCrudController extends CrudController
 
     private function deliveryStatus(){
         $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
-        $delivery_statuses = DeliveryStatus::where('file_faktur_pajak', null);
+        $delivery_statuses = DeliveryStatus::select('*', 
+            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
+        ->where('file_faktur_pajak', null);
         if(Constant::getRole() != 'Admin PTKI'){
             $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
             ->get();
@@ -306,7 +349,7 @@ class TaxInvoiceCrudController extends CrudController
                     $ds->ds_num.'-'.$ds->ds_line, 
                     $ds->item, 
                     $ds->description,
-                    $ds->unit_price 
+                    $ds->currency.' '.Constant::getPrice($ds->unit_price),
                 ],
                 'value' => $ds->id
             ];
@@ -430,6 +473,17 @@ class TaxInvoiceCrudController extends CrudController
         $db->confirm_flag = 2;
         $db->confirm_date = now();
         $status = $db->save();
+
+        if($status){
+            $me = backpack_user()->id;
+            $comment = new Comment;
+            $comment->comment = "[REJECT REASON]";
+            $comment->tax_invoice_id = $db->id;
+            $comment->user_id = $me;
+            $comment->status = 1;
+            $saving = $comment->save();
+            return $saving;
+        }
         return $status;
     }
 
@@ -514,5 +568,185 @@ class TaxInvoiceCrudController extends CrudController
             ], 200);
         }
     }
+
+    private function setup2(){
+        $this->crud2 = new TaxInvoice;
+        $this->crud2 = $this->crud2->select('*', 
+            DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
+            DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
+            DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
+            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
+            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
+        );
+        $this->crud2->where('payment_in_process_flag', 1);
+        $this->crud2->where('executed_flag', 1);
+    }
+
+
+    /**
+     * The search function that is called by the data table.
+     *
+     * @return array JSON Array of cells in HTML form.
+     */
+    public function search2()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->crud->applyUnappliedFilters();
+
+
+        $totalRows = $this->crud2->count();
+        $filteredRows = $this->crud2->count();
+
+        $startIndex = request()->input('start') ?: 0;
+        // if a search term was present
+        if (request()->input('search') && request()->input('search')['value']) {
+            // filter the results accordingly
+            $this->applySearchTerm2(request()->input('search')['value']);
+            // recalculate the number of filtered rows
+            $filteredRows = $this->crud2->count();
+        }
+        // start the results according to the datatables pagination
+        if (request()->input('start')) {
+            $this->crud2->skip((int) request()->input('start'));
+        }
+        // limit the number of results according to the datatables pagination
+        if (request()->input('length')) {
+            // $this->crud2->take((int) request()->input('length'));
+            $this->crud2->take((int) request()->input('length'));
+        }
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            // $this->crud->query->getQuery()->orders = null;
+            foreach ((array) request()->input('order') as $order) {
+                $column_number = (int) $order['column'];
+                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($column_number);
+                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+                    // apply the current orderBy rules
+                    // $this->crud->orderByWithPrefix($column['name'], $column_direction);
+                    $this->crud2->orderBy($column['name'], $column_direction);
+                }
+
+                // check for custom order logic in the column definition
+                if (isset($column['orderLogic'])) {
+                    // $this->crud->customOrderBy($column, $column_direction);
+                }
+            }
+        }else{
+            $this->crud2->orderBy('id', 'DESC');
+        }
+
+        // show newest items first, by default (if no order has been set for the primary column)
+        // if there was no order set, this will be the only one
+        // if there was an order set, this will be the last one (after all others were applied)
+        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+        // $orderBy = $this->crud->orders;
+        // $table = 'delivery_status';
+        // $key = 'id';
+
+        // $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+        //     return (isset($item['column']) && $item['column'] === $key)
+        //         || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+        // });
+
+        // if (! $hasOrderByPrimaryKey) {
+        // }
+
+        $entries = $this->crud2->get();
+
+        return $this->getEntriesAsJsonForDatatables2($entries, $totalRows, $filteredRows, $startIndex, 'line_2');
+    }
+
+
+
+    /**
+     * Created the array to be fed to the data table.
+     *
+     * @param  array  $entries  Eloquent results.
+     * @param  int  $totalRows
+     * @param  int  $filteredRows
+     * @param  bool|int  $startIndex
+     * @return array
+     */
+    public function getEntriesAsJsonForDatatables2($entries, $totalRows, $filteredRows, $startIndex = false, $lineButton)
+    {
+        $rows = [];
+
+        foreach ($entries as $row) {
+            $rows[] = $this->getRowViews2($row, $startIndex === false ? false : ++$startIndex, $lineButton);
+        }
+
+        $draw = 0;
+        if(request()->input('draw')){
+            $draw = (int) request()->input('draw');
+        }
+
+        return [
+            'draw'            => $draw,
+            'recordsTotal'    => $totalRows,
+            'recordsFiltered' => $filteredRows,
+            'data'            => $rows,
+        ];
+    }
+
+    /**
+     * Get the HTML of the cells in a table row, for a certain DB entry.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $entry  A db entry of the current entity;
+     * @param  bool|int  $rowNumber  The number shown to the user as row number (index);
+     * @return array Array of HTML cell contents.
+     */
+    public function getRowViews2($entry, $rowNumber = false, $lineButton)
+    {
+        $row_items = [];
+
+        foreach ($this->crud->columns() as $key => $column) {
+            $row_items[] = $this->crud->getCellView($column, $entry, $rowNumber);
+        }
+
+        // add the buttons as the last column
+        if ($this->crud->buttons()->where('stack', $lineButton)->count()) {
+            $row_items[] = \View::make('crud::inc.button_stack', ['stack' => $lineButton])
+                                ->with('crud', $this->crud)
+                                ->with('entry', $entry)
+                                ->with('row_number', $rowNumber)
+                                ->render();
+        }
+
+        // add the details_row button to the first column
+        if ($this->crud->getOperationSetting('detailsRow')) {
+            $details_row_button = \View::make('crud::columns.inc.details_row_button')
+                                           ->with('crud', $this)
+                                           ->with('entry', $entry)
+                                           ->with('row_number', $rowNumber)
+                                           ->render();
+            $row_items[0] = $details_row_button.$row_items[0];
+        }
+
+        return $row_items;
+    }
+
+    /**
+     * Add conditions to the CRUD query for a particular search term.
+     *
+     * @param  string  $searchTerm  Whatever string the user types in the search bar.
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function applySearchTerm2($searchTerm)
+    {
+        return $this->crud2->where(function ($query) use ($searchTerm) {
+            foreach ($this->crud->columns() as $column) {
+                if (! isset($column['type'])) {
+                    abort(400, 'Missing column type when trying to apply search term.');
+                }
+
+                $this->crud->applySearchLogicForColumn($query, $column, $searchTerm);
+            }
+        });
+    }
+
+
 
 }

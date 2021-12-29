@@ -132,7 +132,122 @@
     </div>
 
   </div>
+  <br/>
+  <br/>
+  <div class="row">
+    <div class="col">
+      <h3>
+        <span class="text-capitalize">History Tax Payment</span>
+        <small id="datatable2_info_stack"></small>
+      </h3>
+    </div>
+  </div>
+  <div class="row">
+
+    <!-- THE ACTUAL CONTENT -->
+    <div class="{{ $crud->getListContentClass() }}">
+
+        <div class="row mb-0">
+          <div class="col-sm-6">
+            @if ( $crud->buttons()->where('stack', 'top')->count() ||  $crud->exportButtons())
+              <div class="d-print-none {{ $crud->hasAccess('create')?'with-border':'' }}">
+
+                {{-- @include('crud::inc.button_stack', ['stack' => 'top']) --}}
+
+              </div>
+            @endif
+          </div>
+          <div class="col-sm-6">
+            <div id="datatable_search_stack2" class="mt-sm-0 mt-2 d-print-none"></div>
+          </div>
+        </div>
+
+        {{-- Backpack List Filters --}}
+        @if ($crud->filtersEnabled())
+          @include('crud::inc.filters_navbar_custom')
+        @endif
+
+        <table id="crudTable2" class="bg-white table table-striped table-hover nowrap rounded shadow-xs border-xs mt-2" cellspacing="0">
+            <thead>
+              <tr>
+                {{-- Table columns --}}
+                @foreach ($crud->columns() as $column)
+                  <th
+                    data-orderable="{{ var_export($column['orderable'], true) }}"
+                    data-priority="{{ $column['priority'] }}"
+                     {{--
+
+                        data-visible-in-table => if developer forced field in table with 'visibleInTable => true'
+                        data-visible => regular visibility of the field
+                        data-can-be-visible-in-table => prevents the column to be loaded into the table (export-only)
+                        data-visible-in-modal => if column apears on responsive modal
+                        data-visible-in-export => if this field is exportable
+                        data-force-export => force export even if field are hidden
+
+                    --}}
+
+                    {{-- If it is an export field only, we are done. --}}
+                    @if(isset($column['exportOnlyField']) && $column['exportOnlyField'] === true)
+                      data-visible="false"
+                      data-visible-in-table="false"
+                      data-can-be-visible-in-table="false"
+                      data-visible-in-modal="false"
+                      data-visible-in-export="true"
+                      data-force-export="true"
+                    @else
+                      data-visible-in-table="{{var_export($column['visibleInTable'] ?? false)}}"
+                      data-visible="{{var_export($column['visibleInTable'] ?? true)}}"
+                      data-can-be-visible-in-table="true"
+                      data-visible-in-modal="{{var_export($column['visibleInModal'] ?? true)}}"
+                      @if(isset($column['visibleInExport']))
+                         @if($column['visibleInExport'] === false)
+                           data-visible-in-export="false"
+                           data-force-export="false"
+                         @else
+                           data-visible-in-export="true"
+                           data-force-export="true"
+                         @endif
+                       @else
+                         data-visible-in-export="true"
+                         data-force-export="false"
+                       @endif
+                    @endif
+                  >
+                    {!! $column['label'] !!}
+                  </th>
+                @endforeach
+
+                @if ( $crud->buttons()->where('stack', 'line_2')->count() )
+                  <th data-orderable="false"
+                      data-priority="{{ $crud->getActionsColumnPriority() }}"
+                      data-visible-in-export="false"
+                      >{{ trans('backpack::crud.actions') }}</th>
+                @endif
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                {{-- Table columns --}}
+                @foreach ($crud->columns() as $column)
+                  <th>{!! $column['label'] !!}</th>
+                @endforeach
+
+                @if ( $crud->buttons()->where('stack', 'line_2')->count() )
+                  <th>{{ trans('backpack::crud.actions') }}</th>
+                @endif
+              </tr>
+            </tfoot>
+          </table>
+
+    </div>
+
+  </div>
 @endsection
+<?php
+  // dd($crud->buttons()->where('stack', 'line_2'));
+?>
 
 @section('after_styles')
   <!-- DATA TABLES -->
@@ -332,4 +447,97 @@
 
   <!-- CRUD LIST CONTENT - crud_list_scripts stack -->
   @stack('crud_list_scripts')
+  <script>
+    // NEW JS FILE
+    window.crud2 = jQuery.extend(true, {}, window.crud);
+    window.crud2.dataTableConfiguration.ajax.url = "{!! url($crud->route.'/search2').'?'.Request::getQueryString() !!}";
+    window.crud2.dataTableConfiguration.ajax.method = "POST"
+
+    jQuery(document).ready(function($) {
+      window.crud2.table = $("#crudTable2").DataTable(window.crud2.dataTableConfiguration);
+      // move search bar
+      $("#crudTable2_filter").appendTo($('#datatable_search_stack2' ));
+      $("#crudTable2_filter input").removeClass('form-control-sm');
+
+      // move "showing x out of y" info to header
+      // @if($crud->getSubheading())
+      // $('#crudTable2_info').hide();
+      // @else
+      // $("#datatable_info_stack").html($('#crudTable2_info')).css('display','inline-flex').addClass('animated fadeIn');
+      // @endif
+      $('#crudTable2_info').hide();
+      $("#datatable2_info_stack").html($('#crudTable2_info')).css('display','inline-flex').addClass('animated fadeIn');
+
+      // move the bottom buttons before pagination
+      $("#bottom_buttons").insertBefore($('#crudTable2_wrapper .row:last-child' ));
+
+      // override ajax error message
+      $.fn.dataTable.ext.errMode = 'none';
+      $('#crudTable2').on('error.dt', function(e, settings, techNote, message) {
+          new Noty({
+              type: "error",
+              text: "<strong>{{ trans('backpack::crud.ajax_error_title') }}</strong><br>{{ trans('backpack::crud.ajax_error_text') }}"
+          }).show();
+      });
+
+        // when changing page length in datatables, save it into localStorage
+        // so in next requests we know if the length changed by user
+        // or by developer in the controller.
+        $('#crudTable2').on( 'length.dt', function ( e, settings, len ) {
+            localStorage.setItem('DataTables_crudTable_/{{$crud->getRoute()}}_pageLength', len);
+        });
+
+      // make sure AJAX requests include XSRF token
+      $.ajaxPrefilter(function(options, originalOptions, xhr) {
+          var token = $('meta[name="csrf_token"]').attr('content');
+
+          if (token) {
+                return xhr.setRequestHeader('X-XSRF-TOKEN', token);
+          }
+      });
+
+      // on DataTable draw event run all functions in the queue
+      // (eg. delete and details_row buttons add functions to this queue)
+      $('#crudTable2').on( 'draw.dt',   function () {
+         crud2.functionsToRunOnDataTablesDrawEvent.forEach(function(functionName) {
+            crud2.executeFunctionByName(functionName);
+         });
+      } ).dataTable();
+
+      // when datatables-colvis (column visibility) is toggled
+      // rebuild the datatable using the datatable-responsive plugin
+      $('#crudTable').on( 'column-visibility.dt',   function (event) {
+         crud2.table.responsive.rebuild();
+      } ).dataTable();
+
+      @if ($crud->getResponsiveTable())
+        // when columns are hidden by reponsive plugin,
+        // the table should have the has-hidden-columns class
+        crud2.table.on( 'responsive-resize', function ( e, datatable, columns ) {
+            if (crud2.table.responsive.hasHidden()) {
+              $("#crudTable2").removeClass('has-hidden-columns').addClass('has-hidden-columns');
+             } else {
+              $("#crudTable2").removeClass('has-hidden-columns');
+             }
+        } );
+      @else
+        // make sure the column headings have the same width as the actual columns
+        // after the user manually resizes the window
+        var resizeTimer;
+        function resizeCrudTableColumnWidths() {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function() {
+            // Run code here, resizing has "stopped"
+            crud2.table.columns.adjust();
+          }, 250);
+        }
+        $(window).on('resize', function(e) {
+          resizeCrudTableColumnWidths();
+        });
+        $('.sidebar-toggler').click(function() {
+          resizeCrudTableColumnWidths();
+        });
+      @endif
+    });
+  </script>
 @endsection

@@ -41,22 +41,22 @@ class Sidebar
         'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
         'childrens' => []
       ],
-      [
-        'name' => 'Delivery Serial',
-        'url' => backpack_url('delivery-serial'),
-        'icon' => 'la-qrcode',
-        'key' => 'delivery-serial',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
-        'childrens' => []
-      ],
-      [
-        'name' => 'Material Outhouse',
-        'url' => backpack_url('material-outhouse'),
-        'icon' => 'la-cube',
-        'key' => 'material-outhouse',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
-        'childrens' => []
-      ],
+      // [
+      //   'name' => 'Delivery Serial',
+      //   'url' => backpack_url('delivery-serial'),
+      //   'icon' => 'la-qrcode',
+      //   'key' => 'delivery-serial',
+      //   'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+      //   'childrens' => []
+      // ],
+      // [
+      //   'name' => 'Material Outhouse',
+      //   'url' => backpack_url('material-outhouse'),
+      //   'icon' => 'la-cube',
+      //   'key' => 'material-outhouse',
+      //   'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+      //   'childrens' => []
+      // ],
       [
         'name' => 'Summary MO',
         'url' => backpack_url('material-outhouse-summary'),

@@ -206,7 +206,7 @@ class DeliveryCrudController extends CrudController
         $data['delivery_status'] = $delivery_status;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
-
+        // dd($entry);
         return view('vendor.backpack.crud.delivery-show', $data);
     }
 

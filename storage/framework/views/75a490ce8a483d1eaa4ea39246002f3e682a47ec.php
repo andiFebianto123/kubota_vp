@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-filters mb-0 pb-0 pt-0">
+<nav class="navbar navbar-expand-lg navbar-filters mb-0 pb-0 pt-0" id="filter_utama">
       <!-- Brand and toggle get grouped for better mobile display -->
       <a class="nav-item d-none d-lg-block"><span class="la la-filter"></span></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bp-filters-navbar" aria-controls="bp-filters-navbar" aria-expanded="false" aria-label="<?php echo e(trans('backpack::crud.toggle_filters')); ?>">
@@ -8,10 +8,12 @@
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bp-filters-navbar">
-        <ul class="nav navbar-nav">
+        <ul class="nav navbar-nav" id="filter_utama">
           <!-- THE ACTUAL FILTERS -->
     			<?php $__currentLoopData = $crud->filters(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $filter): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    				<?php echo $__env->make($filter->getViewWithNamespace(), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            <?php if(!isset($filter->options['custom_table'])): ?>
+    				  <?php echo $__env->make($filter->getViewWithNamespace(), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            <?php endif; ?>
     			<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           <li class="nav-item"><a href="#" id="remove_filters_button" class="nav-link <?php echo e(count(Request::input()) != 0 ? '' : 'invisible'); ?>"><i class="la la-eraser"></i> <?php echo e(trans('backpack::crud.remove_filters')); ?></a></li>
         </ul>
@@ -42,7 +44,13 @@
               new_url = new_url.addQuery(parameter, value);
             }
 
-            $('#remove_filters_button').toggleClass('invisible', !new_url.query());
+            var urlRegex = new RegExp('search2');
+            if(urlRegex.test(new_url.toString())){
+              // console.log('search yang ke 2');
+            }else{
+              $('#remove_filters_button').toggleClass('invisible', !new_url.query());
+            }
+
 
         return new_url.toString();
 
@@ -65,16 +73,17 @@
   				ajax_table.ajax.url(new_url).load();
 
   				// clear all filters
-  				$(".navbar-filters li[filter-name]").trigger('filter:clear');
+  				//$(".navbar-filters li[filter-name]").trigger('filter:clear');
+          $('#filter_utama li[filter-name]').trigger('filter:clear');
 
           // remove filters from URL
           crud.updateUrl(new_url);
       	});
 
         // hide the Remove filters button when no filter is active
-        $(".navbar-filters li[filter-name]").on('filter:clear', function() {
+        $("#filter_utama li[filter-name]").on('filter:clear', function() {
           var anyActiveFilters = false;
-          $(".navbar-filters li[filter-name]").each(function () {
+          $("#filter_utama li[filter-name]").each(function () {
             if ($(this).hasClass('active')) {
               anyActiveFilters = true;
               // console.log('ACTIVE FILTER');
