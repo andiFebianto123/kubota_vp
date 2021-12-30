@@ -19,17 +19,41 @@
                         class="text-success" 
                         id="comment"
                         data-id-tax-invoice = "{{ $entry->id }}"
+                        data-route="{{ url('admin/send-comments') }}"
                     >
                         <strong>{{ $column['text'] }}</strong>
                     </a>
                 @else
-                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-id-tax-invoice="{{ $entry->id }}" data-target=".bd-example-modal-lg" id="comment"><strong>{{ $column['text'] }}</strong></a>
+                    <a href="javascript:void(0)" 
+                        class="text-info" 
+                        data-toggle="modal" 
+                        data-id-tax-invoice="{{ $entry->id }}" 
+                        data-target=".bd-example-modal-lg" 
+                        data-route="{{ url('admin/send-comments') }}"
+                        id="comment"
+                    >
+                        <strong>{{ $column['text'] }}</strong>
+                    </a>
                 @endif
             @else
-                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-dark">{{ $column['text'] }}</a>
+                <a href="javascript:void(0)" 
+                    id="comment" 
+                    data-id-tax-invoice="{{ $entry->id }}" 
+                    class="text-dark"
+                    data-route="{{ url('admin/send-comments') }}"
+                >
+                    {{ $column['text'] }}
+                </a>
             @endif
             @if($entry->comment == null)
-                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="{{ $entry->id }}" class="text-info"><i>Add Comment</i></a>
+                <a href="javascript:void(0)" 
+                    id="comment" 
+                    data-id-tax-invoice="{{ $entry->id }}" 
+                    class="text-info"
+                    data-route="{{ url('admin/send-comments') }}"
+                >
+                    <i>Add Comment</i>
+                </a>
             @endif
         @else
             {!! $column['text'] !!}
@@ -44,8 +68,10 @@
             $('a#comment').click(function(e){
                 $('.comment-modal').removeAttr('data-id-tax-invoice');
                 let tax_id = $(this).attr('data-id-tax-invoice');
+                let route = $(this).attr('data-route');
                 if(tax_id !== undefined){
                     $('.comment-modal').attr('data-id-tax-invoice', tax_id);
+                    $('.comment-modal').attr('data-route', route);
                 }
                 $('.comment-modal').modal('show');
             });

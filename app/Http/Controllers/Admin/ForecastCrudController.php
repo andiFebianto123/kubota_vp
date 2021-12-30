@@ -168,12 +168,6 @@ class ForecastCrudController extends CrudController
             ]);
         }
 
-        // if (request("filter_forecast_by") != null) {
-        //     $ffb = request("filter_forecast_by");
-        //     $this->dynamicColumns($ffb);
-        // }else{
-        //     $this->dynamicColumns('year');
-        // }
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);

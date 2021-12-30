@@ -19,17 +19,42 @@
                         class="text-success" 
                         id="comment"
                         data-id-tax-invoice = "<?php echo e($entry->id); ?>"
+                        data-route="<?php echo e(url('admin/send-comments')); ?>"
                     >
                         <strong><?php echo e($column['text']); ?></strong>
                     </a>
                 <?php else: ?>
-                    <a href="javascript:void(0)" class="text-info" data-toggle="modal" data-id-tax-invoice="<?php echo e($entry->id); ?>" data-target=".bd-example-modal-lg" id="comment"><strong><?php echo e($column['text']); ?></strong></a>
+                    <a href="javascript:void(0)" 
+                        class="text-info" 
+                        data-toggle="modal" 
+                        data-id-tax-invoice="<?php echo e($entry->id); ?>" 
+                        data-target=".bd-example-modal-lg" 
+                        data-route="<?php echo e(url('admin/send-comments')); ?>"
+                        id="comment"
+                    >
+                        <strong><?php echo e($column['text']); ?></strong>
+                    </a>
                 <?php endif; ?>
             <?php else: ?>
-                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="<?php echo e($entry->id); ?>" class="text-dark"><?php echo e($column['text']); ?></a>
+                <a href="javascript:void(0)" 
+                    id="comment" 
+                    data-id-tax-invoice="<?php echo e($entry->id); ?>" 
+                    class="text-dark"
+                    data-route="<?php echo e(url('admin/send-comments')); ?>"
+                >
+                    <?php echo e($column['text']); ?>
+
+                </a>
             <?php endif; ?>
             <?php if($entry->comment == null): ?>
-                <a href="javascript:void(0)" id="comment" data-id-tax-invoice="<?php echo e($entry->id); ?>" class="text-info"><i>Add Comment</i></a>
+                <a href="javascript:void(0)" 
+                    id="comment" 
+                    data-id-tax-invoice="<?php echo e($entry->id); ?>" 
+                    class="text-info"
+                    data-route="<?php echo e(url('admin/send-comments')); ?>"
+                >
+                    <i>Add Comment</i>
+                </a>
             <?php endif; ?>
         <?php else: ?>
             <?php echo $column['text']; ?>
@@ -45,8 +70,10 @@
             $('a#comment').click(function(e){
                 $('.comment-modal').removeAttr('data-id-tax-invoice');
                 let tax_id = $(this).attr('data-id-tax-invoice');
+                let route = $(this).attr('data-route');
                 if(tax_id !== undefined){
                     $('.comment-modal').attr('data-id-tax-invoice', tax_id);
+                    $('.comment-modal').attr('data-route', route);
                 }
                 $('.comment-modal').modal('show');
             });

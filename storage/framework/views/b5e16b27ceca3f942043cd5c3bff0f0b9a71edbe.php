@@ -383,10 +383,11 @@
       function sendMessage(e){
         e.preventDefault();
         var messageText = $('#input_message').val(),
-            id_tax_payment = $('.comment-modal').attr('data-id-tax-invoice');
+            id_tax_payment = $('.comment-modal').attr('data-id-tax-invoice'),
+            route = $('.comment-modal').attr('data-route');
 
         $.ajax({
-              url: "<?php echo e(url('admin/send-comments')); ?>",
+              url: route,
               type: 'POST',
               data: {
                 comment: messageText,

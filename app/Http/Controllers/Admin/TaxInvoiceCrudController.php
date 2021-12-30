@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\TaxInvoiceRequest;
 use App\Models\DeliveryStatus;
+use App\Models\Delivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Exception;
@@ -14,6 +15,7 @@ use Prologue\Alerts\Facades\Alert;
 use App\Helpers\Constant;
 use App\Models\TaxInvoice;
 use App\Models\Comment;
+use App\Models\Vendor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -474,17 +476,69 @@ class TaxInvoiceCrudController extends CrudController
         $db->confirm_date = now();
         $status = $db->save();
 
+        // if($status){
+        //     $me = backpack_user()->id;
+        //     $comment = new Comment;
+        //     $comment->comment = "[REJECT REASON]";
+        //     $comment->tax_invoice_id = $db->id;
+        //     $comment->user_id = $me;
+        //     $comment->status = 1;
+        //     $saving = $comment->save();
+        //     return $saving;
+        // }
+        // return $status;
+
         if($status){
             $me = backpack_user()->id;
+            $validator = Validator::make(request()->all(), [
+                'comment' => 'required',
+                'id_payment' => [
+                    'required',
+                    'integer',
+                    'exists:App\Models\TaxInvoice,id',
+                ]
+            ]);
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                $messageErrors = [];
+                foreach ($errors->all() as $message) {
+                    array_push($messageErrors, $message);
+                }
+                return response()->json([
+                    'status' => 'failed',
+                    'type' => 'warning',
+                    'message' => $messageErrors
+                ], 200);
+            }
+            if(Constant::getRole() != 'Admin PTKI'){
+                $vendor = backpack_user()->vendor->vend_num;
+                $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
+                ->where('delivery_status.id', request()->input('id_payment'));
+    
+                if($cekVendor->count() > 0){
+                    $cekVendor = $cekVendor->select('po.vend_num')->first();
+                    if($cekVendor->vend_num != $vendor){
+                        return response()->json([
+                            'status' => 'failed',
+                            'type' => 'warning',
+                            'message' => 'Anda tidak mempunyai hubungan dengan vendor ini'
+                        ]);
+                    }
+                }
+            }   
+            // jika berhasil melewati pengecekan vendor dengan delivery status
             $comment = new Comment;
-            $comment->comment = "[REJECT REASON]";
-            $comment->tax_invoice_id = $db->id;
+            $comment->comment = '[REJECT REASON] '.request()->input('comment');
+            $comment->tax_invoice_id = request()->input('id_payment');
             $comment->user_id = $me;
             $comment->status = 1;
             $saving = $comment->save();
-            return $saving;
+            if($saving){
+                return response()->json([
+                    'status' => 'success',
+                ], 200);
+            }
         }
-        return $status;
     }
 
     public function showComments(req $request){
@@ -546,6 +600,25 @@ class TaxInvoiceCrudController extends CrudController
             ], 200);
         }
 
+
+        if(Constant::getRole() != 'Admin PTKI'){
+            $vendor = backpack_user()->vendor->vend_num;
+            $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
+            ->where('delivery_status.id', $request->input('id_payment'));
+
+            if($cekVendor->count() > 0){
+                $cekVendor = $cekVendor->select('po.vend_num')->first();
+                if($cekVendor->vend_num != $vendor){
+                    return response()->json([
+                        'status' => 'failed',
+                        'type' => 'warning',
+                        'message' => 'Anda tidak mempunyai hubungan dengan vendor ini'
+                    ]);
+                }
+            }
+        }
+        
+
         $comment = new Comment;
         $comment->comment = $request->input('comment');
         $comment->tax_invoice_id = $request->input('id_payment');
@@ -567,6 +640,56 @@ class TaxInvoiceCrudController extends CrudController
                 'status' => 'success',
             ], 200);
         }
+    }
+
+    function show()
+    {
+        $entry = $this->crud->getCurrentEntry();
+
+        $delivery_status = DeliveryStatus::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)
+                            ->first();
+
+        $data['crud'] = $this->crud;
+        $data['entry'] = $entry;
+        $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
+        $data['delivery_status'] = $delivery_status;
+
+        // dd($entry);
+        return view('vendor.backpack.crud.list-payment-show', $data);
+    }
+
+    private function detailDS($id)
+    {
+        $delivery_show = Delivery::leftjoin('po_line', function ($join) {
+                            $join->on('po_line.po_num', 'delivery.po_num')
+                                ->orOn('po_line.po_line', 'delivery.po_line');
+                        })
+                        ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                        // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
+                        ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
+                        ->where('delivery.id', $id)
+                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 'delivery.po_release','po_line.item','delivery.u_m',
+                        'vendor.vend_num as vendor_number','vendor.currency as vendor_currency', 'vendor.vend_num as vendor_name', 'delivery.no_surat_jalan_vendor','po_line.item_ptki',
+                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location'])
+                        ->first();
+        $qr_code = "DSW|";
+        $qr_code .= $delivery_show->ds_num."|";
+        $qr_code .= $delivery_show->ds_line."|";
+        $qr_code .= $delivery_show->po_number."|";
+        $qr_code .= $delivery_show->po_line."|";
+        $qr_code .= $delivery_show->po_release."|";
+        $qr_code .= $delivery_show->item_ptki."|";
+        $qr_code .= $delivery_show->shipped_qty."|";
+        $qr_code .= $delivery_show->u_m."|";
+        $qr_code .= $delivery_show->unit_price."|";
+        $qr_code .= date("Y-m-d", strtotime($delivery_show->shipped_date))."|";
+        $qr_code .= $delivery_show->no_surat_jalan_vendor;
+
+        $data['delivery_show'] = $delivery_show;
+        $data['qr_code'] = $qr_code;
+
+        return $data;
     }
 
     private function setup2(){
