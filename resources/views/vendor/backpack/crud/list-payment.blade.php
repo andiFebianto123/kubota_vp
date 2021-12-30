@@ -313,6 +313,30 @@
       </div>
     </div>
   </div>
+  <!-- ini adalah batasan untuk layout modal antara comment dan reject -->
+  <div class="modal fade reject-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Reject Payment</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h6>Reject Payment ?</h6>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1">Write Reason :</label>
+            <textarea class="form-control" id="reject-comment-textarea" rows="5"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onClick="sendReject(event)" >Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     $('.comment-modal').on('shown.bs.modal', function (e) {
       var id_tax_payment = $(this).attr('data-id-tax-invoice');
@@ -422,6 +446,8 @@
                       text: 'Success send comment',
                       type: 'success'
                     }).show();
+                    var ajax_table = $("#crudTable").DataTable();
+                    ajax_table.ajax.reload(null, false);
                 }
                 if(result.status == 'failed'){
                   $.each(result.message, function(i, message){
@@ -441,6 +467,51 @@
               }
         });
       }
+  </script>
+  <script>
+   function sendReject(e){
+      e.preventDefault();
+      var messageText = $('#reject-comment-textarea').val(),
+            id_tax_payment = $('.reject-modal').attr('data-id-tax-invoice'),
+            route = $('.reject-modal').attr('data-route');
+            $.ajax({
+              url: route,
+              type: 'POST',
+              data: {
+                comment: messageText,
+                id_payment: id_tax_payment
+              },
+              success: function(result) {
+                  // Show an alert with the result
+                // console.log(result);
+                if(result.status == 'success'){
+                  $('#reject-comment-textarea').val('');
+                    new Noty({
+                      text: 'Success send Reason',
+                      type: 'success'
+                    }).show();
+                    $('.reject-modal').modal('hide');
+                    var ajax_table = $("#crudTable").DataTable();
+                    ajax_table.ajax.reload(null, false);
+                }
+                if(result.status == 'failed'){
+                  $.each(result.message, function(i, message){
+                    new Noty({
+                      text: message,
+                      type: result.type
+                    }).show();
+                  });
+                }
+              },
+              error: function(result) {
+                  // Show an alert with the result
+                  new Noty({
+                      text: "The new entry could not be created. Please try again.",
+                      type: "warning"
+                  }).show();
+              }
+        });
+   }
   </script>
   <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
@@ -539,6 +610,10 @@
           resizeCrudTableColumnWidths();
         });
       @endif
+        //$('#crudTable2').ajax.reload( null, false ); // user paging is not reset on reload
+        // var ajax_table = $("#crudTable2").DataTable();
+        // ajax_table.ajax.reload(null, false);
     });
+    
   </script>
 @endsection

@@ -18,13 +18,13 @@
           // ask for confirmation before deleting an item
           var button = $(button);
           var route = button.attr('data-route');
-          $('.comment-modal').removeAttr('data-id-tax-invoice');
-            let tax_id = $(button).attr('data-id-tax-invoice');
+          $('.reject-modal').removeAttr('data-id-tax-invoice');
+            let tax_id = button.attr('data-id-tax-invoice');
             if(tax_id !== undefined){
-                $('.comment-modal').attr('data-id-tax-invoice', tax_id);
-                $('.comment-modal').attr('data-route', route);
+                $('.reject-modal').attr('data-id-tax-invoice', tax_id);
+                $('.reject-modal').attr('data-route', route);
             }
-          $('.comment-modal').modal('show');
+          $('.reject-modal').modal('show');
         //   $.ajax({
         //       url: route,
         //       type: 'GET',

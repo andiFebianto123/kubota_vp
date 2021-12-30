@@ -701,6 +701,10 @@ class TaxInvoiceCrudController extends CrudController
             DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
+        if(Constant::getRole() != 'Admin PTKI'){
+            // jika user bukan admin ptki
+            $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+        }
         $this->crud2->where('payment_in_process_flag', 1);
         $this->crud2->where('executed_flag', 1);
     }
