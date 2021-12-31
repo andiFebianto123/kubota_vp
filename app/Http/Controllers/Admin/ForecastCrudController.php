@@ -8,6 +8,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\Session;
 use App\Helpers\ForecastConverter;
 use App\Models\PurchaseOrder;
+use App\Models\Forecast;
 use Illuminate\Support\Facades\DB;
 use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\Mail;
@@ -43,6 +44,9 @@ class ForecastCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
+        // $modelForecast = new Forecast();
+        // $mm = $modelForecast->select('*');
+        // dd($mm->toBase()->getCountForPagination());
         // $this->crud->query = $this->crud->query
     }
 

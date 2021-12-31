@@ -723,7 +723,7 @@ class TaxInvoiceCrudController extends CrudController
 
 
         $totalRows = $this->crud2->count();
-        $filteredRows = $this->crud2->count();
+        $filteredRows = $this->crud2->toBase()->getCountForPagination();
 
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
