@@ -14,7 +14,7 @@ class Sidebar
         'url' => backpack_url('dashboard'),
         'icon' => 'la-home',
         'key' => 'dashboard',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read dashboard'),
         'childrens' => []
       ],
       [
@@ -22,7 +22,7 @@ class Sidebar
         'url' => backpack_url('purchase-order'),
         'icon' => 'la-newspaper',
         'key' => 'purchase-order',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read Purchase Order'),
         'childrens' => []
       ],
       [
@@ -30,7 +30,7 @@ class Sidebar
         'url' => backpack_url('delivery'),
         'icon' => 'la-file',
         'key' => 'delivery',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read Delivery Sheet'),
         'childrens' => []
       ],
       [
@@ -38,7 +38,7 @@ class Sidebar
         'url' => backpack_url('delivery-status'),
         'icon' => 'la-stream',
         'key' => 'delivery-status',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read Delivery Status in Table'),
         'childrens' => []
       ],
       // [
@@ -59,18 +59,27 @@ class Sidebar
       // ],
       [
         'name' => 'Summary MO',
-        'url' => backpack_url('material-outhouse-summary'),
+        'url' => '#',
         'icon' => 'la-cube',
         'key' => 'material-outhouse-summary',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
-        'childrens' => []
+        'access' => Constant::checkPermission('Read Summary MO'),
+        'childrens' => [
+          [
+            'name' => 'Per Item',
+            'url' => backpack_url('material-outhouse-summary-per-item'),
+          ],
+          [
+            'name' => 'Per Po',
+            'url' => backpack_url('material-outhouse-summary-per-po'),
+          ],
+        ]
       ],
       [
         'name' => 'List Payment',
         'url' => backpack_url('tax-invoice'),
         'icon' => 'la-file-invoice-dollar',
         'key' => 'tax-invoice',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read List Payment'),
         'childrens' => []
       ],
       
@@ -79,7 +88,7 @@ class Sidebar
         'url' => backpack_url('forecast'),
         'icon' => 'la-chart-bar',
         'key' => 'forecast',
-        'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
+        'access' => Constant::checkPermission('Read Forecast'),
         'childrens' => []
       ],
       [
@@ -87,7 +96,7 @@ class Sidebar
         'url' => backpack_url('vendor'),
         'icon' => 'la-people-carry',
         'key' => 'vendor',
-        'roles' => ['Admin PTKI'],
+        'access' => Constant::checkPermission('Read Vendor'),
         'childrens' => []
       ],
       [
@@ -95,6 +104,7 @@ class Sidebar
         'url' => backpack_url('user'),
         'icon' => 'la-user-tie',
         'key' => 'user',
+        'access' => Constant::checkPermission('Read User'),
         'roles' => ['Admin PTKI'],
         'childrens' => []
       ],
@@ -103,7 +113,7 @@ class Sidebar
         'url' => backpack_url('general-message'),
         'icon' => 'la-envelope',
         'key' => 'general-message',
-        'roles' => ['Admin PTKI'],
+        'access' => Constant::checkPermission('Read General Message'),
         'childrens' => []
       ],
       [
@@ -111,7 +121,7 @@ class Sidebar
         'url' => backpack_url('configuration'),
         'icon' => 'la-tools',
         'key' => 'configuration',
-        'roles' => ['Admin PTKI'],
+        'access' => Constant::checkPermission('Read Configuration'),
         'childrens' => []
       ],
       [
@@ -119,7 +129,7 @@ class Sidebar
         'url' => backpack_url('role'),
         'icon' => 'la-users',
         'key' => 'role',
-        'roles' => ['Admin PTKI'],
+        'access' => Constant::checkPermission('Read Role'),
         'childrens' => []
       ],
       [
@@ -127,7 +137,7 @@ class Sidebar
         'url' => backpack_url('permission'),
         'icon' => 'la-lock',
         'key' => 'permission',
-        'roles' => ['Admin PTKI'],
+        'access' => Constant::checkPermission('Read Permission'),
         'childrens' => []
       ],
     ];

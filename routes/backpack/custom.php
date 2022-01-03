@@ -56,7 +56,8 @@ Route::group([
     Route::post('delivery-print-label-post', 'PurchaseOrderLineCrudController@exportPdfLabelPost');
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
-    Route::crud('material-outhouse-summary', 'MaterialOuthouseSummaryCrudController');
+    Route::crud('material-outhouse-summary-per-item', 'MaterialOuthouseSummaryPerItemCrudController');
+    Route::crud('material-outhouse-summary-per-po', 'MaterialOuthouseSummaryPerPoCrudController');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
 

@@ -17,7 +17,8 @@ class TwoFactorController extends Controller
 
     public function index() 
     {
-        if (request("t") && User::where("two_factor_url", request("t"))->where('id', backpack_auth()->user()->id)->exists()) {
+        $uid = (backpack_auth()->user()) ? backpack_auth()->user()->id : null;
+        if (request("t") && User::where("two_factor_url", request("t"))->where('id', $uid)->exists()) {
             return view('vendor.backpack.base.auth.two-factor');
         }else{
             return redirect()->to("/");

@@ -1,8 +1,20 @@
-<!-- This file is used to store sidebar items, starting with Backpack\Base 0.9.0 -->
 @foreach ((new App\Helpers\Sidebar())->generate() as $key => $menu)
-    @if(in_array(backpack_auth()->user()->roles->pluck('name')->first(), $menu['roles']))
-    <li class="nav-item"><a class="nav-link" href="{{  $menu['url'] }}"><i class="la {{$menu['icon']}} nav-icon"></i> {{$menu['name']}}</a></li>
+    @if($menu['access'])
+    <li class="nav-item @if($menu['childrens']) nav-dropdown @endif">
+        <a class="nav-link parent @if($menu['childrens']) nav-dropdown-toggle @endif" href="{{  $menu['url'] }}">
+            <i class="nav-icon la {{$menu['icon']}}"></i> {{$menu['name']}}
+        </a>
+        @if($menu['childrens'])
+        <ul class="nav-dropdown-items">
+            @foreach($menu['childrens'] as $key2 => $child)
+            <li class="nav-item">
+                <a class="nav-link childs" href="{{$child['url']}}">
+                <span>• {{$child['name']}}</span>
+                </a>
+            </li>
+            @endforeach
+        </ul>
+        @endif
+    </li>
     @endif
 @endforeach
-<!-- <li class='nav-item'><a class='nav-link' href='{{ backpack_url('role') }}'><i class='nav-icon la la-question'></i> Roles</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('permission') }}'><i class='nav-icon la la-question'></i> Permissions</a></li> -->

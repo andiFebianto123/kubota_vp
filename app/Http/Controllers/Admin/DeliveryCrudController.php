@@ -291,7 +291,7 @@ class DeliveryCrudController extends CrudController
             $insert_d->updated_by = backpack_auth()->user()->id;
             $insert_d->save();
 
-            if ( $po_line->w_serial == 1) {
+            if ( $po_line->w_serial == 1 && isset($sn_childs)) {
 
                 foreach ($sn_childs as $key => $sn_child) {
                     if (isset($sn_child)) {
@@ -307,11 +307,10 @@ class DeliveryCrudController extends CrudController
                         $insert_sn->updated_by = backpack_auth()->user()->id;
                         $insert_sn->save();
                     }
-                    
                 }
             }
 
-            if ( $po_line->outhouse_flag == 1) {
+            if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
                 foreach ($material_ids as $key => $material_id) {
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];

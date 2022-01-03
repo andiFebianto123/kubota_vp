@@ -1,4 +1,4 @@
-<button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs(this)"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
+<button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs(this)"><i class="la la-file-pdf"></i> <span>PDF DS + Harga</span></button>
 
 <?php $__env->startPush('after_scripts'); ?>
 <script>
