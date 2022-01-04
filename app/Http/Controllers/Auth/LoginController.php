@@ -42,14 +42,12 @@ class LoginController extends Controller
     public function __construct()
     {
         $guard = backpack_guard_name();
-
         $this->middleware("guest:$guard", ['except' => 'logout']);
     }
 
     public function index()
     {
         return view('vendor.backpack.base.auth.login');
-
     }
 
     public function forgotPassword()
@@ -88,7 +86,7 @@ class LoginController extends Controller
         $input = $request->all();
      
         $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
- 
+
         if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
         {
             $two_factor_code = strtoupper(substr(md5(date("Ymd His")), 0, 8));
@@ -119,7 +117,6 @@ class LoginController extends Controller
 
             // Mail::to($user->email)->send(new vendorNewPo($details));
 
-
             return response()->json([
                 'status' => true,
                 'alert' => 'success',
@@ -144,6 +141,8 @@ class LoginController extends Controller
     }
 
     public function logout () {
+        session()->put('prev_url', url()->previous());
+
         if (backpack_auth()->check()) {
             $user = User::where("id", backpack_auth()->user()->id)->first();
             $user->two_factor_code = null;

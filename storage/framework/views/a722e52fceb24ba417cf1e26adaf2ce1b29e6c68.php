@@ -16,7 +16,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize"><?php echo e($entry->number); ?></span>
+        <span class="text-capitalize"><?php echo e($entry->po_num); ?></span>
         <small>Preview</small>
         <?php if($crud->hasAccess('list')): ?>
         <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> <?php echo e(trans('backpack::crud.back_to_all')); ?> <span><?php echo e($crud->entity_name_plural); ?></span></a></small>

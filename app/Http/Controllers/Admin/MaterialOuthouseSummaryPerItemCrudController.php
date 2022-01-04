@@ -28,7 +28,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
-        CRUD::setEntityNameStrings('material outhouse summary', 'material outhouses summaries');
+        CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
 
         if(Constant::checkPermission('Read Summary MO')){
             $this->crud->allowAccess('list');
@@ -61,10 +61,11 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             }
         );
 
-        CRUD::column('id')->label('ID');;
+        // CRUD::column('id')->label('ID');;
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('lot_qty')->label('Qty Kirim');
+        CRUD::column('po_num');
+        CRUD::column('lot_qty')->label('Qty Dikirim');
         CRUD::column('qty_issued')->label('Qty Processed');
         CRUD::column('remaining_qty')->label('Remaining Qty');
 

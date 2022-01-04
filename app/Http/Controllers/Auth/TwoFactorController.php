@@ -58,11 +58,13 @@ class TwoFactorController extends Controller
                 ], 200);
         }
 
+        $redirect_to = (session()->has('prev_url'))? session()->get('prev_url'): url('admin/dashboard');
+        
         return response()->json([
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses OTP',
-            'redirect_to' => url('admin/dashboard'),
+            'redirect_to' => $redirect_to,
             'validation_errors' => []
         ], 200);
     }

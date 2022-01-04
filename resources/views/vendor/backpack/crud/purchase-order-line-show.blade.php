@@ -17,7 +17,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize">{{$entry->purchaseOrder->number}}</span>
+        <span class="text-capitalize">{{$entry->po_num}}-{{$entry->po_line}}</span>
         <small>Preview</small>
         @if ($crud->hasAccess('list'))
         <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> {{ trans('backpack::crud.back_to_all') }} <span>{{ $crud->entity_name_plural }}</span></a></small>
