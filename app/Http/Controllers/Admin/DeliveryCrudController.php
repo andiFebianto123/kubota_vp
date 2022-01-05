@@ -291,27 +291,38 @@ class DeliveryCrudController extends CrudController
             $insert_d->updated_by = backpack_auth()->user()->id;
             $insert_d->save();
 
-            if ( $po_line->w_serial == 1) {
+            if ( $po_line->w_serial == 1 && isset($sn_childs)) {
 
                 foreach ($sn_childs as $key => $sn_child) {
                     if (isset($sn_child)) {
-                        $count = DeliverySerial::where('ds_num', $insert_d->ds_num)->where('ds_line', $insert_d->ds_line)->count();
-                        $ds_detail = $count+1;
+                        $uid = backpack_auth()->user()->id;
 
-                        $insert_sn = new DeliverySerial();
-                        $insert_sn->ds_num = $insert_d->ds_num;
-                        $insert_sn->ds_line = $insert_d->ds_line;
-                        $insert_sn->ds_detail = $ds_detail;
-                        $insert_sn->no_mesin = $sn_child;
-                        $insert_sn->created_by = backpack_auth()->user()->id;
-                        $insert_sn->updated_by = backpack_auth()->user()->id;
-                        $insert_sn->save();
+                        $sql_query = "INSERT INTO delivery_serial (ds_num, 
+                        ds_line, 
+                        no_mesin, 
+                        created_by, 
+                        updated_by, 
+                        created_at, 
+                        updated_at, 
+                        ds_detail ) 
+                        SELECT '".$insert_d->ds_num."',
+                        '".$insert_d->ds_line."',
+                        '".$sn_child."',
+                        '".$uid ."',
+                        '".$uid ."',
+                        '".now() ."',
+                        '".now() ."',
+                        COUNT(*)+1 
+                        FROM delivery_serial 
+                        WHERE ds_num = '".$insert_d->ds_num."' AND ds_line = '".$insert_d->ds_line."'";
+
+                        DB::statement($sql_query);
                     }
-                    
                 }
+                // dd("here");
             }
 
-            if ( $po_line->outhouse_flag == 1) {
+            if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
                 foreach ($material_ids as $key => $material_id) {
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];

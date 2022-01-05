@@ -1,7 +1,7 @@
-@inject('constant', 'App\Helpers\Constant')
-@extends(backpack_view('blank'))
+<?php $constant = app('App\Helpers\Constant'); ?>
 
-@php
+
+<?php
 $defaultBreadcrumbs = [
 trans('backpack::crud.admin') => url(config('backpack.base.route_prefix'), 'dashboard'),
 $crud->entity_name_plural => url($crud->route),
@@ -10,43 +10,43 @@ trans('backpack::crud.preview') => false,
 
 // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
 $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
-@endphp
+?>
 
-@section('header')
+<?php $__env->startSection('header'); ?>
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize">{{$entry->po_num}}</span>
+        <span class="text-capitalize"><?php echo e($entry->po_num); ?></span>
         <small>Preview</small>
-        @if ($crud->hasAccess('list'))
-        <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> {{ trans('backpack::crud.back_to_all') }} <span>{{ $crud->entity_name_plural }}</span></a></small>
-        @endif
+        <?php if($crud->hasAccess('list')): ?>
+        <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> <?php echo e(trans('backpack::crud.back_to_all')); ?> <span><?php echo e($crud->entity_name_plural); ?></span></a></small>
+        <?php endif; ?>
     </h2>
 </section>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="row">
-    <div class="{{ $crud->getShowContentClass() }}">
+    <div class="<?php echo e($crud->getShowContentClass()); ?>">
         <!-- Default box -->
         <div class="">
-            @if ($crud->model->translationEnabled())
+            <?php if($crud->model->translationEnabled()): ?>
             <div class="row">
                 <div class="col-md-12 mb-2">
                     <!-- Change translation button group -->
                     <div class="btn-group float-right">
                         <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {{trans('backpack::crud.language')}}: {{ $crud->model->getAvailableLocales()[request()->input('locale')?request()->input('locale'):App::getLocale()] }} &nbsp; <span class="caret"></span>
+                            <?php echo e(trans('backpack::crud.language')); ?>: <?php echo e($crud->model->getAvailableLocales()[request()->input('locale')?request()->input('locale'):App::getLocale()]); ?> &nbsp; <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            @foreach ($crud->model->getAvailableLocales() as $key => $locale)
-                            <a class="dropdown-item" href="{{ url($crud->route.'/'.$entry->getKey().'/show') }}?locale={{ $key }}">{{ $locale }}</a>
-                            @endforeach
+                            <?php $__currentLoopData = $crud->model->getAvailableLocales(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $locale): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <a class="dropdown-item" href="<?php echo e(url($crud->route.'/'.$entry->getKey().'/show')); ?>?locale=<?php echo e($key); ?>"><?php echo e($locale); ?></a>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -58,27 +58,27 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <table class="table">
                 <tr>
                     <td>PO Number</td>
-                    <td>: {{$entry->po_num}}</td>
+                    <td>: <?php echo e($entry->po_num); ?></td>
                 </tr>
                 <tr>
                     <td>Vendor</td>
-                    <td>: {{$entry->vendor->vend_num}}</td>
+                    <td>: <?php echo e($entry->vendor->vend_num); ?></td>
                 </tr>
                 <tr>
                     <td>PO Date</td>
-                    <td>: {{date('Y-m-d', strtotime($entry->po_date))}}</td>
+                    <td>: <?php echo e(date('Y-m-d', strtotime($entry->po_date))); ?></td>
                 </tr>
                 <tr>
                     <td>Email Sent</td>
-                    <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
+                    <td>: <?php echo e(($entry->email_flag) ? "✓":"-"); ?></td>
                 </tr>
                 <tr>
                     <td>Order Sheet</td>
                     <td>: 
-                        @if($constant::checkPermission('Read PO Detail'))
-                            <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
-                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
-                        @endif
+                        <?php if($constant::checkPermission('Read PO Detail')): ?>
+                            <a href="<?php echo e(url('admin/order-sheet-export-pdf/'.$entry->po_num)); ?>" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="<?php echo e(url('admin/order-sheet-export-excel/'.$entry->po_num)); ?>"><i class="la la-file-excel"></i> Excel</a>
+                        <?php endif; ?>
                     </td>
                 </tr>
             </table>
@@ -92,7 +92,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                <label class="font-weight-bold mb-0">PO Line</label> 
             </div>
             <div class="card-body">
-                @if(sizeof($po_lines) > 0)
+                <?php if(sizeof($po_lines) > 0): ?>
                 <div>
                     <!-- <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button> -->
                 </div>
@@ -100,9 +100,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>
-                                @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                                <?php if(backpack_auth()->user()->hasRole('Admin PTKI')): ?>
                                     <input type="checkbox" id="check-all-cb" class="check-all">
-                                @endif
+                                <?php endif; ?>
                             </th>
                             <th>PO Number</th>
                             <th>Status</th>
@@ -112,82 +112,83 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>UM</th>
                             <th>Due Date</th>
                             <th>Tax (%)</th>
-                            <th>Unit Price ({{$entry->vendor->currency}})</th>
-                            <th>Total Price ({{$entry->vendor->currency}})</th>
+                            <th>Unit Price (<?php echo e($entry->vendor->currency); ?>)</th>
+                            <th>Total Price (<?php echo e($entry->vendor->currency); ?>)</th>
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                            <?php if(backpack_auth()->user()->hasRole('Admin PTKI')): ?>
                                 <th>Created At</th>
-                            @endif
+                            <?php endif; ?>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($po_lines as $key => $po_line)
+                        <?php $__currentLoopData = $po_lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $po_line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
-                                @if($po_line->read_at == null && backpack_auth()->user()->hasRole('Admin PTKI'))
-                                <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
-                                <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
-                                @endif
+                                <?php if($po_line->read_at == null && backpack_auth()->user()->hasRole('Admin PTKI')): ?>
+                                <input type="checkbox" name="po_line_ids[]" value="<?php echo e($po_line->id); ?>" class="check-po-lines check-<?php echo e($po_line->id); ?>">
+                                <!-- <input type="checkbox" class="check-read-po-lines check-read-<?php echo e($po_line->id); ?>"> -->
+                                <?php endif; ?>
                             </td>
-                            <td class="text-nowrap">{{$entry->po_num}}-{{$po_line->po_line}}</td>
+                            <td class="text-nowrap"><?php echo e($entry->po_num); ?>-<?php echo e($po_line->po_line); ?></td>
                             <td>
-                                <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
-                                    {{$arr_po_line_status[$po_line->status]['text']}}
+                                <span class="<?php echo e($arr_po_line_status[$po_line->status]['color']); ?>">
+                                    <?php echo e($arr_po_line_status[$po_line->status]['text']); ?>
+
                                 </span>
                             </td>
-                            <td>{{$po_line->item}}</td>
-                            <td>{{$po_line->description}}</td>
-                            <td>{!! $po_line->change_order_qty !!}</td>
-                            <td>{{$po_line->u_m}}</td>
-                            <td>{!! $po_line->change_due_date !!}</td>
-                            <td>{{$po_line->tax}}</td>
-                            <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
-                            <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
-                            <td>{!! $po_line->reformat_flag_accept !!}</td>
-                            <td>{{$po_line->read_by_user}}</td>
-                            <td>{{$po_line->read_at}}</td>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                                <td>{{$po_line->created_at}}</td>
-                            @endif
+                            <td><?php echo e($po_line->item); ?></td>
+                            <td><?php echo e($po_line->description); ?></td>
+                            <td><?php echo $po_line->change_order_qty; ?></td>
+                            <td><?php echo e($po_line->u_m); ?></td>
+                            <td><?php echo $po_line->change_due_date; ?></td>
+                            <td><?php echo e($po_line->tax); ?></td>
+                            <td class="text-nowrap"><?php echo $po_line->change_unit_price; ?></td>
+                            <td class="text-nowrap"><?php echo $po_line->change_total_price; ?></td>
+                            <td><?php echo $po_line->reformat_flag_accept; ?></td>
+                            <td><?php echo e($po_line->read_by_user); ?></td>
+                            <td><?php echo e($po_line->read_at); ?></td>
+                            <?php if(backpack_auth()->user()->hasRole('Admin PTKI')): ?>
+                                <td><?php echo e($po_line->created_at); ?></td>
+                            <?php endif; ?>
                             <td class="text-nowrap"><!-- Single edit button -->
-                                @if($po_line->read_at)
-                                    @if($po_line->status == "O" && $po_line->accept_flag == 1)
-                                        @if($constant::checkPermission('Read PO Detail'))
-                                            <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
-                                        @endif
-                                    @endif
-                                    @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
-                                        @if($po_line->count_ds == 0)
-                                            @if($constant::checkPermission('Unread PO Detail'))
-                                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
-                                            @endif
-                                        @endif
-                                    @endif    
-                                @else
-                                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                                        @if($constant::checkPermission('Read PO Detail'))
-                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
-                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
-                                        @endif
-                                    @endif
-                                @endif
+                                <?php if($po_line->read_at): ?>
+                                    <?php if($po_line->status == "O" && $po_line->accept_flag == 1): ?>
+                                        <?php if($constant::checkPermission('Read PO Detail')): ?>
+                                            <a href="<?php echo e(url('admin/purchase-order-line')); ?>/<?php echo e($po_line->id); ?>/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <?php if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0): ?>
+                                        <?php if($po_line->count_ds == 0): ?>
+                                            <?php if($constant::checkPermission('Unread PO Detail')): ?>
+                                                <a href="<?php echo e(url('admin/purchase-order-line')); ?>/<?php echo e($po_line->id); ?>/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    <?php endif; ?>    
+                                <?php else: ?>
+                                    <?php if(backpack_auth()->user()->hasRole('Admin PTKI')): ?>
+                                        <?php if($constant::checkPermission('Read PO Detail')): ?>
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([<?php echo e($po_line->id); ?>])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([<?php echo e($po_line->id); ?>])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     </tbody>
                 </table>
                 <div class="section-buttons"></div>
 
-                @else
+                <?php else: ?>
                 <p class="text-center">
                     No Data Available
                 </p>
-                @endif
-                {{-- $po_lines->links() --}}
+                <?php endif; ?>
+                
             </div>
 
         </div><!-- /.box-body -->
@@ -199,7 +200,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                <label class="font-weight-bold mb-0">PO Change History</label> 
             </div>
             <div class="card-body">
-                @if(sizeof($po_changes_lines) > 0)
+                <?php if(sizeof($po_changes_lines) > 0): ?>
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
@@ -211,26 +212,26 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($po_changes_lines as $key => $po_line)
+                        <?php $__currentLoopData = $po_changes_lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $po_line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td>{{$po_line->po_num}}</td>
-                            <td>{{$po_line->po_line}}</td>
-                            <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
-                            <td>{{$po_line->po_change}}</td>
+                            <td><?php echo e($po_line->po_num); ?></td>
+                            <td><?php echo e($po_line->po_line); ?></td>
+                            <td><?php echo e(date('Y-m-d', strtotime($po_line->po_change_date))); ?></td>
+                            <td><?php echo e($po_line->po_change); ?></td>
                             <td>
-                                @if($constant::checkPermission('Read PO Detail'))
-                                    <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
-                                @endif
+                                <?php if($constant::checkPermission('Read PO Detail')): ?>
+                                    <a href="<?php echo e(url('admin/purchase-order')); ?>/<?php echo e($po_line->po_num); ?>/<?php echo e($po_line->po_line); ?>/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
-                @else
+                <?php else: ?>
                 <p class="text-center">
                     No Data Available
                 </p>
-                @endif
+                <?php endif; ?>
             </div>
 
         </div><!-- /.box-body -->
@@ -238,14 +239,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 </div>
 
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('after_styles')
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
-<link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
-@endsection
+<?php $__env->startSection('after_styles'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string')); ?>">
+<link rel="stylesheet" href="<?php echo e(asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string')); ?>">
+<?php $__env->stopSection(); ?>
 
-@section('after_scripts')
+<?php $__env->startSection('after_scripts'); ?>
 
 <!-- Modal -->
 
@@ -259,10 +260,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-accept"></p>
-            <form id="form-accept-po-line" action="{{url('admin/purchase-order-accept-po-line')}}" method="post">
-                @csrf
+            <form id="form-accept-po-line" action="<?php echo e(url('admin/purchase-order-accept-po-line')); ?>" method="post">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="po_line_ids" class="val-accept">
-                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <input type="hidden" name="po_id" value="<?php echo e($entry->id); ?>">
                 <div class="mt-4 text-right">
                     <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-accept-po-line')">Submit</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
@@ -282,12 +283,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-reject"></p>
-            <form id="form-reject-po-line" action="{{url('admin/purchase-order-reject-po-line')}}" method="post">
-                @csrf
+            <form id="form-reject-po-line" action="<?php echo e(url('admin/purchase-order-reject-po-line')); ?>" method="post">
+                <?php echo csrf_field(); ?>
                 <label for="">Write Reason</label>
                 <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
                 <input type="hidden" name="po_line_ids" class="val-reject">
-                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <input type="hidden" name="po_id" value="<?php echo e($entry->id); ?>">
                 <div class="mt-4 text-right">
                     <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-reject-po-line')">Submit</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
@@ -297,8 +298,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
-<script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
-<script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+<script src="<?php echo e(asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string')); ?>"></script>
+<script src="<?php echo e(asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string')); ?>"></script>
 <script>
 var anyChecked = false
 var anyReadChecked = false
@@ -427,4 +428,5 @@ function callButton(anyChecked){
  }
  
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make(backpack_view('blank'), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/office/kubota-vendor-portal/resources/views/vendor/backpack/crud/purchase-order-show.blade.php ENDPATH**/ ?>

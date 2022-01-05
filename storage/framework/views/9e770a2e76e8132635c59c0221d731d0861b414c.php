@@ -149,4 +149,4 @@
   <?php echo $__env->yieldPushContent('crud_list_scripts'); ?>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make(backpack_view('blank'), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/office/kubota-vendor-portal/resources/views/vendor/backpack/crud/list.blade.php ENDPATH**/ ?>
+<?php echo $__env->make(backpack_view('blank'), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/office/kubota-vendor-portal/resources/views/vendor/backpack/crud/list-mo-per-po.blade.php ENDPATH**/ ?>

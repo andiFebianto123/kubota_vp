@@ -11,7 +11,7 @@ use App\Helpers\Constant;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class MaterialOuthouseSummaryCrudController extends CrudController
+class MaterialOuthouseSummaryPerItemCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class MaterialOuthouseSummaryCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\MaterialOuthouseSummary::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary');
-        CRUD::setEntityNameStrings('material outhouse summary', 'material outhouses summaries');
+        CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
+        CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
 
         if(Constant::checkPermission('Read Summary MO')){
             $this->crud->allowAccess('list');
@@ -49,26 +49,26 @@ class MaterialOuthouseSummaryCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
+        // $this->crud->addClause('join', 'po_line', 'po_line', 'po_line.po_line');
+        // $this->crud->addClause('join', 'po_line', 'po_num', 'po_line.po_num');
+        $this->crud->addClause(
+            'join',
+            'po_line',
+            function ($query) {
+                $query->on('material_outhouse.po_num', '=', 'po_line.po_num')
+                ->on('material_outhouse.po_line', '=', 'po_line.po_line')
+                ->where('po_line.status', '=', 'O');
+            }
+        );
 
-        CRUD::column('id')->label('ID');;
-        CRUD::column('matl_item')->label('Matl Item');;
+        // CRUD::column('id')->label('ID');;
+        CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('lot_qty')->label('Lot Qty');;
-        CRUD::column('qty_issued')->label('Qty Issued');;
-        CRUD::column('remaining_qty')->label('Remaining Qty');;
-       
-        // CRUD::column([
-        //     'name'     => 'remaining_qty',
-        //     'label'    => 'Qty Remain',
-        //     'type'     => 'closure',
-        //     'function' => function($entry) {
-        //         $qty_issued = IssuedMaterialOuthouse::where('matl_item', $entry->matl_item)->sum('qty_issued');
-        //         $qty = $entry->lot_qty - $qty_issued;
-        //         return $qty;
-        //     }
-        // ]);
+        CRUD::column('po_num');
+        CRUD::column('lot_qty')->label('Qty Dikirim');
+        CRUD::column('qty_issued')->label('Qty Processed');
+        CRUD::column('remaining_qty')->label('Remaining Qty');
 
     }
-
    
 }
