@@ -14,6 +14,9 @@ use App\Mail\vendorNewPo;
 use Illuminate\Support\Facades\Mail;
 use DateTime;
 use App\Helpers\Constant;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ForecastExport;
+
 
 
 /**
@@ -44,10 +47,6 @@ class ForecastCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
-        // $modelForecast = new Forecast();
-        // $mm = $modelForecast->select('*');
-        // dd($mm->toBase()->getCountForPagination());
-        // $this->crud->query = $this->crud->query
     }
 
     protected function getFieldAccess(){
@@ -105,6 +104,7 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
+        $this->crud->addButtonFromView('bottom', 'print_forecast', 'print_forecast', 'beginning');
         // dd([
         //     'cek_role_admin' => backpack_user()->hasRole('Admin PTKI'),
         //     'cek_permision_create' => backpack_user()->hasDirectPermission('create'),
@@ -142,11 +142,11 @@ class ForecastCrudController extends CrudController
                 $forecast->type = 'week';
                 Session::put("forecast_type", $forecast->type);
             }else{
-                $forecast->type = 'moon';
+                $forecast->type = 'month';
                 Session::put("forecast_type", $forecast->type);
             }
         }else{
-            $forecast->type = 'days';
+            $forecast->type = 'week';
             Session::put("forecast_type", $forecast->type);
         }
 
@@ -174,7 +174,8 @@ class ForecastCrudController extends CrudController
 
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
-        $this->crud->setListView('vendor.backpack.crud.forecast-list', $this->data);
+        $this->data['type_forecast'] = $start->type;
+        $this->crud->setListView('vendor.backpack.crud.list-forecast', $this->data);
         
     }
 
@@ -260,6 +261,150 @@ class ForecastCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
+    function applySearchForecast(){
+
+        // tahap uji coba search per week
+
+        $forecast = new ForecastConverter;
+
+        if(Session::get('forecast_type') == 'days'){
+            $forecast->type = 'days';
+        }else if(Session::get('forecast_type') == 'week'){
+            $forecast->type = 'week';
+        }else{
+            $forecast->type = 'month';
+        }
+
+        $startForecast = $forecast->forecastStart();
+
+        $columns = $startForecast->getColumns();
+
+        $this->crud->query = $this->crud->model;
+
+        $search = request()->input('search')['value'];
+
+        $whereWithVendor = "";
+        $whereWithVendor_ = "";
+
+        if($startForecast->type == 'week'){
+            if(Session::get('vendor_name')){
+                $whereWithVendor = "AND f.vend_num = '".Session::get('vendor_name')."'";
+                $whereWithVendor_ = "AND f_w_.vend_num = '".Session::get('vendor_name')."'";
+            }
+        
+            $this->crud->query = $this->crud->query->whereRaw("
+                id = (SELECT MAX(f.id) FROM forecasts f WHERE f.item = forecasts.item AND SUBSTR(f.forecast_date, 1, 10) = SUBSTR(forecasts.forecast_date, 1, 10) {$whereWithVendor})
+            ");
+            
+            $this->crud->query = $this->crud->query->groupBy(DB::raw("item"));
+    
+            $selectData = [
+                'item', 
+            ];
+    
+            $i = 1;
+            foreach($columns as $column){
+                $raw = DB::raw("(SELECT SUM(qty) FROM forecasts f_w WHERE f_w.item = forecasts.item AND SUBSTR(f_w.forecast_date, 1, 10) BETWEEN '{$column['first_date']}' AND '{$column['last_date']}' AND f_w.id = (SELECT MAX(f_w_.id) FROM forecasts f_w_ WHERE f_w_.item = forecasts.item AND SUBSTR(f_w_.forecast_date, 1, 10) = SUBSTR(f_w.forecast_date, 1, 10) {$whereWithVendor_})) as week{$i}");
+                $i++;
+                array_push($selectData, $raw);
+            }
+    
+    
+            $this->crud->query = $this->crud->query->havingRaw(DB::raw("item LIKE '%{$search}%'"))
+            ->orHavingRaw('week1 = ?', [$search])
+            ->orHavingRaw('week2 = ?', [$search])
+            ->orHavingRaw('week3 = ?', [$search])
+            ->orHavingRaw('week4 = ?', [$search])
+            ->orHavingRaw('week5 = ?', [$search])
+            ->orHavingRaw('week6 = ?', [$search])
+            ->orHavingRaw('week7 = ?', [$search])
+            ->orHavingRaw('week8 = ?', [$search])
+            ->orHavingRaw('week9 = ?', [$search])
+            ->orHavingRaw('week10 = ?', [$search])
+            ->orHavingRaw('week11 = ?', [$search])
+            ->orHavingRaw('week12 = ?', [$search])
+            ->orHavingRaw('week13 = ?', [$search])
+            ->orHavingRaw('week14 = ?', [$search])
+            ->orHavingRaw('week15 = ?', [$search])
+            ->orHavingRaw('week16 = ?', [$search])
+            ->select($selectData);
+        }else if($startForecast->type == 'days'){
+            if(Session::get('vendor_name')){
+                $whereWithVendor = "AND f.vend_num = '".Session::get('vendor_name')."'";
+            }
+            $this->crud->query = $this->crud->query->select('id', 'item')
+            ->whereRaw("id = (SELECT MAX(f.id) FROM forecasts f WHERE f.item = forecasts.item AND SUBSTR(f.forecast_date, 1, 10) = SUBSTR(forecasts.forecast_date, 1, 10) {$whereWithVendor})")
+            ->where(function($query) use($search){
+                $query->whereRaw("qty = '{$search}'")
+                ->orWhereRaw("item LIKE '%{$search}%'");
+            })->groupBy('item');
+            
+        }else if($startForecast->type == 'month'){
+            $months = [
+                '01' => 'Jan',
+                '02' => 'Feb',
+                '03' => 'Mar',
+                '04' => 'Apr',
+                '05' => 'May',
+                '06' => 'Jun',
+                '07' => 'Jul',
+                '08' => 'Aug',
+                '09' => 'Sep',
+                '10' => 'Oct',
+                '11' => 'Nov',
+                '12' => 'Dec'
+            ];
+
+            if(Session::get('vendor_name')){
+                $whereWithVendor = "AND f.vend_num = '".Session::get('vendor_name')."'";
+                $whereWithVendor_ = "AND f_.vend_num = '".Session::get('vendor_name')."'";
+            }
+
+            $this->crud->query = $this->crud->query->whereRaw("id = (SELECT MAX(f.id) FROM forecasts f WHERE f.item = forecasts.item AND SUBSTR(f.forecast_date, 1, 10) = SUBSTR(forecasts.forecast_date, 1, 10) {$whereWithVendor})");
+
+            $selectRaw = ['item'];
+
+            $columns = collect($columns);
+
+            $i = 1;
+
+            $columnMap = $columns->map(function($date) use($months){
+                $exp = explode(' ', $date);
+                $monthNumber = array_search($exp[0], $months);
+                return $exp[1].'-'.$monthNumber;
+            });
+
+            foreach($columnMap->all() as $date){
+                $raw = DB::raw("(SELECT SUM(f.qty) FROM forecasts f WHERE f.item = forecasts.item 
+                AND SUBSTR(f.forecast_date, 1, 7) = '{$date}' 
+                AND id = (SELECT MAX(f_.id) FROM forecasts f_ WHERE f_.item = f.item AND SUBSTR(f_.forecast_date, 1, 10) =
+                          SUBSTR(f.forecast_date, 1, 10) {$whereWithVendor_})) as bulan{$i}");
+                $selectRaw[] = $raw;
+                $i++;
+            }
+
+            $this->crud->query = $this->crud->query
+            ->select($selectRaw)
+            ->havingRaw("item LIKE '%{$search}%'")
+            ->orHavingRaw('bulan1 = ?', [$search])
+            ->orHavingRaw('bulan2 = ?', [$search])
+            ->orHavingRaw('bulan3 = ?', [$search])
+            ->orHavingRaw('bulan4 = ?', [$search])
+            ->orHavingRaw('bulan5 = ?', [$search])
+            ->orHavingRaw('bulan6 = ?', [$search])
+            ->orHavingRaw('bulan7 = ?', [$search])
+            ->orHavingRaw('bulan8 = ?', [$search])
+            ->orHavingRaw('bulan9 = ?', [$search])
+            ->orHavingRaw('bulan10 = ?', [$search])
+            ->orHavingRaw('bulan11 = ?', [$search])
+            ->orHavingRaw('bulan12 = ?', [$search])
+            ->orHavingRaw('bulan13 = ?', [$search])
+            ->groupBy('item');
+        }
+
+        $this->crud->query = $this->crud->query->orderBy('id', 'DESC');
+    }
+
     public function search(){
         $this->crud->hasAccessOrFail('list');
         // $this->crud->applyUnappliedFilters();
@@ -267,10 +412,11 @@ class ForecastCrudController extends CrudController
         $filteredRows = $this->crud->query->toBase()->getCountForPagination(); # $this->crud->query->toBase()->getCountForPagination();
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
-        if (request()->input('search') && request()->input('search')['value']) {
+        if ((request()->input('search') && request()->input('search')['value']) && (request()->input('search')['value'] != '0')) {
             // filter the results accordingly
             // recalculate the number of filtered rows
-            // $filteredRows = $this->crud->count();
+            $this->applySearchForecast();
+            $filteredRows = $this->crud->count();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {
@@ -301,7 +447,7 @@ class ForecastCrudController extends CrudController
         }else if(Session::get('forecast_type') == 'week'){
             $forecast->type = 'week';
         }else{
-            $forecast->type = 'moon';
+            $forecast->type = 'month';
 
         }
         // $forecast->getQuery();
@@ -333,6 +479,68 @@ class ForecastCrudController extends CrudController
         return $callback;
     }
 
+    function export(){
+        $this->setQuery();
+
+        $entries = $this->crud->getEntries();
+
+        $getItem = $entries->map(function($item){
+            return $item->item;
+        });
+
+        $forecast = new ForecastConverter;
+        # tambah model tabel forecast
+        $forecast->model = $this->crud->model;
+        # set nama item kedalam perhitungan forecast
+        $forecast->name_items = $getItem->values()->all(); 
+
+        # pilih berdasarkan filter penentuan type perhitungan forecast
+        if(Session::get('forecast_type') == 'days'){
+            $forecast->type = 'days';
+        }else if(Session::get('forecast_type') == 'week'){
+            $forecast->type = 'week';
+        }else{
+            $forecast->type = 'month';
+
+        }
+
+        # memulai forecast
+        $start = $forecast->forecastStart();
+        # menampilkan hasil forecast
+        $resultForecast =  $start->getResultForecast();
+
+        $columns = $start->getColumns();
+
+        CRUD::addColumn([
+            'label'     => 'Nama Item', // Table column heading
+            'name'      => 'name_item',
+        ]);
+        foreach($columns as $key => $column){
+            CRUD::addColumn([
+                'label' => ($forecast->type == 'week') ? "{$column['export_value']}" : $column,
+                'name' => "column_" . "{$key}",
+                'rome_symbol' => ($forecast->type == 'week') ? $column['rome_symbol'] : '',
+                'type' => 'forecast',
+                // 'orderable' => false,
+            ]);
+        }
+
+        // $this->crud->columnHeader = $start->columnHeader;
+
+        // dd([
+        //     'columnHeader' => $start->columnHeader,
+        //     'column' => $start->getColumns(),
+        //     'column_crud' => $this->crud->columns(), 
+        //     'type' => $start->type,
+        //     'result' => $resultForecast,
+        // ]);
+
+        return Excel::download(new ForecastExport(
+            $this->crud->columns(), 
+            $start->columnHeader, 
+            $start->type, 
+            $resultForecast), 'forecast.xlsx');
+    }
     
 
 

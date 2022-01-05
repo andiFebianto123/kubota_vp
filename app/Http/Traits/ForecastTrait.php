@@ -69,8 +69,8 @@ trait ForecastTrait {
             }
             $iterasi++;
         }
-        array_push($itemForecastOriginal, '<span>View</span>');
-        array_push($itemForecast, '<span>View</span>');
+        // array_push($itemForecastOriginal, '<span>View</span>');
+        // array_push($itemForecast, '<span>View</span>');
         array_push($this->resultForecastForOriginal, $itemForecastOriginal);
         array_push($this->resultForecastForDays, $itemForecast);
     }
@@ -98,8 +98,8 @@ trait ForecastTrait {
                 }
             }
         }
-        array_push($itemForecastOriginal, '<span>View</span>');
-        array_push($itemForecast, '<span>View</span>');
+        // array_push($itemForecastOriginal, '<span>View</span>');
+        // array_push($itemForecast, '<span>View</span>');
         array_push($this->resultForecastForOriginal, $itemForecastOriginal);
         array_push($this->resultForecastForWeeks, $itemForecast);
     }
@@ -121,9 +121,64 @@ trait ForecastTrait {
                 array_push($itemForecast, 0);
             }
         }
-        array_push($itemForecastOriginal, '<span>View</span>');
-        array_push($itemForecast, '<span>View</span>');
+        // array_push($itemForecastOriginal, '<span>View</span>');
+        // array_push($itemForecast, '<span>View</span>');
         array_push($this->resultForecastForOriginal, $itemForecastOriginal);
         array_push($this->resultForecastForMoons, $itemForecast);
+    }
+
+    private function forecastDateToConvertToDays(){
+        $dataDateOfMonth = [];
+        /*
+        format = [
+            [
+                'key' => '2021-12',
+                'data' => [
+                    '2021-12-01',
+                    '2021-12-02,
+                    ...
+                    '2021-12-31'
+                ]
+            ],
+            ...
+        ]
+        */
+
+        $iteration = '';
+        $compareDate = [];
+        foreach ($this->dataTglPerDay as $date) {
+            // looping per tanggal format : dddd-mm-dd
+            $dateExp = explode('-', $date);
+            if($iteration == ''){
+                // jika looping mulai dilakukan pertama
+                $iteration = "{$dateExp[0]}-{$dateExp[1]}";
+                $compareDate['key'] = $iteration;
+                $compareDate['data'] = [];
+                array_push($compareDate['data'], $date);
+
+            }else{
+                // jika looping setelah pertama
+                // cek apakah data bulan - tahun saat ini sama dengan bulan - tahun tgl di looping
+                if($iteration === "{$dateExp[0]}-{$dateExp[1]}"){
+                    // jika sama
+                    array_push($compareDate['data'], $date);
+                }else{
+                    // jika tidak sama
+                    $iteration = "{$dateExp[0]}-{$dateExp[1]}";
+                    array_push($dataDateOfMonth, $compareDate);
+                    $compareDate = [];
+                    $compareDate['key'] = $iteration;
+                    $compareDate['data'] = [];
+                    array_push($compareDate['data'], $date);
+                }
+            }
+        }
+        if(isset($compareDate['key']) && count($compareDate['data']) > 0){
+            array_push($dataDateOfMonth, $compareDate);
+            $compareDate = [];
+        }
+
+        $this->columnHeader = collect($dataDateOfMonth);
+        
     }
 }

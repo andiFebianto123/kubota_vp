@@ -73,5 +73,27 @@ class Constant
     return backpack_user()->roles->pluck('name')[0];
   }
 
+  public static function getColumnHeaderDays($columnHeader, $dateKey, $date){
+
+    // posisinya ini sudah collect
+    // $columnHeader    
+    $collect = $columnHeader;
+        
+    $filtered = $collect->where('key', $dateKey);
+
+    $arrDate = collect($filtered->first()['data']);
+
+    $search = $arrDate->search($date);
+
+    return [
+      'total' => $arrDate->count() - 1,
+      'search' => $search
+    ];
+
+  }
+
+  public static function coba_coba(){
+    return 'hallo';
+  }
   
 }
