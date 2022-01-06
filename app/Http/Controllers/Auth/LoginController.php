@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\AccountAttempt;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\TwoFactor;
 use App\Mail\ResetPasswordMail;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\vendorNewPo;
+use App\Models\TempCountFailure;
 
 class LoginController extends Controller
 {
@@ -87,7 +89,18 @@ class LoginController extends Controller
      
         $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
+        $check_lock = (new AccountAttempt())->checkLock($input['username'], 'login');
+
+        if ($check_lock['status'] == false) {
+            return response()->json([
+                'status' => $check_lock['status'],
+                'message' => $check_lock['message']
+            ], 200);
+        }
+
+
+        if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))
+        ) 
         {
             $two_factor_code = strtoupper(substr(md5(date("Ymd His")), 0, 8));
             $two_factor_url = md5($two_factor_code);
@@ -112,7 +125,9 @@ class LoginController extends Controller
             $insert_otp->two_factor_url = $two_factor_url;
             $insert_otp->expired_at = Carbon::now()->addMinutes(5);
             $insert_otp->save();
-           
+
+            TempCountFailure::where('account', $input['username'])->where('type', 'login')->delete();
+
             Mail::to($user->email)->send(new TwoFactorMail($details));
 
             // Mail::to($user->email)->send(new vendorNewPo($details));
@@ -125,10 +140,14 @@ class LoginController extends Controller
                 'validation_errors' => []
             ], 200);
         }else{
+            $username = $input['username'];
+            $at = (new AccountAttempt())->insert($username, 'login');
+            
             return response()->json([
                 'status' => false,
-                'message' => 'Username atau Password Salah'
+                'message' => (isset($at['message']))?$at['message']:'Username atau Password Salah'
                 ], 200);
+            
         }
     }
 

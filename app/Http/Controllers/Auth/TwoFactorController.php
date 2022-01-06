@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\AccountAttempt;
 use App\Http\Controllers\Controller;
 use App\Mail\TwoFactorMail;
 use App\Models\Configuration;
+use App\Models\TempCountFailure;
 use App\Models\User;
 use App\Models\UserOtp;
 use Carbon\Carbon;
@@ -30,7 +32,16 @@ class TwoFactorController extends Controller
         $two_factor_code = $request->two_factor_code;
         $conf_exp_otp = Configuration::where('name', 'expired_otp')->first();
         $expired_otp = ($conf_exp_otp) ? $conf_exp_otp->value:1; // in day
+        $username = backpack_auth()->user()->username;
 
+        $check_lock = (new AccountAttempt())->checkLock($username, 'otp');
+
+        if ($check_lock['status'] == false) {
+            return response()->json([
+                'status' => $check_lock['status'],
+                'message' => $check_lock['message']
+            ], 200);
+        }
 
         if (User::where("id", backpack_auth()->user()->id)
             ->where("two_factor_code", $two_factor_code)
@@ -51,10 +62,14 @@ class TwoFactorController extends Controller
             $update_otp->expired_at = Carbon::now()->addDay($expired_otp);
             $update_otp->save();
 
+            TempCountFailure::where('account', $username)->where('type', 'otp')->delete();
+
         }else{
+            $at = (new AccountAttempt())->insert($username, 'otp');
+            
             return response()->json([
-                'status' => false,
-                'message' => 'OTP Tidak Valid!'
+                'status' => $at['status'],
+                'message' => (isset($at['message']))?$at['message']:'OTP Tidak Valid!'
                 ], 200);
         }
 

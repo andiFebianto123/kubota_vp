@@ -27,6 +27,39 @@ class ConfigurationSeeder extends Seeder
             ],
             ["name" => "expired_otp"],
           ],
+          [
+            [
+              "label" => "Attemp Failure OTP",
+              "name" => "attemp_failure_otp",
+              "value" => 5,
+            ],
+            ["name" => "attemp_failure_otp"],
+          ],
+          [
+            [
+              "label" => "Attemp Failure OTP",
+              "name" => "attemp_failure_login",
+              "value" => 5,
+            ],
+            ["name" => "attemp_failure_login"],
+          ],
+          [
+            [
+              "label" => "Expired Locked OTP (Minutes)",
+              "name" => "locked_account_on_failure_otp",
+              "value" => 5,
+            ],
+            ["name" => "locked_account_on_failure_otp"],
+          ],
+          [
+            [
+              "label" => "Expired Locked Login (Minutes)",
+              "name" => "locked_account_on_failure_login",
+              "value" => 5,
+            ],
+            ["name" => "locked_account_on_failure_login"],
+          ],
+          
         
         ];
 
