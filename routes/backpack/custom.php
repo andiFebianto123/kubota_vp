@@ -72,6 +72,7 @@ Route::group([
     Route::post('get-comments', 'TaxInvoiceCrudController@showComments');
     Route::post('send-comments', 'TaxInvoiceCrudController@sendMessage');
     Route::post('delete-comments', 'TaxInvoiceCrudController@deleteMessage');
+    Route::get('forecast/export', 'ForecastCrudController@export');
 
     Route::post('tax-invoice/search2', [
         'uses'      => 'TaxInvoiceCrudController@search2',

@@ -119,7 +119,7 @@ class ForecastConverter {
             }
             $query->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
         })
-        ->whereRaw("f1.forecast_date BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'")
+        ->whereRaw("SUBSTR(f1.forecast_date, 1, 10) BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'")
         ->where("f1.item", $value);
 
         if(Session::get('vendor_name')){
@@ -128,7 +128,7 @@ class ForecastConverter {
             ->where('f1.vend_num', Session::get('vendor_name'));
         }
 
-        if($this->type == 'moon'){
+        if($this->type == 'month'){
             $this->querySearchRangeForecast = $this->querySearchRangeForecast
             ->groupBy(DB::raw('SUBSTR(forecast_date, 1, 7)'));
         }
@@ -154,7 +154,7 @@ class ForecastConverter {
                 $mergeData = collect($dataForecastOri)->merge($this->resultForecastForWeeks[$key]);
                 array_push($colectDataMerge, $mergeData->all());
             }
-        }else if($this->type == 'moon'){
+        }else if($this->type == 'month'){
             foreach($this->resultForecastForOriginal as $key => $dataForecastOri){
                 $mergeData = collect($dataForecastOri)->merge($this->resultForecastForMoons[$key]);
                 array_push($colectDataMerge, $mergeData->all());
@@ -185,6 +185,8 @@ class ForecastConverter {
             $dd = (int) $d['date'][2];
             $dataTglPerDay_slice = array_slice($this->dataTglPerDay, ($dd - 1));
             $this->dataTglPerDay = $dataTglPerDay_slice;
+
+            $this->forecastDateToConvertToDays();
 
         }else if($this->type == 'week'){
             # jika tipe adalah minggu
@@ -223,7 +225,7 @@ class ForecastConverter {
                 $this->prosesDataPerItemForWeek2($value);
             }
             return $this->resultForecastForWeeks;
-        }else if($this->type == 'moon'){
+        }else if($this->type == 'month'){
             foreach($this->name_items as $value){
                 $this->searchEntries($value);
                 $this->prosesDataPerItemForMoon($value);
@@ -250,7 +252,8 @@ class ForecastConverter {
                 foreach ($this->dataTglPerDay as $date) {
                     #$date --> Y-m-d
                     $newDate = new DateTime($date);
-                    array_push($dataColumn, $newDate->format('d M y'));
+                    // array_push($dataColumn, $newDate->format('d M y'));
+                    array_push($dataColumn, $newDate->format('Y-m-d'));
                 }	
                 break;
             case 'week':
@@ -265,6 +268,9 @@ class ForecastConverter {
                         $column = [
                             'rome_symbol' => $rome[$keyRome],
                             'value' => "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='{$tooltip}'><b>{$rome[$keyRome]}</b></button>",
+                            'export_value' => "{$first} s.d. {$last}",
+                            'first_date' => $first,
+                            'last_date' => $last
                         ];
                         array_push($dataColumn, $column);
                     }
@@ -302,7 +308,7 @@ class ForecastConverter {
                     }
                 }
                 break;
-            case 'moon':
+            case 'month':
                 foreach($this->dataTglPerDay as $moonYear){
                     // contoh output dari $moonYear "2021-11"
                     $date = new DateTime($moonYear);
@@ -727,7 +733,7 @@ class ForecastConverter {
             $totalDayofMonth = cal_days_in_month(CAL_GREGORIAN, $monthNowTrigger, $yearNowTrigger);
             $dayCountTarget = $totalDayofMonth;
 
-            if($this->type == 'moon'){
+            if($this->type == 'month'){
                 // jika Tipe forecast adalah perbulan
                 $totalDayofMonth = 0;
                 $stringMoon = "{$yearNowTrigger}-{$monthNowTrigger}";
@@ -789,7 +795,7 @@ class ForecastConverter {
 
             // cek jika tahun looping dan bulan looping sama dengan bulan, tahun target maka iterasi berhenti
             // ini khusus untuk type minggu
-            if($this->type == 'week' || $this->type == 'moon'){
+            if($this->type == 'week' || $this->type == 'month'){
                 if( ($yearNowTrigger == $yearTarget) && ($monthNowTrigger == $monthTarget)){
                     $this->fromDate = "{$targetDate['explode'][0]}-{$targetDate['explode'][1]}-01";
                     $this->targetDate = "{$targetDate['explode_target'][0]}-{$targetDate['explode_target'][1]}-{$dayCountTarget}";
