@@ -31,7 +31,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-po');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per PO');
         $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_num as po_line','lot_qty'
+        'material_outhouse.po_num as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description'
         );
 
         if(Constant::checkPermission('Read Summary MO')){
@@ -58,7 +58,11 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->query->join('po_line as pl', function($join){
             $join->on('material_outhouse.po_num', '=', 'pl.po_num');
-            $join->on('material_outhouse.po_line', '=', 'pl.po_line');
+            $join->on('material_outhouse.po_line', '=', 'pl.po_line')
+            ->where('pl.status', '=', 'O');;
+        });
+        $this->crud->query->join('po', function($join){
+            $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
         // $this->crud->addClause(
         //     'join',
@@ -71,10 +75,14 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         // );
 
         $this->crud->groupBy('material_outhouse.po_num');
+        if(Constant::getRole() == 'Admin PTKI'){
+            CRUD::column('vend_num')->label('Vend Num');
+        }
 
         CRUD::column('po_num')->label('PO Num');
-        // CRUD::column('matl_item')->label('Matl Item');
-        // CRUD::column('description');
+        CRUD::column('po_line')->label('PO Line');
+        CRUD::column('matl_item')->label('Matl Item');
+        CRUD::column('description');
         CRUD::column('lot_qty')->label('Qty Dikirim');
         CRUD::column('qty_issued')->label('Qty Processed');
         CRUD::column('remaining_qty')->label('Remaining Qty');

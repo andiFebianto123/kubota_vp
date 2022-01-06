@@ -68,7 +68,7 @@ class TwoFactorController extends Controller
             $at = (new AccountAttempt())->insert($username, 'otp');
             
             return response()->json([
-                'status' => $at['status'],
+                'status' => false,
                 'message' => (isset($at['message']))?$at['message']:'OTP Tidak Valid!'
                 ], 200);
         }
