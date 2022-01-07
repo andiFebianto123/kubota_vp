@@ -31,7 +31,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-po');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per PO');
         $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_num as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description'
+        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description'
         );
 
         if(Constant::checkPermission('Read Summary MO')){
