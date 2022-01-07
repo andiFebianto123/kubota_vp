@@ -224,7 +224,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                             <tr>
                                 <td>Rejected QTY</td>
-                                <td>: <span class="text-danger"> {{$delivery_status->rejected_qty}}</span></td>
+                                <td>: 
+                                    <button 
+                                        id="btn-for-form-delivery" 
+                                        class="btn btn-sm btn-danger" 
+                                        data-toggle="modal" 
+                                        data-target="#modalQtyRejected" 
+                                        type="button">
+                                        {{$qty_reject_count}}
+                                    </button>
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -357,6 +366,42 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @endsection
 
 @section('after_scripts')
+@if(sizeof($delivery_rejects) > 0)
+<div id="modalQtyRejected" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Qty Rejects</h5>
+        </div>
+        <div class="modal-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Num</th>
+                        <th>Reason</th>
+                        <th>Qty</th>
+                        <th>Inspection Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($delivery_rejects as $key => $dr)
+                    <tr>
+                        <td>{{$dr->reason_num}}</td>
+                        <td>{{$dr->reason}}</td>
+                        <td>{{$dr->rejected_qty}}</td>
+                        <td>{{$dr->inspection_date}}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+  </div>
+</div>
+@endif
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 @endsection

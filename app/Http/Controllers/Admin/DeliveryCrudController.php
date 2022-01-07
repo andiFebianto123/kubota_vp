@@ -7,6 +7,7 @@ use App\Helpers\Constant;
 use App\Http\Requests\DeliveryRequest;
 use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
+use App\Models\DeliveryReject;
 use App\Models\DeliverySerial;
 use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
@@ -91,6 +92,11 @@ class DeliveryCrudController extends CrudController
         CRUD::addColumn([
             'label'     => 'DS Number', // Table column heading
             'name'      => 'ds_num', // the column that contains the ID of that connected entity;
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
+            'label'     => 'DS Line', // Table column heading
+            'name'      => 'ds_line', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
         CRUD::addColumn([
@@ -200,10 +206,17 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $entry->ds_line)
                             ->first();
 
+        $delivery_rejects = DeliveryReject::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)->get();
+        
+        $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
         $data['delivery_status'] = $delivery_status;
+        $data['delivery_rejects'] = $delivery_rejects;
+        $data['qty_reject_count'] = $qty_reject_count;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
         // dd($entry);
