@@ -181,4 +181,31 @@ trait ForecastTrait {
         $this->columnHeader = collect($dataDateOfMonth);
         
     }
+
+    function getResultForecastExport(){
+        if($this->type == 'days'){
+            # jika tipe adalah hari
+            foreach ($this->name_items as $value) {
+                $this->searchEntries($value);
+                // $this->prosesDataPerItem($value);
+                $this->prosesDataPerItem2($value);
+            }
+            return $this->resultForecastForOriginal;
+        }else if($this->type == 'week'){
+            #jika tipe adalah mingguan
+            foreach ($this->name_items as $value) {
+                // $this->prosesDataPerItemForWeek($value);
+                $this->searchEntries($value);
+                $this->prosesDataPerItemForWeek2($value);
+            }
+            return $this->resultForecastForOriginal;
+        }else if($this->type == 'month'){
+            foreach($this->name_items as $value){
+                $this->searchEntries($value);
+                $this->prosesDataPerItemForMoon($value);
+            }
+            return $this->resultForecastForOriginal;
+        }
+        return 0;
+    }
 }

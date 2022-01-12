@@ -9,12 +9,14 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Venturecraft\Revisionable\RevisionableTrait;
 
 
 class User extends Authenticatable
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use RevisionableTrait;
 
     /**
      * The attributes that are mass assignable.

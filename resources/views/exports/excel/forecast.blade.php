@@ -1,11 +1,15 @@
 @inject('constant', 'App\Helpers\Constant')
 <table>
     <thead>
+        <tr>
+            <th><strong>Nama Vendor<strong></th>
+            <th colspan="4">Andi febianto</th>
+        </tr>
         @if($type == 'week')
             <tr>
-                <th rowspan="2" style="border:1px solid black; width: 30px;">Nama Item</th>
+                <th rowspan="2" style="border:1px solid black; width: 200px;">Nama Item</th>
             @foreach($crud['columnHeader'] as $header)
-                <th colspan="4" style="text-align:center; border:1px solid black;">
+                <th colspan="4" style="text-align:center; border:1px solid black; width: 100px;">
                     {!! $header !!}
                 </th>
             @endforeach
@@ -14,7 +18,7 @@
         @endif
         @if($type == 'days')
             <tr>
-                <th rowspan="2" style="border:1px solid black; width: 30px;">Nama Item</th>
+                <th rowspan="2" style="border:1px solid black; width: 200px;">Nama Item</th>
             @foreach($crud['columnHeader'] as $header)
                 <?php
                     $key = $header['key'].'-01';
@@ -39,7 +43,7 @@
                         if($column['type'] == 'forecast'){
                             $style = "
                                 border: 1px solid black; 
-                                width: 25px;
+                                width: 230px;
                                 text-align: center;
                             ";
                         }
@@ -62,13 +66,13 @@
                     if($type == 'month'){
                         $style = "
                             border: 1px solid black; 
-                            width: 15px;
+                            width: 100px;
                             text-align: center;
                         ";
                         if($column['label'] == 'Nama Item'){
                             $style = "
                                 border: 1px solid black; 
-                                width: 30px;
+                                width: 200px;
                                 text-align: center;
                             ";
                         }
@@ -78,7 +82,7 @@
                 }
                 @endphp
                 <th
-                    style="{{ $style ?? '' }}"
+                    style="{{ $style }}"
                 >
                     @if(isset($column['link']))
                     <a href="{{url('admin/forecast')}}{{$column['link']}}{{$column['label']}}">{{$column['label']}}</a>

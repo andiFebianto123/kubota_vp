@@ -110,6 +110,7 @@ class ForecastConverter {
             );
         }
         $this->querySearchRangeForecast = $this->querySearchRangeForecast
+        ->whereRaw("f1.item = '{$value}'")
         ->where('id', function($query){
             $query->from('forecasts as f2')
             ->select(DB::raw('MAX(id)'))
@@ -119,8 +120,7 @@ class ForecastConverter {
             }
             $query->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
         })
-        ->whereRaw("SUBSTR(f1.forecast_date, 1, 10) BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'")
-        ->where("f1.item", $value);
+        ->whereRaw("SUBSTR(f1.forecast_date, 1, 10) BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'");
 
         if(Session::get('vendor_name')){
             // jika terdapat nama vendor
@@ -496,18 +496,18 @@ class ForecastConverter {
      */
     private function forecastDateToConvertToWeek(){
         $moonsReverences = [
-            '01' => 'Jan',
-            '02' => 'Feb',
+            '01' => 'January',
+            '02' => 'February',
             '03' => 'March',
-            '04' => 'Apr',
+            '04' => 'April',
             '05' => 'May',
-            '06' => 'Jun',
-            '07' => 'Jul',
-            '08' => 'Augs',
-            '09' => 'Sep',
-            '10' => 'Oct',
-            '11' => 'Nov',
-            '12' => 'Dec'
+            '06' => 'June',
+            '07' => 'July',
+            '08' => 'August',
+            '09' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December'
         ];
         $dateCustomExplode = collect($this->dataTglPerDay)
         ->map(function($date){
