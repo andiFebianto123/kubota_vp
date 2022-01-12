@@ -29,7 +29,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
-
+        $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
+        'material_outhouse.po_num as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description'
+        );
         if(Constant::checkPermission('Read Summary MO')){
             $this->crud->allowAccess('list');
         }else{
@@ -49,8 +51,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
-        // $this->crud->addClause('join', 'po_line', 'po_line', 'po_line.po_line');
-        // $this->crud->addClause('join', 'po_line', 'po_num', 'po_line.po_num');
+        $this->crud->query->join('po', function($join){
+            $join->on('material_outhouse.po_num', '=', 'po.po_num');
+        });
         $this->crud->addClause(
             'join',
             'po_line',
@@ -60,11 +63,14 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
                 ->where('po_line.status', '=', 'O');
             }
         );
+        $this->crud->groupBy('material_outhouse.matl_item');
+        if(Constant::getRole() == 'Admin PTKI'){
+            CRUD::column('vend_num')->label('Vend Num');
+        }
 
         // CRUD::column('id')->label('ID');;
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('po_num');
         CRUD::column('lot_qty')->label('Qty Dikirim');
         CRUD::column('qty_issued')->label('Qty Processed');
         CRUD::column('remaining_qty')->label('Remaining Qty');

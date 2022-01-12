@@ -29,7 +29,7 @@
             <td></td>
         </tr>
         <tr>
-            <td colspan="4">Attn : <br> {{$po->vendor->vend_name}}<br> {{$po->vendor->vend_addr}}</td>
+            <td colspan="4">Attn :</td>
             <td></td>
             <td></td>
             <td></td>
@@ -38,10 +38,7 @@
             <td></td>
         </tr>
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td colspan="4">{{$po->vendor->vend_name}}</td>
             <td></td>
             <td></td>
             <td></td>
@@ -49,10 +46,7 @@
             <td colspan="2">Taman Industri Bukit Semarang Baru (BSB) Blok D.1 Kav.8 <br> Kel.Jatibarang - Kec. Mijen – Kota Semarang</td>
         </tr>
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td colspan="4">{{$po->vendor->vend_addr}}</td>
             <td></td>
             <td></td>
             <td></td>

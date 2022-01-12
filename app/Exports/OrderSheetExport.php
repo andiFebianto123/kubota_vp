@@ -6,12 +6,28 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithDrawings;
 
-class OrderSheetExport implements FromView, WithEvents
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+
+
+class OrderSheetExport implements FromView, WithEvents, WithDrawings
 {
     public function __construct($data_fc)
     {
         $this->data_fc = $data_fc;
+    }
+
+    public function drawings()
+    {
+        $drawing = new Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Kubota logo');
+        $drawing->setPath(public_path('/img/logokubotaforearth.png'));
+        $drawing->setHeight(60);
+        $drawing->setCoordinates('J1');
+
+        return $drawing;
     }
 
     public function registerEvents(): array
