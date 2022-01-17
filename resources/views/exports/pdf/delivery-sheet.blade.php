@@ -79,7 +79,7 @@
                                 @else
                                     @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong>
-                                    @elseif($constant::checkPermission('Print DS without Price'))
+                                    @else
                                         <strong> - </strong>
                                     @endif
                                 @endif
@@ -87,7 +87,7 @@
                         </tr>
 
                         <tr>
-                            <td width="25%">Part No.<br><strong>-</strong></td>
+                            <td width="25%">Part No.<br><strong>{{$delivery_show->item}}</strong></td>
                             <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
                             <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
                             <td width="25%">
@@ -101,7 +101,7 @@
                                 @else
                                     @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong>
-                                    @elseif($constant::checkPermission('Print DS without Price'))
+                                    @else
                                         <strong> - </strong>
                                     @endif
                                 @endif
@@ -119,7 +119,7 @@
                         <tr>
                             <td width="15%" align="center"><small>VENDOR</small></td>
                             <td rowspan="2" valign="top">
-                                <small>QC</small> : <strong>NO</strong><br>
+                                <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                 <small>NOTES</small> :
                             </td>
                         </tr>

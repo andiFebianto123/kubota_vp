@@ -54,17 +54,17 @@ return [
         ],
         'sftp' => [
             'driver' => 'sftp',
-            'host' => 'example.com',
-            'username' => 'your-username',
-            'password' => 'your-password',
+            'host' => env('SFTP_HOST'),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
         
             // Settings for SSH key based authentication...
-            'privateKey' => '/path/to/privateKey',
-            'password' => 'encryption-password',
+            // 'privateKey' => env('SFTP_PATH_PRIVATEKEY', ''),
+            // 'password' => env('SFTP_ENCRYPION_PASSWORD', ''),
         
             // Optional SFTP Settings...
-            // 'port' => 22,
-            // 'root' => '',
+            'port' => env('SFTP_PORT', 22),
+            'root' => env('SFTP_ROOT',''),
             // 'timeout' => 30,
         ],
 
