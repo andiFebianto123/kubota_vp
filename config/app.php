@@ -164,6 +164,7 @@ return [
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        Venturecraft\Revisionable\RevisionableServiceProvider::class,
         Spatie\Backup\BackupServiceProvider::class,
 
         /*

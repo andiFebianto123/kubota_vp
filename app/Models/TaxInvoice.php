@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Venturecraft\Revisionable\RevisionableTrait;
 
 class TaxInvoice extends Model
 {
     use CrudTrait;
+    use RevisionableTrait;
 
     /*
     |--------------------------------------------------------------------------

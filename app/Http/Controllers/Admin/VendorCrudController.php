@@ -203,4 +203,14 @@ class VendorCrudController extends CrudController
             return [$vendor->vend_num => $vendor->vend_name];
         });
     }
+
+    public function itemVendorOptions2(Request $request){
+        $term = $request->input('term');
+        return \App\Models\Vendor::where('vend_num', 'like', '%'.$term.'%')
+        ->select('vend_num')
+        ->get()
+        ->mapWithKeys(function($vendor){
+            return [$vendor->vend_num => $vendor->vend_num];
+        });
+    }
 }

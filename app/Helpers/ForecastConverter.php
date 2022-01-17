@@ -94,7 +94,6 @@ class ForecastConverter {
             ->select(
                 'id', 
                 'item', 
-                'forecast_date', 
                 DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
                 'qty'
             );
@@ -103,35 +102,36 @@ class ForecastConverter {
             ->select(
                 'id', 
                 'item', 
-                'forecast_date', 
                 DB::raw('SUBSTR(forecast_date, 1, 10) as tanggal'),
                 DB::raw('SUBSTR(forecast_date, 1, 7) as bulan'),
                 DB::raw('SUM(qty) as qty')
             );
         }
         $this->querySearchRangeForecast = $this->querySearchRangeForecast
-        ->where('id', function($query){
-            $query->from('forecasts as f2')
-            ->select(DB::raw('MAX(id)'))
-            ->whereRaw('f2.item = f1.item');
-            if(Session::get('vendor_name')){
-                $query->whereRaw('f2.vend_num = f1.vend_num');
-            }
-            $query->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)');
-        })
-        ->whereRaw("SUBSTR(f1.forecast_date, 1, 10) BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'")
-        ->where("f1.item", $value);
-
+        ->whereRaw("f1.item = '{$value}'");
         if(Session::get('vendor_name')){
             // jika terdapat nama vendor
             $this->querySearchRangeForecast = $this->querySearchRangeForecast
             ->where('f1.vend_num', Session::get('vendor_name'));
         }
+        $this->querySearchRangeForecast = $this->querySearchRangeForecast->where('id', function($query){
+            $query->from('forecasts as f2')
+            ->select(DB::raw('id'))
+            ->whereRaw('f2.item = f1.item');
+            if(Session::get('vendor_name')){
+                $query->whereRaw('f2.vend_num = f1.vend_num');
+            }
+            $query->whereRaw('SUBSTR(f2.forecast_date, 1, 10) = SUBSTR(f1.forecast_date, 1, 10)')
+            ->orderBy('id', 'desc')
+            ->limit(1);
+        })
+        ->whereRaw("SUBSTR(f1.forecast_date, 1, 10) BETWEEN '{$this->fromDate}' AND '{$this->targetDate}'");
 
         if($this->type == 'month'){
             $this->querySearchRangeForecast = $this->querySearchRangeForecast
             ->groupBy(DB::raw('SUBSTR(forecast_date, 1, 7)'));
         }
+        // dd($this->querySearchRangeForecast->toSql());
         $this->querySearchRangeForecast = $this->querySearchRangeForecast
         ->get();
     }
@@ -191,6 +191,8 @@ class ForecastConverter {
         }else if($this->type == 'week'){
             # jika tipe adalah minggu
             $this->forecastDateToConvertToWeek();
+            # convert week to system
+            $this->buildDataWeek();
         }
 
         return $this;
@@ -496,18 +498,18 @@ class ForecastConverter {
      */
     private function forecastDateToConvertToWeek(){
         $moonsReverences = [
-            '01' => 'Jan',
-            '02' => 'Feb',
+            '01' => 'January',
+            '02' => 'February',
             '03' => 'March',
-            '04' => 'Apr',
+            '04' => 'April',
             '05' => 'May',
-            '06' => 'Jun',
-            '07' => 'Jul',
-            '08' => 'Augs',
-            '09' => 'Sep',
-            '10' => 'Oct',
-            '11' => 'Nov',
-            '12' => 'Dec'
+            '06' => 'June',
+            '07' => 'July',
+            '08' => 'August',
+            '09' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December'
         ];
         $dateCustomExplode = collect($this->dataTglPerDay)
         ->map(function($date){

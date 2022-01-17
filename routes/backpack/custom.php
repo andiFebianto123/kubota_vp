@@ -48,6 +48,7 @@ Route::group([
     Route::get('test/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
     // route untuk ajax filter vendor untuk mendapatkan kode vendor
     Route::get('test/ajax-vendor-options', 'VendorCrudController@itemVendorOptions');
+    Route::get('test/ajax-vendor-options2', 'VendorCrudController@itemVendorOptions2');
 
     // Route untuk export PDF print label delivery sheet detail
     // Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelSingle');

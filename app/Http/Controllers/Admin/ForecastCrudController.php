@@ -16,6 +16,8 @@ use DateTime;
 use App\Helpers\Constant;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ForecastExport;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
 
@@ -55,7 +57,7 @@ class ForecastCrudController extends CrudController
                 if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
                     Session::put("vendor_name", request('filter_vendor'));
                     $db = DB::table('vendor')->where('vend_num', Session::get('vendor_name'))->first();
-                    Session::put('vendor_text', $db->vend_name);
+                    Session::put('vendor_text', $db->vend_num);
                 }else{
                     Session::forget('vendor_name');
                     Session::forget('vendor_text');
@@ -105,26 +107,6 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->addButtonFromView('bottom', 'print_forecast', 'print_forecast', 'beginning');
-        // dd([
-        //     'cek_role_admin' => backpack_user()->hasRole('Admin PTKI'),
-        //     'cek_permision_create' => backpack_user()->hasDirectPermission('create'),
-        //     'cek_permission_update' => backpack_user()->hasDirectPermission('update'),
-        //     'all_direct_permission' => backpack_user()->getDirectPermissions()->values()->all(),
-        //     'all_permission_via_role' => backpack_user()->getPermissionsViaRoles()->values()->all(),
-        //     'all_permission' => backpack_user()->getAllPermissions()->values()->all(),
-        // ]);
-        
-        // $arr_week = ["Week 1","Week 2", "Week 3", "Week 4"];
-        // $arr_day = ["Senin","Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
-        // $ar_month = ["Januari","Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        // CRUD::addColumn([
-        //     'label'     => 'Name', // Table column heading
-        //     'name'      => 'nama',
-        // ]);
-        // CRUD::addColumn([
-        //     'label'     => 'Age', // Table column heading
-        //     'name'      => 'age',
-        // ]);
 
         // $this->crud->allowResponsive();
 
@@ -172,7 +154,7 @@ class ForecastCrudController extends CrudController
             ]);
         }
 
-        $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options');
+        $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options2');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->data['type_forecast'] = $start->type;
         $this->crud->setListView('vendor.backpack.crud.list-forecast', $this->data);
@@ -328,6 +310,7 @@ class ForecastCrudController extends CrudController
             ->orHavingRaw('week15 = ?', [$search])
             ->orHavingRaw('week16 = ?', [$search])
             ->select($selectData);
+            dd($this->crud->query->toSql());
         }else if($startForecast->type == 'days'){
             if(Session::get('vendor_name')){
                 $whereWithVendor = "AND f.vend_num = '".Session::get('vendor_name')."'";
@@ -338,7 +321,6 @@ class ForecastCrudController extends CrudController
                 $query->whereRaw("qty = '{$search}'")
                 ->orWhereRaw("item LIKE '%{$search}%'");
             })->groupBy('item');
-            
         }else if($startForecast->type == 'month'){
             $months = [
                 '01' => 'Jan',
@@ -415,8 +397,10 @@ class ForecastCrudController extends CrudController
         if ((request()->input('search') && request()->input('search')['value']) && (request()->input('search')['value'] != '0')) {
             // filter the results accordingly
             // recalculate the number of filtered rows
-            $this->applySearchForecast();
-            $filteredRows = $this->crud->count();
+            // $this->applySearchForecast();
+            $search = request()->input('search')['value'];
+            $this->crud->query = $this->crud->query->where("item", "LIKE", "%$search%");
+            $filteredRows = $this->crud->query->toBase()->getCountForPagination();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {
@@ -434,7 +418,6 @@ class ForecastCrudController extends CrudController
         });
         # mengambil semua nama item data dari tabel forecast
         
-
         $forecast = new ForecastConverter;
         # tambah model tabel forecast
         $forecast->model = $this->crud->model;
@@ -457,6 +440,7 @@ class ForecastCrudController extends CrudController
         # menampilkan hasil forecast
         $resultForecast =  $start->getResultForecast();
 
+
         // overwrite any order set in the setup() method with the datatables order
         if (request()->input('order')) {
             // clear any past orderBy rules
@@ -470,8 +454,14 @@ class ForecastCrudController extends CrudController
             }
             $resultForecast = $start->getResultWithOrderBy($orderBy);
         }
+
+        $draw = 0;
+        if(request()->input('draw')){
+            $draw = (int) request()->input('draw');
+        }
+
         $callback = array(
-            'draw'=>request()->input('draw'), // Ini dari datatablenya untuk tanda pada halaman pagination
+            'draw'=>$draw, // Ini dari datatablenya untuk tanda pada halaman pagination
             'recordsTotal' => $totalRows, // total dari semua row
             'recordsFiltered' => $filteredRows,
             'data' => $resultForecast,
@@ -479,7 +469,7 @@ class ForecastCrudController extends CrudController
         return $callback;
     }
 
-    function export(){
+    function export2(){
         $this->setQuery();
 
         $entries = $this->crud->getEntries();
@@ -535,11 +525,94 @@ class ForecastCrudController extends CrudController
         //     'result' => $resultForecast,
         // ]);
 
+
+        $dateFrom = new DateTime($forecast->fromDate);
+        $dateTarget = new DateTime($forecast->targetDate);
+
+
+        $nameFileDownload = "Forecast_".$forecast->type." - ".$dateFrom->format('F')." ".$dateFrom->format('Y')." - ".$dateTarget->format('F')." ".$dateTarget->format('Y');
+
         return Excel::download(new ForecastExport(
             $this->crud->columns(), 
             $start->columnHeader, 
             $start->type, 
-            $resultForecast), 'forecast.xlsx');
+            $resultForecast), "{$nameFileDownload}.xlsx");
+    }
+
+    function getNameFromNumber($num) {
+        $numeric = ($num - 1) % 26;
+        $letter = chr(65 + $numeric);
+        $num2 = intval(($num - 1) / 26);
+        if ($num2 > 0) {
+            return $this->getNameFromNumber($num2) . $letter;
+        } else {
+            return $letter;
+        }
+    }
+
+    function export(){
+        $this->setQuery();
+
+        $entries = $this->crud->getEntries();
+
+        $getItem = $entries->map(function($item){
+            return $item->item;
+        });
+
+        $forecast = new ForecastConverter;
+        # tambah model tabel forecast
+        $forecast->model = $this->crud->model;
+        # set nama item kedalam perhitungan forecast
+        $forecast->name_items = $getItem->values()->all(); 
+
+        # pilih berdasarkan filter penentuan type perhitungan forecast
+        if(Session::get('forecast_type') == 'days'){
+            $forecast->type = 'days';
+        }else if(Session::get('forecast_type') == 'week'){
+            $forecast->type = 'week';
+        }else{
+            $forecast->type = 'month';
+
+        }
+
+        # memulai forecast
+        $start = $forecast->forecastStart();
+        # menampilkan hasil forecast
+        $resultForecast =  $start->getResultForecastExport();
+
+        $columns = $start->getColumns();
+
+        CRUD::addColumn([
+            'label'     => 'Nama Item', // Table column heading
+            'name'      => 'name_item',
+        ]);
+        foreach($columns as $key => $column){
+            CRUD::addColumn([
+                'label' => ($forecast->type == 'week') ? "{$column['export_value']}" : $column,
+                'name' => "column_" . "{$key}",
+                'rome_symbol' => ($forecast->type == 'week') ? $column['rome_symbol'] : '',
+                'type' => 'forecast',
+            ]);
+        }
+
+        $dateFrom = new DateTime($forecast->fromDate);
+        $dateTarget = new DateTime($forecast->targetDate);
+
+
+        $nameFileDownload = "Forecast_".$forecast->type." - ".$dateFrom->format('F')." ".$dateFrom->format('Y')." - ".$dateTarget->format('F')." ".$dateTarget->format('Y');
+
+        $convertForecast = new ForecastExport(
+            $columns, 
+            $start->columnHeader, 
+            $start->type, 
+            $resultForecast);
+        
+        if($forecast->type == 'week'){
+            return $convertForecast->exportForecastWeeks($nameFileDownload);
+        }else if($forecast->type == 'days'){
+            return $convertForecast->exportForecastDays($nameFileDownload);
+        }
+        return $convertForecast->exportForecastMonth($nameFileDownload);
     }
     
 
