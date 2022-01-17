@@ -208,4 +208,24 @@ trait ForecastTrait {
         }
         return 0;
     }
+
+    private function buildDataWeek(){
+        // $this->dataDatePerWeek;
+        foreach($this->dataDatePerWeek as $moon => $dataWeek){
+            $week2 = $dataWeek[1];
+            $week3 = $dataWeek[2];
+
+            $week2[] = $week3[0];
+            $this->dataDatePerWeek[$moon][1] = $week2;
+
+            $updateWeek3 = array_slice($week3, 1);
+            $this->dataDatePerWeek[$moon][2] = $updateWeek3;
+
+            $week4 = $dataWeek[3];
+            $this->dataDatePerWeek[$moon][2][] = $week4[0];
+
+            $updateWeek4 = array_slice($week4, 1);
+            $this->dataDatePerWeek[$moon][3] = $updateWeek4;
+        }
+    }
 }

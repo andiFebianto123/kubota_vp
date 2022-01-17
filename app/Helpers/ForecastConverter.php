@@ -191,6 +191,8 @@ class ForecastConverter {
         }else if($this->type == 'week'){
             # jika tipe adalah minggu
             $this->forecastDateToConvertToWeek();
+            # convert week to system
+            $this->buildDataWeek();
         }
 
         return $this;
