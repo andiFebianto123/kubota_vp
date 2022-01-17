@@ -400,7 +400,6 @@ class ForecastCrudController extends CrudController
             // $this->applySearchForecast();
             $search = request()->input('search')['value'];
             $this->crud->query = $this->crud->query->where("item", "LIKE", "%$search%");
-            // dd($this->crud->query->toSql());
             $filteredRows = $this->crud->query->toBase()->getCountForPagination();
         }
         // start the results according to the datatables pagination
@@ -593,20 +592,12 @@ class ForecastCrudController extends CrudController
                 'name' => "column_" . "{$key}",
                 'rome_symbol' => ($forecast->type == 'week') ? $column['rome_symbol'] : '',
                 'type' => 'forecast',
-                // 'orderable' => false,
             ]);
         }
 
         $dateFrom = new DateTime($forecast->fromDate);
         $dateTarget = new DateTime($forecast->targetDate);
 
-        // dd([
-        //     'columnHeader' => $start->columnHeader,
-        //     'column' => $start->getColumns(),
-        //     'column_crud' => $this->crud->columns(), 
-        //     'type' => $start->type,
-        //     'result' => $resultForecast,
-        // ]);
 
         $nameFileDownload = "Forecast_".$forecast->type." - ".$dateFrom->format('F')." ".$dateFrom->format('Y')." - ".$dateTarget->format('F')." ".$dateTarget->format('Y');
 
