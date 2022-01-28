@@ -3,6 +3,7 @@ namespace App\Helpers;
 
 use App\Models\Delivery;
 use App\Models\PurchaseOrderLine;
+use Illuminate\Support\Facades\DB;
 
 class DsValidation
 {
@@ -24,19 +25,23 @@ class DsValidation
 
   public function unfinishedPoLine($args)
   {
+    
     $due_date = $args['due_date'];
+    // $po_num = $args['po_num'];
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
-    $old_po = PurchaseOrderLine::leftJoin('delivery', function($join) {
-                      $join->on('po_line.po_num', '=', 'delivery.po_num')
-                          ->on('po_line.po_line', '=', 'delivery.po_line');
-                  })
-                  ->where('status', 'O')
+
+    // $query = "select * from "
+    // $old_po = DB::statement('your raw query here')
+    
+    $old_po = PurchaseOrderLine::where('status', 'O')
                   ->where('accept_flag', 1)
-                  ->whereDate('po_line.due_date', '<', date('Y-m-d',strtotime($due_date)))
-                  ->where($filters)
-                  ->orderBy('po_line.due_date','desc')
-                  ->selectRaw('po_line.po_num, po_line.po_line, po_line.item, po_line.description, po_line.due_date, ROUND(sum(shipped_qty), 2) as total_shipped_qty, po_line.order_qty')
-                  ->paginate(100);
+                  ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
+                  ->where($filters)                                         
+                  ->orderBy('po_line.po_line','asc')
+                  ->orderBy('po_line.due_date','asc')
+                  ->selectRaw("po_num, po_line, item, description, due_date, order_qty, 'total_shipped_qty'")
+                  ->take(1)
+                  ->get();
 
       return [
         'datas'  => $old_po,

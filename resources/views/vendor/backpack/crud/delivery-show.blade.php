@@ -63,7 +63,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <table border="1px" width="98%" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}</strong></td>
+                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}} - {{$delivery_show->ds_line}}</strong></td>
                                 <td width="50%" colspan="2"></td>
                             </tr>
                             <tr>

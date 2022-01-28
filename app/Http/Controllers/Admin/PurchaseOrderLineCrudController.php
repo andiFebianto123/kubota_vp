@@ -222,10 +222,12 @@ class PurchaseOrderLineCrudController extends CrudController
                 ],
             );
         }
+
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $entry->item];
-        $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date ];
-        // $arr_filters[] = ['po_line.po_num', '!=', null];
+        $arr_filters[] = ['po_line.po_num', '=', $entry->po_num];
+        $arr_filters[] = ['po_line.po_line', '<', $entry->po_line];
+        $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date];
         $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
 
         $data['crud'] = $this->crud;

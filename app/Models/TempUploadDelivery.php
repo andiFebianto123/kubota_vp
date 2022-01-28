@@ -78,6 +78,8 @@ class TempUploadDelivery extends Model
     private function rowValidation(){
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
+        $arr_filters[] = ['po_line.po_num', '=', $this->po_num];
+        $arr_filters[] = ['po_line.po_line', '<', $this->po_line];
         $args1 = ['filters' => $arr_filters, 'due_date' => $this->purchaseOrderLine->due_date ];
         $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->purchaseOrderLine->order_qty ];
 

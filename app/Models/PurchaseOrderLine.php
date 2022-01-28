@@ -15,7 +15,7 @@ class PurchaseOrderLine extends Model
 
     protected $append = [
         'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept',
-        'count_ds'
+        'count_ds', 'total_shipped_qty'
     ];
 
     public function purchaseOrder()
@@ -39,7 +39,8 @@ class PurchaseOrderLine extends Model
         $value = number_format($this->unit_price,0,',','.');
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
 
             $change = number_format($last_po_line->unit_price,0,',','.')." -> ".$value;
 
@@ -57,7 +58,8 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value;
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
 
             $change = $last_po_line->order_qty. " -> ". $value;
             if ($last_po_line->order_qty != $value) {
@@ -74,7 +76,8 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
             $from = $last_po_line->unit_price*$last_po_line->order_qty;
 
             $change = number_format($from,0,',','.')." -> ".$value;
@@ -92,7 +95,8 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
 
             $change = date('Y-m-d', strtotime($last_po_line->due_date))." -> ".$value;
             if(date('Y-m-d', strtotime($last_po_line->due_date)) != $value){
@@ -118,6 +122,12 @@ class PurchaseOrderLine extends Model
     public function getCountDsAttribute()
     {
         return Delivery::where('po_num', $this->po_num)->where('po_line', $this->po_line)->count();
+    }
+
+
+    public function getTotalShippedQtyAttribute()
+    {
+        return Delivery::where('po_num', $this->po_num)->where('po_line', $this->po_line)->sum('shipped_qty');
     }
 
 

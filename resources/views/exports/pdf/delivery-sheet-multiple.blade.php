@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel</title>
+    <title>Delivery Sheet</title>
 </head>
 <style>
     table td{
@@ -54,11 +54,21 @@
                 $with_price = $delivery['with_price'];
             @endphp
         <div @if($key % 2 != 0) class="page_break" @endif style="margin-bottom: 40px;"> 
+            <div>
+                <div style="float: left;  position:relative;">
+                    <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
+                </div>
+                <div style="float: right;  position:relative;">
+                    <small style="font-size: 12px;">KIS - 404.0006</small>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr>
             <div style="float:left; position:relative; width: 540px;">
                 <table width="98%" class="pdf-table">
                     <tbody>
                         <tr>
-                            <td width="100%" colspan="4">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}</strong></td>
+                            <td width="100%" colspan="4">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}-{{$delivery_show->ds_line}}</strong></td>
                         </tr>
                         <tr>
                             <td width="50%" colspan="2">Dlv.Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->shipped_date))}}</strong></td>
