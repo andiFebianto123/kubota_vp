@@ -229,7 +229,7 @@ class PurchaseOrderLineCrudController extends CrudController
         $arr_filters[] = ['po_line.po_line', '<', $entry->po_line];
         $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date];
         $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
-
+        
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['po'] = $po;

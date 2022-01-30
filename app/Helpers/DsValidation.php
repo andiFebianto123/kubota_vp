@@ -38,13 +38,20 @@ class DsValidation
                   ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
                   ->where($filters)                                         
                   ->orderBy('po_line.po_line','asc')
-                  ->orderBy('po_line.due_date','asc')
+                  // ->orderBy('po_line.due_date','asc')
                   ->selectRaw("po_num, po_line, item, description, due_date, order_qty, 'total_shipped_qty'")
-                  ->take(1)
+                  // ->take(1)
                   ->get();
 
+      $arr_old_po = [];
+      foreach ($old_po as $key => $op) {
+        if ($op->total_shipped_qty < $op->order_qty) {
+          $arr_old_po[] = $op;
+        }
+      }
+
       return [
-        'datas'  => $old_po,
+        'datas'  => $arr_old_po,
         'mode'   => 'danger',
         'message' => 'Selesaikan terlebih dahulu PO yang lama!'
       ];
