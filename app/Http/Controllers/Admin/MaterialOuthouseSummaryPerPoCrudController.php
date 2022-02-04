@@ -75,6 +75,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         // );
 
         $this->crud->groupBy('material_outhouse.po_num');
+        $this->crud->groupBy('material_outhouse.matl_item');
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
         }
