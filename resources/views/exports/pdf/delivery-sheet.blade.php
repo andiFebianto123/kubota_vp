@@ -50,7 +50,7 @@
             <div style="float: left;  position:relative;">
                 <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
             </div>
-            <div style="float: right;  position:relative;">
+            <div style="float: right;  position:relative;  padding-top:10px;">
                 <small style="font-size: 12px;">KIS - 404.0006</small>
             </div>
         </div>
@@ -141,7 +141,7 @@
                 <div>
                     <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
                 </div>
-                <div class="doc-requirement">
+                <div class="doc-requirement" style="height: 196px;">
                     <strong>Document Requirements</strong>
                     <hr>
                     <ul>
@@ -154,7 +154,12 @@
                 </div>
             </div>
         </div>
+        <div style="clear:both;"></div>
+        <div style="text-align: right; font-size:11px;">
+            <p>Print Date/Time {{date('d-M-Y H:i:s')}}</p>
+        </div>
     </div>
+    
 </body>
 
 </html>

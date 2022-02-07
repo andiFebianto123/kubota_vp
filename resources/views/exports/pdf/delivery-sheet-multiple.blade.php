@@ -52,13 +52,19 @@
                 $delivery_show = $delivery['delivery_show'];
                 $qr_code = $delivery['qr_code'];
                 $with_price = $delivery['with_price'];
+                $use_page_break = "";
             @endphp
-        <div @if($key % 2 != 0) class="page_break" @endif style="margin-bottom: 40px;"> 
+            @if($key < sizeof($deliveries) - 1 && $key % 2 != 0)
+                @php $use_page_break = "page_break"; @endphp
+
+            @endif
+
+        <div @if($key % 2 != 0) class="{{ $use_page_break}}" @endif style="margin-bottom: 30px;"> 
             <div>
                 <div style="float: left;  position:relative;">
                     <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
                 </div>
-                <div style="float: right;  position:relative;">
+                <div style="float: right;  position:relative;  padding-top:10px;">
                     <small style="font-size: 12px;">KIS - 404.0006</small>
                 </div>
             </div>
@@ -148,7 +154,7 @@
                 <div>
                     <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
                 </div>
-                <div class="doc-requirement">
+                <div class="doc-requirement" style="height: 196px;">
                     <strong>Document Requirements</strong>
                     <hr>
                     <ul>
@@ -160,7 +166,11 @@
                     </ul>
                 </div>
             </div>
-            <div style="clear: both; float:none;"></div>
+            <!-- <div style="clear: both; float:none;"></div> -->
+            <div style="clear:both;"></div>
+            <div style="text-align: right; font-size:11px;">
+                <p>Print Date/Time {{date('d-M-Y H:i:s')}}</p>
+            </div>
         </div>
         @endforeach
     </div>

@@ -115,8 +115,8 @@
                         </div>
 
                         <div id="collapse-{{$key}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
-                            <div class="card-body">
-                            {{$gm->content}}                        
+                            <div class="card-body help-section">
+                            {!! $gm->content !!}                        
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
                 @foreach($general_message_info as $key => $gm)
                 <div class="information-section mb-2">
                     <h6>{{$gm->title}}</h6>
-                    {{$gm->content}}
+                    {!! $gm->content !!}
                 </div>
                 @endforeach
                 
