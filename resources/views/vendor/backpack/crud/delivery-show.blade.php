@@ -71,8 +71,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="50%" colspan="2">P/O Due Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->due_date))}}</strong></td>
                             </tr>
                             <tr>
-                                <td width="50%" colspan="2">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
-                                <td width="25%">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                                <td width="50%" colspan="2">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                                <td width="25%">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
                                 <td width="25%">Vendor Dlv. No<br><strong>{{$delivery_show->no_surat_jalan_vendor}}</strong></td>
                             </tr>
                             <tr>

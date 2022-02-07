@@ -90,7 +90,7 @@ class GeneralMessageCrudController extends CrudController
         $this->crud->addField([
             'label'     => 'Content', // Table column heading
             'name'      => 'content', // the column that contains the ID of that connected entity;
-            'type' => 'wysiwyg',
+            'type' => 'tinymce',
         ]);
     }
 
