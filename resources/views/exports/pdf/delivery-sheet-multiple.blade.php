@@ -152,7 +152,7 @@
             </div>
             <div style="float:right; position:relative; width:168px;">
                 <div>
-                    <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
+                    <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->errorCorrection('H')->generate($qr_code)) }} ">
                 </div>
                 <div class="doc-requirement" style="height: 196px;">
                     <strong>Document Requirements</strong>
