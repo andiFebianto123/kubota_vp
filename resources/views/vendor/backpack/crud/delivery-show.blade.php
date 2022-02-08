@@ -294,7 +294,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <tr>
                                     <td>Validated</td>
                                     <td>:
-                                        @if($delivery_status->received_flag == 1)
+                                        @if($delivery_status->validate_by_fa_flag == 1)
                                         <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                         @else
                                         <button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button>

@@ -206,10 +206,15 @@ class PurchaseOrderCrudController extends CrudController
         
         $po_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
                                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                // ->leftJoin('comments', function($query) {
+                                //     $query->on('comments.article_id','=','articles.id')
+                                //         ->whereRaw('comments.id IN (select MAX(a2.id) from comments as a2 join articles as u2 on u2.id = a2.article_id group by u2.id)');
+                                // })
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
-                                ->orderBy('po_line.id', 'desc')
+                                // ->orderBy('po_line.id', 'desc')
                                 ->get();
+
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
 
         $po_changes_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )

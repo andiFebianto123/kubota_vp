@@ -34,6 +34,7 @@ class DsValidation
     // $old_po = DB::statement('your raw query here')
     
     $old_po = PurchaseOrderLine::where('status', 'O')
+                  ->where('outhouse_flag', 0)
                   ->where('accept_flag', 1)
                   ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
                   ->where($filters)                                         

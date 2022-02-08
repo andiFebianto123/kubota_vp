@@ -15,6 +15,7 @@ class ChangeDeliveryStatus1Table extends Migration
     {
         Schema::table('delivery_status', function (Blueprint $table) {
             $table->string('grn_num')->change();
+            $table->integer('validate_by_fa_flag')->default(0);
         });
     }
 

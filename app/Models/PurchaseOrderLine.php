@@ -34,19 +34,35 @@ class PurchaseOrderLine extends Model
         return ($user) ? $user->username :'-';
     }
 
+    private function getLatestChange(){
+        // $count_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+        // // ->where('po_change', $this->po_change - 1)
+        // ->where('po_line', $this->po_line)->count();
+
+        $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
+        ->where('po_change', '<', $this->po_change)
+        ->where('po_line', $this->po_line)
+        ->orderBy('po_change', 'desc')
+        ->first();
+
+        return $last_po_line;
+    }
+
     public function getChangeUnitPriceAttribute()
     {
         $value = number_format($this->unit_price,0,',','.');
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
-                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = $this->getLatestChange();
 
-            $change = number_format($last_po_line->unit_price,0,',','.')." -> ".$value;
+            if (isset($last_po_line)) {
+                $change = number_format($last_po_line->unit_price,0,',','.')." -> ".$value;
 
-            if(number_format($last_po_line->unit_price,0,',','.') != $value){
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+                if(number_format($last_po_line->unit_price,0,',','.') != $value){
+                    $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+                }
             }
+
         }
 
         return $html_row;
@@ -58,12 +74,14 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value;
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
-            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
-
-            $change = $last_po_line->order_qty. " -> ". $value;
-            if ($last_po_line->order_qty != $value) {
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+            
+            $last_po_line = $this->getLatestChange();
+            
+            if (isset($last_po_line)) {
+                $change = $last_po_line->order_qty. " -> ". $value;
+                if ($last_po_line->order_qty != $value) {
+                    $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+                }
             }
         }
 
@@ -76,14 +94,17 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
-                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
-            $from = $last_po_line->unit_price*$last_po_line->order_qty;
+            $last_po_line = $this->getLatestChange();
 
-            $change = number_format($from,0,',','.')." -> ".$value;
-            if(number_format($from,0,',','.') != $value){
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+            if (isset($last_po_line)) {
+                $from = $last_po_line->unit_price*$last_po_line->order_qty;
+
+                $change = number_format($from,0,',','.')." -> ".$value;
+                if(number_format($from,0,',','.') != $value){
+                    $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+                }
             }
+            
         }
 
         return $html_row;
@@ -95,12 +116,13 @@ class PurchaseOrderLine extends Model
 
         $html_row = $value; 
         if($this->po_change > 0){
-            $last_po_line = PurchaseOrderLine::where('po_num', $this->po_num)
-                            ->where('po_line', $this->po_line)->get()[$this->po_change - 1];
+            $last_po_line = $this->getLatestChange();
 
-            $change = date('Y-m-d', strtotime($last_po_line->due_date))." -> ".$value;
-            if(date('Y-m-d', strtotime($last_po_line->due_date)) != $value){
-                $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+            if (isset($last_po_line)) {
+                $change = date('Y-m-d', strtotime($last_po_line->due_date))." -> ".$value;
+                if(date('Y-m-d', strtotime($last_po_line->due_date)) != $value){
+                    $html_row = "<button type='button' class='btn btn-link p-0' data-toggle='tooltip' data-placement='top' title='".$change."'><b>".$value."</b></button>";
+                }
             }
         }
 
