@@ -16,9 +16,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $this->createPermission();
 
-        $this->assignRolePermission();
+        // $this->assignRolePermission();
 
-        $this->assignUserRole();
+        // $this->assignUserRole();
     }
 
     function createRole(){
