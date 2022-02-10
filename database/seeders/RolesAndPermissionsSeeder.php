@@ -122,6 +122,22 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             [
               [
+                "name" => "Accept PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses accept data PO"
+              ],
+              ['name' => 'Accept PO Detail'],
+            ],
+            [
+              [
+                "name" => "Reject PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses reject data PO"
+              ],
+              ['name' => 'Reject PO Detail'],
+            ],
+            [
+              [
                 "name" => "Unread PO Detail",
                 "guard_name" => "web",
                 "description" => "Mempunyai akses unread pada PO detail"
