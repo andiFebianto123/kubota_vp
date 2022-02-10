@@ -376,7 +376,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <h5 class="modal-title">Qty Rejects</h5>
         </div>
         <div class="modal-body">
-            <table class="table">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Num</th>
@@ -392,6 +392,31 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <td>{{$dr->reason}}</td>
                         <td>{{$dr->rejected_qty}}</td>
                         <td>{{$dr->inspection_date}}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <hr>
+            <h5>Repair</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Reason Num</th>
+                        <th>Repair Num</th>
+                        <th>Type</th>
+                        <th>Qty</th>
+                        <th>Repair Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($delivery_repairs as $key => $drep)
+                    <tr>
+                        <td>{{$drep->reason_num}}</td>
+                        <td>{{$drep->repair_num}}</td>
+                        <td>{{$drep->repair_type}}</td>
+                        <td>{{$drep->repair_qty}}</td>
+                        <td>{{$drep->repair_date}}</td>
                     </tr>
                     @endforeach
                 </tbody>

@@ -8,6 +8,7 @@ use App\Http\Requests\DeliveryRequest;
 use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
 use App\Models\DeliveryReject;
+use App\Models\DeliveryRepair;
 use App\Models\DeliverySerial;
 use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
@@ -209,6 +210,9 @@ class DeliveryCrudController extends CrudController
         $delivery_rejects = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->get();
         
+        $delivery_repairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
+                            ->where('ds_line_reject', $entry->ds_line)->get();
+        
         $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
         $data['crud'] = $this->crud;
@@ -216,6 +220,7 @@ class DeliveryCrudController extends CrudController
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
         $data['delivery_status'] = $delivery_status;
         $data['delivery_rejects'] = $delivery_rejects;
+        $data['delivery_repairs'] = $delivery_repairs;
         $data['qty_reject_count'] = $qty_reject_count;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 

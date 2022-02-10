@@ -615,5 +615,10 @@
         // ajax_table.ajax.reload(null, false);
     });
     
+    $( document ).ajaxStop(function() {
+      var crudTableInfo = $("#crudTable_info").text()
+      crudTableInfo = crudTableInfo.split("entries")[0]
+      $("#crudTable_info").text(crudTableInfo+" entries.")
+    });
   </script>
 @endsection

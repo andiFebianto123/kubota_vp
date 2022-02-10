@@ -157,4 +157,12 @@
 
   <!-- CRUD LIST CONTENT - crud_list_scripts stack -->
   @stack('crud_list_scripts')
+  <script>
+    $( document ).ajaxStop(function() {
+      var crudTableInfo = $("#crudTable_info").text()
+      crudTableInfo = crudTableInfo.split("entries")[0]
+      $("#crudTable_info").text(crudTableInfo+" entries.")
+    });
+
+  </script>
 @endsection
