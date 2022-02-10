@@ -167,18 +167,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                         @endif
                                     @endif    
                                 @else
-                                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                                        @if($constant::checkPermission('Read PO Detail'))
-                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
-                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
-                                        @endif
+                                    @if($constant::checkPermission('Accept PO Detail'))
+                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                    @endif
+                                    @if($constant::checkPermission('Reject PO Detail'))
+                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                     @endif
                                 @endif
                             </td>
                         </tr>
                         @endforeach
 
-                    </tbody>
+                    </tbody> 
                 </table>
                 <div class="section-buttons"></div>
 

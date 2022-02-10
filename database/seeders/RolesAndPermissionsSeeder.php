@@ -16,9 +16,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $this->createPermission();
 
-        $this->assignRolePermission();
+        // $this->assignRolePermission();
 
-        $this->assignUserRole();
+        // $this->assignUserRole();
     }
 
     function createRole(){
@@ -119,6 +119,22 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Mempunyai akses print order sheet, accept, reject, view detail PO Line dan view detail PO Change History"
               ],
               ['name' => 'Read PO Detail'],
+            ],
+            [
+              [
+                "name" => "Accept PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses accept data PO"
+              ],
+              ['name' => 'Accept PO Detail'],
+            ],
+            [
+              [
+                "name" => "Reject PO Detail",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses reject data PO"
+              ],
+              ['name' => 'Reject PO Detail'],
             ],
             [
               [
