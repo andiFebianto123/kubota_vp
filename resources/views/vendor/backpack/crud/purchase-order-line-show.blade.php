@@ -104,7 +104,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <div class="m-4 p-2" style="border:1px solid #ff9800; color:#ff9800;">
                     <b> PO Line yang belum selesai:</b><br>
                     @foreach($unfinished_po_line['datas'] as $key => $upl)
-                    {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
+                        @if($key == 0)
+                        {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
+                        @endif
                     @endforeach
                 </div>
                 @endif

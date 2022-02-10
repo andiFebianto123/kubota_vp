@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel</title>
+    <title>Delivery Sheet</title>
 </head>
 <style>
     table td{
@@ -52,21 +52,37 @@
                 $delivery_show = $delivery['delivery_show'];
                 $qr_code = $delivery['qr_code'];
                 $with_price = $delivery['with_price'];
+                $use_page_break = "";
             @endphp
-        <div @if($key % 2 != 0) class="page_break" @endif style="margin-bottom: 40px;"> 
+            @if($key < sizeof($deliveries) - 1 && $key % 2 != 0)
+                @php $use_page_break = "page_break"; @endphp
+
+            @endif
+
+        <div @if($key % 2 != 0) class="{{ $use_page_break}}" @endif style="margin-bottom: 30px;"> 
+            <div>
+                <div style="float: left;  position:relative;">
+                    <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
+                </div>
+                <div style="float: right;  position:relative;  padding-top:10px;">
+                    <small style="font-size: 12px;">KIS - 404.0006</small>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr>
             <div style="float:left; position:relative; width: 540px;">
                 <table width="98%" class="pdf-table">
                     <tbody>
                         <tr>
-                            <td width="100%" colspan="4">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}</strong></td>
+                            <td width="100%" colspan="4">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}-{{$delivery_show->ds_line}}</strong></td>
                         </tr>
                         <tr>
                             <td width="50%" colspan="2">Dlv.Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->shipped_date))}}</strong></td>
                             <td width="50%" colspan="2">P/O Due Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->due_date))}}</strong></td>
                         </tr>
                         <tr>
-                            <td width="50%" colspan="2">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
-                            <td width="25%">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                            <td width="50%" colspan="2">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                            <td width="25%">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
                             <td width="25%">Vendor Dlv. No<br><strong>{{$delivery_show->no_surat_jalan_vendor}}</strong></td>
                         </tr>
                         <tr>
@@ -138,7 +154,7 @@
                 <div>
                     <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
                 </div>
-                <div class="doc-requirement">
+                <div class="doc-requirement" style="height: 180px;">
                     <strong>Document Requirements</strong>
                     <hr>
                     <ul>
@@ -150,7 +166,11 @@
                     </ul>
                 </div>
             </div>
-            <div style="clear: both; float:none;"></div>
+            <!-- <div style="clear: both; float:none;"></div> -->
+            <div style="clear:both;"></div>
+            <div style="text-align: right; font-size:11px;">
+                <p>Print Date/Time {{date('d-M-Y H:i:s')}}</p>
+            </div>
         </div>
         @endforeach
     </div>

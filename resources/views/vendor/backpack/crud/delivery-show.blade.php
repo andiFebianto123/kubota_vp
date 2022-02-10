@@ -63,7 +63,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <table border="1px" width="98%" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}}</strong></td>
+                                <td width="50%" colspan="2">Delivery Sheet No.<br><strong>{{$delivery_show->ds_num}} - {{$delivery_show->ds_line}}</strong></td>
                                 <td width="50%" colspan="2"></td>
                             </tr>
                             <tr>
@@ -71,8 +71,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="50%" colspan="2">P/O Due Date<br><strong>{{date("Y-m-d", strtotime($delivery_show->due_date))}}</strong></td>
                             </tr>
                             <tr>
-                                <td width="50%" colspan="2">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
-                                <td width="25%">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                                <td width="50%" colspan="2">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
+                                <td width="25%">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
                                 <td width="25%">Vendor Dlv. No<br><strong>{{$delivery_show->no_surat_jalan_vendor}}</strong></td>
                             </tr>
                             <tr>
@@ -81,7 +81,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
                                 <td width="25%">
                                     Unit Price<br>
-                                    @if(!$constant::checkPermission('Print DS without Price'))
+                                    @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">
                                             {{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}
                                         </strong>
@@ -97,7 +97,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
                                 <td width="25%">
                                     Amount<br/>
-                                    @if(!$constant::checkPermission('Print DS without Price'))
+                                    @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">
                                             {{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}
                                         </strong>
@@ -118,7 +118,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <tr>
                                 <td width="15%" align="center"><small>VENDOR</small></td>
                                 <td rowspan="2" valign="top">
-                                    <small>QC</small> : <strong>NO</strong><br>
+                                    <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                     <small>NOTES</small> :
                                 </td>
                             </tr>
@@ -144,7 +144,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-4">
+            <div class="mt-4">
                 @if($constant::getRole() == 'Admin PTKI')
                     <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                     <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
@@ -294,7 +294,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <tr>
                                     <td>Validated</td>
                                     <td>:
-                                        @if($delivery_status->received_flag == 1)
+                                        @if($delivery_status->validate_by_fa_flag == 1)
                                         <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                         @else
                                         <button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button>

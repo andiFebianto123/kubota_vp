@@ -173,3 +173,13 @@
     border: 1px solid #b8c2db;
 }
 
+.information-section img {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.help-section img {
+    width: 100% !important;
+    height: auto !important;
+}
+
