@@ -472,6 +472,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $adminRole->givePermissionTo('Create Role');
         $adminRole->givePermissionTo('Delete Role');
         $adminRole->givePermissionTo('Read Permission');
+        $adminRole->givePermissionTo('Read dashboard');
         // dd($adminRole->permissions);
 
     }
