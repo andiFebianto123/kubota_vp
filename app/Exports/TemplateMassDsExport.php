@@ -41,6 +41,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
                     'po_line' => $col->po_line,
                     'item' => $col->item,
                     'description' => $col->description,
+                    'due_date' => $col->due_date,
                     'unit_price' => $col->unit_price,
                     'order_qty' => $col->order_qty,
                     'po_change' => $col->po_change,
@@ -93,14 +94,14 @@ class TemplateMassDsExport implements  FromView, WithEvents
         
                 ];
 
-                $arr_columns = range('A', 'L');
+                $arr_columns = range('A', 'M');
                 foreach ($arr_columns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
                 
                 $many_data = $this->count_data +1;
-                $event->sheet->getDelegate()->getStyle('A1:L1')->applyFromArray($style_header);
+                $event->sheet->getDelegate()->getStyle('A1:M1')->applyFromArray($style_header);
                 $event->sheet->getDelegate()->getStyle('B2:H'.$many_data)->applyFromArray($style_group_protected);
                 $event->sheet->protectCells('B2:H10', 'PHP');
 

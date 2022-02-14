@@ -19,6 +19,7 @@ use Prologue\Alerts\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class PurchaseOrderLineCrudController
@@ -184,8 +185,12 @@ class PurchaseOrderLineCrudController extends CrudController
             'type' => 'hidden',
             'name' => 'po_line_id',
             'value' => $entry->id
-        ]);        
-        CRUD::field('petugas_vendor');
+        ]);   
+        $this->crud->addField([
+            'type' => 'text',
+            'name' => 'petugas_vendor',
+            'default' => Auth::guard('backpack')->user()->name
+        ]); 
         CRUD::field('no_surat_jalan_vendor');
         $this->crud->addField([
             'type' => 'number_qty',

@@ -81,6 +81,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong></td>
                                 <td width="25%">
                                     Unit Price<br>
+                                    <strong>TBA</strong>
+                                    {{--
                                     @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">
                                             {{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}
@@ -88,6 +90,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     @else
                                         <strong> - </strong>
                                     @endif
+                                    --}}
                                 </td>
                             </tr>
 
@@ -97,6 +100,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
                                 <td width="25%">
                                     Amount<br/>
+                                    <strong>TBA</strong>
+                                    {{--
                                     @if($constant::checkPermission('Print DS with Price'))
                                         <strong class="right">
                                             {{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}
@@ -104,6 +109,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     @else
                                         <strong> - </strong>
                                     @endif
+                                    --}}
                                 </td>
                             </tr>
                             <tr>
@@ -145,6 +151,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="mt-4">
+                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i> PDF</a>
+                {{--
+
                 @if($constant::getRole() == 'Admin PTKI')
                     <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                     <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
@@ -156,6 +165,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
                     @endif
                 @endif
+
+                    --}}
+                
             </div>
         </div>
     
@@ -253,7 +265,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <table class="table table-striped table-hover">
                                 <tr>
                                     <td>Unit Price</td>
-                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
+                                        <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                                 </tr>
                                 <tr>
                                     <td>Vend. Dlv No</td>

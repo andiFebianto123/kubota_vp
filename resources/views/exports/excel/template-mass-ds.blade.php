@@ -15,6 +15,7 @@
             <th>PO LINE</th>
             <th>Item</th>
             <th>Description</th>
+            <th>Due Date</th>
             <th>Unit Price</th>
             <th>Order Qty</th>
             <th>Change</th>
@@ -32,12 +33,13 @@
                 <td>{{ $po_line['po_line'] }}</td>
                 <td>{{ $po_line['item'] }}</td>
                 <td>{{ $po_line['description'] }}</td>
+                <td>{{ date('Y-m-d', strtotime($po_line['due_date'])) }}</td>
                 <td>{{ $po_line['unit_price'] }}</td>
                 <td>{{ $po_line['order_qty'] }}</td>
                 <td>{{ $po_line['po_change'] }}</td>
                 <td></td>
                 <td></td>
-                <td></td>
+                <td>{{Auth::guard('backpack')->user()->name}}</td>
                 <td></td>
             </tr>
         @endforeach

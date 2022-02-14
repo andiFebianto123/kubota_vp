@@ -1,4 +1,4 @@
-<button type="button" id="btn-for-form-print-mass-ds2" class="btn btn-sm btn-danger" onclick="printMassDs2(this)"><i class="la la-file-pdf"></i> <span>PDF DS - Harga</span></button>
+<button type="button" id="btn-for-form-print-mass-ds2" class="btn btn-sm btn-danger" onclick="printMassDs2(this)"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
 
 @push('after_scripts')
 <script>
