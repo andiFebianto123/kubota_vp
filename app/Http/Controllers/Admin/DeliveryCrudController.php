@@ -8,6 +8,7 @@ use App\Http\Requests\DeliveryRequest;
 use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
 use App\Models\DeliveryReject;
+use App\Models\DeliveryRepair;
 use App\Models\DeliverySerial;
 use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
@@ -22,6 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Endroid\QrCode\Writer\PngWriter;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -65,21 +67,13 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('update');
 
         // khusus role adminPTKI
+        $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
+
         if(Constant::getRole() == 'Admin PTKI'){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
-            $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'beginning');
-            $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
         }else{
             if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
                 $this->crud->removeButton('delete');
-            }
-    
-            if(Constant::checkPermission('Print DS with Price')){
-                $this->crud->addButtonFromView('top', 'bulk_print_ds', 'bulk_print_ds', 'beginning');
-            }
-    
-            if(Constant::checkPermission('Print DS without Price')){
-                $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
             }
     
             if(Constant::checkPermission('Print Label')){
@@ -180,8 +174,12 @@ class DeliveryCrudController extends CrudController
             'type' => 'hidden',
             'name' => 'po_line_id',
             'value' => request('po_line_id')
+        ]);  
+        $this->crud->addField([
+            'type' => 'text',
+            'name' => 'petugas_vendor',
+            'default' => Auth::guard('backpack')->user()->name
         ]);        
-        CRUD::field('petugas_vendor');
         CRUD::field('no_surat_jalan_vendor');
         CRUD::field('order_qty');
         CRUD::field('serial_number');
@@ -209,6 +207,9 @@ class DeliveryCrudController extends CrudController
         $delivery_rejects = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->get();
         
+        $delivery_repairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
+                            ->where('ds_line_reject', $entry->ds_line)->get();
+        
         $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
         $data['crud'] = $this->crud;
@@ -216,6 +217,7 @@ class DeliveryCrudController extends CrudController
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
         $data['delivery_status'] = $delivery_status;
         $data['delivery_rejects'] = $delivery_rejects;
+        $data['delivery_repairs'] = $delivery_repairs;
         $data['qty_reject_count'] = $qty_reject_count;
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 

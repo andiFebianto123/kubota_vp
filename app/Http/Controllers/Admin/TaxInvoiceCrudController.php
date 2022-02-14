@@ -96,6 +96,7 @@ class TaxInvoiceCrudController extends CrudController
        // $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
        $this->crud->addClause('where', 'payment_in_process_flag', '=', 1);
        $this->crud->addClause('where', 'executed_flag', '=', 0);
+       $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -336,8 +337,8 @@ class TaxInvoiceCrudController extends CrudController
         $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
         $delivery_statuses = DeliveryStatus::select('*', 
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
-        ->where('file_faktur_pajak', null);
-        if(Constant::getRole() != 'Admin PTKI'){
+            ->where('file_faktur_pajak', null);
+            if(Constant::getRole() != 'Admin PTKI'){
             $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
             ->get();
         }else{

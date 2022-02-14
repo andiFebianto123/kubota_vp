@@ -145,16 +145,19 @@ class PurchaseOrderCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'po_num', $keysValue->unique()->toArray());
           });
 
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) { 
-            $this->crud->addClause('where', 'vend_num', $value);
-        });
+        if(in_array($current_role, ['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'vend_num', $value);
+            });
+        }
+        
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:

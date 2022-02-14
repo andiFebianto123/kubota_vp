@@ -67,6 +67,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
         }
+        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+        }
 
         // CRUD::column('id')->label('ID');;
         CRUD::column('matl_item')->label('Matl Item');

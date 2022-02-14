@@ -78,6 +78,9 @@
                             <td width="25%">Dlv.QTY<br><strong style="text-align: right;">{{$delivery_show->order_qty}}</strong></td>
                             <td width="25%">
                                 Unit Price<br>
+                                <strong>TBA</strong>
+                                {{--
+                                    
                                 @if($constant::getRole() == 'Admin PTKI')
                                     @if(isset($with_price) && $with_price == 'yes')
                                         <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->unit_price,0,',','.')}}</strong>
@@ -91,6 +94,7 @@
                                         <strong> - </strong>
                                     @endif
                                 @endif
+                                --}}
                             </td>
                         </tr>
 
@@ -100,6 +104,8 @@
                             <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
                             <td width="25%">
                                 Amount<br>
+                                <strong>TBA</strong>
+                                {{--
                                 @if($constant::getRole() == 'Admin PTKI')
                                     @if(isset($with_price) && $with_price == 'yes')
                                         <strong class="right">{{$delivery_show->currency." " . number_format($delivery_show->order_qty*$delivery_show->unit_price,0,',','.')}}</strong>
@@ -112,7 +118,9 @@
                                     @else
                                         <strong> - </strong>
                                     @endif
-                                @endif
+                                @endif  
+                                    --}}
+                                
                             </td>
                         </tr>
                         <tr>
