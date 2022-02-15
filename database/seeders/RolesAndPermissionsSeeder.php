@@ -19,6 +19,10 @@ class RolesAndPermissionsSeeder extends Seeder
         // $this->assignRolePermission();
 
         // $this->assignUserRole();
+
+        $this->assignUserRole();
+
+        $this->assignRolePermission();
     }
 
     function createRole(){
@@ -464,9 +468,11 @@ class RolesAndPermissionsSeeder extends Seeder
         $adminRole = Role::findByName('Admin PTKI');
         // $adminRole->givePermissionTo('Show Payment Status DS');
         $adminRole->givePermissionTo('Read Role');
-        $adminRole->givePermissionTo('Create Role');
         $adminRole->givePermissionTo('Update Role');
+        $adminRole->givePermissionTo('Create Role');
         $adminRole->givePermissionTo('Delete Role');
+        $adminRole->givePermissionTo('Read Permission');
+        $adminRole->givePermissionTo('Read dashboard');
         // dd($adminRole->permissions);
 
     }
