@@ -214,7 +214,8 @@ class PurchaseOrderLineCrudController extends CrudController
 
         if($entry->outhouse_flag == 1){
             $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
-                                    ->where('po_line', $entry->po_line);
+                                    ->where('po_line', $entry->po_line)
+                                    ->groupBy('matl_item');
 
             $this->crud->addField(
                 [
@@ -230,6 +231,7 @@ class PurchaseOrderLineCrudController extends CrudController
 
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $entry->item];
+        $arr_filters[] = ['po_line.po_num', '!=', $entry->po_num];
         $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date];
         $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
         

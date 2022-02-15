@@ -78,11 +78,12 @@ class TempUploadDelivery extends Model
     private function rowValidation(){
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
+        $arr_filters[] = ['po_line.po_num', '=', $this->po_num];
         $args1 = ['filters' => $arr_filters, 'due_date' => $this->purchaseOrderLine->due_date ];
         $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->purchaseOrderLine->order_qty ];
 
         $ds_validation = new DsValidation();
-        $unfinished_po_line = $ds_validation->unfinishedPoLine( $args1);
+        $unfinished_po_line = $ds_validation->unfinishedPoLine($args1);
         $current_max_qty = $ds_validation->currentMaxQty($args2);
         
         if (sizeof($unfinished_po_line['datas']) > 0 ) {

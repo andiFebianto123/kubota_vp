@@ -347,14 +347,17 @@ class DeliveryCrudController extends CrudController
             }
 
             if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
+                $any_errors = false;
                 foreach ($material_ids as $key => $material_id) {
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];
+                    $issued_qty =  $shipped_qty * $mo->qty_per;
+                    $lot_qty =  $mo->lot_qty;
 
                     $insert_imo = new IssuedMaterialOuthouse();
                     $insert_imo->ds_num = $insert_d->ds_num;
                     $insert_imo->ds_line = $insert_d->ds_line;
-                    $insert_imo->ds_detail = 123;
+                    $insert_imo->ds_detail = $po_line->item;
                     $insert_imo->matl_item = $mo->matl_item;
                     $insert_imo->description = $mo->description;
                     $insert_imo->lot =  $mo->lot;
@@ -362,8 +365,28 @@ class DeliveryCrudController extends CrudController
                     $insert_imo->created_by = backpack_auth()->user()->id;
                     $insert_imo->updated_by = backpack_auth()->user()->id;
                     $insert_imo->save();
+                    if ($issued_qty > $lot_qty ) {
+                        $any_errors = true;
+                    }
                 }
+
+                if ($any_errors) {
+                    DB::rollBack();
+                    // $validator->errors()->add('field', 'Something is wrong with this field!');
+
+                    $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+                    return response()->json([
+                        'status' => false,
+                        'alert' => 'danger',
+                        'message' => "Qty Alert",
+                        'errors' => $errors
+                    ], 422);
+                }
+
+                
             }
+            
             DB::commit();
 
             $message = 'Delivery Sheet Created';

@@ -307,6 +307,7 @@ class TempUploadDeliveryCrudController extends CrudController
 
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $po_line->item];
+        $arr_filters[] = ['po_line.po_num', '!=', $entry->po_num];
         $args = ['filters' => $arr_filters, 'due_date' => $po_line->due_date ];
 
         $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);

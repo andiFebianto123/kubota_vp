@@ -349,6 +349,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     }
 
     function outhouseTableManager(currentQty){
+        var anyError = false
+        var arrQtyPer = []
+        var arrLotQty = {}
         $.each($('.form-issued'), function( k, v ) {
             var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
             var qtyper = parseFloat($('.form-issued:eq('+k+')').data('qtyper'))
@@ -358,25 +361,20 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 fixedIssuedQty = parseFloat(fixedIssuedQty).toFixed(2);
             $('.form-issued:eq('+k+')').val(fixedIssuedQty)
             $('.qty-requirement:eq('+k+')').text(fixedIssuedQty)
-            
-            $( '.form-issued:eq('+k+')' ).keyup(function() {
-                var messageErrorHtml = "<br>"
-                var messageError = ""
-                var anyError = false
-                if ($(this).val() > lotqty) {
-                    anyError = true
-                    messageError += "Lot ("+lotqty+") & "
-                }
-                if ($(this).val() > issuedQty) {
-                    anyError = true
-                    messageError += "Req ("+fixedIssuedQty+") & "
-                }
-                if (anyError) {
-                    messageErrorHtml = "<span class='has-error-form-issued'>Qty melebihi "+messageError.slice(0, -2)+"</span>"
-                }
-                $( '.error-form-issued:eq('+k+')' ).html(messageErrorHtml)
-            })
-         })        
+            arrLotQty[qtyper] = lotqty
+            arrQtyPer.push(qtyper)
+            $('.outhouse-table tbody tr:eq('+k+')').css('color', '#000000')
+            if (issuedQty > lotqty) {
+                $('.outhouse-table tbody tr:eq('+k+')').css('color', '#df4759')
+                anyError = true
+            }
+        }) 
+        
+        var maxQtyPer = Math.max(...arrQtyPer)
+        var maxQtyAllowed = arrLotQty[maxQtyPer]/maxQtyPer
+        if (anyError) {
+            $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQtyAllowed+')</small>')
+        }       
     }
 
     var totalChecked = 0
