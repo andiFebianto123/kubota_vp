@@ -51,6 +51,7 @@
             @php
                 $delivery_show = $delivery['delivery_show'];
                 $qr_code = $delivery['qr_code'];
+                $issued_mos = $delivery['issued_mos'];
                 $with_price = $delivery['with_price'];
                 $use_page_break = "";
             @endphp
@@ -59,7 +60,7 @@
 
             @endif
 
-        <div @if($key % 2 != 0) class="{{ $use_page_break}}" @endif style="margin-bottom: 30px;"> 
+        <div @if($key % 2 != 0) class="{{ $use_page_break}}" @endif style="margin-bottom: 20px;"> 
             <div>
                 <div style="float: left;  position:relative;">
                     <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
@@ -83,7 +84,9 @@
                         <tr>
                             <td width="50%" colspan="2">Vend. Name<br><strong>{{$delivery_show->vendor_name}}</strong></td>
                             <td width="25%">Vend. No<br><strong>{{$delivery_show->vendor_number}}</strong></td>
-                            <td width="25%">Vendor Dlv. No<br><strong>{{$delivery_show->no_surat_jalan_vendor}}</strong></td>
+                            <td width="25%">Vendor Dlv. No<br>
+                            <strong @if(strlen($delivery_show->no_surat_jalan_vendor) > 15) style="font-size:10px;" @endif>{{$delivery_show->no_surat_jalan_vendor}}</strong>
+                            </td>
                         </tr>
                         <tr>
                             <td width="25%">Order No.<br><strong>{{$delivery_show->po_number}}-{{$delivery_show->po_line}}</strong></td>
@@ -147,14 +150,18 @@
                 <table width="98%" style="margin-top: 10px;" class="pdf-table">
                     <tbody>
                         <tr>
-                            <td width="15%" align="center"><small>VENDOR</small></td>
-                            <td rowspan="2" valign="top">
-                                <small>QC</small> : <strong>NO</strong><br>
-                                <small>NOTES</small> :
+                            <td width="15%" align="center" style="padding:0px;" valign="top">
+                                <small>VENDOR</small>
+                                <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
                             </td>
-                        </tr>
-                        <tr>
-                            <td height="63px"></td>
+                            <td valign="top" height="117px">
+                                <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
+                                <small>NOTES</small> :
+                                @foreach($issued_mos as $imo)
+                                <br>
+                                <span style="font-size: 10px;"> - {{$imo->matl_item}} {{$imo->description}}</span>
+                                @endforeach
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -163,7 +170,7 @@
                 <div>
                     <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
                 </div>
-                <div class="doc-requirement" style="height: 180px;">
+                <div class="doc-requirement" style="height: 205px;">
                     <strong>Document Requirements</strong>
                     <hr>
                     <ul>

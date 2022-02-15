@@ -212,6 +212,8 @@ class DeliveryCrudController extends CrudController
         
         $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
+        
+        
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
@@ -219,6 +221,7 @@ class DeliveryCrudController extends CrudController
         $data['delivery_rejects'] = $delivery_rejects;
         $data['delivery_repairs'] = $delivery_repairs;
         $data['qty_reject_count'] = $qty_reject_count;
+        $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
         // dd($entry);
@@ -240,6 +243,10 @@ class DeliveryCrudController extends CrudController
                         'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 
                         'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location', 'po_line.inspection_flag'])
                         ->first();
+
+        $issued_mos = IssuedMaterialOuthouse::where('ds_num', $delivery_show->ds_num )
+                        ->where('ds_line', $delivery_show->ds_line)->get();
+
         $qr_code = "DSW|";
         $qr_code .= $delivery_show->ds_num."|";
         $qr_code .= $delivery_show->ds_line."|";
@@ -255,6 +262,7 @@ class DeliveryCrudController extends CrudController
 
         $data['delivery_show'] = $delivery_show;
         $data['qr_code'] = $qr_code;
+        $data['issued_mos'] = $issued_mos;
 
         return $data;
     }
@@ -388,6 +396,7 @@ class DeliveryCrudController extends CrudController
 
         $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
         $data['qr_code'] = $this->detailDS($id)['qr_code'];
+        $data['issued_mos'] = $this->detailDS($id)['issued_mos'];
         $data['with_price'] = $with_price;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet',$data);
@@ -423,6 +432,7 @@ class DeliveryCrudController extends CrudController
             $arr_deliveries[] = [
                 'delivery_show' => $this->detailDS($delivery->id)['delivery_show'],
                 'qr_code' => $this->detailDS($delivery->id)['qr_code'],
+                'issued_mos' =>  $this->detailDS($delivery->id)['issued_mos'],
                 'with_price' => $with_price
             ];
         }
@@ -430,6 +440,7 @@ class DeliveryCrudController extends CrudController
         $data['deliveries'] = $arr_deliveries;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet-multiple',$data);
+        
         return $pdf->stream();
 
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');

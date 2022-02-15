@@ -126,6 +126,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td rowspan="2" valign="top">
                                     <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                     <small>NOTES</small> :
+                                    @foreach($issued_mos as $imo)
+                                    <br>
+                                    <small> - {{$imo->matl_item}} {{$imo->description}}</small>
+                                    @endforeach
                                 </td>
                             </tr>
                             <tr>
