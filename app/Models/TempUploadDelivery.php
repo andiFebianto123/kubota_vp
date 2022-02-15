@@ -84,7 +84,7 @@ class TempUploadDelivery extends Model
 
         $ds_validation = new DsValidation();
         $unfinished_po_line = $ds_validation->unfinishedPoLine($args1);
-        $current_max_qty = $ds_validation->currentMaxQty($args2);
+        $current_max_qty = ($this->purchaseOrderLine->outhouse_flag == 1)? $ds_validation->currentMaxQtyOuthouse($args2) : $ds_validation->currentMaxQty($args2);
         
         if (sizeof($unfinished_po_line['datas']) > 0 ) {
             $arr_validation[] = ['mode' => $unfinished_po_line['mode'], 'message' => $unfinished_po_line['message']];

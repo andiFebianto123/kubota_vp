@@ -334,7 +334,7 @@ class TempUploadDeliveryCrudController extends CrudController
         $petugas_vendor = $request->input('petugas_vendor');
         $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
         $sn_childs = $request->input('sn_childs');
-        $outhouse_ids = $request->input('outhouse_ids');
+        $material_ids = $request->input('material_ids');
         $material_issues = $request->input('material_issues');
 
         $arr_datas = [];
@@ -346,11 +346,31 @@ class TempUploadDeliveryCrudController extends CrudController
             }
         }
 
-        if (isset($outhouse_ids)) {
+        if (isset($material_ids)) {
             $arr_datas = ['type' =>'material_outhouse'];
+            $any_errors = false;
+            foreach ($material_ids as $k => $oi) {
+                $mo = MaterialOuthouse::where('id', $oi)->first();
+                $issued_qty =  $shipped_qty * $mo->qty_per;
+                $lot_qty =  $mo->lot_qty;
 
-            foreach ($outhouse_ids as $k => $oi) {
                 $arr_datas['attributes'][] = ['id' => $oi, 'qty' => $material_issues[$k]];
+
+                if ($issued_qty > $lot_qty ) {
+                    $any_errors = true;
+                }
+            }
+
+            if ($any_errors) {
+
+                $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+                return response()->json([
+                    'status' => false,
+                    'alert' => 'danger',
+                    'message' => "Qty Alert",
+                    'errors' => $errors
+                ], 422);
             }
         }
 
