@@ -122,18 +122,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <table border="1px" width="98%" style="margin-top: 10px;" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td width="15%" align="center"><small>VENDOR</small></td>
-                                <td rowspan="2" valign="top">
+                                <td width="15%" align="center" style="padding:0px;" valign="top">
+                                    <small>VENDOR</small>
+                                    <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
+                                </td>
+                                <td valign="top" height="140px">
                                     <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                     <small>NOTES</small> :
                                     @foreach($issued_mos as $imo)
                                     <br>
-                                    <small> - {{$imo->matl_item}} {{$imo->description}}</small>
+                                    <span style="font-size: 10px;"> - {{$imo->matl_item}} {{$imo->description}}</span>
                                     @endforeach
                                 </td>
-                            </tr>
-                            <tr>
-                                <td height="80px"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -154,8 +154,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     </div>
                 </div>
             </div>
-            <div class="mt-4">
-                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i> PDF</a>
+            <div class="mt-4 text-center">
+                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
                 {{--
 
                 @if($constant::getRole() == 'Admin PTKI')

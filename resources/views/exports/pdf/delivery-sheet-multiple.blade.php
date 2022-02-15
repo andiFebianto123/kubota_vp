@@ -115,7 +115,7 @@
                         </tr>
 
                         <tr>
-                            <td width="25%">Part No.<br><strong>-</strong></td>
+                            <td width="25%">Part No.<br><strong>{{$delivery_show->item}}</strong></td>
                             <td width="25%">Currency<br><strong>{{$delivery_show->currency}}</strong></td>
                             <td width="25%">Tax Status<br><strong class="right">{{$delivery_show->tax_status}}</strong></td>
                             <td width="25%">
