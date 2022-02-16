@@ -69,7 +69,7 @@ class DeliveryCrudController extends CrudController
         // khusus role adminPTKI
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
 
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
         }else{
             if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
@@ -79,6 +79,10 @@ class DeliveryCrudController extends CrudController
             if(Constant::checkPermission('Print Label')){
                 $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
             }
+            $this->crud->query->join('po as po', function($join){
+                $join->on('delivery.po_num', '=', 'po.po_num')
+                ->where('po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            });
         }
 
         $this->crud->enableBulkActions();
@@ -127,26 +131,30 @@ class DeliveryCrudController extends CrudController
             'name'      => 'operator', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) {
-            // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
-            // JOIN po p ON p.po_num = d.po_num
-            // WHERE p.vend_num = 'V001303'
-            $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
-            ->select('delivery.id as id')
-            ->where('po.vend_num', $value)
-            ->get()
-            ->mapWithKeys(function($po, $index){
-                return [$index => $po->id];
+
+        if(Constant::getRole() == 'Admin PTKI'){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) {
+                // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
+                // JOIN po p ON p.po_num = d.po_num
+                // WHERE p.vend_num = 'V001303'
+                $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+                ->select('delivery.id as id')
+                ->where('po.vend_num', $value)
+                ->get()
+                ->mapWithKeys(function($po, $index){
+                    return [$index => $po->id];
+                });
+                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
             });
-            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
-        });
+        }
+        
     }
 
     /**
