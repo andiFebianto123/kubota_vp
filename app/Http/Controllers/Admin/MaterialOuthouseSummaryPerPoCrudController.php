@@ -6,13 +6,15 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
+use App\Models\MaterialOuthouseSummaryPerPo;
+use App\Models\IssuedMaterialOuthouse;
 
 /**
  * Class MaterialOuthouseCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class MaterialOuthouseSummaryPerPoCrudController extends CrudController
+class MaterialOuthouseSummaryPerPoCrudController extends CrudController 
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -21,7 +23,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
-     * Configure the CrudPanel object. Apply settings to all operations.
+     * Configure the CrudPanel object. Apply settings to all operations. 
      * 
      * @return void
      */
@@ -30,8 +32,23 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerPo::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-po');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per PO');
-        $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description'
+        $this->crud->query = $this->crud->query->select(
+            'material_outhouse.id as id', 
+            'material_outhouse.po_num as po_num', 
+            'material_outhouse.po_line as po_line',
+            'lot_qty', 
+            'po.vend_num', 
+            'pl.status' ,
+            'matl_item', 
+            'pl.u_m', 
+            'pl.due_date', 
+            'material_outhouse.description',
+            DB::raw('(SUM(material_outhouse.lot_qty) - IFNULL((
+                SELECT SUM(issue_qty) FROM issued_material_outhouse 
+                LEFT JOIN delivery ON delivery.ds_num = issued_material_outhouse.ds_num
+                WHERE delivery.po_num = material_outhouse.po_num AND
+                delivery.po_line = material_outhouse.po_line
+            ), 0)) as remaining_qty')
         );
 
         if(Constant::checkPermission('Read Summary MO')){
@@ -39,8 +56,16 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
-
-        // $this->crud->setListView('vendor.backpack.crud.list-mo-per-po');
+        // $this->crud->enableBulkActions();
+        $this->crud->addColumn([
+            'type'           => 'checkbox_mopo',
+            'name'           => 'bulk_actions',
+            'label'          => ' <input type="checkbox" class="crud_bulk_actions_main_checkbox" style="width: 16px; height: 16px;" />',
+            'searchLogic'    => false,
+            'orderable'      => false,
+            'visibleInModal' => false,
+        ]);
+        $this->crud->enableDetailsRow();
 
     }
 
@@ -59,7 +84,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->query->join('po_line as pl', function($join){
             $join->on('material_outhouse.po_num', '=', 'pl.po_num');
             $join->on('material_outhouse.po_line', '=', 'pl.po_line')
-            ->where('pl.status', '=', 'O');;
+            ->where('pl.status', '=', 'O');
         });
         $this->crud->query->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
@@ -67,30 +92,75 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
             $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
-        // $this->crud->addClause(
-        //     'join',
-        //     'po_line',
-        //     function ($query) {
-        //         $query->on('material_outhouse.po_num', '=', 'po_line.po_num')
-        //         ->on('material_outhouse.po_line', '=', 'po_line.po_line')
-        //         ->where('po_line.status', '=', 'O');
-        //     }
-        // );
 
         $this->crud->groupBy('material_outhouse.po_num');
-        $this->crud->groupBy('material_outhouse.matl_item');
-        if(Constant::getRole() == 'Admin PTKI'){
-            CRUD::column('vend_num')->label('Vend Num');
-        }
+        $this->crud->groupBy('material_outhouse.po_line');
+        $this->crud->query->having('remaining_qty', '>', 0);
 
-        CRUD::column('po_num')->label('PO Num');
-        CRUD::column('po_line')->label('PO Line');
-        CRUD::column('matl_item')->label('Matl Item');
+        // $this->crud->groupBy('material_outhouse.matl_item');
+        // dd($this->crud->query->get());
+        // if(Constant::getRole() == 'Admin PTKI'){
+        //     CRUD::column('vend_num')->label('Vend Num');
+        // }
+
+        CRUD::column('po_num_line')->label('PO Number');
+        // CRUD::column('status')->label('Status');
+        CRUD::addColumn([
+            'label'     => 'Status', // Table column heading
+            'name'      => 'status', // the column that contains the ID of that connected entity;
+            'type' => 'closure',
+            'function' => function($entry) {
+                if($entry->status == 'O'){
+                    return 'Ordered';
+                }
+            }
+        ]);
+
+        // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
-        CRUD::column('lot_qty')->label('Qty Dikirim');
-        CRUD::column('qty_issued')->label('Qty Processed');
-        CRUD::column('remaining_qty')->label('Remaining Qty');
+        CRUD::column('remaining_header')->label('Available Material');
+        CRUD::column('u_m')->label('UM');
+        CRUD::column('due_date')->label('Due Date');
+        $this->crud->setListView('crud::list-mo-po');
+    }
 
+    public function showDetailsRow($id)
+    {
+        // $this->crud->hasAccessOrFail('details_row');
+
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+
+        $dataDetailMaterial = MaterialOuthouseSummaryPerPo::join('po_line as pl', function($join){
+            $join->on('material_outhouse.po_num', '=', 'pl.po_num');
+            $join->on('material_outhouse.po_line', '=', 'pl.po_line')
+            ->where('pl.status', '=', 'O');
+        });
+        $dataDetailMaterial->join('po', function($join){
+            $join->on('material_outhouse.po_num', '=', 'po.po_num');
+        });
+        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+            $dataDetailMaterial->where('vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+        }
+        $dataDetailMaterial->where('material_outhouse.po_num', '=', $this->data['entry']->po_num)
+        ->where('material_outhouse.po_line', '=', $this->data['entry']->po_line)
+        ->select(
+            'material_outhouse.po_line',
+            'material_outhouse.matl_item', 
+            'material_outhouse.description', 
+            'material_outhouse.lot_qty as jumlah_lot_qty'
+        );
+        $this->data['data_materials'] = $dataDetailMaterial->get();
+        $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
+                        ->where('delivery.po_num', $this->data['entry']->po_num)
+                        ->where('delivery.po_line', $this->data['entry']->po_line)
+                        ->sum('issue_qty');
+        $this->data['issued_qty'] = $qty_issued;
+
+        // dd($this->data['data_materials']);
+
+        // // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
+        return view('crud::details_row', $this->data);
     }
    
 }
