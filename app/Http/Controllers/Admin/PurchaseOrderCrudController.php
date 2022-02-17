@@ -220,10 +220,10 @@ class PurchaseOrderCrudController extends CrudController
 
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
 
-        $po_changes_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
-                    ->leftJoin('po', 'po.po_num',  'po_line.po_num')
-                    ->where('po_line.po_change', '>', 0)
-                    ->orderBy('po_line.id', 'desc')
+        $po_changes_lines = PurchaseOrderLine::where('po_num', $entry->po_num )
+                    ->where('po_change', '>', 0)
+                    ->orderBy('po_change', 'desc')
+                    ->groupBy('po_change')
                     ->get();
         /* not used
         $po_line_read_accs = PurchaseOrderLine::where('purchase_order_id', $entry->id )
@@ -249,11 +249,10 @@ class PurchaseOrderCrudController extends CrudController
         return view('vendor.backpack.crud.purchase-order-show', $data);
     }
 
-    public function detailChange($po_num, $line)
+    public function detailChange($po_num, $po_change)
     {
-        $po = PurchaseOrder::where('po_num', $po_num)->first();
         $po_lines = PurchaseOrderLine::where('po.po_num', $po_num )
-                ->where('po_line', $line)
+                ->where('po_line.po_change', $po_change )
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
@@ -262,8 +261,9 @@ class PurchaseOrderCrudController extends CrudController
                 
         $arr_po_line_status = (new Constant())->statusOFC();
 
-        $data['po'] = $po;
         $data['crud'] = $this->crud;
+        $data['po_num'] = $po_num;
+        $data['po_change'] = $po_change;
         $data['po_lines'] = $po_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
 

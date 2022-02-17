@@ -97,7 +97,7 @@
             <table style="width:100%;">
                 <tr>
                     <td valign="top">
-                        <label class="title">ORDER SHEET {{$po->po_num}} Rev 00</label>
+                        <label class="title">ORDER SHEET {{$po->po_num}} Rev.{{$po->po_change}}</label>
                         <p>{{$po->vend_num}} - {{$po->vendor->vend_name}}</p>
                         <p>Attn : <br> {{$po->vendor->vend_name}}<br> {{$po->vendor->vend_addr}}</p>
                     </td>

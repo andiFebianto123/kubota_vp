@@ -200,11 +200,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($po_changes_lines) > 0)
-                <table class="table table-striped mb-0">
+                <table class="table table-striped mb-0 supportDatatable">
                     <thead>
                         <tr>
                             <th>PO Number</th>
-                            <th>PO Line</th>
                             <th>Issued Date</th>
                             <th>Change</th>
                             <th></th>
@@ -214,12 +213,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_changes_lines as $key => $po_line)
                         <tr>
                             <td>{{$po_line->po_num}}</td>
-                            <td>{{$po_line->po_line}}</td>
                             <td>{{date('Y-m-d', strtotime($po_line->po_change_date))}}</td>
                             <td>{{$po_line->po_change}}</td>
                             <td>
                                 @if($constant::checkPermission('Read PO Detail'))
-                                    <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_line}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                    <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_change}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @endif
                             </td>
                         </tr>
@@ -239,8 +237,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
 
 @endsection
-
 @section('after_styles')
+<link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/crud.css').'?v='.config('backpack.base.cachebusting_string') }}">
 <link rel="stylesheet" href="{{ asset('packages/backpack/crud/css/show.css').'?v='.config('backpack.base.cachebusting_string') }}">
 @endsection
@@ -297,6 +295,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+<script src="{{ asset('packages/backpack/crud/js/list.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script>
@@ -306,6 +305,7 @@ var totalPoLine = $('.check-po-lines').length
 var totalPoLineRead = $('.check-read-po-lines').length
 var totalChecked = 0
 var totalCheckedRead = 0
+
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
