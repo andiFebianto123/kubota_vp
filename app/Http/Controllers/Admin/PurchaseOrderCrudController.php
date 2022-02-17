@@ -81,7 +81,7 @@ class PurchaseOrderCrudController extends CrudController
 
 
         CRUD::column('id')->label('ID');
-        if($current_role == 'admin'){
+        if(in_array($current_role,['Admin PTKI'])){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor', // Table column heading
                 'name'      => 'vend_num', // the column that contains the ID of that connected entity;

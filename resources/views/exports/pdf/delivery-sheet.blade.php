@@ -133,15 +133,22 @@
                 <table width="98%" style="margin-top: 10px;" class="pdf-table">
                     <tbody>
                         <tr>
-                            <td width="15%" align="center"><small>VENDOR</small></td>
-                            <td rowspan="2" valign="top">
+                            <td width="15%" align="center" style="padding:0px;" valign="top">
+                                <small>VENDOR</small>
+                                <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
+                            </td>
+                            <td valign="top" height="117px">
                                 <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                 <small>NOTES</small> :
+                                @foreach($issued_mos as $imo)
+                                <br>
+                                <span style="font-size: 10px;"> - {{$imo->matl_item}} {{$imo->description}}</span>
+                                @endforeach
                             </td>
                         </tr>
-                        <tr>
+                        <!-- <tr>
                             <td height="63px"></td>
-                        </tr>
+                        </tr> -->
                     </tbody>
                 </table>
             </div>
@@ -149,7 +156,7 @@
                 <div>
                     <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(168)->generate($qr_code)) }} ">
                 </div>
-                <div class="doc-requirement" style="height: 180px;">
+                <div class="doc-requirement" style="height: 205px;">
                     <strong>Document Requirements</strong>
                     <hr>
                     <ul>

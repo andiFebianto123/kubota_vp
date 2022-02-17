@@ -98,7 +98,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <div class="m-4 p-2" style="border:1px solid #ff9800; color:#ff9800;">
                     <b> PO Line yang belum selesai:</b><br>
                     @foreach($unfinished_po_line['datas'] as $key => $upl)
-                    {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
+                        @if($key == 0)
+                            {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
+                        @endif
                     @endforeach
                 </div>
                 @endif
@@ -210,16 +212,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             htmlMessage += "<li>Jumlah quantity melebihi maksimum</li>"
         }
         if($('*').hasClass('form-issued')){
-            $.each($('.form-issued'), function( k, v ) {
-                var num = k+1
-                var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
-                var currentQty = parseFloat($('.form-issued:eq('+k+')').val())
+            showWarning = false
+
+            // $.each($('.form-issued'), function( k, v ) {
+            //     var num = k+1
+            //     var lotqty = parseFloat($('.form-issued:eq('+k+')').data('lotqty'))
+            //     var currentQty = parseFloat($('.form-issued:eq('+k+')').val())
                 
-                if(currentQty > lotqty){
-                    showWarning = true
-                    htmlMessage += "<li>Jumlah material issue #"+num+" melebihi maksimum</li>"
-                }
-            })
+            //     if(currentQty > lotqty){
+            //         showWarning = true
+            //         htmlMessage += "<li>Jumlah material issue #"+num+" melebihi maksimum</li>"
+            //     }
+            // })
         } 
 
         if(showWarning){
@@ -251,4 +255,5 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
       });
     }
 </script>
+@include('vendor.backpack.crud.extendscript-outhouse')
 @endsection

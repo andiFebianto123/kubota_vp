@@ -69,7 +69,7 @@ class DeliveryCrudController extends CrudController
         // khusus role adminPTKI
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
 
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
         }else{
             if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
@@ -79,6 +79,10 @@ class DeliveryCrudController extends CrudController
             if(Constant::checkPermission('Print Label')){
                 $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
             }
+            $this->crud->query->join('po as po', function($join){
+                $join->on('delivery.po_num', '=', 'po.po_num')
+                ->where('po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            });
         }
 
         $this->crud->enableBulkActions();
@@ -127,26 +131,30 @@ class DeliveryCrudController extends CrudController
             'name'      => 'operator', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) {
-            // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
-            // JOIN po p ON p.po_num = d.po_num
-            // WHERE p.vend_num = 'V001303'
-            $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
-            ->select('delivery.id as id')
-            ->where('po.vend_num', $value)
-            ->get()
-            ->mapWithKeys(function($po, $index){
-                return [$index => $po->id];
+
+        if(Constant::getRole() == 'Admin PTKI'){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) {
+                // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
+                // JOIN po p ON p.po_num = d.po_num
+                // WHERE p.vend_num = 'V001303'
+                $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+                ->select('delivery.id as id')
+                ->where('po.vend_num', $value)
+                ->get()
+                ->mapWithKeys(function($po, $index){
+                    return [$index => $po->id];
+                });
+                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
             });
-            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
-        });
+        }
+        
     }
 
     /**
@@ -212,6 +220,8 @@ class DeliveryCrudController extends CrudController
         
         $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
+        
+        
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
@@ -219,6 +229,7 @@ class DeliveryCrudController extends CrudController
         $data['delivery_rejects'] = $delivery_rejects;
         $data['delivery_repairs'] = $delivery_repairs;
         $data['qty_reject_count'] = $qty_reject_count;
+        $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
         // dd($entry);
@@ -240,6 +251,10 @@ class DeliveryCrudController extends CrudController
                         'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 
                         'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location', 'po_line.inspection_flag'])
                         ->first();
+
+        $issued_mos = IssuedMaterialOuthouse::where('ds_num', $delivery_show->ds_num )
+                        ->where('ds_line', $delivery_show->ds_line)->get();
+
         $qr_code = "DSW|";
         $qr_code .= $delivery_show->ds_num."|";
         $qr_code .= $delivery_show->ds_line."|";
@@ -255,6 +270,7 @@ class DeliveryCrudController extends CrudController
 
         $data['delivery_show'] = $delivery_show;
         $data['qr_code'] = $qr_code;
+        $data['issued_mos'] = $issued_mos;
 
         return $data;
     }
@@ -339,14 +355,17 @@ class DeliveryCrudController extends CrudController
             }
 
             if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
+                $any_errors = false;
                 foreach ($material_ids as $key => $material_id) {
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];
+                    $issued_qty =  $shipped_qty * $mo->qty_per;
+                    $lot_qty =  $mo->lot_qty;
 
                     $insert_imo = new IssuedMaterialOuthouse();
                     $insert_imo->ds_num = $insert_d->ds_num;
                     $insert_imo->ds_line = $insert_d->ds_line;
-                    $insert_imo->ds_detail = 123;
+                    $insert_imo->ds_detail = $po_line->item;
                     $insert_imo->matl_item = $mo->matl_item;
                     $insert_imo->description = $mo->description;
                     $insert_imo->lot =  $mo->lot;
@@ -354,8 +373,28 @@ class DeliveryCrudController extends CrudController
                     $insert_imo->created_by = backpack_auth()->user()->id;
                     $insert_imo->updated_by = backpack_auth()->user()->id;
                     $insert_imo->save();
+                    if ($issued_qty > $lot_qty ) {
+                        $any_errors = true;
+                    }
                 }
+
+                if ($any_errors) {
+                    DB::rollBack();
+                    // $validator->errors()->add('field', 'Something is wrong with this field!');
+
+                    $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+                    return response()->json([
+                        'status' => false,
+                        'alert' => 'danger',
+                        'message' => "Qty Alert",
+                        'errors' => $errors
+                    ], 422);
+                }
+
+                
             }
+            
             DB::commit();
 
             $message = 'Delivery Sheet Created';
@@ -388,6 +427,7 @@ class DeliveryCrudController extends CrudController
 
         $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
         $data['qr_code'] = $this->detailDS($id)['qr_code'];
+        $data['issued_mos'] = $this->detailDS($id)['issued_mos'];
         $data['with_price'] = $with_price;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet',$data);
@@ -423,6 +463,7 @@ class DeliveryCrudController extends CrudController
             $arr_deliveries[] = [
                 'delivery_show' => $this->detailDS($delivery->id)['delivery_show'],
                 'qr_code' => $this->detailDS($delivery->id)['qr_code'],
+                'issued_mos' =>  $this->detailDS($delivery->id)['issued_mos'],
                 'with_price' => $with_price
             ];
         }
@@ -430,6 +471,7 @@ class DeliveryCrudController extends CrudController
         $data['deliveries'] = $arr_deliveries;
 
     	$pdf = PDF::loadview('exports.pdf.delivery-sheet-multiple',$data);
+        
         return $pdf->stream();
 
         // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');

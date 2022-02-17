@@ -112,26 +112,33 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) {
-            // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
-            // JOIN po p ON p.po_num = d.po_num
-            // WHERE p.vend_num = 'V001303'
-            $dbGet = \App\Models\DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
-            ->select('delivery_status.id as id')
-            ->where('po.vend_num', $value)
-            ->get()
-            ->mapWithKeys(function($po, $index){
-                return [$index => $po->id];
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) {
+                // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
+                // JOIN po p ON p.po_num = d.po_num
+                // WHERE p.vend_num = 'V001303'
+                $dbGet = \App\Models\DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
+                ->select('delivery_status.id as id')
+                ->where('po.vend_num', $value)
+                ->get()
+                ->mapWithKeys(function($po, $index){
+                    return [$index => $po->id];
+                });
+                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
             });
-            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
-        });
+        }else{
+            $this->crud->query->join('po as po', function($join){
+                $join->on('delivery_status.po_num', '=', 'po.po_num')
+                ->where('po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            });
+        }
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:

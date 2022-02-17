@@ -211,23 +211,26 @@ class TaxInvoiceCrudController extends CrudController
             }
         ]);
         CRUD::column('updated_at');
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) { 
-            $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
-            ->select('delivery_status.id as id')
-            ->where('po.vend_num', $value)
-            ->get()
-            ->mapWithKeys(function($po, $index){
-                return [$index => $po->id];
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
+                ->select('delivery_status.id as id')
+                ->where('po.vend_num', $value)
+                ->get()
+                ->mapWithKeys(function($po, $index){
+                    return [$index => $po->id];
+                });
+                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
             });
-            $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
-        });
+        }
 
         $this->crud->addFilter([
             'type'  => 'date_range',
@@ -243,24 +246,27 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->button_create = 'Invoice and Tax';
 
         // ini buat table yang ke 2
-        $this->crud->addFilter([
-            'name'        => 'vendor2',
-            'type'        => 'select2_ajax_custom',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor',
-            'custom_table' => true,
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) { 
-            $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
-            ->select('delivery_status.id as id')
-            ->where('po.vend_num', $value)
-            ->get()
-            ->mapWithKeys(function($po, $index){
-                return [$index => $po->id];
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor2',
+                'type'        => 'select2_ajax_custom',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor',
+                'custom_table' => true,
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
+                ->select('delivery_status.id as id')
+                ->where('po.vend_num', $value)
+                ->get()
+                ->mapWithKeys(function($po, $index){
+                    return [$index => $po->id];
+                });
+                $this->crud2 = $this->crud2->whereIn('id', $dbGet->unique()->toArray());
             });
-            $this->crud2 = $this->crud2->whereIn('id', $dbGet->unique()->toArray());
-        });
+        }
+
         $this->crud->addFilter([
             'type'  => 'date_range_custom',
             'name'  => 'from_to_2',
