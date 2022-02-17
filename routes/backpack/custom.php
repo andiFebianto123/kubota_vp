@@ -59,6 +59,7 @@ Route::group([
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
     Route::crud('material-outhouse-summary-per-item', 'MaterialOuthouseSummaryPerItemCrudController');
     Route::crud('material-outhouse-summary-per-po', 'MaterialOuthouseSummaryPerPoCrudController');
+    Route::get('material-outhouse-summary-per-po/{id}/details', 'MaterialOuthouseSummaryPerPoCrudController@showDetailsRow');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
 

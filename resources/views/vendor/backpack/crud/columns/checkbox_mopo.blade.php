@@ -26,14 +26,15 @@
 
 			if (checked) {
 				// add item to crud.checkedItems variable
-				// crud.checkedItems.push(primaryKeyValue); 
+				crud.checkedItems.push(primaryKeyValue); 
 
-				// var $tr = $(this).parent().parent().parent().children(':first').children(':first');
-				// var row = window.crud.table.row($tr);
+				var $tr = $(this).parent().parent().parent().children(':first').children(':first');
+				var row = window.crud.table.row($tr);
 
-				// $tr.trigger('click');
-
-				// console.log($tr);
+				if(!$tr.parent().parent().hasClass('shown')){
+					// jika tidak ada class shown nya alias tidak show
+					$tr.trigger('click');
+				}
 
 				// if shift has been pressed, also select all elements
 				// between the last checked item and this one
@@ -55,6 +56,13 @@
 				var index = crud.checkedItems.indexOf(primaryKeyValue);
 				if (index > -1) {
 				  crud.checkedItems.splice(index, 1);
+				}
+				var $tr = $(this).parent().parent().parent().children(':first').children(':first');
+				var row = window.crud.table.row($tr);
+
+				if($tr.parent().parent().hasClass('shown')){
+					// jika tidak ada class shown nya alias tidak show
+					$tr.trigger('click');
 				}
 			}
 
