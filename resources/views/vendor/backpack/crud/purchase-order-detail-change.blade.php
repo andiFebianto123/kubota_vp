@@ -15,7 +15,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize">{{$po->po_num}}</span>
+        <span class="text-capitalize">{{$po_num}}</span>
         <small>Preview</small>
         @if ($crud->hasAccess('list'))
         <small class=""><a href="{{ url($crud->route) }}" class="font-sm"><i class="la la-angle-double-left"></i> {{ trans('backpack::crud.back_to_all') }} <span>{{ $crud->entity_name_plural }}</span></a></small>
@@ -57,12 +57,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             <table class="table">
                 <tr>
                     <td>PO Number</td>
-                    <td>: {{$po->po_num}}</td>
+                    <td>: {{$po_num}}</td>
                 </tr>
                
                 <tr>
                     <td>Change</td>
-                    <td>: {{$po->po_change}}</td>
+                    <td>: {{$po_change}}</td>
+                </tr>
+                <tr>
+                    <td>Jumlah</td>
+                    <td>: {{sizeof($po_lines)}}</td>
                 </tr>
             </table>
         </div><!-- /.box-body -->
@@ -88,20 +92,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>UM</th>
                             <th>Due Date</th>
                             <th>Tax (%)</th>
-                            <th>Unit Price</th>
-                            <th>Total Price</th>
-                            <th>Status Accept</th>
-                            <th>Read By</th>
-                            <th>Read At</th>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                            <th>Created At</th>
-                            @endif
+                            <th>Unit Price (IDR)</th>
+                            <th>Total Price (IDR)</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
-                            <td class="text-nowrap">{{$po->po_num}}-{{$po_line->po_line}}</td>
+                            <td class="text-nowrap">{{$po_num}}-{{$po_line->po_line}}</td>
                             <td>
                                 <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
                                     {{$arr_po_line_status[$po_line->status]['text']}}
@@ -116,12 +114,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->tax}}</td>
                             <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
                             <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
-                            <td>{!! $po_line->reformat_flag_accept !!}</td>
-                            <td>{{$po_line->read_by_user}}</td>
-                            <td>{{$po_line->read_at}}</td>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                            <td>{{$po_line->created_at}}</td>
-                            @endif
                             
                         </tr>
                         @endforeach
@@ -156,5 +148,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
-
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
 @endsection

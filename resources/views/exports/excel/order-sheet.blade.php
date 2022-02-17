@@ -11,7 +11,7 @@
 <body>
     <table>
         <tr>
-            <td colspan="4">ORDER SHEET {{$po->po_num}} Rev 00</td>
+            <td colspan="4">ORDER SHEET {{$po->po_num}} Rev.{{$po->po_change}}</td>
             <td></td>
             <td></td>
             <td></td>

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 use Spatie\Permission\Models\Role as RoleSpatie;
 use App\Helpers\Constant;
-
+use App\Models\Vendor;
 
 /**
  * Class UserCrudController
@@ -128,15 +128,14 @@ class UserCrudController extends CrudController
             'pivot' => false,
         ]);
 
-        
-        $this->crud->addField([
-            'label'     => 'Vendor', // Table column heading
-            'type'      => 'select2',
-            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
-            'entity'    => 'vendor', // the method that defines the relationship in your Model
-            'attribute' => 'vend_num', // foreign key attribute that is shown to user
-            'model'     => "App\Models\Vendor",
+        $this->crud->addField([   // select2_from_array
+            'name'        => 'vendor_id',
+            'label'       => "Vendor",
+            'type'        => 'select2_from_array',
+            'options'     => $this->optVendors(),
+            'allows_null' => true,
         ]);
+        
         CRUD::field('name');
         CRUD::field('username');
         CRUD::field('email');
@@ -155,6 +154,17 @@ class UserCrudController extends CrudController
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
+
+    private function optVendors()
+    {
+        $vendors = Vendor::get();
+        $arr_vendor = [];
+        foreach ($vendors as $key => $v) {
+            $arr_vendor[$v->id] = $v->vend_num.'-'.$v->vend_name;
+        }
+
+        return $arr_vendor;
+    }
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();

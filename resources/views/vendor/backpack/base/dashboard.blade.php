@@ -90,8 +90,12 @@
                 <h2>Hi, {{Auth::guard('backpack')->user()->username}}</h2>
                 Selamat Datang di Vendor Portal PT. Kubota Indonesia
                 <br>Perhatian : Data di Website ini terupdate setiap harinya jam 12.00 WIB dan 18.00 WIB.
-
-                
+                @if(Auth::guard('backpack')->user()->vendor_id)
+                <hr>
+                Vendor {{Auth::guard('backpack')->user()->vendor->vend_num}} 
+                <br>{{Auth::guard('backpack')->user()->vendor->vend_name}}
+                <br>{{Auth::guard('backpack')->user()->vendor->vend_addr}}
+                @endif
             </div>
         </div>
     </div>
