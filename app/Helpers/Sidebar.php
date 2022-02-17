@@ -75,6 +75,23 @@ class Sidebar
         ]
       ],
       [
+        'name' => 'History Summary MO',
+        'url' => '#',
+        'icon' => 'la-cube',
+        'key' => 'history-material-outhouse-summary',
+        'access' => Constant::checkPermission('Read History Summary MO'),
+        'childrens' => [
+          [
+            'name' => 'History Per Item',
+            'url' => backpack_url('histori-mo-summary-per-item'),
+          ],
+          [
+            'name' => 'History Per Po',
+            'url' => backpack_url('histori-mo-summary-per-po'),
+          ]
+        ]
+      ],
+      [
         'name' => 'List Payment',
         'url' => backpack_url('tax-invoice'),
         'icon' => 'la-file-invoice-dollar',
