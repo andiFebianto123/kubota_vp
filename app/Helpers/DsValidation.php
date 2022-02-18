@@ -52,21 +52,14 @@ class DsValidation
     $po_num = $args['po_num'];
     $po_line = $args['po_line'];
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
-
-    // $query = "select * from "
-    // $old_po = DB::statement('your raw query here')
     
     $old_po = PurchaseOrderLine::where('status', 'O')
                   ->where('outhouse_flag', 0)
-                  // ->where('accept_flag', 1)
                   ->where('po_num', '<=', $po_num)
-                  ->where('po_line', '<=', $po_line)
                   ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
                   ->where($filters)                                         
                   ->orderBy('po_line','asc')
                   ->orderBy('po_num','asc')
-                  // ->selectRaw("po_num, po_line, item, description, due_date, order_qty, 'total_shipped_qty'")
-                  // ->take(1)
                   ->get(['po_num', 'po_line', 'item', 'description', 'due_date', 'order_qty']);
 
       $arr_old_po = [];
@@ -75,15 +68,17 @@ class DsValidation
         if ($op->total_shipped_qty < $op->order_qty) {
           $show = true;
         }
-        if ($po_num == $op->po_num && $po_line == $op->po_line) {
-          $show = false;
+        if ($po_num == $op->po_num) {
+          if ($po_line <= $op->po_line) {
+            $show = false;
+          }
         }
         
         if ($show) {
           $arr_old_po[] = $op;
         }
       }
-      $arr_old_po = collect($arr_old_po)->sortBy('po_num')->take(1);
+      $arr_old_po = collect($arr_old_po)->sortBy('num_line')->take(1);
 
       return [
         'datas'  => $arr_old_po,
