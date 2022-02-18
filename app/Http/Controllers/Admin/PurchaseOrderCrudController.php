@@ -246,7 +246,21 @@ class PurchaseOrderCrudController extends CrudController
         $data['po_changes_lines'] = $po_changes_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
 
-        return view('vendor.backpack.crud.purchase-order-show', $data);
+        $can_access = false;
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $can_access = true;
+        }else{
+            $po = PurchaseOrder::where('id', $entry->id )->first();
+            if (backpack_auth()->user()->vendor->vend_num == $po->vend_num) {
+                $can_access = true;
+            }
+        }
+
+        if ($can_access) {
+            return view('vendor.backpack.crud.purchase-order-show', $data);
+        }else{
+            abort(404);
+        }
     }
 
     public function detailChange($po_num, $po_change)
@@ -517,11 +531,24 @@ class PurchaseOrderCrudController extends CrudController
             'message' => 'Request all Accept PO success',
         ], 200);
     }
+
+
     public function itemPoOptions(Request $request){
         $term = $request->input('term');
-        return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
-            return [$item->item => $item->item];
-        });
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')
+                    ->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+                return [$item->item => $item->item];
+            });
+        }else{
+            return PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+                    ->where('vend_num', backpack_auth()->user()->vendor->vend_num)
+                    ->where('item', 'like', '%'.$term.'%')
+                    ->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
+                return [$item->item => $item->item];
+            });
+        }
+       
     }
 
 }

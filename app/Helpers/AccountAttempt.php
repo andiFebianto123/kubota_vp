@@ -16,6 +16,8 @@ class AccountAttempt
     $attemp_failure = Configuration::where('name', 'attemp_failure_'.$type)->first()->value;
     $locked_account_on_failure = Configuration::where('name', 'locked_account_on_failure_'.$type)->first()->value;
     $exist_user = User::where('username', $username)->exists();
+    $response['status'] = false;
+    $response['message'] = "User is not exist";
     if ($exist_user) {
         $max_attempt = $attemp_failure;
         $minutes_passed = $locked_account_on_failure;
@@ -41,16 +43,16 @@ class AccountAttempt
     
                 $response['status'] = false;
                 $response['message'] = 'Max Attempt '.$max_attempt.' Please try again '.$minutes_passed.' minutes later';
-            }else{
-                $insert_failure = new TempCountFailure();
-                $insert_failure->account = $username;
-                $insert_failure->type = $type;
-                $insert_failure->ip = $current_ip;
-                $insert_failure->ua = $_SERVER['HTTP_USER_AGENT'];
-                $insert_failure->detail = null;
-                $insert_failure->save();
-                $response['status'] = true;
-            }
+              }else{
+                  $insert_failure = new TempCountFailure();
+                  $insert_failure->account = $username;
+                  $insert_failure->type = $type;
+                  $insert_failure->ip = $current_ip;
+                  $insert_failure->ua = $_SERVER['HTTP_USER_AGENT'];
+                  $insert_failure->detail = null;
+                  $insert_failure->save();
+                  $response['status'] = true;
+              }
             }
         
     }

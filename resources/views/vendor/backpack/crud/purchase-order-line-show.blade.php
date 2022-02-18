@@ -327,7 +327,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         var htmlErrorMsg = ""
         if($('#current-qty').val() > $('#current-qty').data('max')){
             showModal = true
-            htmlErrorMsg += "<li>[DS] Jumlah Qty melebihi batas (max. "+$('#current-qty').val()+")</li>"
+            htmlErrorMsg += "<li>[DS] Jumlah Qty melebihi batas (max. "+$('#current-qty').data('max')+")</li>"
         }
 
         if($('*').hasClass('form-issued')){

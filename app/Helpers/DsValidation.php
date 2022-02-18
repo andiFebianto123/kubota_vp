@@ -15,16 +15,21 @@ class DsValidation
     $po_line = $args['po_line'];
     $order_qty = $args['order_qty'];
 
+    $qty_initial = PurchaseOrderLine::where("po_num", $po_num)
+                   ->where("po_line", $po_line)
+                   ->sum('order_qty');
+
     $realtime_ds_qty = Delivery::where("po_num", $po_num)
                       ->where("po_line", $po_line)
-                      // ->where("outhouse_flag", 0)
                       ->sum('shipped_qty');
-    $current_qty = ($order_qty < $realtime_ds_qty)? 0 : $order_qty -  $realtime_ds_qty;
+
+    $realtime_qty = $qty_initial - $realtime_ds_qty;
+    $current_qty = ($order_qty < $realtime_qty)? $realtime_qty -  $order_qty : $realtime_qty;
     
     return [
       'datas'  => $current_qty,
-      'mode'   => 'warning',
-      'message' => 'Maksimum Qty '. $current_qty
+      'mode'   => 'danger',
+      'message' => 'Maksimum Qty '. $realtime_ds_qty
     ];
   }
 
