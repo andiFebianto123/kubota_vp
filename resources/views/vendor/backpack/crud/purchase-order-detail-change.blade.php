@@ -108,12 +108,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->item}}</td>
                             <td>{{$po_line->vendor_name}}</td>
                             <td>{{$po_line->description}}</td>
-                            <td>{!! $po_line->change_order_qty !!}</td>
+                            <td>{!! $po_line->order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
-                            <td>{!! $po_line->change_due_date !!}</td>
+                            <td>{!! $po_line->due_date !!}</td>
                             <td>{{$po_line->tax}}</td>
-                            <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
-                            <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
+                            <td class="text-nowrap">{!! $po_line->unit_price !!}</td>
+                            <td class="text-nowrap">{!! $po_line->total_price !!}</td>
                             
                         </tr>
                         @endforeach
