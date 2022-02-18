@@ -204,7 +204,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>PO Number</th>
-                            <th>Issued Date</th>
+                            <th>PO Change Date</th>
                             <th>Change</th>
                             <th></th>
                         </tr>
