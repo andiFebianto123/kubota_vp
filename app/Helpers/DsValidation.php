@@ -58,7 +58,7 @@ class DsValidation
     
     $old_po = PurchaseOrderLine::where('status', 'O')
                   ->where('outhouse_flag', 0)
-                  ->where('accept_flag', 1)
+                  // ->where('accept_flag', 1)
                   ->where('po_num', '<=', $po_num)
                   ->where('po_line', '<=', $po_line)
                   ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
