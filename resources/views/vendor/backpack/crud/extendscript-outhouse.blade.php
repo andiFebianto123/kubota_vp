@@ -21,7 +21,6 @@
                 anyError = true
             }
         }) 
-        
         var maxQtyPer = Math.max(...arrQtyPer)
         var maxQtyAllowed = arrLotQty[maxQtyPer]/maxQtyPer
         if (anyError) {

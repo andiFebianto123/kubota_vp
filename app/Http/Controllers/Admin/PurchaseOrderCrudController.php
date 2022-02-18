@@ -450,6 +450,8 @@ class PurchaseOrderCrudController extends CrudController
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
+                                ->where('status', 'O')
+                                ->where('accept_flag', '<', 2)
                                 ->get();
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
         $arr_po_line_status = (new Constant())->statusOFC();
@@ -474,6 +476,8 @@ class PurchaseOrderCrudController extends CrudController
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
+                                ->where('status', 'O')
+                                ->where('accept_flag', '<', 2)
                                 ->get();
         $collection_po_lines = collect($po_lines)->unique('po_line')->sortBy('po_line');
         $arr_po_line_status = (new Constant())->statusOFC();

@@ -40,9 +40,13 @@ class DsValidation
 
     $realtime_ds_qty = MaterialOuthouse::where("po_num", $po_num)
                       ->where("po_line", $po_line)
-                      ->orderBy("qty_per", 'desc')
-                      ->first();
-    $current_qty = ($realtime_ds_qty)? $realtime_ds_qty->lot_qty/$realtime_ds_qty->qty_per : 0;
+                      ->get();
+
+    $arr_min_qty = [0];
+    foreach ($realtime_ds_qty as $key => $rdq) {
+      $arr_min_qty[] = ($rdq)? $rdq->remaining_qty/$rdq->qty_per : 0;
+    }
+    $current_qty = min($arr_min_qty); 
     
     return [
       'datas'  => $current_qty,
