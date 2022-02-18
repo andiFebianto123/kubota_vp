@@ -60,7 +60,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->addColumn([
             'type'           => 'checkbox_mopo',
             'name'           => 'bulk_actions',
-            'label'          => ' <input type="checkbox" class="crud_bulk_actions_main_checkbox" style="width: 16px; height: 16px;" />',
+            'label'          => '<input type="checkbox" class="crud_bulk_actions_main_checkbox" style="width: 16px; height: 16px;" />',
             'searchLogic'    => false,
             'orderable'      => false,
             'visibleInModal' => false,
