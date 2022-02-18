@@ -12,7 +12,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->createRole();
+        // $this->createRole();
 
         $this->createPermission();
 
@@ -20,9 +20,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // $this->assignUserRole();
 
-        $this->assignUserRole();
+        // $this->assignUserRole();
 
-        $this->assignRolePermission();
+        // $this->assignRolePermission();
     }
 
     function createRole(){
@@ -447,6 +447,14 @@ class RolesAndPermissionsSeeder extends Seeder
               ],
               ['name' => 'Read Permission']
             ],
+            [
+              [
+                "name" => 'Read History Summary MO',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat data Mo di menu history mo'
+              ],
+              ['name' => 'Read History Summary MO']
+            ]
         ];
         foreach($arrPermission as $key => $seed) {
           // Permission::updateOrCreate($seed[0],$seed[1]);

@@ -164,17 +164,5 @@
       $("#crudTable_info").text(crudTableInfo+" entries.")
     });
 
-    $(function(){
-      // window.crud.table.rows({ selected: true }).every( function () {
-      //   var $tr = $(this.node());
-      //   this.child(format($tr.data('child-value'))).show();
-      //   $tr.addClass('shown');
-      // });
-      window.crud.table.rows().every(function(rowIdx, tableLoop, rowLoop){
-        console.log(this.child);
-      });
-
-    });
-
   </script>
 @endsection
