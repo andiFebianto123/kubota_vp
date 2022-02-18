@@ -92,7 +92,7 @@
                 <br>Perhatian : Data di Website ini terupdate setiap harinya jam 12.00 WIB dan 18.00 WIB.
                 @if(Auth::guard('backpack')->user()->vendor_id)
                 <hr>
-                Vendor {{Auth::guard('backpack')->user()->vendor->vend_num}} 
+                <b>Kode Vendor : {{Auth::guard('backpack')->user()->vendor->vend_num}} </b> 
                 <br>{{Auth::guard('backpack')->user()->vendor->vend_name}}
                 <br>{{Auth::guard('backpack')->user()->vendor->vend_addr}}
                 @endif
