@@ -3,6 +3,7 @@ namespace App\Helpers;
 
 use App\Models\Delivery;
 use App\Models\MaterialOuthouse;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Support\Facades\DB;
 
@@ -52,15 +53,19 @@ class DsValidation
     $po_num = $args['po_num'];
     $po_line = $args['po_line'];
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
+
+    $po = PurchaseOrder::where('po_num', $po_num)->first();
     
-    $old_po = PurchaseOrderLine::where('status', 'O')
-                  ->where('outhouse_flag', 0)
-                  ->where('po_num', '<=', $po_num)
-                  ->whereDate('due_date', '<=', date('Y-m-d',strtotime($due_date)))
-                  ->where($filters)                                         
-                  ->orderBy('po_line','asc')
-                  ->orderBy('po_num','asc')
-                  ->get(['po_num', 'po_line', 'item', 'description', 'due_date', 'order_qty']);
+    $old_po = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+                  ->where('po_line.status', 'O')
+                  ->where('po_line.outhouse_flag', 0)
+                  ->where('po_line.po_num', '<=', $po_num)
+                  ->where('po.vend_num', '<=', $po->vend_num)
+                  ->whereDate('po_line.due_date', '<=', date('Y-m-d',strtotime($due_date)))
+                  ->where($filters)         
+                  ->orderBy('po_line.po_line','asc')
+                  ->orderBy('po_line.po_num','asc')
+                  ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
       $arr_old_po = [];
       foreach ($old_po as $key => $op) {
