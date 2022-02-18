@@ -61,7 +61,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         $this->crud->query->groupBy('material_outhouse.po_num');
         $this->crud->query->groupBy('material_outhouse.po_line');
-        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' AND remaining_qty > 0)");
+        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' AND remaining_qty = 0)");
 
         if(Constant::checkPermission('Read History Summary MO')){
             $this->crud->allowAccess('list');
