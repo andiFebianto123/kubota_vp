@@ -114,12 +114,14 @@ class LoginController extends Controller
             ];
 
             $user = User::where("id", backpack_auth()->user()->id)->first();
+            $user->timestamps = false;
             $user->two_factor_code = $two_factor_code;
             $user->two_factor_url = $two_factor_url;
             $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
             $user->save();
+            $user->timestamps = true;
 
-            $insert_otp = new UserOtp();
+            $insert_otp = new UserOtp(); 
             $insert_otp->user_id = backpack_auth()->user()->id;
             $insert_otp->two_factor_code = $two_factor_code;
             $insert_otp->two_factor_url = $two_factor_url;
@@ -164,10 +166,12 @@ class LoginController extends Controller
 
         if (backpack_auth()->check()) {
             $user = User::where("id", backpack_auth()->user()->id)->first();
+            $user->timestamps = false;
             $user->two_factor_code = null;
             $user->two_factor_expires_at = null;
             $user->two_factor_url = null;
             $user->save();
+            $user->timestamps = true;
         }
         
         backpack_auth()->logout();

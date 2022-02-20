@@ -72,7 +72,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             CRUD::column('vend_num')->label('Vend Num');
         }
         if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
-            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
         // dd($this->crud->query->get());

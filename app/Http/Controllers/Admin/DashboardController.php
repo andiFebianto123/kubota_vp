@@ -9,6 +9,8 @@ use App\Models\GeneralMessage;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Helpers\Constant;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -55,6 +57,9 @@ class DashboardController extends Controller
         $count_po_line_unreads = $this->countPurchaseOrderLine();
         $count_delivery = $this->countDelivery();
         $count_delivery_status = $this->countDeliveryStatus();
+        $user = User::where('id', backpack_user()->id);
+        $user->select(DB::raw("datediff(current_date(), DATE(updated_at)) as selisih_pertahun, datediff(DATE(updated_at), DATE(created_at)) as selisih_peruser"));
+
 
         $data['count_delivery_status'] = $count_delivery_status;
         $data['count_delivery'] = $count_delivery;
@@ -62,6 +67,7 @@ class DashboardController extends Controller
         $data['count_po_line_unreads'] = $count_po_line_unreads;
         $data['general_message_help'] = $general_message_help;
         $data['general_message_info'] = $general_message_info;
+        $data['user_check_password_range'] = $user->get()->first();
 
         if(!Constant::checkPermission('Read dashboard')){
             abort(403);

@@ -7,12 +7,21 @@ use App\Models\UserOtp;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Exception;
+use App\Imports\UserMasterImport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 use Spatie\Permission\Models\Role as RoleSpatie;
 use App\Helpers\Constant;
 use App\Models\Vendor;
+use App\Models\User;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TemplateUserExport;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request as requests;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MailNewUser;
 
 /**
  * Class UserCrudController
@@ -45,7 +54,7 @@ class UserCrudController extends CrudController
             $this->crud->allowAccess('list');
         }else{
             $this->crud->denyAccess('list');
-        }
+        }        
     }
 
     /**
@@ -66,6 +75,7 @@ class UserCrudController extends CrudController
         if(!Constant::checkPermission('Delete User')){
             $this->crud->removeButton('delete');
         }
+        $this->crud->addButtonFromView('top', 'upload_user', 'upload_user', 'end');
         CRUD::column('name');
         CRUD::column('username');
         CRUD::column('email');
@@ -98,6 +108,7 @@ class UserCrudController extends CrudController
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
          */
+        $this->crud->setListView('crud::list-user');
     }
 
     /**
@@ -268,5 +279,82 @@ class UserCrudController extends CrudController
         }
     }
 
+    public function templateUsers()
+    {
+        return Excel::download(new TemplateUserExport(backpack_auth()->user()), 'template-users-'.date('YmdHis').'.xlsx');
+
+    }
+
+    public function import(requests $request){
+
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:xlsx,xls',
+         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $messageErrors = [];
+            foreach ($errors->all() as $message) {
+                array_push($messageErrors, $message);
+            }
+            $messageErrors = implode('<br/>', $messageErrors);
+            return response()->json([
+                'status' => false,
+                'validator' => true,
+                'message' => $messageErrors
+            ], 200);
+        }
+
+        $file = $request->file('file');
+
+        // membuat nama file unik
+		$nama_file = rand().$file->getClientOriginalName();
+
+        // upload ke folder file_siswa di dalam folder public
+        $file->storeAs('public/file_user', $nama_file);
+		//$file->move('file_anak',$nama_file);
+
+
+        DB::beginTransaction();
+        try{
+            $import = new UserMasterImport();
+            $import->import(storage_path('/app/public/file_user/'.$nama_file));
+
+            if(file_exists( storage_path('/app/public/file_user/'.$nama_file))) {
+                unlink(storage_path('/app/public/file_user/'.$nama_file));
+            }
+    
+            if(count($import->errorsMessage) > 0){
+                DB::rollback();
+                return response()->json([
+                    'data' => $import->errorsMessage,
+                    'status' => false,
+                    'message' => 'Ada data yang error ketika di import',
+                    'notification' => 'Ada beberapa data tidak valid proses import',
+                ], 200);
+            }
+            // Kode kirim email bisa diletakan disini
+            if(count($import->dataUsers) > 0){
+                foreach($import->dataUsers as $user){
+                    Mail::to($user['email'])
+                    ->send(new MailNewUser($user));
+                }
+            }
+            // END
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Import User telah berhasil dilakukan',
+                'notification' => 'File berhasil di import',
+            ], 200);
+
+        }catch(\Exception $e){
+            DB::rollback();
+            \Alert::add('error', $e->getMessage())->flash();
+        }
+
+    }
+
    
 }
+

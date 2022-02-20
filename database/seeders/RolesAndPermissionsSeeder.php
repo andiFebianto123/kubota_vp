@@ -20,9 +20,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // $this->assignUserRole();
 
-        // $this->assignUserRole();
+        $this->assignUserRole();
 
-        // $this->assignRolePermission();
+        $this->assignRolePermission();
     }
 
     function createRole(){
