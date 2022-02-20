@@ -75,9 +75,6 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
-        // dd($this->crud->query->get());
-
-        // CRUD::column('id')->label('ID');;
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
         CRUD::column('remaining_qty')->label('Available Material');

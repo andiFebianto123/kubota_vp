@@ -55,11 +55,6 @@ class MaterialOuthouseCrudController extends CrudController
         CRUD::column('lot');
         CRUD::column('lot_qty')->label('Lot Qty');
 
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
     }
 
     /**
