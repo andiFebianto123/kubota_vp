@@ -127,7 +127,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         @foreach ($po_lines as $key => $po_line)
                         <tr>
                             <td>
-                                @if($po_line->read_at == null && backpack_auth()->user()->hasRole('Admin PTKI'))
+                                @if($po_line->read_at == null && $po_line->status == 'O')
                                 <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
@@ -153,12 +153,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$po_line->created_at}}</td>
                             @endif
                             <td class="text-nowrap"><!-- Single edit button -->
-                                @if($po_line->read_at)
-                                    @if($po_line->status == "O" && $po_line->accept_flag == 1)
-                                        @if($constant::checkPermission('Read PO Detail'))
-                                            <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
-                                        @endif
+                                @if(in_array($po_line->status, ['F', 'C']) || ($po_line->status == 'O' && $po_line->accept_flag == 1))
+                                    @if($constant::checkPermission('Read PO Detail'))
+                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
+                                @endif
+                                @if($po_line->read_at)
                                     @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
                                             @if($constant::checkPermission('Unread PO Detail'))
@@ -167,11 +167,15 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                         @endif
                                     @endif    
                                 @else
-                                    @if($constant::checkPermission('Accept PO Detail'))
-                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
-                                    @endif
-                                    @if($constant::checkPermission('Reject PO Detail'))
-                                        <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                    @if($po_line->status == 'O')
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                        @if($constant::checkPermission('Accept PO Detail'))
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                        @endif
+                                        @if($constant::checkPermission('Reject PO Detail'))
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
+                                        @endif
                                     @endif
                                 @endif
                             </td>
@@ -204,7 +208,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>PO Number</th>
-                            <th>Issued Date</th>
+                            <th>PO Change Date</th>
                             <th>Change</th>
                             <th></th>
                         </tr>

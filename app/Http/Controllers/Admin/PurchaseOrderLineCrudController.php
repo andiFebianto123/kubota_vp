@@ -169,6 +169,11 @@ class PurchaseOrderLineCrudController extends CrudController
 
         $current_qty = ($entry->order_qty < $realtime_ds_qty)? 0 : $entry->order_qty -  $realtime_ds_qty;
 
+        if($entry->outhouse_flag == 1){
+            $args = ['po_num' => $entry->po_num, 'po_line' => $entry->po_line, 'order_qty' => 0];
+            $current_qty = (new DsValidation())->currentMaxQtyOuthouse($args)['datas'];
+        }
+
         $this->crud->addField([
             'label' => 'Delivery Date From Vendor',
             'type' => 'date_picker',
@@ -216,7 +221,7 @@ class PurchaseOrderLineCrudController extends CrudController
             $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
                                     ->where('po_line', $entry->po_line)
                                     ->groupBy('matl_item');
-
+        
             $this->crud->addField(
                 [
                     'name'  => 'mo_issue_qty',
@@ -231,8 +236,11 @@ class PurchaseOrderLineCrudController extends CrudController
 
         $arr_filters = [];
         $arr_filters[] = ['po_line.item', '=', $entry->item];
-        $arr_filters[] = ['po_line.po_num', '!=', $entry->po_num];
-        $args = ['filters' => $arr_filters, 'due_date' => $entry->due_date];
+        $args = [   'filters' => $arr_filters, 
+                    'due_date' => $entry->due_date,
+                    'po_num' => $entry->po_num,
+                    'po_line' => $entry->po_line,
+                ];
         $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
         
         $data['crud'] = $this->crud;
@@ -243,7 +251,31 @@ class PurchaseOrderLineCrudController extends CrudController
         $data['deliveries'] = $deliveries;
         $data['delivery_statuses'] = $delivery_statuses;
 
-        return view('vendor.backpack.crud.purchase-order-line-show', $data);
+        
+
+        $can_access = false;
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $can_access = true;
+        }else{
+            $po = PurchaseOrderLine::where('id', $entry->id )->first();
+            if (backpack_auth()->user()->vendor->vend_num == $po->purchaseOrder->vend_num) {
+                $can_access = true;
+            }
+        }
+        if ($entry->accept_flag == 2) {
+            $can_access = false;
+        }
+
+        if ($can_access) {
+            $layout = 'vendor.backpack.crud.purchase-order-line-show';
+            if ( in_array($entry->status, ['C', 'F']) ) {
+                $layout = 'vendor.backpack.crud.purchase-order-line-show-readonly';
+            }
+        }else{
+            abort(404);
+        }
+
+        return view($layout, $data);
     }
 
 

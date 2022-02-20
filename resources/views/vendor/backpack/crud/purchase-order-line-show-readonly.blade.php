@@ -94,42 +94,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div><!-- /.box-body -->
     </div><!-- /.box -->
 
-    <div class="col-md-8">
-        @if($constant::checkPermission('Create Delivery Sheet'))
-        <div class="card-header bg-secondary">
-            <label class="font-weight-bold mb-0">Create Delivery Sheet</label> 
-        </div>
-        <div class="card no-padding no-border">
-                @if(sizeof($unfinished_po_line['datas']) > 0)
-                <div class="m-4 p-2" style="border:1px solid #ff9800; color:#ff9800;">
-                    <b> PO Line yang belum selesai:</b><br>
-                    @foreach($unfinished_po_line['datas'] as $key => $upl)
-                        {{$key+1}}. {{$upl->po_num."-".$upl->po_line}} ({{date('Y-m-d',strtotime($upl->due_date))}}) {{($upl->total_shipped_qty)?$upl->total_shipped_qty:"0"}}/{{$upl->order_qty}}<br>
-                    @endforeach
-                </div>
-                @endif
-                <form id="form-delivery" method="post"
-                        action="{{ url('admin/delivery') }}"
-                        @if ($crud->hasUploadFields('create'))
-                        enctype="multipart/form-data"
-                        @endif
-                        >
-                    {!! csrf_field() !!}
-                    <!-- load the view from the application if it exists, otherwise load the one in the package -->
-                    <div class="m-2">
-                    @include('crud::inc.show_fields', ['fields' => $crud->fields()])
-                    </div>
-
-                    @if(sizeof($unfinished_po_line['datas']) > 0)
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
-                    @else
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
-                    @endif
-                </form>
-        </div>
-        @endif
-    </div>
-
     <div class="col-md-12">
         @if($constant::checkPermission('Read PO Line Detail'))
         <div class="card">
@@ -138,17 +102,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
-                <form id="form-print-mass-ds" action="{{url('admin/delivery-print-label-all')}}" method="post">
-                    @csrf
-                    <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
-                    <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
-
-                    <table id="ds-table" class="table table-striped mb-0 table-responsive">
+                <table id="ds-table" class="table table-striped mb-0 table-responsive">
                         <thead>
                             <tr>
-                                <th>
-                                    <input type="checkbox" id="check-all-cb" name="print_deliveries" class="check-all" data-delivery="{{sizeof($deliveries)}}" >
-                                </th>
                                 <th>PO</th>
                                 <th>DS Number</th>
                                 <th>DS Line</th>
@@ -158,7 +114,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
                                 <th>DO Number</th>
                                 <th>Operator</th>
-                                <th>Action</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,9 +124,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             @endphp
                             @foreach ($deliveries as $key => $delivery)
                             <tr>
-                                <td>
-                                    <input type="checkbox" value="{{$delivery->id}}" name="print_delivery[]" class="check-delivery check-{{$delivery->id}}">
-                                </td>
                                 <td style="white-space: nowrap;">{{$delivery->po_num}}-{{$delivery->po_line}}</td>
                                 <td>{{$delivery->ds_num}}</td>
                                 <td>{{$delivery->ds_line}}</td>
@@ -181,15 +134,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
-                                    @if($constant::checkPermission('Print Label Delivery Sheet'))
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement="top" title="Print Label"><i class="la la-print"></i></a>
-                                    @endif
-                                    @if($constant::checkPermission('Delete Delivery Sheet'))
-                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
-                                    @endif
                                 </td>
                             </tr>
                             @php
@@ -201,7 +146,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="6" class="text-center font-weight-bold">
+                                <td colspan="5" class="text-center font-weight-bold">
                                     Total
                                 </td>
                                 <td>
@@ -213,9 +158,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                         </tfoot>
                     </table>
-                    <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
-                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
-                </form>
                 @else
                 <p>No Data Available</p>
                 @endif

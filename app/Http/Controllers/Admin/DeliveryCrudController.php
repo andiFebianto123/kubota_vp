@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\TemplateSerialNumberExport;
 use App\Helpers\Constant;
+use App\Helpers\DsValidation;
 use App\Http\Requests\DeliveryRequest;
 use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
@@ -79,10 +80,9 @@ class DeliveryCrudController extends CrudController
             if(Constant::checkPermission('Print Label')){
                 $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
             }
-            $this->crud->query->join('po as po', function($join){
-                $join->on('delivery.po_num', '=', 'po.po_num')
-                ->where('po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
-            });
+            $this->crud->addClause('join', 'po', 'po.po_num', 'delivery.po_num');
+            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->query = $this->crud->query->select('delivery.*', 'po.vend_num');
         }
 
         $this->crud->enableBulkActions();
@@ -232,8 +232,21 @@ class DeliveryCrudController extends CrudController
         $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
-        // dd($entry);
-        return view('vendor.backpack.crud.delivery-show', $data);
+        $can_access = false;
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $can_access = true;
+        }else{
+            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')->where('delivery.id', $entry->id )->first();
+            if (backpack_auth()->user()->vendor->vend_num == $po->vend_num) {
+                $can_access = true;
+            }
+        }
+
+        if ($can_access) {
+            return view('vendor.backpack.crud.delivery-show', $data);
+        }else{
+            abort(404);
+        }
     }
 
     private function detailDS($id)
@@ -295,6 +308,26 @@ class DeliveryCrudController extends CrudController
         
         $ds_num =  (new Constant())->codeDs($po_line->po_num, $po_line->po_line, $shipped_date);
 
+        $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
+        $cmq =  (new DsValidation())->currentMaxQty($args);
+        $alert_for = "";
+
+        if ($po_line->outhouse_flag == 1) {
+            $alert_for = " Outhouse";
+            $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
+        }
+
+        if ($cmq['datas'] < $shipped_qty) {
+            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => "Qty Alert ".$alert_for,
+                'errors' => $errors
+            ], 422);
+        }
+
         DB::beginTransaction();
 
         try{
@@ -322,6 +355,23 @@ class DeliveryCrudController extends CrudController
             $insert_d->created_by = backpack_auth()->user()->id;
             $insert_d->updated_by = backpack_auth()->user()->id;
             $insert_d->save();
+
+
+            $insert_dstatus = new DeliveryStatus();
+            $insert_dstatus->ds_num = $ds_num['single'];
+            $insert_dstatus->po_num = $po_line->po_num;
+            $insert_dstatus->po_line = $po_line->po_line;
+            $insert_dstatus->po_release = $po_line->po_release;
+            $insert_dstatus->ds_line = $ds_num['line'];
+            $insert_dstatus->item = $po_line->item;
+            $insert_dstatus->description = $po_line->description;
+            $insert_dstatus->unit_price = $po_line->unit_price;
+            $insert_dstatus->shipped_qty = $shipped_qty;
+            $insert_dstatus->petugas_vendor = $petugas_vendor;
+            $insert_dstatus->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+            $insert_dstatus->created_by = backpack_auth()->user()->id;
+            $insert_dstatus->updated_by = backpack_auth()->user()->id;
+            $insert_dstatus->save();
 
             if ( $po_line->w_serial == 1 && isset($sn_childs)) {
 
@@ -360,7 +410,7 @@ class DeliveryCrudController extends CrudController
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];
                     $issued_qty =  $shipped_qty * $mo->qty_per;
-                    $lot_qty =  $mo->lot_qty;
+                    $remaining_qty =  $mo->remaining_qty;
 
                     $insert_imo = new IssuedMaterialOuthouse();
                     $insert_imo->ds_num = $insert_d->ds_num;
@@ -373,7 +423,7 @@ class DeliveryCrudController extends CrudController
                     $insert_imo->created_by = backpack_auth()->user()->id;
                     $insert_imo->updated_by = backpack_auth()->user()->id;
                     $insert_imo->save();
-                    if ($issued_qty > $lot_qty ) {
+                    if ($issued_qty > $remaining_qty ) {
                         $any_errors = true;
                     }
                 }
@@ -391,8 +441,6 @@ class DeliveryCrudController extends CrudController
                         'errors' => $errors
                     ], 422);
                 }
-
-                
             }
             
             DB::commit();
@@ -594,7 +642,14 @@ class DeliveryCrudController extends CrudController
 
     public function destroy($id)
     {
-        Delivery::where('id', $id)->delete();
+        $delivery = Delivery::where('id', $id)->first();
+        if (isset($delivery)) {
+            IssuedMaterialOuthouse::where('ds_num', $delivery->ds_num)
+                                ->where('ds_line', $delivery->ds_line)
+                                ->delete();
+            Delivery::where('id', $id)->delete();
+        }
+        
         return true;
     }
 }

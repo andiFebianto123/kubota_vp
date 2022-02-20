@@ -15,7 +15,7 @@ class PurchaseOrderLine extends Model
 
     protected $append = [
         'read_by_user', 'change_unit_price', 'change_order_qty', 'change_total_price', 'change_due_date', 'reformat_flag_accept',
-        'count_ds', 'total_shipped_qty'
+        'count_ds', 'total_shipped_qty', 'num_line'
     ];
 
     public function purchaseOrder()
@@ -32,6 +32,11 @@ class PurchaseOrderLine extends Model
         $user = User::where('id', $this->read_by)->first();
 
         return ($user) ? $user->username :'-';
+    }
+
+    public function getNumLineAttribute()
+    {
+        return $this->po_num."-".$this->po_line;
     }
 
     private function getLatestChange(){

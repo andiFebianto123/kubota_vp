@@ -69,6 +69,7 @@ class Constant
   public static function checkPermission($permission){
     return backpack_user()->roles->first()->hasPermissionTo($permission);
   }
+  
   public static function getRole(){
     return backpack_user()->roles->pluck('name')[0];
   }

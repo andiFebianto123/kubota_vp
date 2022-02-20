@@ -28,13 +28,13 @@
                 <td class="py-3">{{$data->seq}}</td>
                 <td class="py-3">{{$data->matl_item}}</td>
                 <td class="py-3">{{$data->description}}</td>
-                <td class="py-3">{{$data->lot_qty}}</td>
+                <td class="py-3">{{$data->remaining_qty}}</td>
                {{--
                  <td class="py-3"><span class="qty-requirement">{{$fixed_issued_qty}}</span></td>
                  --}}
                 <td> 
                     <input type="hidden" name="material_ids[]" value="{{$data->id}}"> 
-                    <input type="number" class="form-control form-issued" data-totalqtyper="{{$field['total_qty_per']}}" data-lotqty="{{$data->lot_qty}}" data-qtyper="{{$data->qty_per}}" name="{{$field['name']}}[]" value="{{$fixed_issued_qty}}" readonly> 
+                    <input type="number" class="form-control form-issued" data-totalqtyper="{{$field['total_qty_per']}}" data-lotqty="{{$data->remaining_qty}}" data-qtyper="{{$data->qty_per}}" name="{{$field['name']}}[]" value="{{$fixed_issued_qty}}" readonly> 
                     <small class="text-danger error-form-issued" style="font-size: 11px;"><br></small>
                 </td>
             </tr>

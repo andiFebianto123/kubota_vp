@@ -7,7 +7,7 @@ trans('backpack::crud.admin') => url(config('backpack.base.route_prefix'), 'dash
 $crud->entity_name_plural => url($crud->route),
 trans('backpack::crud.preview') => false,
 ];
-
+$file_count = 0;
 // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
 $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @endphp
@@ -133,31 +133,38 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <table class="table table-striped table-hover">
                                 <tr>
                                     <td>Unit Price</td>
-                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
+                                    <td>:</td>
+                                    <td>{{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                                 </tr>
                                 <tr>
                                     <td>Vend. Dlv No</td>
-                                    <td>: {{$delivery_status->no_surat_jalan_vendor}}</td> 
+                                    <td>:</td>
+                                    <td> {{$delivery_status->no_surat_jalan_vendor}}</td> 
                                 </tr>
                                 <tr>
                                     <td>No Faktur Pajak</td>
-                                    <td>: {{$delivery_status->no_faktur_pajak}}</td>
+                                    <td>:</td>
+                                    <td>{{$delivery_status->no_faktur_pajak}}</td>
                                 </tr>
                                 <tr>
                                     <td>No Voucher</td>
-                                    <td>: {{$delivery_status->no_voucher}}</td>
+                                    <td>:</td>
+                                    <td> {{$delivery_status->no_voucher}}</td>
                                 </tr>
                                 <tr>
                                     <td>Bank</td>
-                                    <td>: {{$delivery_status->bank}}</td>
+                                    <td>:</td>
+                                    <td> {{$delivery_status->bank}}</td>
                                 </tr>
                                 <tr>
                                     <td>Payment Ref Number</td>
-                                    <td>: {{$delivery_status->payment_ref_num}}</td>
+                                    <td>:</td>
+                                    <td> {{$delivery_status->payment_ref_num}}</td>
                                 </tr>
                                 <tr>
                                     <td>Total</td>
-                                    <td>: {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
+                                    <td>:</td>
+                                    <td> {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
                             </table>
                         </div>
@@ -165,16 +172,19 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <table class="table table-striped table-hover">
                                 <tr>
                                     <td>Payment Plan Date</td>
-                                    <td>: {{$delivery_status->payment_plan_date}}</td>
+                                    <td>:</td>
+                                    <td> {{$delivery_status->payment_plan_date}}</td>
                                 </tr>
                                 <tr>
                                     <td>Payment Est Date</td>
-                                    <td>: {{date('Y-m-d', strtotime($delivery_status->payment_plan_date))}}</td>
+                                    <td>:</td>
+                                    <td> {{date('Y-m-d', strtotime($delivery_status->payment_plan_date))}}</td>
                                 </tr>
                                 <tr>
                                     <td>Validated</td>
-                                    <td>:
-                                        @if($delivery_status->received_flag == 1)
+                                    <td>:</td>
+                                    <td>
+                                        @if($delivery_status->validate_by_fa_flag == 1)
                                         <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                         @else
                                         <button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button>
@@ -183,7 +193,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Payment in Proses</td>
-                                    <td>: 
+                                    <td>:</td>
+                                    <td>
                                         @if($delivery_status->payment_in_process_flag == 1)
                                         <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                         @else
@@ -193,7 +204,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </tr>
                                 <tr>
                                     <td>Executed</td>
-                                    <td> :
+                                    <td>:</td>
+                                    <td>
                                         @if($delivery_status->executed_flag == 1)
                                         <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                         @else
@@ -202,11 +214,22 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Faktur Pajak</td>
-                                    <td> :
+                                    <td>Download File</td>
+                                    <td>:</td>
+                                    <td>
                                         @if(isset($delivery_status->file_faktur_pajak))
-                                        <a class="btn btn-sm btn-link" target="_blank" href="{{$delivery_status->file_faktur_pajak}}" download><i class="la la-cloud-download-alt"></i> Download</a>
-                                        @else
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_faktur_pajak))}}" download><i class="la la-cloud-download-alt"></i> Faktur Pajak</a><br>
+                                        @endif
+                                        @if(isset($delivery_status->invoice))
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->invoice))}}" download><i class="la la-cloud-download-alt"></i> Invoice</a><br>
+                                        @endif
+                                        @if(isset($delivery_status->file_surat_jalan))
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_surat_jalan))}}" download><i class="la la-cloud-download-alt"></i> Surat Jalan</a><br>
+                                        @endif
+                                        @if($file_count == 0)
                                         Belum Ada
                                         @endif
                                     </td>

@@ -12,4 +12,7 @@ class IssuedMaterialOuthouse extends Model
     use RevisionableTrait;
     protected $table = 'issued_material_outhouse';
 
+    public function delivery(){
+        return $this->hasMany(Delivery::class, 'ds_num', 'ds_num');
+    }
 }

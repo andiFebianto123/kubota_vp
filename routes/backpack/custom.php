@@ -85,4 +85,5 @@ Route::group([
     Route::crud('histori-mo-summary-per-item', 'HistoriMoSummaryPerItemCrudController');
     Route::get('template-users', 'UserCrudController@templateUsers');
     Route::post('user-import', 'UserCrudController@import');
+
 });

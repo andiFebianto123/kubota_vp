@@ -157,7 +157,11 @@ class ForecastCrudController extends CrudController
         $this->crud->urlAjaxFilterVendor = url('admin/test/ajax-vendor-options2');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->data['type_forecast'] = $start->type;
-        $this->crud->setListView('vendor.backpack.crud.list-forecast', $this->data);
+        if(backpack_user()->hasRole('Admin PTKI')){
+            $this->crud->setListView('vendor.backpack.crud.list-forecast', $this->data);
+        }else{
+            $this->crud->setListView('vendor.backpack.crud.forecast-underconstruction', $this->data);
+        }
         
     }
 
