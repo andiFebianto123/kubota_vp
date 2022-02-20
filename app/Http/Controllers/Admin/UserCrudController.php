@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request as requests;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MailNewUser;
+use App\Models\Delivery;
+use App\Models\PurchaseOrderLine;
+use Illuminate\Routing\Route;
 
 /**
  * Class UserCrudController
@@ -95,6 +98,9 @@ class UserCrudController extends CrudController
                 $query->orWhere('roles.name', 'like', "%{$searchTerm}%");
             }
         ]);
+        if(!in_array(Constant::getRole(),['Admin PTKI'])){
+            $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
+        }
 
         // CRUD::addColumn([
         //     'label'     => 'Role', // Table column heading
@@ -168,7 +174,11 @@ class UserCrudController extends CrudController
 
     private function optVendors()
     {
-        $vendors = Vendor::get();
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $vendors = Vendor::get();
+        }else{
+            $vendors = Vendor::where('id', backpack_auth()->user()->vendor->id)->get();
+        }
         $arr_vendor = [];
         foreach ($vendors as $key => $v) {
             $arr_vendor[$v->id] = $v->vend_num.'-'.$v->vend_name;
@@ -176,9 +186,31 @@ class UserCrudController extends CrudController
 
         return $arr_vendor;
     }
+
+    private function handlePermissionNonAdmin($vendor_id){
+        $allow_access = false;
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $allow_access = true;
+
+        }else{
+            if (backpack_auth()->user()->vendor->id == $vendor_id) {
+                $allow_access = true;
+            }
+        }
+
+        return $allow_access;
+    }
+
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
+
+        if($this->handlePermissionNonAdmin($vendor_id)){
+            $this->setupCreateOperation();
+        }else{
+            abort(404);
+        }
     }
 
     public function store(Request $request)
@@ -214,6 +246,12 @@ class UserCrudController extends CrudController
 
     function update($id)
     {
+        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
+
+        if(!$this->handlePermissionNonAdmin($vendor_id)){
+            abort(404);
+        }
+
         $this->crud->setRequest($this->crud->validateRequest());
 
         /** @var \Illuminate\Http\Request $request */
@@ -260,6 +298,11 @@ class UserCrudController extends CrudController
 
     public function destroy($id)
     {
+        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
+        if(!$this->handlePermissionNonAdmin($vendor_id)){
+            abort(404);
+        }
+
         $this->crud->hasAccessOrFail('delete');
 
         $id = $this->crud->getCurrentEntryId() ?? $id;
