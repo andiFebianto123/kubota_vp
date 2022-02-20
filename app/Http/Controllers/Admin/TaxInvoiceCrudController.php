@@ -398,7 +398,7 @@ class TaxInvoiceCrudController extends CrudController
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
                 if (isset($old_files)) {
-                    $will_unlink_file =  str_replace("/","",$old_files);
+                    $will_unlink_file =  $old_files;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -415,7 +415,7 @@ class TaxInvoiceCrudController extends CrudController
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->invoice;
                 if (isset($old_files)) {
-                    $will_unlink_file =  str_replace("/","",$old_files);
+                    $will_unlink_file =  $old_files;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -433,7 +433,7 @@ class TaxInvoiceCrudController extends CrudController
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
                 if (isset($old_files)) {
-                    $will_unlink_file =  str_replace("/","",$old_files);
+                    $will_unlink_file = $old_files;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();

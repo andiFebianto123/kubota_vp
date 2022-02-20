@@ -7,7 +7,7 @@ trans('backpack::crud.admin') => url(config('backpack.base.route_prefix'), 'dash
 $crud->entity_name_plural => url($crud->route),
 trans('backpack::crud.preview') => false,
 ];
-
+$file_count = 0;
 // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
 $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @endphp
@@ -202,11 +202,21 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Faktur Pajak</td>
+                                    <td>Download File</td>
                                     <td> :
                                         @if(isset($delivery_status->file_faktur_pajak))
-                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_faktur_pajak))}}" download><i class="la la-cloud-download-alt"></i> Download</a>
-                                        @else
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_faktur_pajak))}}" download><i class="la la-cloud-download-alt"></i> Faktur Pajak</a><br>
+                                        @endif
+                                        @if(isset($delivery_status->invoice))
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->invoice))}}" download><i class="la la-cloud-download-alt"></i> Invoice</a><br>
+                                        @endif
+                                        @if(isset($delivery_status->file_surat_jalan))
+                                        @php $file_count++ @endphp
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_surat_jalan))}}" download><i class="la la-cloud-download-alt"></i> Surat Jalan</a><br>
+                                        @endif
+                                        @if($file_count == 0)
                                         Belum Ada
                                         @endif
                                     </td>
