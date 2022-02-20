@@ -93,7 +93,7 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->crud->addButtonFromView('line_2', 'show2', 'show', 'begining');
 
-       // $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
+       $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
        $this->crud->addClause('where', 'payment_in_process_flag', '=', 1);
        $this->crud->addClause('where', 'executed_flag', '=', 0);
        $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
@@ -473,7 +473,6 @@ class TaxInvoiceCrudController extends CrudController
         $change->file_faktur_pajak = null;
         $change->invoice = null;
         $change->file_surat_jalan = null;
-        $change->payment_in_process_flag = 0;
         $success = $change->save();
         
         Comment::where('tax_invoice_id', $id)
