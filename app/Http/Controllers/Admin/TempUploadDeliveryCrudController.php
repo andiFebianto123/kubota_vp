@@ -15,6 +15,7 @@ use App\Models\PurchaseOrderLine;
 use App\Models\TempUploadDelivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
 use PDF;
@@ -130,62 +131,94 @@ class TempUploadDeliveryCrudController extends CrudController
     private function insertMassData(){
         $data_temps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
         $arr_ids = [];
+        DB::beginTransaction();
 
-        foreach ($data_temps as $key => $data_temp) {
-            $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)->where('po_line', $data_temp->po_line)->first();
-            $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->shipped_date);
-            $ds_line = $ds_num['line'];
-
-            $insert = new Delivery();
-            $insert->ds_num = $ds_num['single'];
-            $insert->group_ds_num = $ds_num['group'];
-            $insert->po_line = $data_temp->po_line;
-            $insert->po_num = $data_temp->po_num;
-            $insert->po_release = 0;
-            $insert->ds_line = $ds_line;
-            $insert->item = $po_line->item;
-            $insert->description = $po_line->description;
-            $insert->u_m = $po_line->u_m;
-            $insert->due_date = $po_line->due_date;
-            $insert->unit_price = $po_line->unit_price;
-            $insert->wh = $po_line->wh;
-            $insert->location = $po_line->location;
-            $insert->tax_status = $po_line->tax_status;
-            $insert->currency = $po_line->currency;
-            $insert->shipped_qty = $data_temp->shipped_qty;
-            $insert->shipped_date = date('Y-m-d', strtotime($data_temp->shipped_date));
-            $insert->order_qty = $po_line->order_qty;
-            $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
-            $insert->petugas_vendor = $data_temp->petugas_vendor;
-            $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
-
-            if ($po_line->status == 'O' && $po_line->accept_flag == 1 && $data_temp->category_validation != 'danger') {
-                $insert->save();
-                $arr_ids[] = $insert->id;
-
-                if ($po_line->outhouse_flag == 1 && isset($data_temp->data_attr)) {
-                    $data_attrs = json_decode($data_temp->data_attr);
-                    foreach ($data_attrs->attributes as $key => $da) {
-                        $material_outhouse = MaterialOuthouse::where('id', $da->id)->first();
-                        if (isset($material_outhouse)) {
-                            $insert_outhouse = new IssuedMaterialOuthouse();
-                            $insert_outhouse->ds_num = $ds_num['single'];
-                            $insert_outhouse->ds_line = $ds_line;
-                            $insert_outhouse->ds_detail = $po_line->item;
-                            $insert_outhouse->matl_item = $material_outhouse->matl_item;
-                            $insert_outhouse->description =  $material_outhouse->description;
-                            $insert_outhouse->lot =  $material_outhouse->lot;
-                            $insert_outhouse->issue_qty =  $da->qty;
-                            $insert_outhouse->save();
+        try{
+            foreach ($data_temps as $key => $data_temp) {
+                $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)->where('po_line', $data_temp->po_line)->first();
+                $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->shipped_date);
+                $ds_line = $ds_num['line'];
+    
+                $insert = new Delivery();
+                $insert->ds_num = $ds_num['single'];
+                $insert->group_ds_num = $ds_num['group'];
+                $insert->po_line = $data_temp->po_line;
+                $insert->po_num = $data_temp->po_num;
+                $insert->po_release = 0;
+                $insert->ds_line = $ds_line;
+                $insert->item = $po_line->item;
+                $insert->description = $po_line->description;
+                $insert->u_m = $po_line->u_m;
+                $insert->due_date = $po_line->due_date;
+                $insert->unit_price = $po_line->unit_price;
+                $insert->wh = $po_line->wh;
+                $insert->location = $po_line->location;
+                $insert->tax_status = $po_line->tax_status;
+                $insert->currency = $po_line->currency;
+                $insert->shipped_qty = $data_temp->shipped_qty;
+                $insert->shipped_date = date('Y-m-d', strtotime($data_temp->shipped_date));
+                $insert->order_qty = $po_line->order_qty;
+                $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
+                $insert->petugas_vendor = $data_temp->petugas_vendor;
+                $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
+    
+                if ($po_line->status == 'O' && $po_line->accept_flag == 1 && $data_temp->category_validation != 'danger') {
+                    $insert->save();
+    
+                    $insert_dstatus = new DeliveryStatus();
+                    $insert_dstatus->ds_num = $ds_num['single'];
+                    $insert_dstatus->po_num = $po_line->po_num;
+                    $insert_dstatus->po_line = $po_line->po_line;
+                    $insert_dstatus->po_release = $po_line->po_release;
+                    $insert_dstatus->ds_line = $ds_num['line'];
+                    $insert_dstatus->item = $po_line->item;
+                    $insert_dstatus->description = $po_line->description;
+                    $insert_dstatus->unit_price = $po_line->unit_price;
+                    $insert_dstatus->tax_status = $po_line->tax_status;
+                    $insert_dstatus->shipped_qty = $data_temp->shipped_qty;
+                    $insert_dstatus->order_qty = $po_line->order_qty;
+                    $insert_dstatus->petugas_vendor = $data_temp->petugas_vendor;
+                    $insert_dstatus->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
+                    $insert_dstatus->created_by = backpack_auth()->user()->id;
+                    $insert_dstatus->updated_by = backpack_auth()->user()->id;
+                    $insert_dstatus->save();
+    
+                    $arr_ids[] = $insert->id;
+    
+                    if ($po_line->outhouse_flag == 1 && isset($data_temp->data_attr)) {
+                        $data_attrs = json_decode($data_temp->data_attr);
+                        foreach ($data_attrs->attributes as $key => $da) {
+                            $material_outhouse = MaterialOuthouse::where('id', $da->id)->first();
+                            if (isset($material_outhouse)) {
+                                $insert_outhouse = new IssuedMaterialOuthouse();
+                                $insert_outhouse->ds_num = $ds_num['single'];
+                                $insert_outhouse->ds_line = $ds_line;
+                                $insert_outhouse->ds_detail = $po_line->item;
+                                $insert_outhouse->matl_item = $material_outhouse->matl_item;
+                                $insert_outhouse->description =  $material_outhouse->description;
+                                $insert_outhouse->lot =  $material_outhouse->lot;
+                                $insert_outhouse->issue_qty =  $da->qty;
+                                $insert_outhouse->save();
+                            }
                         }
                     }
                 }
             }
+    
+            TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+            DB::commit();
+
+            return ['status' => true, 'arr_ids' => $arr_ids];
+
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => $e->getMessage(),
+                'validation_errors' => []
+            ], 500);
         }
-
-        TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
-
-        return ['status' => true, 'arr_ids' => $arr_ids];
     }
 
     public function insertToDb(Request $request)

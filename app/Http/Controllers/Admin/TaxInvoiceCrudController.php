@@ -393,13 +393,12 @@ class TaxInvoiceCrudController extends CrudController
         if ($urlfile) {
             $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlfile->getClientOriginalExtension();
             $urlfile->move('files', $filename);
-            $filename = asset('files/'.$filename);
+            $filename = 'file-invoices/'.$filename;
             
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
                 if (isset($old_files)) {
-                    $base_url = url('/');
-                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    $will_unlink_file =  str_replace("/","",$old_files);
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -411,13 +410,12 @@ class TaxInvoiceCrudController extends CrudController
         if(isset($request->invoice)){
             $filenameInvoice = 'faktur_pajak_invoice'.date('ymdhis').'.'.$request->invoice->getClientOriginalExtension();
             $request->invoice->move('files', $filenameInvoice);
-            $filenameInvoice = asset('files/'.$filenameInvoice);
+            $filenameInvoice = 'file-invoices/'.$filenameInvoice;
 
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->invoice;
                 if (isset($old_files)) {
-                    $base_url = url('/');
-                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    $will_unlink_file =  str_replace("/","",$old_files);
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -430,13 +428,12 @@ class TaxInvoiceCrudController extends CrudController
         if(isset($request->file_surat_jalan)){
             $filenameSuratJalan = 'faktur_pajak_surat_jalan'.date('ymdhis').'.'.$request->file_surat_jalan->getClientOriginalExtension();
             $request->file_surat_jalan->move('files', $filenameSuratJalan);
-            $filenameSuratJalan = asset('files/'.$filenameSuratJalan);
+            $filenameSuratJalan = 'file-invoices/'.$filenameSuratJalan;
 
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
                 if (isset($old_files)) {
-                    $base_url = url('/');
-                    $will_unlink_file =  str_replace($base_url."/","",$old_files);
+                    $will_unlink_file =  str_replace("/","",$old_files);
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -668,33 +665,21 @@ class TaxInvoiceCrudController extends CrudController
 
     private function detailDS($id)
     {
-        $delivery_show = Delivery::leftjoin('po_line', function ($join) {
-                            $join->on('po_line.po_num', 'delivery.po_num')
-                                ->orOn('po_line.po_line', 'delivery.po_line');
+        $delivery_show = DeliveryStatus::leftjoin('po_line', function ($join) {
+                            $join->on('po_line.po_num', 'delivery_status.po_num')
+                                ->orOn('po_line.po_line', 'delivery_status.po_line');
                         })
                         ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                         // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
-                        ->where('delivery.id', $id)
-                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 'delivery.po_release','po_line.item','delivery.u_m',
-                        'vendor.vend_num as vendor_number','vendor.currency as vendor_currency', 'vendor.vend_num as vendor_name', 'delivery.no_surat_jalan_vendor','po_line.item_ptki',
-                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location'])
+                        ->where('delivery_status.id', $id)
+                        ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date', 'delivery_status.po_release','po_line.item',
+                        'vendor.vend_num as vendor_number','vendor.currency as vendor_currency', 'vendor.vend_num as vendor_name', 'delivery_status.no_surat_jalan_vendor','po_line.item_ptki',
+                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery_status.shipped_qty', 'delivery_status.unit_price', 
+                        'delivery_status.tax_status', 'delivery_status.description', ])
                         ->first();
-        $qr_code = "DSW|";
-        $qr_code .= $delivery_show->ds_num."|";
-        $qr_code .= $delivery_show->ds_line."|";
-        $qr_code .= $delivery_show->po_number."|";
-        $qr_code .= $delivery_show->po_line."|";
-        $qr_code .= $delivery_show->po_release."|";
-        $qr_code .= $delivery_show->item_ptki."|";
-        $qr_code .= $delivery_show->shipped_qty."|";
-        $qr_code .= $delivery_show->u_m."|";
-        $qr_code .= $delivery_show->unit_price."|";
-        $qr_code .= date("Y-m-d", strtotime($delivery_show->shipped_date))."|";
-        $qr_code .= $delivery_show->no_surat_jalan_vendor;
 
         $data['delivery_show'] = $delivery_show;
-        $data['qr_code'] = $qr_code;
 
         return $data;
     }
@@ -882,5 +867,14 @@ class TaxInvoiceCrudController extends CrudController
     }
 
 
-
+    public function showFiles($filename)
+    {
+        $m_file = public_path('files/'.$filename);
+        if (file_exists($m_file)) {
+            return response()->file($m_file);
+        }else{
+            abort(404);
+        }
+        
+    }
 }

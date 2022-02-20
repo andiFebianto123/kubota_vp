@@ -29,4 +29,4 @@ Route::get('/', function () {
 Route::get('admin', function () {
     return redirect()->to('admin/dashboard');
 });
-
+Route::get('file-invoices/{filename}', 'Admin\TaxInvoiceCrudController@showFiles')->middleware(['web', 'twofactor']);

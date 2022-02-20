@@ -356,6 +356,25 @@ class DeliveryCrudController extends CrudController
             $insert_d->updated_by = backpack_auth()->user()->id;
             $insert_d->save();
 
+
+            $insert_dstatus = new DeliveryStatus();
+            $insert_dstatus->ds_num = $ds_num['single'];
+            $insert_dstatus->po_num = $po_line->po_num;
+            $insert_dstatus->po_line = $po_line->po_line;
+            $insert_dstatus->po_release = $po_line->po_release;
+            $insert_dstatus->ds_line = $ds_num['line'];
+            $insert_dstatus->item = $po_line->item;
+            $insert_dstatus->description = $po_line->description;
+            $insert_dstatus->unit_price = $po_line->unit_price;
+            $insert_dstatus->tax_status = $po_line->tax_status;
+            $insert_dstatus->shipped_qty = $shipped_qty;
+            $insert_dstatus->order_qty = $po_line->order_qty;
+            $insert_dstatus->petugas_vendor = $petugas_vendor;
+            $insert_dstatus->no_surat_jalan_vendor = $no_surat_jalan_vendor;
+            $insert_dstatus->created_by = backpack_auth()->user()->id;
+            $insert_dstatus->updated_by = backpack_auth()->user()->id;
+            $insert_dstatus->save();
+
             if ( $po_line->w_serial == 1 && isset($sn_childs)) {
 
                 foreach ($sn_childs as $key => $sn_child) {
@@ -424,8 +443,6 @@ class DeliveryCrudController extends CrudController
                         'errors' => $errors
                     ], 422);
                 }
-
-                
             }
             
             DB::commit();

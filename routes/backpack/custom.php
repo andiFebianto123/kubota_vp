@@ -83,4 +83,5 @@ Route::group([
     Route::crud('histori-mo-summary-per-po', 'HistoriMoSummaryPerPoCrudController');
     Route::get('material-outhouse-summary-per-po/{id}/details', 'HistoriMoSummaryPerPoCrudController@showDetailsRow');
     Route::crud('histori-mo-summary-per-item', 'HistoriMoSummaryPerItemCrudController');
+
 });

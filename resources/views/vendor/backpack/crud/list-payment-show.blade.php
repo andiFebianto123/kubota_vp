@@ -205,7 +205,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <td>Faktur Pajak</td>
                                     <td> :
                                         @if(isset($delivery_status->file_faktur_pajak))
-                                        <a class="btn btn-sm btn-link" target="_blank" href="{{$delivery_status->file_faktur_pajak}}" download><i class="la la-cloud-download-alt"></i> Download</a>
+                                        <a class="btn btn-sm btn-link" target="_blank" href="{{str_replace("files/","file-invoices/",asset($delivery_status->file_faktur_pajak))}}" download><i class="la la-cloud-download-alt"></i> Download</a>
                                         @else
                                         Belum Ada
                                         @endif
