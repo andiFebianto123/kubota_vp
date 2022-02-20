@@ -45,24 +45,25 @@
                     {{ $column['text'] }}
                 </a>
             @endif
-            @if($entry->comment == null)
-                <a href="javascript:void(0)" 
-                    id="comment" 
-                    data-id-tax-invoice="{{ $entry->id }}" 
-                    class="text-info"
-                    data-route="{{ url('admin/send-comments') }}"
-                >
-                    <i>Add Comment</i>
-                </a>
+            @if($entry->executed_flag == 0)
+                @if($entry->comment == null)
+                    <a href="javascript:void(0)" 
+                        id="comment" 
+                        data-id-tax-invoice="{{ $entry->id }}" 
+                        class="text-info"
+                        data-route="{{ url('admin/send-comments') }}"
+                    >
+                        <i>Add Comment</i>
+                    </a>
+                @endif
             @endif
         @else
             {!! $column['text'] !!}
         @endif
     @includeWhen(!empty($column['wrapper']), 'crud::columns.inc.wrapper_end')
 </div>
+@if($entry->executed_flag == 0)
 <script>
-    // var entries = {!! json_encode($entry) !!};
-    // console.log(entries);
     if(typeof openCommentModal != 'function'){
         function openCommentModal(){
             $('a#comment').click(function(e){
@@ -77,5 +78,29 @@
             });
         }
     }
+</script>
+@else
+<script>
+    if(typeof openCommentModal != 'function'){
+        function openCommentModal(){
+            $('a#comment').click(function(e){
+                $('.comment-modal').removeAttr('data-id-tax-invoice');
+                $('.input-message').remove();
+                $('.modal-footer').remove();
+
+                let tax_id = $(this).attr('data-id-tax-invoice');
+                let route = $(this).attr('data-route');
+                if(tax_id !== undefined){
+                    $('.comment-modal').attr('data-id-tax-invoice', tax_id);
+                    $('.comment-modal').attr('data-route', route);
+                }
+                $('.comment-modal').modal('show');
+            });
+        }
+    }
+</script>
+@endif
+
+<script>
     openCommentModal();
 </script>
