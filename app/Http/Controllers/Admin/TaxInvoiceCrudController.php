@@ -403,6 +403,7 @@ class TaxInvoiceCrudController extends CrudController
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
                 $change->file_faktur_pajak = $filename;
+                $change->payment_in_process_flag = 1;
                 $change->save();
             }
         }
@@ -455,12 +456,26 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->hasAccessOrFail('delete');
 
         $id = $this->crud->getCurrentEntryId() ?? $id;
+
+        $old_file = DeliveryStatus::where('id', $id)->first();
+        if (isset($old_file->file_faktur_pajak)) {
+            unlink(public_path($old_file->file_faktur_pajak));
+        }
+        if (isset($old_file->invoice)) {
+            unlink(public_path($old_file->invoice));
+        }
+        if (isset($old_file->file_surat_jalan)) {
+            unlink(public_path($old_file->file_surat_jalan));
+        }
        
         $change = DeliveryStatus::where('id', $id)->first();
         $change->file_faktur_pajak = null;
+        $change->invoice = null;
+        $change->file_surat_jalan = null;
+        $change->payment_in_process_flag = 0;
         $success = $change->save();
-
-        $deleteComments = Comment::where('tax_invoice_id', $id)
+        
+        Comment::where('tax_invoice_id', $id)
             ->forcedelete();
 
         return $success;
