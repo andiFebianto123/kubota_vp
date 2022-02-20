@@ -343,7 +343,9 @@ class TaxInvoiceCrudController extends CrudController
         $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
         $delivery_statuses = DeliveryStatus::select('*', 
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
-            ->where('file_faktur_pajak', null);
+            ->where('file_faktur_pajak', null)
+            ->where('validate_by_fa_flag', 1)
+            ->where('payment_in_process_flag', 1);
             if(Constant::getRole() != 'Admin PTKI'){
             $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
             ->get();
@@ -393,7 +395,7 @@ class TaxInvoiceCrudController extends CrudController
         if ($urlfile) {
             $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlfile->getClientOriginalExtension();
             $urlfile->move('files', $filename);
-            $filename = 'file-invoices/'.$filename;
+            $filename = 'files/'.$filename;
             
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
@@ -403,7 +405,6 @@ class TaxInvoiceCrudController extends CrudController
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
                 $change->file_faktur_pajak = $filename;
-                $change->payment_in_process_flag = 1;
                 $change->save();
             }
         }
@@ -411,7 +412,7 @@ class TaxInvoiceCrudController extends CrudController
         if(isset($request->invoice)){
             $filenameInvoice = 'faktur_pajak_invoice'.date('ymdhis').'.'.$request->invoice->getClientOriginalExtension();
             $request->invoice->move('files', $filenameInvoice);
-            $filenameInvoice = 'file-invoices/'.$filenameInvoice;
+            $filenameInvoice = 'files/'.$filenameInvoice;
 
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->invoice;
@@ -429,7 +430,7 @@ class TaxInvoiceCrudController extends CrudController
         if(isset($request->file_surat_jalan)){
             $filenameSuratJalan = 'faktur_pajak_surat_jalan'.date('ymdhis').'.'.$request->file_surat_jalan->getClientOriginalExtension();
             $request->file_surat_jalan->move('files', $filenameSuratJalan);
-            $filenameSuratJalan = 'file-invoices/'.$filenameSuratJalan;
+            $filenameSuratJalan = 'files/'.$filenameSuratJalan;
 
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
