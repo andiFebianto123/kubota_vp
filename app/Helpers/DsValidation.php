@@ -42,11 +42,14 @@ class DsValidation
                       ->where("po_line", $po_line)
                       ->get();
 
-    $arr_min_qty = [0];
+    $arr_min_qty = [];
+    $current_qty = 0;
     foreach ($realtime_ds_qty as $key => $rdq) {
       $arr_min_qty[] = ($rdq)? $rdq->remaining_qty/$rdq->qty_per : 0;
     }
-    $current_qty = min($arr_min_qty); 
+    if (sizeof($arr_min_qty) > 0) {
+      $current_qty = min($arr_min_qty); 
+    }
     
     return [
       'datas'  => $current_qty,

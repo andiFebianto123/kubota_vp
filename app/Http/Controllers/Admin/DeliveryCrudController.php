@@ -621,7 +621,14 @@ class DeliveryCrudController extends CrudController
 
     public function destroy($id)
     {
-        Delivery::where('id', $id)->delete();
+        $delivery = Delivery::where('id', $id)->first();
+        if (isset($delivery)) {
+            IssuedMaterialOuthouse::where('ds_num', $delivery->ds_num)
+                                ->where('ds_line', $delivery->ds_line)
+                                ->delete();
+            Delivery::where('id', $id)->delete();
+        }
+        
         return true;
     }
 }

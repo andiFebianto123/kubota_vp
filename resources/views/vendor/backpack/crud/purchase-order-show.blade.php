@@ -168,6 +168,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     @endif    
                                 @else
                                     @if($po_line->status == 'O')
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
+                                            <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                         @if($constant::checkPermission('Accept PO Detail'))
                                             <button class="btn btn-sm btn-link"  type="button" data-toggle="modal" onclick="acceptPoLines([{{$po_line->id}}])" data-target="#modalAccept"><i class="la la-check"></i> Accept</button>
                                         @endif
