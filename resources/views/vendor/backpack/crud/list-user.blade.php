@@ -177,7 +177,7 @@
         </div>
         <div class="modal-body">
           <p>Silahkan menggunakan template di bawah ini untuk mengimport 
-            <br><a href="http://kubota-vp/public/admin/template-users">template-users-sheet.xlsx</a>
+            <br><a href="{{url('admin/template-users')}}">template-users-sheet.xlsx</a>
           </p>
           <form id="form-upload-user" action="{{ backpack_url('user-import') }}" method="POST" enctype="multipart/form-data">
           <div class="form-group" style="border: 1px solid gray; padding: 6px;">
