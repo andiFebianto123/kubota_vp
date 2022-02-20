@@ -310,6 +310,12 @@ class DeliveryCrudController extends CrudController
 
         $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
         $cmq =  (new DsValidation())->currentMaxQty($args);
+        $alert_for = "";
+
+        if ($po_line->outhouse_flag == 1) {
+            $alert_for = " Outhouse";
+            $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
+        }
 
         if ($cmq['datas'] < $shipped_qty) {
             $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
@@ -317,7 +323,7 @@ class DeliveryCrudController extends CrudController
             return response()->json([
                 'status' => false,
                 'alert' => 'danger',
-                'message' => "Qty Alert",
+                'message' => "Qty Alert ".$alert_for,
                 'errors' => $errors
             ], 422);
         }
