@@ -17,7 +17,7 @@ class AccountAttempt
     $locked_account_on_failure = Configuration::where('name', 'locked_account_on_failure_'.$type)->first()->value;
     $exist_user = User::where('username', $username)->exists();
     $response['status'] = false;
-    $response['message'] = "User is not exist";
+    // $response['message'] = "User is not exist";
     if ($exist_user) {
         $max_attempt = $attemp_failure;
         $minutes_passed = $locked_account_on_failure;
