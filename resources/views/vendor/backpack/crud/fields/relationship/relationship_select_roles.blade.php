@@ -7,13 +7,6 @@
     $field['allows_null'] = $field['allows_null'] ?? $crud->model::isColumnNullable($field['name']);
     // Note: isColumnNullable returns true if column is nullable in database, also true if column does not exist.
 
-    
-    if (!isset($field['options'])) {
-            $field['options'] = $connected_entity::all()->pluck($field['attribute'],$connected_entity_key_name);
-        } else {
-            $field['options'] = call_user_func($field['options'], $field['model']::query())->pluck($field['attribute'],$connected_entity_key_name);
-    }
-
     // make sure the $field['value'] takes the proper value
     // and format it to JSON, so that select2 can parse it
     $current_value = old(square_brackets_to_dots($field['name'])) ?? $field['value'] ?? $field['default'] ?? '';

@@ -11,7 +11,9 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\Constant;
-
+use App\Models\ModelHasRole;
+use Exception;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class RoleCrudController
@@ -237,6 +239,36 @@ class RoleCrudController extends CrudController
                 'alert' => 'warning',
                 'message' => 'Role tidak tersedia'
             ], 400);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $this->crud->hasAccessOrFail('delete');
+
+        $id = $this->crud->getCurrentEntryId() ?? $id;
+
+        DB::beginTransaction();
+        try{
+            $allow_delete = true;
+            if(ModelHasRole::where('role_id', $id)->exists()){
+                $allow_delete = false;
+            }
+            if ($allow_delete) {
+                $response = $this->crud->delete($id);
+                DB::commit();
+                return $response;
+            }else{
+                DB::rollback();
+                $custom_message['danger'][0] = 'This role is still in use';
+                
+                return $custom_message;  
+            }
+            
+        }
+        catch(Exception $e){
+            DB::rollback();
+            throw $e;
         }
     }
 }

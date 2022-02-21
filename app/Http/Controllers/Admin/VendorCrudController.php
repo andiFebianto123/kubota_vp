@@ -97,21 +97,41 @@ class VendorCrudController extends CrudController
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
-        $this->crud->addFilter([
-            'name'        => 'vendor',
-            'type'        => 'select2_ajax',
-            'label'       => 'Name Vendor',
-            'placeholder' => 'Pick a vendor'
-        ],
-        url('admin/test/ajax-vendor-options'),
-        function($value) { 
-            $this->crud->addClause('where', 'vend_num', $value);
-        });
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'vend_num', $value);
+            });
+        }else{
+            $this->crud->removeButton('create');
+            $this->crud->addClause('where', 'id', '=', backpack_auth()->user()->vendor->id);
+        }
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
          */
+    }
+
+    private function handlePermissionNonAdmin($vendor_id){
+        $allow_access = false;
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $allow_access = true;
+
+        }else{
+            if (backpack_auth()->user()->vendor->id == $vendor_id) {
+                $allow_access = true;
+            }
+        }
+
+        return $allow_access;
     }
 
     /**
@@ -134,6 +154,12 @@ class VendorCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $id = $this->crud->getCurrentEntry()->id;
+
+        if(!$this->handlePermissionNonAdmin($id)){
+            abort(404);
+        }
+
         CRUD::setValidation(VendorRequest::class);
         $this->myFields('update');
     }

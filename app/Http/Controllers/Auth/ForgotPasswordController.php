@@ -103,6 +103,7 @@ class ForgotPasswordController extends Controller
         if (isset($user_fp)) {
             $user = User::where('email', $user_fp->email)->first();
             $user->password = bcrypt($password);
+            $user->last_update_password = now();
             $user->save();
         }else{
             return response()->json([
