@@ -1,6 +1,7 @@
 <?php
 namespace App\Exports;
 
+use App\Helpers\Constant;
 use App\Models\PurchaseOrder;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -26,7 +27,16 @@ class PurchaseOrderExport implements FromView, WithEvents
 
     public function view(): View
     {
+        $filters = [];
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $filters = [];
+        }else{
+            $filters[] = ['vendor.vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
+        }
+
         $purchase_orders = PurchaseOrder::leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
+                            ->where($filters)
                             ->get(['po.id as id', 'po.po_num as number', 'vendor.vend_num as vendor_number'
                             ,'po.po_date as po_date', 'po.email_flag as email_flag', 'po.po_change']);
 
