@@ -214,9 +214,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>Received</td>
                                 <td>: 
                                     @if($delivery_status->received_flag == 1)
-                                    <i class="la la-check text-success font-weight-bold"></i>
+                                    <button type="button" class="btn btn-sm btn-success"><i class="la la-check"></i></button>
                                     @else
-                                    <i class="la la-times text-danger font-weight-bold"></i>
+                                    <button type="button" class="btn btn-sm btn-danger"><i class="la la-times"></i></button>
                                     @endif
                                 </td>
                             </tr>
@@ -328,7 +328,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Payment in Proses</td>
+                                    <td>Payment in Process</td>
                                     <td>:</td>
                                     <td>
                                         @if($delivery_status->payment_in_process_flag == 1)

@@ -513,7 +513,7 @@ class PurchaseOrderCrudController extends CrudController
                 $details = [
                     'type' => 'reminder_po',
                     'title' => 'Ada PO baru',
-                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, Anda dapat mengklik tombol dibawah ini.',
+                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
 

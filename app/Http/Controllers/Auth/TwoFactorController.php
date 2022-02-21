@@ -49,7 +49,6 @@ class TwoFactorController extends Controller
             ->exists()) 
             {
             $user = User::where("id", backpack_auth()->user()->id)->first();
-            $user->timestamps = false;
             $user->two_factor_code = $two_factor_code;
             $user->two_factor_expires_at = Carbon::now()->addDay($expired_otp);
             $user->two_factor_url = null;
@@ -57,7 +56,6 @@ class TwoFactorController extends Controller
             $user->ip = $this->getClientIp();
             $user->user_agent = $_SERVER['HTTP_USER_AGENT'];
             $user->save();
-            $user->timestamps = true;
 
             $update_otp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
             $update_otp->two_factor_code = $two_factor_code;
@@ -74,7 +72,7 @@ class TwoFactorController extends Controller
                 'message' => (isset($at['message']))?$at['message']:'OTP Tidak Valid!'
                 ], 200);
         }
-
+        
         $redirect_to = (session()->has('prev_url'))? session()->get('prev_url'): url('admin/dashboard');
         
         return response()->json([

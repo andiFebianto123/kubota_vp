@@ -28,6 +28,9 @@ class TwoFactor
             {
                 $can_login = true;
             }
+            if($auth->last_update_password === NULL){
+                return redirect()->guest(backpack_url('edit-account-info'));
+            }
         }
 
         if ($can_login) {
