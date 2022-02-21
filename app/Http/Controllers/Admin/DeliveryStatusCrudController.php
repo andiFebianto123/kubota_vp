@@ -55,7 +55,6 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('ds_num')->label('DS Num');
         CRUD::column('ds_line')->label('DS Line');
         CRUD::column('ds_type')->label('DS Type');
-        CRUD::column('po_line_id')->label('PO Line ID');
         CRUD::column('po_release')->label('PO Release');
         CRUD::column('description')->label('Desc');
         CRUD::column('grn_num')->label('GRN Num');

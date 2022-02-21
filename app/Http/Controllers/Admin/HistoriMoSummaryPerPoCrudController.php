@@ -42,6 +42,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'pl.status' ,
             'matl_item', 
             'pl.u_m', 
+            'pl.order_qty',
             'pl.due_date', 
             'material_outhouse.description',
         );
@@ -121,7 +122,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
-        CRUD::column('remaining_qty')->label('Available Material');
+        CRUD::column('order_qty')->label('Available Material');
         // CRUD::column('available_qty')->label('aq');
         CRUD::column('u_m')->label('UM');
         CRUD::column('due_date')->label('Due Date');

@@ -1,6 +1,7 @@
 <?php
 namespace App\Exports;
 
+use App\Helpers\Constant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Contracts\View\View;
@@ -22,6 +23,12 @@ class TemplateMassDsExport implements  FromView, WithEvents
     {
         $filters = [];
         $many_data = 0;
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $filters = [];
+        }else{
+            $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
+        }
 
         $pos = PurchaseOrder::where($filters)->orderBy('po_num','asc')->get();
         $arr_po_lines = [];
@@ -53,9 +60,6 @@ class TemplateMassDsExport implements  FromView, WithEvents
             
         }
 
-        $po_lines = PurchaseOrderLine::where('status', 'O')
-                ->where('accept_flag', 1)
-                ->get();
 
         $data['po_lines'] = $arr_po_lines;
     

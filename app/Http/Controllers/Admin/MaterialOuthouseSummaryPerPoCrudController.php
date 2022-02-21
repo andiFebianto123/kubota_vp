@@ -43,6 +43,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
             'pl.status' ,
             'matl_item', 
             'pl.u_m', 
+            'pl.order_qty',
             'pl.due_date', 
             'material_outhouse.description'
         );
@@ -114,7 +115,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
 
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
-        CRUD::column('remaining_qty2')->label('Available Material');
+        CRUD::column('order_qty')->label('Available Material');
         CRUD::column('u_m')->label('UM');
         CRUD::column('due_date')->label('Due Date');
         $this->crud->setListView('crud::list-mo-po');
@@ -140,19 +141,19 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         }
         $dataDetailMaterial->where('material_outhouse.po_num', '=', $this->data['entry']->po_num)
         ->where('material_outhouse.po_line', '=', $this->data['entry']->po_line);
-        $dataDetailMaterial->select(
-            'material_outhouse.po_line',
-            'material_outhouse.matl_item', 
-            'material_outhouse.description', 
-            'material_outhouse.lot_qty as jumlah_lot_qty',
-            DB::raw("(SUM(material_outhouse.lot_qty) - IFNULL((
-                SELECT SUM(issue_qty) FROM issued_material_outhouse 
-                LEFT JOIN delivery ON delivery.ds_num = issued_material_outhouse.ds_num
-                WHERE delivery.po_num = material_outhouse.po_num AND
-                delivery.po_line = material_outhouse.po_line AND
-    			issued_material_outhouse.matl_item = material_outhouse.matl_item
-            ), 0)) as availabel_qty")
-        )->groupBy("material_outhouse.matl_item");
+        // $dataDetailMaterial->select(
+        //     'material_outhouse.po_line',
+        //     'material_outhouse.matl_item', 
+        //     'material_outhouse.description', 
+        //     'material_outhouse.lot_qty as jumlah_lot_qty',
+        //     DB::raw("(SUM(material_outhouse.lot_qty) - IFNULL((
+        //         SELECT SUM(issue_qty) FROM issued_material_outhouse 
+        //         LEFT JOIN delivery ON delivery.ds_num = issued_material_outhouse.ds_num
+        //         WHERE delivery.po_num = material_outhouse.po_num AND
+        //         delivery.po_line = material_outhouse.po_line AND
+    	// 		issued_material_outhouse.matl_item = material_outhouse.matl_item
+        //     ), 0)) as availabel_qty")
+        // )->groupBy("material_outhouse.matl_item");
         $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
                             ->where('po_line', $this->data['entry']->po_line)
                             ->get();
