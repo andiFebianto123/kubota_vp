@@ -136,22 +136,56 @@
             <td align="center" style="border: 1px solid #000000;"><b>PROD DATE (Ref)</b></td>
         </tr>
         @php
-            $total = 0;
-            $num = 1;
+        $total = 0;
+        $num = 1;
         @endphp
+        @foreach ($po_lines as $key => $po_line)
+            @php
+                $arr_change_1[$po_line->po_change][] = $po_line->description;
+                $arr_change_2[$po_line->po_change][] = $po_line->due_date;
+                $arr_change_3[$po_line->po_change][] = (string) $po_line->order_qty;
+                $arr_change_4[$po_line->po_change][] = (string) $po_line->unit_price;
+            @endphp
+        @endforeach
         @foreach ($po_lines as $key => $po_line)
         @php
             $total += $po_line->order_qty*$po_line->unit_price;
+            $due_date = date("Y-m-d", strtotime($po_line->due_date));
+            $unit_price = number_format($po_line->unit_price,0,',','.');
         @endphp
         <tr>
             <td align="center" style="border-left: 1px solid #000000; border-right:1px solid #000000;">{{$num++}}</td>
             <td align="center" style="border-right:1px solid #000000;" class="text-nowrap">{{$po_line->po_num}}-{{$po_line->po_line}}</td>
-            <td align="center" style="border-right:1px solid #000000;">00</td>
+            <td align="center" style="border-right:1px solid #000000;">{{$po_line->po_change}}</td>
             <td style="border-right:1px solid #000000;">{{$po_line->item}}</td>
-            <td style="border-right:1px solid #000000;">{{$po_line->description}}</td>
-            <td align="center" style="border-right:1px solid #000000;">{!! date("Y-m-d", strtotime($po_line->due_date)) !!}</td>
-            <td align="right" style="border-right:1px solid #000000;">{{$po_line->order_qty}}</td>
-            <td align="right" style="border-right:1px solid #000000;" class="text-nowrap"> {{number_format($po_line->unit_price,0,',','.')}}</td>
+            <td style="border-right:1px solid #000000;">
+                @if( sizeof($arr_change_1[$po_line->po_change]) > 1 && array_count_values($arr_change_1[$po_line->po_change])[$po_line->description] !=  sizeof($arr_change_1[$po_line->po_change]))
+                <b><i><u>{{$po_line->description}}</u></i></b>
+                @else
+                {{$po_line->description}}
+                @endif
+            </td>
+            <td align="center" style="border-right:1px solid #000000;">
+                @if( sizeof($arr_change_2[$po_line->po_change]) > 1 && array_count_values($arr_change_2[$po_line->po_change])[$po_line->due_date] !=  sizeof($arr_change_2[$po_line->po_change]))
+                <b><i><u>{{$due_date}}</u></i></b>
+                @else
+                {{$due_date}}
+                @endif
+            </td>
+            <td align="right" style="border-right:1px solid #000000;">
+                @if( sizeof($arr_change_3[$po_line->po_change]) > 1 && array_count_values($arr_change_3[$po_line->po_change])[(string)$po_line->order_qty] !=  sizeof($arr_change_3[$po_line->po_change]))
+                <b><i><u>{{$po_line->order_qty}}</u></i></b>
+                @else
+                {{$po_line->order_qty}}
+                @endif
+            </td>
+            <td align="right" style="border-right:1px solid #000000;" class="text-nowrap">
+                @if( sizeof($arr_change_4[$po_line->po_change]) > 1 && array_count_values($arr_change_4[$po_line->po_change])[(string)$po_line->unit_price] !=  sizeof($arr_change_4[$po_line->po_change]))
+                <b><i><u>{{$unit_price}}</u></i></b>
+                @else
+                {{$unit_price}}
+                @endif
+            </td>
             <td align="right" style="border-right:1px solid #000000;" class="text-nowrap">{{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}</td>
             <td align="center" style="border-right:1px solid #000000;">{!! date("Y-m-d", strtotime($po_line->production_date)) !!}</td>
         </tr>
@@ -192,7 +226,7 @@
             <td></td>
             <td></td>
             <td colspan="3" valign="bottom" style="border-right: 1px solid #000000;">
-                ▢ Result Of Inspection (Certificate)  
+                ▢ Result Of Inspection (Certificate)
             </td>
         </tr>
         <tr>

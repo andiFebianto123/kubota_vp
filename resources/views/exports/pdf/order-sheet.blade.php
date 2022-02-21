@@ -162,17 +162,53 @@
                     @endphp
                     @foreach ($po_lines as $key => $po_line)
                     @php
-                    $total += $po_line->order_qty*$po_line->unit_price;
+                        $arr_change_1[$po_line->po_change][] = $po_line->description;
+                        $arr_change_2[$po_line->po_change][] = $po_line->due_date;
+                        $arr_change_3[$po_line->po_change][] = (string) $po_line->order_qty;
+                        $arr_change_4[$po_line->po_change][] = (string) $po_line->unit_price;
+                    @endphp
+                    @endforeach
+
+                    @foreach ($po_lines as $key => $po_line)
+                    @php
+                        $total += $po_line->order_qty*$po_line->unit_price;
+                        $due_date = date("Y-m-d", strtotime($po_line->due_date));
+                        $unit_price = number_format($po_line->unit_price,0,',','.');
                     @endphp
                     <tr>
                         <td align="center">{{$num++}}</td>
                         <td align="center" class="text-nowrap">{{$po_line->po_num}}-{{$po_line->po_line}}</td>
-                        <td align="center">00</td>
+                        <td align="center">{{$po_line->po_change}}</td>
                         <td>{{$po_line->item}}</td>
-                        <td>{{$po_line->description}}</td>
-                        <td align="center">{!! date("Y-m-d", strtotime($po_line->due_date)) !!}</td>
-                        <td align="right">{{$po_line->order_qty}}</td>
-                        <td align="right" class="text-nowrap"> {{number_format($po_line->unit_price,0,',','.')}}</td>
+                        <td>
+                            @if( sizeof($arr_change_1[$po_line->po_change]) > 1 && array_count_values($arr_change_1[$po_line->po_change])[$po_line->description] !=  sizeof($arr_change_1[$po_line->po_change]))
+                            <b><i><u>{{$po_line->description}}</u></i></b>
+                            @else
+                            {{$po_line->description}}
+                            @endif
+                        </td>
+                        <td align="center">
+                            @if( sizeof($arr_change_2[$po_line->po_change]) > 1 && array_count_values($arr_change_2[$po_line->po_change])[$po_line->due_date] !=  sizeof($arr_change_2[$po_line->po_change]))
+                            <b><i><u>{{$due_date}}</u></i></b>
+                            @else
+                            {{$due_date}}
+                            @endif
+                        </td>
+                        <td align="right">
+                            @if( sizeof($arr_change_3[$po_line->po_change]) > 1 && array_count_values($arr_change_3[$po_line->po_change])[(string)$po_line->order_qty] !=  sizeof($arr_change_3[$po_line->po_change]))
+                            <b><i><u>{{$po_line->order_qty}}</u></i></b>
+                            @else
+                            {{$po_line->order_qty}}
+                            @endif
+                        </td>
+                        <td align="right" class="text-nowrap">
+                            @if( sizeof($arr_change_4[$po_line->po_change]) > 1 && array_count_values($arr_change_4[$po_line->po_change])[(string)$po_line->unit_price] !=  sizeof($arr_change_4[$po_line->po_change]))
+                            <b><i><u>{{$unit_price}}</u></i></b>
+                            @else
+                            {{$unit_price}}
+                            @endif
+                        </td>
+                        <td align="right" class="text-nowrap"> {{$unit_price}}</td>
                         <td align="right" class="text-nowrap">{{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}</td>
                         <td align="center">{!! date("Y-m-d", strtotime($po_line->production_date)) !!}</td>
                     </tr>
