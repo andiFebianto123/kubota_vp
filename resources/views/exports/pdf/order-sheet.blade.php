@@ -208,7 +208,6 @@
                             {{$unit_price}}
                             @endif
                         </td>
-                        <td align="right" class="text-nowrap"> {{$unit_price}}</td>
                         <td align="right" class="text-nowrap">{{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}</td>
                         <td align="center">{!! date("Y-m-d", strtotime($po_line->production_date)) !!}</td>
                     </tr>
