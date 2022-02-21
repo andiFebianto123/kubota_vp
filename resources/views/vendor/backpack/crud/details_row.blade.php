@@ -21,7 +21,7 @@
 					<tr>
 						<th>Material Item</th>
 						<th>Description</th>
-						<th>Availabel Qty</th>
+						<th>Available Qty</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -30,7 +30,7 @@
 						<tr>
 							<td>{{ $data_material->matl_item }}</td>
 							<td>{{ $data_material->description }}</td>
-							<td>{{ $data_material->availabel_qty }}</td>
+							<td>{{ $data_material->remaining_qty }}</td>
 						</tr>
 					@endforeach
 					<?php 

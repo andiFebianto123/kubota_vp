@@ -8,6 +8,7 @@ use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use App\Models\MaterialOuthouseSummaryPerPo;
 use App\Models\IssuedMaterialOuthouse;
+use App\Models\MaterialOuthouse;
 
 /**
  * Class MaterialOuthouseCrudController
@@ -152,8 +153,10 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
     			issued_material_outhouse.matl_item = material_outhouse.matl_item
             ), 0)) as availabel_qty")
         )->groupBy("material_outhouse.matl_item");
-
-        $this->data['data_materials'] = $dataDetailMaterial->get();
+        $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
+                            ->where('po_line', $this->data['entry']->po_line)
+                            ->get();
+        $this->data['data_materials'] = $data_materials;
         // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
         //                 ->where('delivery.po_num', $this->data['entry']->po_num)
         //                 ->where('delivery.po_line', $this->data['entry']->po_line)

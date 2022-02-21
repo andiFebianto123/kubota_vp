@@ -8,6 +8,7 @@ use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use App\Models\MaterialOuthouseSummaryPerPo;
 use App\Models\IssuedMaterialOuthouse;
+use App\Models\MaterialOuthouse;
 
 /**
  * Class HistoriMoSummaryPerPoCrudController
@@ -42,25 +43,32 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'matl_item', 
             'pl.u_m', 
             'pl.due_date', 
-            'material_outhouse.description'
+            'material_outhouse.description',
         );
-        $this->crud->query->join('po_line as pl', function($join){
-            $join->on('material_outhouse.po_num', '=', 'pl.po_num');
-            $join->on('material_outhouse.po_line', '=', 'pl.po_line');
+        $this->crud->query->join('delivery as dl', function($join){
+            $join->on('material_outhouse.po_num', '=', 'dl.po_num');
+            $join->on('material_outhouse.po_line', '=', 'dl.po_line');
             // ->where('pl.status', '=', 'O');
         });
         $this->crud->query->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
+        $this->crud->query->join('po_line as pl', function($join){
+            $join->on('material_outhouse.po_num', '=', 'pl.po_num');
+            $join->on('material_outhouse.po_line', '=', 'pl.po_line');
+        });
 
-        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
-        $this->crud->query->whereRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O')");
+        // $this->crud->query->whereRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or 
+        //     (`pl`.`status` = 'O' AND test_qty = 600)"
+        // );
+
         $this->crud->query->groupBy('material_outhouse.po_num');
         $this->crud->query->groupBy('material_outhouse.po_line');
 
-        // $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' AND remaining_qty = 0)");
+        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O')");
 
         if(Constant::checkPermission('Read History Summary MO')){
             $this->crud->allowAccess('list');
@@ -113,7 +121,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
-        CRUD::column('remaining_qty2')->label('Available Material');
+        CRUD::column('remaining_qty')->label('Available Material');
+        // CRUD::column('available_qty')->label('aq');
         CRUD::column('u_m')->label('UM');
         CRUD::column('due_date')->label('Due Date');
         $this->crud->addFilter([
@@ -158,6 +167,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+
     public function showDetailsRow($id)
     {
         // $this->crud->hasAccessOrFail('details_row');
@@ -172,25 +183,24 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $dataDetailMaterial->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
-        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+        
+        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $dataDetailMaterial->where('vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
+
         $dataDetailMaterial->where('material_outhouse.po_num', '=', $this->data['entry']->po_num)
         ->where('material_outhouse.po_line', '=', $this->data['entry']->po_line)
         ->select(
             'material_outhouse.po_line',
             'material_outhouse.matl_item', 
             'material_outhouse.description', 
-            'material_outhouse.lot_qty as jumlah_lot_qty',
-            DB::raw("(SUM(material_outhouse.lot_qty) - IFNULL((
-                SELECT SUM(issue_qty) FROM issued_material_outhouse 
-                LEFT JOIN delivery ON delivery.ds_num = issued_material_outhouse.ds_num
-                WHERE delivery.po_num = material_outhouse.po_num AND
-                delivery.po_line = material_outhouse.po_line AND
-    			issued_material_outhouse.matl_item = material_outhouse.matl_item
-            ), 0)) as availabel_qty")
+            'material_outhouse.lot_qty as jumlah_lot_qty'
         )->groupBy("material_outhouse.matl_item");
-        $this->data['data_materials'] = $dataDetailMaterial->get();
+
+        $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
+                            ->where('po_line', $this->data['entry']->po_line)
+                            ->get();
+        $this->data['data_materials'] = $data_materials;
         // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
         //                 ->where('delivery.po_num', $this->data['entry']->po_num)
         //                 ->where('delivery.po_line', $this->data['entry']->po_line)

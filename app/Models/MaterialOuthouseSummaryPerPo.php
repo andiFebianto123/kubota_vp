@@ -45,17 +45,16 @@ class MaterialOuthouseSummaryPerPo extends Model
     public function getLotQtyAttribute()
     {
         $lot_qty = MaterialOuthouse::where('po_num', $this->po_num)
-                    ->where('matl_item', $this->matl_item)
+                    ->where('po_line', $this->po_line)
                     ->sum('lot_qty');
         return $lot_qty;
     }
 
     public function getQtyIssuedAttribute()
     {
-        $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
-                        ->where('delivery.po_num', $this->po_num)
-                        ->where('issued_material_outhouse.matl_item', $this->matl_item)
-                        ->sum('issue_qty');
+        $qty_issued = IssuedMaterialOuthouse::whereHas('delivery', function($query) {
+            $query->where('po_num', $this->po_num);
+         })->where('matl_item', $this->matl_item)->sum('issue_qty');
 
         return $qty_issued;
     }

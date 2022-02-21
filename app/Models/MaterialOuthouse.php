@@ -32,8 +32,6 @@ class MaterialOuthouse extends Model
         return $qty_issued;
     }
 
-
-
     public function getRemainingQtyAttribute()
     {
         $qty_issued = $this->getQtyIssuedAttribute();
@@ -41,4 +39,5 @@ class MaterialOuthouse extends Model
         
         return $qty;
     }
+
 }
