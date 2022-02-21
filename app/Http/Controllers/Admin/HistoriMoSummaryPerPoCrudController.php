@@ -124,7 +124,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
-        CRUD::column('order_qty')->label('Available Material');
+        CRUD::column('order_qty')->label('Qty Order');
         // CRUD::column('available_qty')->label('aq');
         CRUD::column('u_m')->label('UM');
         CRUD::column('due_date')->label('Due Date');

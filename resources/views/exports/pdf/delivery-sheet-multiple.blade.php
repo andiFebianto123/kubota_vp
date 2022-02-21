@@ -12,10 +12,13 @@
     table td{
         border:1px solid #ffffff;
         background-color: #ffffff;
-        font-size: 12px;
+        font-size: 11px;
         font-family: Arial, Helvetica, sans-serif;
         padding: 4px;
         color: #000000;
+    }
+    td strong{
+        font-size: 12px;
     }
     table{
         background-color: #000000;
