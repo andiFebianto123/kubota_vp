@@ -85,7 +85,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->query->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
-        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
@@ -135,7 +135,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $dataDetailMaterial->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
-        if(in_array(Constant::getRole(), ['Marketing Vendor', 'Finance Vendor', 'Warehouse Vendor'])){
+        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $dataDetailMaterial->where('vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $dataDetailMaterial->where('material_outhouse.po_num', '=', $this->data['entry']->po_num)
