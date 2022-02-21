@@ -101,9 +101,9 @@
                     <div class="card-header">
                         {{ trans('backpack::base.change_password') }}
                         @if($user->last_update_password == null)
-                            <span style="color: red;">
-                                Anda harus mengupdate password Anda terlebih dahulu, sebelum dapat menggunakan aplikasi ini
-                            </span>
+                            <label style="color: red;">
+                                Anda harus mengupdate password Anda terlebih dahulu, sebelum dapat menggunakan aplikasi ini!
+                            </label>
                         @endif
                     </div>
 

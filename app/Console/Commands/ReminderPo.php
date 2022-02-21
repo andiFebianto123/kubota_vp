@@ -76,7 +76,7 @@ class ReminderPo extends Command
                 $details = [
                     'type' => 'reminder_po',
                     'title' => 'Reminder accept PO',
-                    'message' => 'Semua data PO Line anda telah di accept, Anda dapat mengklik tombol dibawah ini.',
+                    'message' => 'Semua data PO Line anda telah di accept, anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
                 ];
 
