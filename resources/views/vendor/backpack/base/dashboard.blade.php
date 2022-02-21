@@ -2,17 +2,17 @@
 @section('content')
 <div class="row">
     <div class="col">
-        @if($user_check_password_range->selisih_pertahun >= 365 && $user_check_password_range->selisih_pertahun < 395)
+        @if($user_check_password_range->selisih_pertahun >= 335 && $user_check_password_range->selisih_pertahun < 365)
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>Hallo, {{Auth::guard('backpack')->user()->username}}</strong> Anda diharapkan untuk mengganti password 1 tahun sekali
+                <strong>Hallo, {{Auth::guard('backpack')->user()->username}}</strong>. Untuk alasan keamanan data, anda diharapkan untuk mengubah password 1 tahun sekali.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
         @endif
-        @if($user_check_password_range->selisih_pertahun >= 395)
+        @if($user_check_password_range->selisih_pertahun >= 365)
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Hallo, {{Auth::guard('backpack')->user()->username}}</strong> Anda harus ganti password sekarang
+                <strong>Hallo, {{Auth::guard('backpack')->user()->username}}</strong>. Untuk alasan keamanan data, disarankan untuk mengubah password anda sekarang.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
