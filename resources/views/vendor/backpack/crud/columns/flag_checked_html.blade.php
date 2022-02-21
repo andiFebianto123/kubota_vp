@@ -1,4 +1,6 @@
 @php
+    $value = data_get($entry, $column['name']);
+
     $column['text'] = $column['value'] ?? '';
     $column['escaped'] = $column['escaped'] ?? false;
     $column['prefix'] = $column['prefix'] ?? '';
@@ -9,7 +11,7 @@
     }
 @endphp
 
-@if($column['text'] == 1)
+@if($value == 1)
 <span class="text-success">
     <i class="la la-check"></i>
 </span>
