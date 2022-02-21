@@ -100,9 +100,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <thead>
                         <tr>
                             <th>
-                                @if(backpack_auth()->user()->hasRole('Admin PTKI'))
-                                    <input type="checkbox" id="check-all-cb" class="check-all">
-                                @endif
+                                <input type="checkbox" id="check-all-cb" class="check-all">
                             </th>
                             <th>PO Number</th>
                             <th>Status</th>
