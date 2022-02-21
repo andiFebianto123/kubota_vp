@@ -51,6 +51,10 @@ class DashboardController extends Controller
     }
     public function index()
     {
+        if(backpack_user()->last_update_password === NULL){
+            return redirect(url('admin/edit-account-info'));
+        }
+
         $general_message_help = GeneralMessage::where('category', 'help')->get();
         $general_message_info = GeneralMessage::where('category', 'information')->get();
         $count_po_all = $this->countPurchaseOrder();
@@ -58,8 +62,7 @@ class DashboardController extends Controller
         $count_delivery = $this->countDelivery();
         $count_delivery_status = $this->countDeliveryStatus();
         $user = User::where('id', backpack_user()->id);
-        $user->select(DB::raw("datediff(current_date(), DATE(updated_at)) as selisih_pertahun, datediff(DATE(updated_at), DATE(created_at)) as selisih_peruser"));
-
+        $user->select(DB::raw("datediff(current_date(), DATE(last_update_password)) as selisih_pertahun"));
 
         $data['count_delivery_status'] = $count_delivery_status;
         $data['count_delivery'] = $count_delivery;

@@ -22,6 +22,7 @@ Route::post('admin/login', 'Auth\LoginController@authenticate')->name("rectmedia
 // Route::post('authenticate', 'Auth\LoginController@authenticate')->name("rectmedia.auth.login");
 Route::get('two-factor', 'Auth\TwoFactorController@index')->name("twofactor");
 Route::post('two-factor-update', 'Auth\TwoFactorController@update')->name("twofactor.update");
+Route::post('admin/update-password', 'Auth\MyAccountController@postChangePasswordForm2')->name("rectmedia.update.password");
 
 Route::get('/', function () {
     return redirect()->to('admin');

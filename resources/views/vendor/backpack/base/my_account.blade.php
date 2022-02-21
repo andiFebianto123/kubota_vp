@@ -92,7 +92,7 @@
         
         {{-- CHANGE PASSWORD FORM --}}
         <div class="col-lg-8">
-            <form class="form" action="{{ route('backpack.account.password') }}" method="post">
+            <form class="form" action="{{ route('rectmedia.update.password') }}" method="post">
 
                 {!! csrf_field() !!}
 
@@ -100,6 +100,11 @@
 
                     <div class="card-header">
                         {{ trans('backpack::base.change_password') }}
+                        @if($user->last_update_password == null)
+                            <span style="color: red;">
+                                Anda harus mengupdate password Anda terlebih dahulu, sebelum dapat menggunakan aplikasi ini
+                            </span>
+                        @endif
                     </div>
 
                     <div class="card-body backpack-profile-form bold-labels">
