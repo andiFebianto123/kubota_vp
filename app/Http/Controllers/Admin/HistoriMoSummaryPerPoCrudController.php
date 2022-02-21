@@ -44,7 +44,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'pl.u_m', 
             'pl.order_qty',
             'pl.due_date', 
-            'material_outhouse.description',
+            'pl.description'
         );
         $this->crud->query->join('delivery as dl', function($join){
             $join->on('material_outhouse.po_num', '=', 'dl.po_num');
@@ -103,7 +103,9 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         // $this->crud->query->having('remaining_qty', '>', 0);
 
-        CRUD::column('po_num_line')->label('PO Number');
+        CRUD::column('po_num')->label('PO Number');
+        CRUD::column('po_line')->label('PO Line');
+        // CRUD::column('po_num_line')->label('PO Number');
         // CRUD::column('status')->label('Status');
         CRUD::addColumn([
             'label'     => 'Status', // Table column heading

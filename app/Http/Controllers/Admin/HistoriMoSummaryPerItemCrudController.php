@@ -62,7 +62,18 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             $join->on('material_outhouse.po_line', '=', 'pl.po_line');
             // ->where('pl.status', '=', 'O');
         });
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(in_array(Constant::getRole(), ['Admin PTKI'])){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'vend_num', $value);
+            });
+        }else{
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $this->crud->groupBy('material_outhouse.matl_item');

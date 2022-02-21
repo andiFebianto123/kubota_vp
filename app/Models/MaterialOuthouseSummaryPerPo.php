@@ -14,7 +14,7 @@ class MaterialOuthouseSummaryPerPo extends Model
     use RevisionableTrait;
     protected $table = 'material_outhouse';
         // protected $fillable = [];
-    protected $appends = ['qty_issued', 'remaining_qty'];
+    protected $appends = ['qty_issued', 'remaining_qty', 'po_num_line'];
 
     public function getPoNumLineAttribute(){
         return $this->po_num . '-' .$this->po_line;

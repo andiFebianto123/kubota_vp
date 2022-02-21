@@ -98,7 +98,7 @@ class TempUploadDelivery extends Model
             $arr_validation[] = ['mode' => $current_max_qty['mode'], 'message' => $current_max_qty['message']];
         }
         if($this->shipped_qty <= 0){
-            $arr_validation[] = ['mode' => 'danger', 'message' => 'Qty must greather than 0'];
+            $arr_validation[] = ['mode' => 'danger', 'message' => 'QTY cannot be 0'];
         }
     
         return $arr_validation;

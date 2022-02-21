@@ -56,20 +56,30 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $this->crud->query->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
-        $this->crud->addClause(
-            'join',
-            'po_line',
-            function ($query) {
-                $query->on('material_outhouse.po_num', '=', 'po_line.po_num')
-                ->on('material_outhouse.po_line', '=', 'po_line.po_line')
-                ->where('po_line.status', '=', 'O');
-            }
-        );
-        $this->crud->groupBy('material_outhouse.matl_item');
-        $this->crud->query->having('remaining_qty', '>', 0);
+        // $this->crud->addClause(
+        //     'join',
+        //     'po_line',
+        //     function ($query) {
+        //         $query->on('material_outhouse.po_num', '=', 'po_line.po_num')
+        //         ->on('material_outhouse.po_line', '=', 'po_line.po_line')
+        //         ->where('po_line.status', '=', 'O');
+        //     }
+        // );
+        $this->crud->groupBy('matl_item');
+        // $this->crud->query->having('remaining_qty', '>', 0);
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/test/ajax-vendor-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'vend_num', $value);
+            });
         }
         if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);

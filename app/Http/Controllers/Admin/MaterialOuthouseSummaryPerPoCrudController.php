@@ -45,7 +45,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
             'pl.u_m', 
             'pl.order_qty',
             'pl.due_date', 
-            'material_outhouse.description'
+            'pl.description'
         );
 
         if(Constant::checkPermission('Read Summary MO')){
@@ -99,8 +99,10 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         // if(Constant::getRole() == 'Admin PTKI'){
         //     CRUD::column('vend_num')->label('Vend Num');
         // }
+        // $this->crud->addColumnToSearch('po_num');
 
-        CRUD::column('po_num_line')->label('PO Number');
+        CRUD::column('po_num')->label('PO Number');
+        CRUD::column('po_line')->label('PO Line');
         // CRUD::column('status')->label('Status');
         CRUD::addColumn([
             'label'     => 'Status', // Table column heading
