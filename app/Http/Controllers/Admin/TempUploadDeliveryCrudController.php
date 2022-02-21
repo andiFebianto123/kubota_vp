@@ -134,6 +134,9 @@ class TempUploadDeliveryCrudController extends CrudController
         DB::beginTransaction();
 
         try{
+            $success_insert = 0;
+            $total_insert = sizeof($data_temps);
+
             foreach ($data_temps as $key => $data_temp) {
                 $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)->where('po_line', $data_temp->po_line)->first();
                 $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->shipped_date);
@@ -176,7 +179,6 @@ class TempUploadDeliveryCrudController extends CrudController
                     $insert_dstatus->unit_price = $po_line->unit_price;
                     $insert_dstatus->tax_status = $po_line->tax_status;
                     $insert_dstatus->shipped_qty = $data_temp->shipped_qty;
-                    $insert_dstatus->order_qty = $po_line->order_qty;
                     $insert_dstatus->petugas_vendor = $data_temp->petugas_vendor;
                     $insert_dstatus->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
                     $insert_dstatus->created_by = backpack_auth()->user()->id;
@@ -202,13 +204,58 @@ class TempUploadDeliveryCrudController extends CrudController
                             }
                         }
                     }
+
+                    if ( $po_line->outhouse_flag == 1) {
+                        $outhouse_materials = MaterialOuthouse::where('po_num', $po_line->po_num)
+                                    ->where('po_line', $po_line->po_line)
+                                    ->groupBy('matl_item')
+                                    ->get();
+
+                        foreach ($outhouse_materials as $key => $om) {
+                            $issued_qty =  $data_temp->shipped_qty * $om->qty_per;
+        
+                            $insert_imo = new IssuedMaterialOuthouse();
+                            $insert_imo->ds_num =  $ds_num['single'];
+                            $insert_imo->ds_line = $ds_line;
+                            $insert_imo->ds_detail = $po_line->item;
+                            $insert_imo->matl_item = $om->matl_item;
+                            $insert_imo->description = $om->description;
+                            $insert_imo->lot =  $om->lot;
+                            $insert_imo->issue_qty = $issued_qty;
+                            $insert_imo->created_by = backpack_auth()->user()->id;
+                            $insert_imo->updated_by = backpack_auth()->user()->id;
+                            $insert_imo->save();
+                        }
+                    }
+                    $success_insert++;
                 }
             }
     
             TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
-            DB::commit();
 
-            return ['status' => true, 'arr_ids' => $arr_ids];
+            $message = "";
+            $alert = "";
+            $status = false;
+            if ($success_insert == $total_insert && $total_insert > 0) {
+                $status = true;
+                $alert = "success";
+                $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
+                DB::commit();
+            }else if ($success_insert < $total_insert && $success_insert > 0) {
+                $status = true;
+                $alert = "warning";
+                $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
+                DB::commit();
+            }else if($success_insert == 0){
+                $status = false;
+                $alert = "danger";
+                $message = "Failure import data (".$success_insert."/". $total_insert.")";
+                DB::rollback();
+            }
+
+            
+
+            return ['status' => $status, 'arr_ids' => $arr_ids, 'message' => $message, 'alert' => $alert];
 
         }catch(\Exception $e){
             DB::rollback();
@@ -223,13 +270,22 @@ class TempUploadDeliveryCrudController extends CrudController
 
     public function insertToDb(Request $request)
     {
-        return $this->insertMassData()['status'];
+        $imd = $this->insertMassData();
+        
+        return response()->json([
+            'status' => $imd['status'],
+            'alert' => $imd['alert'],
+            'message' => $imd['message'],
+            'validation_errors' => []
+        ], 200);
     }
 
 
     public function printInsertToDb(Request $request)
     {
-        $arr_ids = $this->insertMassData()['arr_ids'];
+        $imd = $this->insertMassData();
+
+        $arr_ids = $imd['arr_ids'];
 
         $arr_param['print_all'] = false;
         $arr_param['po_num'] = '-';
@@ -240,9 +296,9 @@ class TempUploadDeliveryCrudController extends CrudController
         $str_param = base64_encode(serialize($arr_param));
 
         return response()->json([
-            'status' => true,
-            'alert' => 'success',
-            'message' => 'Sukses Generate PDF',
+            'status' => $imd['status'],
+            'alert' => $imd['alert'],
+            'message' => $imd['message'],
             'newtab' => true,
             'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
             'validation_errors' => []

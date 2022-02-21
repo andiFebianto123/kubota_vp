@@ -20,17 +20,20 @@
               success: function(result) {
                   // Show an alert with the result
                   new Noty({
-                      text: "Data has been imported",
-                      type: "success"
+                      text: result.message,
+                      type: result.alert
                   }).show();
-                  crud.table.ajax.reload();
-                  // Hide the modal, if any
-                  $('.modal').modal('hide');
-                  setTimeout(
-                    function() 
-                    {
-                        window.location.replace(redirectTo);
-                    }, 2000);                 
+                  if (result.status) {
+                    crud.table.ajax.reload();
+                    // Hide the modal, if any
+                    $('.modal').modal('hide');
+                    setTimeout(
+                        function() 
+                        {
+                            window.location.replace(redirectTo);
+                        }, 2000);   
+                  }
+                                
               },
               error: function(result) {
                   // Show an alert with the result

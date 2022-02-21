@@ -15,6 +15,11 @@
               url: route,
               type: 'POST',
               success: function(response) {
+                new Noty({
+                      text: response.message,
+                      type: response.alert
+                  }).show();
+                  
                 if (response.status) {
                     if (response.redirect_to) {
                         if (response.newtab) {

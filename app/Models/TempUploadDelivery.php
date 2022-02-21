@@ -77,6 +77,7 @@ class TempUploadDelivery extends Model
 
     private function rowValidation(){
         $arr_filters = [];
+        $arr_validation = [];
         $arr_filters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
         // $arr_filters[] = ['po_line.po_num', '=', $this->po_num];
         $args1 = [  'filters' => $arr_filters, 
@@ -84,7 +85,7 @@ class TempUploadDelivery extends Model
                     'po_num' => $this->po_num, 
                     'po_line' => $this->po_line
                 ];
-        $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->purchaseOrderLine->order_qty ];
+        $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->shipped_qty ];
 
         $ds_validation = new DsValidation();
         $unfinished_po_line = $ds_validation->unfinishedPoLine($args1);
@@ -93,7 +94,12 @@ class TempUploadDelivery extends Model
         if (sizeof($unfinished_po_line['datas']) > 0 ) {
             $arr_validation[] = ['mode' => $unfinished_po_line['mode'], 'message' => $unfinished_po_line['message']];
         }
-        $arr_validation[] = ['mode' => $current_max_qty['mode'], 'message' => $current_max_qty['message']];
+        if($current_max_qty['datas'] < $this->shipped_qty){
+            $arr_validation[] = ['mode' => $current_max_qty['mode'], 'message' => $current_max_qty['message']];
+        }
+        if($this->shipped_qty <= 0){
+            $arr_validation[] = ['mode' => 'danger', 'message' => 'Qty must greather than 0'];
+        }
     
         return $arr_validation;
     }
