@@ -102,7 +102,7 @@
                         {{ trans('backpack::base.change_password') }}
                         @if($user->last_update_password == null)
                             <label style="color: red;">
-                                Anda harus mengupdate password Anda terlebih dahulu, sebelum dapat menggunakan aplikasi ini!
+                                Anda harus melakukan update password anda terlebih dahulu, untuk dapat menggunakan aplikasi ini!
                             </label>
                         @endif
                     </div>
