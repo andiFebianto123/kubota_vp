@@ -79,7 +79,7 @@ class TaxInvoiceCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        // $this->crud->removeButton('show');
+        $this->crud->removeButton('delete');
         $this->crud->removeButton('update');
         if(!Constant::checkPermission('Create Invoice and Tax')){
             $this->crud->removeButton('create');
@@ -141,7 +141,7 @@ class TaxInvoiceCrudController extends CrudController
         ]);
         CRUD::addColumn([
             'label'     => 'Qty Received', // Table column heading
-            'name'      => 'qty_received', // the column that contains the ID of that connected entity;
+            'name'      => 'received_qty', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
         CRUD::addColumn([
