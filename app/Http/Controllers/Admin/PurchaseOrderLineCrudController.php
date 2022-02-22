@@ -386,7 +386,7 @@ class PurchaseOrderLineCrudController extends CrudController
             ->whereIn('delivery.id', $print_delivery )
             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-            'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
+            'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
             'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
             // ->groupBy('delivery.id')->get();
         }else{
@@ -396,7 +396,7 @@ class PurchaseOrderLineCrudController extends CrudController
                 ->where('delivery.id', $id)
                 ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
                 ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
+                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
                 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
             // ->groupBy('delivery.id')->get();
             }
