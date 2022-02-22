@@ -193,10 +193,15 @@ class PurchaseOrderLineCrudController extends CrudController
         ]);   
         $this->crud->addField([
             'type' => 'text',
+            'label' => 'Petugas Vendor',
             'name' => 'petugas_vendor',
             'default' => Auth::guard('backpack')->user()->name
         ]); 
-        CRUD::field('no_surat_jalan_vendor');
+        $this->crud->addField([
+            'type' => 'text',
+            'label' => 'No Surat Jalan',
+            'name' => 'no_surat_jalan_vendor',
+        ]); 
         $this->crud->addField([
             'type' => 'number_qty',
             'name' => 'shipped_qty',

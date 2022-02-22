@@ -96,7 +96,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'name'      => 'petugas_vendor', 
         ]);
         CRUD::addColumn([
-            'label'     => 'DO Number Vendor', // Table column heading
+            'label'     => 'No Surat Jalan', // Table column heading
             'name'      => 'no_surat_jalan_vendor', 
         ]);
         CRUD::addColumn([
@@ -104,7 +104,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'name'      => 'validation_text', 
             'type'      => 'model_function',
             'function_name' => 'getValidationText',
-            'limit' => 255
+            'limit' => 1000
         ]);
        
         // Alert::success("Successfully Save Multiple DS!")->flash();
@@ -438,7 +438,6 @@ class TempUploadDeliveryCrudController extends CrudController
 
         $po_line = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
 
-
         $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
         $cmq =  (new DsValidation())->currentMaxQty($args);
         $alert_for = "";
@@ -449,7 +448,7 @@ class TempUploadDeliveryCrudController extends CrudController
         }
 
         if ($cmq['datas'] < $shipped_qty) {
-            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
+            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal '.$cmq['datas'] ];
 
             return response()->json([
                 'status' => false,

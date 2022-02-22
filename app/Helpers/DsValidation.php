@@ -26,12 +26,11 @@ class DsValidation
                       ->sum('shipped_qty');
 
     $realtime_qty = $qty_initial - $realtime_ds_qty;
-    $current_qty = ($order_qty < $realtime_qty)? $realtime_qty -  $order_qty : $realtime_qty;
     
     return [
-      'datas'  => $current_qty,
+      'datas'  => $realtime_qty,
       'mode'   => 'danger',
-      'message' => 'Maksimum Qty '. $current_qty
+      'message' => 'Maksimum Qty '. $realtime_qty
     ];
   }
 
