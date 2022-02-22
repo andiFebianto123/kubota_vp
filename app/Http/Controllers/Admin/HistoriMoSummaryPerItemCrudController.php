@@ -31,9 +31,16 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-item');
         CRUD::setEntityNameStrings('histori mo summary per item', 'Summary MO History Per Item');
+        $sql = "((SELECT lot_qty) - 
+        (SELECT SUM(issue_qty) FROM issued_material_outhouse imo
+        WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num AND
+        delivery.po_line = material_outhouse.po_line)
+        AND 
+        imo.matl_item = material_outhouse.matl_item = imo.matl_item )) AS mremaining_qty";
+
         $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
         'material_outhouse.po_num as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status',
-            DB::raw("(SUM(lot_qty) - IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo WHERE imo.matl_item = material_outhouse.matl_item), 0)) AS remaining_qty")
+            DB::raw($sql)
         );
         if(Constant::checkPermission('Read History Summary MO')){
             $this->crud->allowAccess('list');
@@ -77,7 +84,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $this->crud->groupBy('material_outhouse.matl_item');
-        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' AND remaining_qty = 0)");
+        $this->crud->query->havingRaw("(mremaining_qty <= 0)");
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
@@ -87,7 +94,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::column('matl_item')->label('Matl Item');
         // CRUD::column('status')->label('Status');
         CRUD::column('description');
-        CRUD::column('remaining_qty')->label('Available Material');
+        CRUD::column('mremaining_qty')->label('Available Material');
     }
 
     /**
