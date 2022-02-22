@@ -64,10 +64,14 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         $this->crud->query->join('po', function($join){
             $join->on('material_outhouse.po_num', '=', 'po.po_num');
         });
+
         $this->crud->query->join('po_line as pl', function($join){
             $join->on('material_outhouse.po_num', '=', 'pl.po_num');
             $join->on('material_outhouse.po_line', '=', 'pl.po_line');
-            // ->where('pl.status', '=', 'O');
+        });
+        $this->crud->query->join('delivery as dl', function($join){
+            $join->on('material_outhouse.po_num', '=', 'dl.po_num');
+            $join->on('material_outhouse.po_line', '=', 'dl.po_line');
         });
         if(in_array(Constant::getRole(), ['Admin PTKI'])){
             $this->crud->addFilter([
@@ -84,7 +88,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $this->crud->groupBy('material_outhouse.matl_item');
-        $this->crud->query->havingRaw("(mremaining_qty <= 0)");
+        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' and mremaining_qty <= 0)");
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
@@ -94,7 +98,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::column('matl_item')->label('Matl Item');
         // CRUD::column('status')->label('Status');
         CRUD::column('description');
-        CRUD::column('mremaining_qty')->label('Available Material');
+        CRUD::column('remaining_qty')->label('Available Material');
     }
 
     /**

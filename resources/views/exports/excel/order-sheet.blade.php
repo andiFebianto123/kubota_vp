@@ -140,14 +140,6 @@
         $num = 1;
         @endphp
         @foreach ($po_lines as $key => $po_line)
-            @php
-                $arr_change_1[$po_line->po_change][] = $po_line->description;
-                $arr_change_2[$po_line->po_change][] = $po_line->due_date;
-                $arr_change_3[$po_line->po_change][] = (string) $po_line->order_qty;
-                $arr_change_4[$po_line->po_change][] = (string) $po_line->unit_price;
-            @endphp
-        @endforeach
-        @foreach ($po_lines as $key => $po_line)
         @php
             $total += $po_line->order_qty*$po_line->unit_price;
             $due_date = date("Y-m-d", strtotime($po_line->due_date));
@@ -159,29 +151,29 @@
             <td align="center" style="border-right:1px solid #000000;">{{$po_line->po_change}}</td>
             <td style="border-right:1px solid #000000;">{{$po_line->item}}</td>
             <td style="border-right:1px solid #000000;">
-                @if( sizeof($arr_change_1[$po_line->po_change]) > 1 && array_count_values($arr_change_1[$po_line->po_change])[$po_line->description] !=  sizeof($arr_change_1[$po_line->po_change]))
-                <b><i><u>{{$po_line->description}}</u></i></b>
+                @if($po_line->po_change == $po->po_change)
+                {!! $po_line->change_description_bold !!}
                 @else
                 {{$po_line->description}}
                 @endif
             </td>
             <td align="center" style="border-right:1px solid #000000;">
-                @if( sizeof($arr_change_2[$po_line->po_change]) > 1 && array_count_values($arr_change_2[$po_line->po_change])[$po_line->due_date] !=  sizeof($arr_change_2[$po_line->po_change]))
-                <b><i><u>{{$due_date}}</u></i></b>
+                @if($po_line->po_change == $po->po_change)
+                {!! $po_line->change_due_date_bold !!}
                 @else
                 {{$due_date}}
                 @endif
             </td>
             <td align="right" style="border-right:1px solid #000000;">
-                @if( sizeof($arr_change_3[$po_line->po_change]) > 1 && array_count_values($arr_change_3[$po_line->po_change])[(string)$po_line->order_qty] !=  sizeof($arr_change_3[$po_line->po_change]))
-                <b><i><u>{{$po_line->order_qty}}</u></i></b>
+                @if($po_line->po_change == $po->po_change)
+                {!! $po_line->change_order_qty_bold !!}
                 @else
                 {{$po_line->order_qty}}
                 @endif
             </td>
             <td align="right" style="border-right:1px solid #000000;" class="text-nowrap">
-                @if( sizeof($arr_change_4[$po_line->po_change]) > 1 && array_count_values($arr_change_4[$po_line->po_change])[(string)$po_line->unit_price] !=  sizeof($arr_change_4[$po_line->po_change]))
-                <b><i><u>{{$unit_price}}</u></i></b>
+                @if($po_line->po_change == $po->po_change)
+                {!! $po_line->change_unit_price_bold !!}
                 @else
                 {{$unit_price}}
                 @endif
