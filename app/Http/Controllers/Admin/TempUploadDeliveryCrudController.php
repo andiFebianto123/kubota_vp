@@ -142,7 +142,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             ->orderBy('po_change', 'desc')
                             ->first();
                 $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->delivery_date);
-                $ds_line = $success_insert+1;
+                $ds_line = $ds_num['line'];
     
                 $insert = new Delivery();
                 $insert->ds_num = $ds_num['single'];

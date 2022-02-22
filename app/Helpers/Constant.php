@@ -37,7 +37,7 @@ class Constant
     }
     $po = PurchaseOrder::where('po_num', $po_num)->first();
     $ds_num_mid = $po->vend_num.date('ymd', strtotime($delivery_date));
-    $ds = Delivery::where('po_num', $po_num)->where('po_line', $po_line)->orderBy('id', 'desc')->first();
+    $ds = Delivery::where('ds_num', $ds_num_mid.$code)->orderBy('ds_line', 'desc')->first();
     $ds_line = (isset($ds))?$ds->ds_line+1:1;
 
     $ds_num['single'] = $ds_num_mid.$code;
