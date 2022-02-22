@@ -79,7 +79,6 @@ class TempUploadDelivery extends Model
         $arr_filters = [];
         $arr_validation = [];
         $arr_filters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
-        // $arr_filters[] = ['po_line.po_num', '=', $this->po_num];
         $args1 = [  'filters' => $arr_filters, 
                     'due_date' => $this->purchaseOrderLine->due_date, 
                     'po_num' => $this->po_num, 
@@ -106,6 +105,15 @@ class TempUploadDelivery extends Model
         }
         if($this->shipped_qty <= 0){
             $arr_validation[] = ['mode' => 'danger', 'message' => 'QTY cannot be 0'];
+        }
+        if (!isset($this->petugas_vendor)) {
+            $arr_validation[] = ['mode' => 'danger', 'message' => 'Petugas Vendor is required'];
+        }
+        if (!isset($this->no_surat_jalan_vendor)) {
+            $arr_validation[] = ['mode' => 'danger', 'message' => 'No Surat Jalan Vendor is required'];
+        }
+        if (!isset($this->delivery_date)) {
+            $arr_validation[] = ['mode' => 'danger', 'message' => 'Delivery Date is required'];
         }
     
         return $arr_validation;

@@ -18,7 +18,8 @@ class DsValidation
 
     $qty_initial = PurchaseOrderLine::where("po_num", $po_num)
                    ->where("po_line", $po_line)
-                   ->sum('order_qty');
+                   ->orderBy('po_change', 'desc')
+                   ->first()->order_qty;
 
     $realtime_ds_qty = Delivery::where("po_num", $po_num)
                       ->where("po_line", $po_line)

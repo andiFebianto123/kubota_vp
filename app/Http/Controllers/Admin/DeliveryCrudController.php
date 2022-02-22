@@ -128,7 +128,7 @@ class DeliveryCrudController extends CrudController
         ]);
         CRUD::addColumn([
             'label'     => 'Operator', // Table column heading
-            'name'      => 'operator', // the column that contains the ID of that connected entity;
+            'name'      => 'petugas_vendor', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
 

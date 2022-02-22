@@ -142,7 +142,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             ->orderBy('po_change', 'desc')
                             ->first();
                 $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->delivery_date);
-                $ds_line = $ds_num['line'];
+                $ds_line = $success_insert+1;
     
                 $insert = new Delivery();
                 $insert->ds_num = $ds_num['single'];
@@ -175,7 +175,7 @@ class TempUploadDeliveryCrudController extends CrudController
                     $insert_dstatus->po_num = $po_line->po_num;
                     $insert_dstatus->po_line = $po_line->po_line;
                     $insert_dstatus->po_release = $po_line->po_release;
-                    $insert_dstatus->ds_line = $ds_num['line'];
+                    $insert_dstatus->ds_line = $ds_line;
                     $insert_dstatus->item = $po_line->item;
                     $insert_dstatus->description = $po_line->description;
                     $insert_dstatus->unit_price = $po_line->unit_price;
@@ -425,6 +425,7 @@ class TempUploadDeliveryCrudController extends CrudController
     public function update($id)
     {
         $this->crud->setRequest($this->crud->validateRequest());
+        $entry = $this->crud->getCurrentEntry();
 
         $request = $this->crud->getRequest();
         $shipped_qty = $request->input('shipped_qty');
@@ -434,6 +435,29 @@ class TempUploadDeliveryCrudController extends CrudController
         $sn_childs = $request->input('sn_childs');
         $material_ids = $request->input('material_ids');
         $material_issues = $request->input('material_issues');
+
+        $po_line = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
+
+
+        $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
+        $cmq =  (new DsValidation())->currentMaxQty($args);
+        $alert_for = "";
+
+        if ($po_line->outhouse_flag == 1) {
+            $alert_for = " Outhouse";
+            $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
+        }
+
+        if ($cmq['datas'] < $shipped_qty) {
+            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => "Qty Alert ".$alert_for,
+                'errors' => $errors
+            ], 422);
+        }
 
         $arr_datas = [];
         if (isset($sn_childs)) {
