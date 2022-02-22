@@ -85,6 +85,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         
 
         CRUD::column('matl_item')->label('Matl Item');
+        // CRUD::column('status')->label('Status');
         CRUD::column('description');
         CRUD::column('remaining_qty')->label('Available Material');
     }

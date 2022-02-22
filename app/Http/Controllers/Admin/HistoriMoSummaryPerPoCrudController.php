@@ -33,6 +33,26 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerPo::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-po');
         CRUD::setEntityNameStrings('histori mo summary per po', 'Summary MO History per PO');
+       
+        // $sql = "(SELECT SUM(lot_qty) FROM material_outhouse";
+        // $sql = "((SELECT lot_qty) - 
+        // (SELECT SUM(issue_qty) FROM issued_material_outhouse imo
+        // LEFT JOIN delivery ON delivery.ds_num = imo.ds_num
+        // WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num AND
+        // delivery.po_line = material_outhouse.po_line)
+        // AND 
+        // imo.matl_item = (SELECT matl_item FROM material_outhouse mo WHERE imo.matl_item = mo.matl_item
+        // AND mo.po_num = delivery.po_num 
+        // AND delivery.po_line = mo.po_line 
+        // ORDER BY mo.qty_per ASC LIMIT 1) )) AS summy";
+
+        $sql = "((SELECT lot_qty) - 
+        (SELECT SUM(issue_qty) FROM issued_material_outhouse imo
+        WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num AND
+        delivery.po_line = material_outhouse.po_line)
+        AND 
+        imo.matl_item = material_outhouse.matl_item = imo.matl_item )) AS remaining_qty";
+        
         $this->crud->query = $this->crud->query->select(
             'material_outhouse.id as id', 
             'material_outhouse.po_num as po_num', 
@@ -44,7 +64,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'pl.u_m', 
             'pl.order_qty',
             'pl.due_date', 
-            'pl.description'
+            'pl.description', 
+            DB::raw($sql)
         );
         $this->crud->query->join('delivery as dl', function($join){
             $join->on('material_outhouse.po_num', '=', 'dl.po_num');
@@ -69,7 +90,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->crud->query->groupBy('material_outhouse.po_num');
         $this->crud->query->groupBy('material_outhouse.po_line');
 
-        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O')");
+        $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' and remaining_qty <= 0)");
 
         if(Constant::checkPermission('Read History Summary MO')){
             $this->crud->allowAccess('list');
@@ -105,6 +126,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         CRUD::column('po_num')->label('PO Number');
         CRUD::column('po_line')->label('PO Line');
+        // CRUD::column('summy')->label('Summy');
         // CRUD::column('po_num_line')->label('PO Number');
         // CRUD::column('status')->label('Status');
         CRUD::addColumn([
@@ -202,6 +224,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
         $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
                             ->where('po_line', $this->data['entry']->po_line)
+                            ->groupBy('matl_item')
                             ->get();
         $this->data['data_materials'] = $data_materials;
         // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
