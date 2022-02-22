@@ -5,7 +5,7 @@
     var urlMassDs2 = "{{url('admin/delivery-export-mass-pdf-post2')}}"
 
 	function printMassDs2(button) {
-
+console.log(crud);
 		if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)
 		{
 			new Noty({

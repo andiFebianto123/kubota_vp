@@ -17,8 +17,6 @@
 
 			var checked = this.checked;
 			var primaryKeyValue = $(this).attr('data-primary-key-value');
-			// console.log(this.checked);
-			// console.log(primaryKeyValue);
 
 			if (typeof crud.checkedItems === 'undefined') {
 				crud.checkedItems = [];
@@ -26,7 +24,7 @@
 
 			if (checked) {
 				// add item to crud.checkedItems variable
-				// crud.checkedItems.push(primaryKeyValue); 
+				crud.checkedItems.push(primaryKeyValue); 
 
 				// var $tr = $(this).parent().parent().parent().children(':first').children(':first');
 				// var row = window.crud.table.row($tr);

@@ -66,6 +66,7 @@ class DeliveryCrudController extends CrudController
     {
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
+        $this->crud->enableBulkActions();
 
         // khusus role adminPTKI
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
@@ -85,7 +86,6 @@ class DeliveryCrudController extends CrudController
             $this->crud->query = $this->crud->query->select('delivery.*', 'po.vend_num');
         }
 
-        $this->crud->enableBulkActions();
 
         CRUD::addColumn([
             'label'     => 'DS Number', // Table column heading
@@ -401,7 +401,6 @@ class DeliveryCrudController extends CrudController
                         DB::statement($sql_query);
                     }
                 }
-                // dd("here");
             }
 
             if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
@@ -430,7 +429,6 @@ class DeliveryCrudController extends CrudController
 
                 if ($any_errors) {
                     DB::rollBack();
-                    // $validator->errors()->add('field', 'Something is wrong with this field!');
 
                     $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
 

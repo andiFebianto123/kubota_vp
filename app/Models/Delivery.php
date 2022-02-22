@@ -12,6 +12,7 @@ class Delivery extends Model
     use HasFactory;
     use RevisionableTrait;
     protected $table = 'delivery';
+    // protected $primaryKey = 'id';
 
     protected $fillable = [
         'id',
