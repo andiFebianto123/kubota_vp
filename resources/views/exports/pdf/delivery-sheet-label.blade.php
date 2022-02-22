@@ -71,6 +71,10 @@
                     $qr_code = $delivery->ds_num .'.'.$delivery->ds_line.'|'.$delivery->item.'|'.$qtyAsli;
         ?>
         <?php
+            if($jumlah == 0) {
+                echo "QTY per box tidak boleh kosong";
+            }
+            
             if($tipe == 'genap'){
                 // jika increment adalah bilangan ganjil
         ?>
