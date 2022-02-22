@@ -5,6 +5,7 @@ use App\Models\Delivery;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use App\Models\TempUploadDelivery;
 use Illuminate\Support\Facades\DB;
 
 class DsValidation
@@ -29,7 +30,7 @@ class DsValidation
     return [
       'datas'  => $current_qty,
       'mode'   => 'danger',
-      'message' => 'Maksimum Qty '. $realtime_ds_qty
+      'message' => 'Maksimum Qty '. $current_qty
     ];
   }
 
@@ -84,6 +85,59 @@ class DsValidation
         $show = false;
         if ($op->total_shipped_qty < $op->order_qty) {
           $show = true;
+        }
+        if ($po_num == $op->po_num) {
+          if ($po_line <= $op->po_line) {
+            $show = false;
+          }
+        }
+        
+        if ($show) {
+          $arr_old_po[] = $op;
+        }
+      }
+      $arr_old_po = collect($arr_old_po)->sortBy('num_line')->take(1);
+
+      return [
+        'datas'  => $arr_old_po,
+        'mode'   => 'danger',
+        'message' => 'Selesaikan terlebih dahulu PO yang lama!'
+      ];
+  }
+
+
+  public function unfinishedPoLineMass($args)
+  {
+    
+    $due_date = $args['due_date'];
+    $po_num = $args['po_num'];
+    $po_line = $args['po_line'];
+    $filters = (isset($args['filters'])) ? $args['filters'] : [];
+
+    $po = PurchaseOrder::where('po_num', $po_num)->first();
+    
+    $old_po = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+                  ->where('po_line.status', 'O')
+                  ->where('po_line.outhouse_flag', 0)
+                  ->where('po_line.po_num', '<=', $po_num)
+                  ->where('po.vend_num', '<=', $po->vend_num)
+                  ->whereDate('po_line.due_date', '<=', date('Y-m-d',strtotime($due_date)))
+                  ->where($filters)         
+                  ->orderBy('po_line.po_line','asc')
+                  ->orderBy('po_line.po_num','asc')
+                  ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+
+      $arr_old_po = [];
+      foreach ($old_po as $key => $op) {
+        $show = false;
+        if ($op->total_shipped_qty < $op->order_qty) {
+          $show = true;
+          $temp_po = TempUploadDelivery::where('po_num', $op->po_num)->where('po_line', $op->po_line)->first();
+          if (isset($temp_po)) {
+            if ($temp_po->shipped_qty + $op->total_shipped_qty == $op->order_qty) {
+              $show = false;
+            }
+          }
         }
         if ($po_num == $op->po_num) {
           if ($po_line <= $op->po_line) {

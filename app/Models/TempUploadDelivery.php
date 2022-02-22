@@ -88,11 +88,18 @@ class TempUploadDelivery extends Model
         $args2 = ['po_num' => $this->po_num, 'po_line' => $this->po_line, 'order_qty' => $this->shipped_qty ];
 
         $ds_validation = new DsValidation();
-        $unfinished_po_line = $ds_validation->unfinishedPoLine($args1);
+        $unfinished_po_line = $ds_validation->unfinishedPoLineMass($args1);
         $current_max_qty = ($this->purchaseOrderLine->outhouse_flag == 1)? $ds_validation->currentMaxQtyOuthouse($args2) : $ds_validation->currentMaxQty($args2);
         
         if (sizeof($unfinished_po_line['datas']) > 0 ) {
-            $arr_validation[] = ['mode' => $unfinished_po_line['mode'], 'message' => $unfinished_po_line['message']];
+            $message_upl = $unfinished_po_line['message']." ";
+            foreach($unfinished_po_line['datas'] as $key => $upl){
+                $tsq = ($upl->total_shipped_qty)?$upl->total_shipped_qty:"0";
+                $tsq .= "/".$upl->order_qty;
+                $message_upl .= $upl->po_num."-".$upl->po_line. " (".date('Y-m-d',strtotime($upl->due_date)).") ".$tsq. "<br>";
+            }
+                
+            $arr_validation[] = ['mode' => $unfinished_po_line['mode'], 'message' => $message_upl];
         }
         if($current_max_qty['datas'] < $this->shipped_qty){
             $arr_validation[] = ['mode' => $current_max_qty['mode'], 'message' => $current_max_qty['message']];

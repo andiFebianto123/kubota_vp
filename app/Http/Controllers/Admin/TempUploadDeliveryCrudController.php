@@ -136,10 +136,12 @@ class TempUploadDeliveryCrudController extends CrudController
         try{
             $success_insert = 0;
             $total_insert = sizeof($data_temps);
-
             foreach ($data_temps as $key => $data_temp) {
-                $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)->where('po_line', $data_temp->po_line)->first();
-                $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->shipped_date);
+                $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)
+                            ->where('po_line', $data_temp->po_line)
+                            ->orderBy('po_change', 'desc')
+                            ->first();
+                $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->delivery_date);
                 $ds_line = $ds_num['line'];
     
                 $insert = new Delivery();
@@ -159,7 +161,7 @@ class TempUploadDeliveryCrudController extends CrudController
                 $insert->tax_status = $po_line->tax_status;
                 $insert->currency = $po_line->currency;
                 $insert->shipped_qty = $data_temp->shipped_qty;
-                $insert->shipped_date = date('Y-m-d', strtotime($data_temp->shipped_date));
+                $insert->shipped_date = date('Y-m-d', strtotime($data_temp->delivery_date));
                 $insert->order_qty = $po_line->order_qty;
                 $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
                 $insert->petugas_vendor = $data_temp->petugas_vendor;
@@ -231,8 +233,6 @@ class TempUploadDeliveryCrudController extends CrudController
                 }
             }
     
-            TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
-
             $message = "";
             $alert = "";
             $status = false;
@@ -240,16 +240,20 @@ class TempUploadDeliveryCrudController extends CrudController
                 $status = true;
                 $alert = "success";
                 $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
-                DB::commit();
             }else if ($success_insert < $total_insert && $success_insert > 0) {
                 $status = true;
                 $alert = "warning";
                 $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
-                DB::commit();
             }else if($success_insert == 0){
                 $status = false;
                 $alert = "danger";
                 $message = "Failure import data (".$success_insert."/". $total_insert.")";
+            }
+
+            if ($status) {
+                TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+                DB::commit();
+            }else{
                 DB::rollback();
             }
 

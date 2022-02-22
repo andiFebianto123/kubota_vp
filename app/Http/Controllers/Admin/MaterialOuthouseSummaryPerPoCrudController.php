@@ -158,6 +158,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         // )->groupBy("material_outhouse.matl_item");
         $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
                             ->where('po_line', $this->data['entry']->po_line)
+                            ->groupBy('matl_item')
                             ->get();
         $this->data['data_materials'] = $data_materials;
         // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')

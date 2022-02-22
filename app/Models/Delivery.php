@@ -33,6 +33,12 @@ class Delivery extends Model
 
     }
 
+    public function getShippedDateAttribute($value)
+    {
+        return date('Y-m-d', strtotime($value));
+
+    }
+
     public function pdfCheck($crud = false)
     {
         return "<div class='group-price-check'><input type='checkbox'> Dengan Harga</div>";
