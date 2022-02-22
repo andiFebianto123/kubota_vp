@@ -408,7 +408,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'po_line' => $entry->po_line,
          ];
 
-        $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
+        $unfinished_po_line = (new DsValidation())->unfinishedPoLineMass($args);
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
