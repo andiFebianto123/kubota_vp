@@ -22,6 +22,16 @@ class Constant
     return $status;
   }
 
+  public function arrStatus(){
+
+    $status = [
+      ['text' => 'Ordered', 'value' => 'O'],
+      ['text' => 'Filled', 'value' => 'F'],
+      ['text' => 'Complete', 'value' => 'C'],
+    ];
+    return $status;
+  }
+
   public function codeDs($po_num, $po_line, $delivery_date){
     $code = "";
     switch (backpack_auth()->user()->roles->pluck('name')->first()) {

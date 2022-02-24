@@ -10,6 +10,7 @@ trans('backpack::crud.preview') => false,
 
 // if breadcrumbs aren't defined in the CrudController, use the default breadcrumbs
 $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
+
 @endphp
 
 @section('header')
@@ -92,6 +93,17 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                <label class="font-weight-bold mb-0">PO Line</label> 
             </div>
             <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <select name="status" id="status-po" class="form-control">
+                            <option value="">All Status</option>
+                            @foreach ($arr_status as $key => $po_status)
+                            <option value="{{$po_status['value']}}">{{$po_status['text']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
                 @if(sizeof($po_lines) > 0)
                 <div>
                     <!-- <button class="btn btn-sm btn-default" type="button" data-toggle="modal" data-target="#importMassDS"><i class="la la-cloud-upload-alt"></i> Import (<span class="total-mass">0</span>)</button> -->
@@ -123,7 +135,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     </thead>
                     <tbody>
                         @foreach ($po_lines as $key => $po_line)
-                        <tr>
+                        <tr class="row-po-lines po-status-{{$po_line->status}}">
                             <td>
                                 @if($po_line->read_at == null && $po_line->status == 'O')
                                 <input type="checkbox" name="po_line_ids[]" value="{{$po_line->id}}" class="check-po-lines check-{{$po_line->id}}">
@@ -349,6 +361,17 @@ $('#check-all-cb-read').change(function () {
     }
 
     $(".total-mass").text(totalCheckedRead)
+})
+
+$('#status-po').change(function () {
+    var valStatus = $(this).val()
+    if (valStatus) {
+        $('.row-po-lines').fadeOut(1000);
+        $('.po-status-'+valStatus).fadeIn(1000);
+    }else{
+        $('.row-po-lines').fadeIn(1000);
+    }
+    
 })
 
 $('.check-read-po-lines').change(function () {

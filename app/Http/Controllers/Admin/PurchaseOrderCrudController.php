@@ -206,6 +206,7 @@ class PurchaseOrderCrudController extends CrudController
     {
         $entry = $this->crud->getCurrentEntry();
         session()->put("last_url", request()->url());
+
         
         $po_lines = PurchaseOrderLine::where('po.po_num', $entry->po_num )
                                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
@@ -237,6 +238,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->get();
         */
         $arr_po_line_status = (new Constant())->statusOFC();
+        $arr_status = (new Constant())->arrStatus();
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
@@ -245,6 +247,7 @@ class PurchaseOrderCrudController extends CrudController
         $data['po_lines'] = $collection_po_lines;
         $data['po_changes_lines'] = $po_changes_lines;
         $data['arr_po_line_status'] = $arr_po_line_status;
+        $data['arr_status'] = $arr_status;
 
         $can_access = false;
         if(in_array(Constant::getRole(),['Admin PTKI'])){
