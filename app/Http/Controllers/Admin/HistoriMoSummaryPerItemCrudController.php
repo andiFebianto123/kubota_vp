@@ -32,13 +32,12 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-item');
         CRUD::setEntityNameStrings('histori mo summary per item', 'Summary MO History Per Item');
         $sql = "(
-            (SELECT lot_qty) - 
-            ((SELECT SUM(order_qty) FROM po_line pl WHERE pl.po_num = material_outhouse.po_num AND pl.po_line = material_outhouse.po_line AND (pl.status = 'F' OR pl.status = 'C' OR pl.status = 'O') )) -
-            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num AND delivery.po_line = material_outhouse.po_line) AND imo.matl_item = material_outhouse.matl_item = imo.matl_item), 0))
+            (SELECT sum(lot_qty) FROM material_outhouse mo WHERE mo.matl_item = material_outhouse.matl_item) -
+            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo WHERE imo.matl_item = material_outhouse.matl_item), 0))
             ) AS mremaining_qty";
 
         $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_num as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status',
+        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status',
             DB::raw($sql)
         );
         if(Constant::checkPermission('Read History Summary MO')){
@@ -89,6 +88,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $this->crud->groupBy('material_outhouse.matl_item');
+        $this->crud->groupBy('pl.status');
         $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' and mremaining_qty <= 0)");
 
         if(Constant::getRole() == 'Admin PTKI'){
