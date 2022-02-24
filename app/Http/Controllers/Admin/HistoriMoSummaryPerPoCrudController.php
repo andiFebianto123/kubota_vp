@@ -35,9 +35,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::setEntityNameStrings('histori mo summary per po', 'Summary MO History per PO');
 
         $sql = "(
-            (SELECT lot_qty) - 
-            ((SELECT SUM(order_qty) FROM po_line pl WHERE pl.po_num = material_outhouse.po_num AND pl.po_line = material_outhouse.po_line AND (pl.status = 'F' OR pl.status = 'C' OR pl.status = 'O') )) -
-            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num AND delivery.po_line = material_outhouse.po_line)), 0))
+            (SELECT sum(lot_qty) FROM material_outhouse mo WHERE mo.po_num = material_outhouse.po_num)  -
+            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo WHERE imo.ds_num IN (SELECT ds_num FROM delivery WHERE delivery.po_num = material_outhouse.po_num)), 0))
             ) AS mremaining_qty";
         
         $this->crud->query = $this->crud->query->select(
@@ -69,7 +68,6 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         });
         $this->crud->query->join('po_line as pl', function($join){
             $join->on('material_outhouse.po_num', '=', 'pl.po_num');
-            $join->on('material_outhouse.po_line', '=', 'pl.po_line');
         });
 
         if(!in_array(Constant::getRole(), ['Admin PTKI'])){
@@ -80,7 +78,6 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         // );
 
         $this->crud->query->groupBy('material_outhouse.po_num');
-        $this->crud->query->groupBy('material_outhouse.po_line');
 
         // $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' and remaining_qty <= 0)");
         $this->crud->query->havingRaw("(`pl`.`status` = 'C' or `pl`.`status` = 'F') or (`pl`.`status` = 'O' and mremaining_qty <= 0)");
@@ -140,7 +137,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
         CRUD::column('order_qty')->label('Qty Order');
-        CRUD::column('order_qty')->label('Qty Order');
+        CRUD::column('mremaining_qty')->label('mr Order');
         // CRUD::column('available_qty')->label('aq');
         CRUD::column('u_m')->label('UM');
         CRUD::column('due_date')->label('Due Date');
