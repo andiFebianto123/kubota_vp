@@ -40,7 +40,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             ) AS mremaining_qty";
 
         $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status',
+        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status', 'pl.due_date',
             DB::raw($sql)
         );
         if(Constant::checkPermission('Read History Summary MO')){
@@ -103,6 +103,18 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         // CRUD::column('status')->label('Status');
         CRUD::column('description');
         CRUD::column('mremaining_qty')->label('Available Material');
+        CRUD::column('due_date')->label('Due Date');
+        $this->crud->addFilter([
+            'type'  => 'date_range_hmo',
+            'name'  => 'due_date',
+            'label' => 'Date range'
+          ],
+          false,
+          function ($value) { // if the filter is active, apply these constraints
+            $dates = json_decode($value);
+            $this->crud->addClause('where', 'pl.due_date', '>=', $dates->from);
+            $this->crud->addClause('where', 'pl.due_date', '<=', $dates->to . ' 23:59:59');
+          });
     }
 
     /**

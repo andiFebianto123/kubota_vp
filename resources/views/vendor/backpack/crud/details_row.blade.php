@@ -13,15 +13,12 @@
 <div class="m-t-10 m-b-10 p-l-10 p-r-10 p-t-10 p-b-10">
 	<div class="row">
 		<div class="col-md-12">
-			@php
-				// $total_qty = 0;
-			@endphp
 			<table class="table table-bordered">
 				<thead>
 					<tr>
 						<th>Material Item</th>
 						<th>Description</th>
-						<th>Available Qty</th>
+						<th>Total Qty</th>
 					</tr>
 				</thead>
 				<tbody>

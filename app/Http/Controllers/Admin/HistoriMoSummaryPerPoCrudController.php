@@ -119,20 +119,20 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         // CRUD::column('summy')->label('Summy');
         // CRUD::column('po_num_line')->label('PO Number');
         // CRUD::column('status')->label('Status');
-        CRUD::addColumn([
-            'label'     => 'Status', // Table column heading
-            'name'      => 'status', // the column that contains the ID of that connected entity;
-            'type' => 'closure',
-            'function' => function($entry) {
-                if($entry->status == 'O'){
-                    return 'Ordered';
-                }else if($entry->status == 'F'){
-                    return 'Filled';
-                }else if($entry->status == 'C'){
-                    return 'Complete';
-                }
-            }
-        ]);
+        // CRUD::addColumn([
+        //     'label'     => 'Status', // Table column heading
+        //     'name'      => 'status', // the column that contains the ID of that connected entity;
+        //     'type' => 'closure',
+        //     'function' => function($entry) {
+        //         if($entry->status == 'O'){
+        //             return 'Ordered';
+        //         }else if($entry->status == 'F'){
+        //             return 'Filled';
+        //         }else if($entry->status == 'C'){
+        //             return 'Complete';
+        //         }
+        //     }
+        // ]);
 
         // CRUD::column('matl_item')->label('Item');
         CRUD::column('description');
@@ -148,6 +148,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
+            session()->flash('filter_due_date', $value);
             $dates = json_decode($value);
             $this->crud->addClause('where', 'pl.due_date', '>=', $dates->from);
             $this->crud->addClause('where', 'pl.due_date', '<=', $dates->to . ' 23:59:59');
@@ -192,6 +193,14 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
 
+        $filters = [];
+        if (session()->has('filter_due_date')) {
+            $due_date = session()->get('filter_due_date');
+            $due_date_d = json_decode($due_date);
+            $filters[] = ['pl.due_date', '>=', $due_date_d->from];
+            $filters[] = ['pl.due_date', '<=', $due_date_d->to . ' 23:59:59'];
+        }
+
         $dataDetailMaterial = MaterialOuthouseSummaryPerPo::join('po_line as pl', function($join){
             $join->on('material_outhouse.po_num', '=', 'pl.po_num');
             $join->on('material_outhouse.po_line', '=', 'pl.po_line');
@@ -213,12 +222,19 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'material_outhouse.lot_qty as jumlah_lot_qty'
         )->groupBy("material_outhouse.matl_item");
 
-        $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
-                            ->where('po_line', $this->data['entry']->po_line)
+        $data_materials = MaterialOuthouse::join('po_line as pl', function($join){
+                                $join->on('material_outhouse.po_num', '=', 'pl.po_num');
+                                $join->on('material_outhouse.po_line', '=', 'pl.po_line');
+                            })
+                            ->where('material_outhouse.po_num', $this->data['entry']->po_num)
+                            ->where('material_outhouse.po_line', $this->data['entry']->po_line)
+                            ->where($filters)
                             ->groupBy('matl_item')
                             ->get();
+
+        // $this->data['due_date'] = $filters;
         $this->data['data_materials'] = $data_materials;
-        // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
+                            // $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
         //                 ->where('delivery.po_num', $this->data['entry']->po_num)
         //                 ->where('delivery.po_line', $this->data['entry']->po_line)
         //                 ->sum('issue_qty');

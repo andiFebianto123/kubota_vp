@@ -318,6 +318,9 @@ var totalPoLineRead = $('.check-read-po-lines').length
 var totalChecked = 0
 var totalCheckedRead = 0
 
+if (totalPoLine == 0) {
+    $('#check-all-cb').remove()
+}
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })

@@ -44,7 +44,7 @@
                 # jumlah qty per ds delivery
                 $jumlahQtyData = $delivery->qty;
                 # lakukan pembagian agar mengetahui jumlah looping sebanyak
-                $jumlah = 0;
+                $jumlah = $delivery->qty;
                 if ($dbagi > 0) {
                     $jumlah = ceil($jumlahQtyData / $dbagi);
                 }
