@@ -26,10 +26,15 @@ class MaterialOuthouse extends Model
 
     public function getQtyIssuedAttribute()
     {
-        $qty_issued = IssuedMaterialOuthouse::whereHas('delivery', function($query) {
-            $query->where('po_num', $this->po_num);
-            $query->where('po_line', $this->po_line);
-         })->where('matl_item', $this->matl_item)->sum('issue_qty');
+
+         $qty_issued = IssuedMaterialOuthouse::join('delivery', function($join){
+            $join->on('delivery.ds_num', '=', 'issued_material_outhouse.ds_num');
+            $join->on('delivery.ds_line', '=', 'issued_material_outhouse.ds_line');
+        })
+         ->where('delivery.po_num', $this->po_num)
+         ->where('delivery.po_line', $this->po_line)
+         ->where('matl_item', $this->matl_item)
+         ->sum('issue_qty');
 
         return $qty_issued;
     }

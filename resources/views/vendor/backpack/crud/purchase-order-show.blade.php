@@ -371,8 +371,9 @@ $('#status-po').change(function () {
     }else{
         $('.row-po-lines').fadeIn(1000);
     }
-    
 })
+
+
 
 $('.check-read-po-lines').change(function () {
     if ($(this).prop('checked')==true){

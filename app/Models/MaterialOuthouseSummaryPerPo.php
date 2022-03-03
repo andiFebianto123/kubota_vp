@@ -54,6 +54,7 @@ class MaterialOuthouseSummaryPerPo extends Model
     {
         $qty_issued = IssuedMaterialOuthouse::whereHas('delivery', function($query) {
             $query->where('po_num', $this->po_num);
+            // $query->where('po_line', $this->po_num);
          })->where('matl_item', $this->matl_item)->sum('issue_qty');
 
         return $qty_issued;
