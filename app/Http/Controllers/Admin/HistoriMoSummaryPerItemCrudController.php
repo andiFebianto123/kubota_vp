@@ -33,8 +33,8 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::setEntityNameStrings('histori mo summary per item', 'Summary MO History Per Item');
 
         $sql_date = "";
-        if (session()->has('filter_due_date')) {
-            $due_date = session()->get('filter_due_date');
+        if (request('shipped_date')) {
+            $due_date = request('shipped_date');
             $due_date_d = json_decode($due_date);
 
             $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
