@@ -40,7 +40,8 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
             'issued_material_outhouse.id as id', 
             'issued_material_outhouse.matl_item', 
             'issued_material_outhouse.description', 
-            'delivery.due_date', 
+            'delivery.shipped_date', 
+            'po.vend_num', 
             DB::raw($sql)
         );
 
@@ -109,17 +110,17 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
         CRUD::column('sum_qty_order')->label('Qty Used');
-        CRUD::column('due_date')->label('Due Date');
+        CRUD::column('shipped_date')->label('Shipped Date');
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
-            'name'  => 'due_date',
+            'name'  => 'shipped_date',
             'label' => 'Date range'
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
             $dates = json_decode($value);
-            $this->crud->addClause('where', 'delivery.due_date', '>=', $dates->from);
-            $this->crud->addClause('where', 'delivery.due_date', '<=', $dates->to . ' 23:59:59');
+            $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
+            $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
         });
     }
 

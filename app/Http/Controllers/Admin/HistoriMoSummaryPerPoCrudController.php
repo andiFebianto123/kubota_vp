@@ -45,7 +45,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'delivery.po_line as po_line',
             'delivery.u_m', 
             'delivery.description', 
-            'delivery.due_date', 
+            'delivery.shipped_date', 
+            'po.vend_num', 
             DB::raw($sql)
         );
         
@@ -109,18 +110,18 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::column('description');
         CRUD::column('sum_qty_order')->label('Qty Used');
         CRUD::column('u_m')->label('UM');
-        CRUD::column('due_date')->label('Due Date');
+        CRUD::column('shipped_date')->label('Shipped Date');
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
-            'name'  => 'due_date',
+            'name'  => 'shipped_date',
             'label' => 'Date range'
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
             session()->flash('filter_due_date', $value);
             $dates = json_decode($value);
-            $this->crud->addClause('where', 'delivery.due_date', '>=', $dates->from);
-            $this->crud->addClause('where', 'delivery.due_date', '<=', $dates->to . ' 23:59:59');
+            $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
+            $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
           });
     }
 
@@ -167,8 +168,8 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         if (session()->has('filter_due_date')) {
             $due_date = session()->get('filter_due_date');
             $due_date_d = json_decode($due_date);
-            $filters[] = ['delivery.due_date', '>=', $due_date_d->from];
-            $filters[] = ['delivery.due_date', '<=', $due_date_d->to . ' 23:59:59'];
+            $filters[] = ['delivery.shipped_date', '>=', $due_date_d->from];
+            $filters[] = ['delivery.shipped_date', '<=', $due_date_d->to . ' 23:59:59'];
         }
 
         $delivery = Delivery::where('ds_num', $entry->ds_num)
