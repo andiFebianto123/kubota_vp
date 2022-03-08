@@ -299,7 +299,6 @@ class TaxInvoiceCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(TaxInvoiceRequest::class);
-
         CRUD::addField([   // Upload
             'name'      => 'file_faktur_pajak',
             'label'     => 'Faktur Pajak',
@@ -337,15 +336,17 @@ class TaxInvoiceCrudController extends CrudController
             'table'       =>  ['table_header' => $this->deliveryStatus()['header'], 'table_body'=> $this->deliveryStatus()['body']]
         ]);
 
+        $this->crud->setCreateView('vendor.backpack.crud.create-tax');
     }
 
     private function deliveryStatus(){
-        $table_header = ['PO', 'DS', 'Item', 'Description', 'Unit Price'];
+        $table_header = ['PO', 'DS Num','DS Line', 'Item', 'Description', 'Unit Price'];
         $delivery_statuses = DeliveryStatus::select('*', 
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
             ->where('validate_by_fa_flag', 1)
             ->where('payment_in_process_flag', 1)
-            ->where('executed_flag', 0);
+            ->where('executed_flag', 0)
+            ->orderBy('id', 'desc');
             if(Constant::getRole() != 'Admin PTKI'){
             $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
             ->get();
@@ -357,7 +358,8 @@ class TaxInvoiceCrudController extends CrudController
             $table_body[] =[
                 'column' => [
                     $ds->po_num.'-'.$ds->po_line, 
-                    $ds->ds_num.'-'.$ds->ds_line, 
+                    $ds->ds_num, 
+                    $ds->ds_line, 
                     $ds->item, 
                     $ds->description,
                     $ds->currency.' '.Constant::getPrice($ds->unit_price),
