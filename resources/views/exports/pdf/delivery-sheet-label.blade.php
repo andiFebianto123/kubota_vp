@@ -33,7 +33,7 @@
 
 <body style="padding:0px; margin:0px">
       <div class="container" style="width:100%; height: auto; background-color:transparent; display:block;">
-        
+
         <?php
             $tipe = 'ganjil';
             foreach($data as $delivery){
@@ -44,9 +44,12 @@
                 # jumlah qty per ds delivery
                 $jumlahQtyData = $delivery->qty;
                 # lakukan pembagian agar mengetahui jumlah looping sebanyak
-                $jumlah = $delivery->qty;
+                $jumlah = 0;
                 if ($dbagi > 0) {
                     $jumlah = ceil($jumlahQtyData / $dbagi);
+                } else {
+                    $jumlah = 1;
+                    $dbagi = $delivery->qty;
                 }
                 # reset totalQty
                 $qtyTotal = 0;
@@ -75,39 +78,39 @@
                 // jika increment adalah bilangan ganjil
         ?>
             <div class="box" style="
-                width: 49%; 
-                height: 240px; 
+                width: 49%;
+                height: 240px;
                 display: block;
                 margin-bottom: 10px;
                 margin-right: 8px;
                 float:left;"
             >
-                
+
                 <table id="tableA" style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td colspan="3" style="border: 1px solid gray; height: 39.1px;">
                             <div><strong>Item Code</strong> : {{ $delivery->item }}</div>
                         </td>
-                    </tr>        
+                    </tr>
                     <tr>
                         <td colspan="3" style="border: 1px solid gray; height: 39.1px;">
                             <div><strong>Item Description</strong> : {{ $delivery->description }}</div>
                         </td>
-                    </tr>                                
+                    </tr>
                     <tr>
                         <td colspan="2" style="border: 1px solid gray; width:660px; height: 39.1px;">
                             <div><strong>DS Num</strong> : {{ $delivery->ds_num }}-{{ $delivery->ds_line }}</div>
                         </td>
                         <td rowspan="3" style="border: 1px solid gray; height: 39.1px;">
-                           <center><img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(100)->generate($qr_code)) }} "></center> 
-                        </td>                        
+                           <center><img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(100)->generate($qr_code)) }} "></center>
+                        </td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid gray; ">
                             <div><strong>PO</strong> : {{ $delivery->po_num }}-{{ $delivery->po_line }}</div>
                         </td>
                         <td style="border: 1px solid gray; ">
-                            <div><strong>Qty Ship</strong> : {{ $delivery->qty }}</div>                            
+                            <div><strong>Qty Ship</strong> : {{ $delivery->qty }}</div>
                         </td>
                     </tr>
                     <tr>
@@ -115,7 +118,7 @@
                             <div><strong>Ship Date</strong> : {{ $delivery->shipped_date }}</div>
                         </td>
                         <td style="border: 1px solid gray; ">
-                            <div><strong>Qty Box</strong> : {{ $qtyAsli }}</div>                            
+                            <div><strong>Qty Box</strong> : {{ $qtyAsli }}</div>
                         </td>
                     </tr>
                 </table>
@@ -126,39 +129,39 @@
                 // jika increment adalah bilangan ganjil
         ?>
             <div class="box" style="
-                width: 49%; 
-                height: 240px; 
+                width: 49%;
+                height: 240px;
                 display: block;
                 margin-bottom: 10px;
                 margin-right: 8px;
                 float:left;"
             >
-                
+
                 <table id="tableA" style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td colspan="3" style="border: 1px solid gray; height: 39.1px;">
                             <div><strong>Item Code</strong> : {{ $delivery->item }}</div>
                         </td>
-                    </tr>        
+                    </tr>
                     <tr>
                         <td colspan="3" style="border: 1px solid gray; height: 39.1px;">
                             <div><strong>Item Description</strong> : {{ $delivery->description }}</div>
                         </td>
-                    </tr>                                
+                    </tr>
                     <tr>
                         <td colspan="2" style="border: 1px solid gray; width:660px; height: 39.1px;">
                             <div><strong>DS Num</strong> : {{ $delivery->ds_num }}-{{ $delivery->ds_line }}</div>
                         </td>
                         <td rowspan="3" style="border: 1px solid gray; height: 39.1px;">
-                            <center><img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(100)->generate($qr_code)) }} "></center> 
-                        </td>                        
+                            <center><img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(100)->generate($qr_code)) }} "></center>
+                        </td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid gray; ">
                             <div><strong>PO</strong> : {{ $delivery->po_num }}-{{ $delivery->po_line }}</div>
                         </td>
                         <td style="border: 1px solid gray; ">
-                        <div><strong>Qty Ship</strong> : {{ $delivery->qty }}</div>                            
+                        <div><strong>Qty Ship</strong> : {{ $delivery->qty }}</div>
                         </td>
                     </tr>
                     <tr>
@@ -166,7 +169,7 @@
                             <div><strong>Ship Date</strong> : {{ $delivery->shipped_date }}</div>
                         </td>
                         <td style="border: 1px solid gray; ">
-                            <div><strong>Qty Box</strong> : {{ $qtyAsli }}</div>                            
+                            <div><strong>Qty Box</strong> : {{ $qtyAsli }}</div>
                         </td>
                     </tr>
                 </table>
@@ -177,12 +180,8 @@
                     $increment++;
                 }
             }
-            
-            if($jumlah == 0) {
-                echo "QTY per box tidak boleh kosong";
-            }
         ?>
-      </div>  
+      </div>
 </body>
 
 </html>
