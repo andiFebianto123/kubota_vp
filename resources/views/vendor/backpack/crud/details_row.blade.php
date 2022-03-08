@@ -27,7 +27,7 @@
 						<tr>
 							<td>{{ $data_material->matl_item }}</td>
 							<td>{{ $data_material->description }}</td>
-							<td>{{ $data_material->issue_qty }}</td>
+							<td>{{ $data_material->sum_issued_qty }}</td>
 						</tr>
 					@endforeach
 					<?php 

@@ -12,21 +12,21 @@ class IssuedMaterialOuthouse extends Model
     use HasFactory;
     use RevisionableTrait;
     protected $table = 'issued_material_outhouse';
-    // protected $appends = ['sum_issued_qty'];
+    protected $appends = ['sum_issued_qty'];
 
     public function delivery(){
         return $this->hasMany(Delivery::class, 'ds_num', 'ds_num');
     }
 
-    // public function getSumIssuedQtyAttribute()
-    // {
-    //     $qty_issued = IssuedMaterialOuthouse::join('delivery', function($join){
-    //         $join->on('issued_material_outhouse.ds_num', '=', 'delivery.ds_num');
-    //         $join->on('issued_material_outhouse.ds_line', '=', 'delivery.ds_line');
-    //     })
-    //     ->where('matl_item', $this->matl_item)
-    //     ->sum('issue_qty');
+    public function getSumIssuedQtyAttribute()
+    {
+        $qty_issued = IssuedMaterialOuthouse::join('delivery', function($join){
+            $join->on('issued_material_outhouse.ds_num', '=', 'delivery.ds_num');
+            $join->on('issued_material_outhouse.ds_line', '=', 'delivery.ds_line');
+        })
+        ->where('matl_item', $this->matl_item)
+        ->sum('issue_qty');
 
-    //     return $qty_issued;
-    // }
+        return $qty_issued;
+    }
 }

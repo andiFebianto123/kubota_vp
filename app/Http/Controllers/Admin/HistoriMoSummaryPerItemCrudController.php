@@ -32,8 +32,18 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-item');
         CRUD::setEntityNameStrings('histori mo summary per item', 'Summary MO History Per Item');
 
+        $sql_date = "";
+        if (session()->has('filter_due_date')) {
+            $due_date = session()->get('filter_due_date');
+            $due_date_d = json_decode($due_date);
+
+            $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
+        }
+
         $sql = "(SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
-                    WHERE imo.matl_item = issued_material_outhouse.matl_item
+                    JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
+                    WHERE imo.matl_item = issued_material_outhouse.matl_item 
+                    ".$sql_date."
                     ) AS sum_qty_order";
 
         $this->crud->query = $this->crud->query->select(
@@ -119,6 +129,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
           false,
           function ($value) { // if the filter is active, apply these constraints
             $dates = json_decode($value);
+            session()->flash('filter_due_date', $value);
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
         });

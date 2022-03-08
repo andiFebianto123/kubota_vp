@@ -164,29 +164,34 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->data['entry'] = $entry;
         $this->data['crud'] = $this->crud;
 
-        $filters = [];
+        $sql_date = "";
         if (session()->has('filter_due_date')) {
             $due_date = session()->get('filter_due_date');
             $due_date_d = json_decode($due_date);
-            $filters[] = ['delivery.shipped_date', '>=', $due_date_d->from];
-            $filters[] = ['delivery.shipped_date', '<=', $due_date_d->to . ' 23:59:59'];
+
+            $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
         }
 
         $delivery = Delivery::where('ds_num', $entry->ds_num)
                     ->where('ds_line', $entry->ds_line)
                     ->first();
 
-        $data_materials = IssuedMaterialOuthouse::join('delivery', function($join){
-                                $join->on('issued_material_outhouse.ds_num', '=', 'delivery.ds_num');
-                                $join->on('issued_material_outhouse.ds_line', '=', 'delivery.ds_line');
-                            })
-                            ->where('delivery.po_num', $delivery->po_num)
-                            ->where($filters)
-                            ->groupBy('issued_material_outhouse.matl_item')
-                            ->get(['issued_material_outhouse.id', 'issued_material_outhouse.matl_item', 
-                            'issued_material_outhouse.description', 'issued_material_outhouse.issue_qty', 
-                            'delivery.due_date'
-                            ]);
+        $sql = "SELECT `issued_material_outhouse`.`matl_item`, `issued_material_outhouse`.`description`, 
+                `issued_material_outhouse`.`issue_qty`, `delivery`.`due_date`, 
+                (SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
+                    JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
+                    WHERE imo.matl_item = issued_material_outhouse.matl_item 
+                    AND delivery.po_num = '". $delivery->po_num."'
+                    ".$sql_date."
+                ) AS sum_issued_qty
+                FROM `issued_material_outhouse`
+                JOIN `delivery` ON 
+                (`issued_material_outhouse`.`ds_num` = `delivery`.`ds_num` AND `issued_material_outhouse`.`ds_line` = `delivery`.`ds_line`)
+                WHERE `delivery`.`po_num` = '".$delivery->po_num."'
+                ".$sql_date."
+                GROUP BY `issued_material_outhouse`.`matl_item`";
+
+        $data_materials = DB::select($sql);
 
         $this->data['data_materials'] = $data_materials;
         return view('crud::details_row', $this->data);
