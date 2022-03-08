@@ -76,6 +76,11 @@ class DeliveryStatusCrudController extends CrudController
             'name'      => 'executed_flag', // the column that contains the ID of that connected entity;
             'type' => 'flag_checked_html',
         ]);
+        CRUD::addColumn([
+            'label'     => 'Validated Flag', // Table column heading
+            'name'      => 'validate_by_fa_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
         CRUD::column('payment_date')->label('Payment Date');
         CRUD::column('tax_status')->label('Tax Status');
         CRUD::column('payment_ref_num')->label('Payment Ref Num');
