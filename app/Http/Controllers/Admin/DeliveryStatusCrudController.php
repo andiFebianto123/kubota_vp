@@ -38,6 +38,19 @@ class DeliveryStatusCrudController extends CrudController
         }
     }
 
+    public function create(){
+        return abort(404);
+    }
+
+    public function edit(){
+        return abort(404);
+    }
+
+    public function show(){
+        return abort(404);
+    }
+
+
     /**
      * Define what happens when the List operation is loaded.
      * 
@@ -67,6 +80,11 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('received_date')->label('Received Date');
         CRUD::column('payment_plan_date')->label('Due Date');
         CRUD::addColumn([
+            'label'     => 'Validated Flag', // Table column heading
+            'name'      => 'validate_by_fa_flag', // the column that contains the ID of that connected entity;
+            'type' => 'flag_checked_html',
+        ]);
+        CRUD::addColumn([
             'label'     => 'Payment in Process Flag', // Table column heading
             'name'      => 'payment_in_process_flag', // the column that contains the ID of that connected entity;
             'type' => 'flag_checked_html',
@@ -74,11 +92,6 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::addColumn([
             'label'     => 'Executed Flag', // Table column heading
             'name'      => 'executed_flag', // the column that contains the ID of that connected entity;
-            'type' => 'flag_checked_html',
-        ]);
-        CRUD::addColumn([
-            'label'     => 'Validated Flag', // Table column heading
-            'name'      => 'validate_by_fa_flag', // the column that contains the ID of that connected entity;
             'type' => 'flag_checked_html',
         ]);
         CRUD::column('payment_date')->label('Payment Date');

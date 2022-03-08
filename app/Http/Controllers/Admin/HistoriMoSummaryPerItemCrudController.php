@@ -56,6 +56,19 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
+
+    public function create(){
+        return abort(404);
+    }
+
+    public function edit(){
+        return abort(404);
+    }
+
+    public function show(){
+        return abort(404);
+    }
+    
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');

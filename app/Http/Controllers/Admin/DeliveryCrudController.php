@@ -56,6 +56,14 @@ class DeliveryCrudController extends CrudController
         }
     }
 
+    public function create(){
+        return abort(404);
+    }
+
+    public function edit(){
+        return abort(404);
+    }
+
     /**
      * Define what happens when the List operation is loaded.
      * 
@@ -165,6 +173,7 @@ class DeliveryCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
+
         CRUD::setValidation(DeliveryRequest::class);
 
         $this->crud->addField([
@@ -646,6 +655,9 @@ class DeliveryCrudController extends CrudController
                                 ->where('ds_line', $delivery->ds_line)
                                 ->delete();
             Delivery::where('id', $id)->delete();
+            DeliveryStatus::where('ds_num', $delivery->ds_num)
+                            ->where('ds_line', $delivery->ds_line)
+                            ->delete();
         }
         
         return true;

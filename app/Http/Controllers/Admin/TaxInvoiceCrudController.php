@@ -70,6 +70,10 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->crud->setListView('vendor.backpack.crud.list-payment');
     }
+    
+    public function edit(){
+        return abort(404);
+    }
 
     /**
      * Define what happens when the List operation is loaded.

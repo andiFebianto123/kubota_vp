@@ -51,6 +51,18 @@ class ForecastCrudController extends CrudController
         }
     }
 
+    public function create(){
+        return abort(404);
+    }
+
+    public function edit(){
+        return abort(404);
+    }
+
+    public function show(){
+        return abort(404);
+    }
+
     protected function getFieldAccess(){
         if(backpack_user()->hasRole('Admin PTKI')){
             if(request('vendor_submit')){

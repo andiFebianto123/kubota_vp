@@ -49,6 +49,18 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         }
     }
 
+    public function create(){
+        return abort(404);
+    }
+
+    public function edit(){
+        return abort(404);
+    }
+
+    public function show(){
+        return abort(404);
+    }
+    
     /**
      * Define what happens when the List operation is loaded.
      * 
