@@ -31,7 +31,10 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
         $sql = "(
-            (SELECT sum(lot_qty) FROM material_outhouse mo JOIN po_line ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) WHERE mo.matl_item = material_outhouse.matl_item AND (po_line.status = 'O')) -
+            (SELECT sum(lot_qty) FROM material_outhouse mo 
+            JOIN po_line 
+            ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
+            WHERE mo.matl_item = material_outhouse.matl_item AND (po_line.status = 'O')) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
             JOIN po_line ON (po_line.po_num = delivery.po_num AND po_line.po_line = delivery.po_line)
@@ -82,15 +85,6 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             $join->on('material_outhouse.po_line', '=', 'pl.po_line');
         });
 
-        // $this->crud->addClause(
-        //     'join',
-        //     'po_line',
-        //     function ($query) {
-        //         $query->on('material_outhouse.po_num', '=', 'po_line.po_num')
-        //         ->on('material_outhouse.po_line', '=', 'po_line.po_line')
-        //         ->where('po_line.status', '=', 'O');
-        //     }
-        // );
         $this->crud->groupBy('matl_item');
         $this->crud->groupBy('pl.status');
         $this->crud->query->havingRaw("(`pl`.`status` = 'O' and mremaining_qty > 0)");

@@ -204,7 +204,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
                         WHERE imo.matl_item = pimo.matl_item 
                         AND delivery.po_num = '". $delivery->po_num."'
                         ".$sql_date."
-                    ) AS sum_issued_qty
+                    ) AS remaining_qty
                 FROM issued_material_outhouse pimo
                 JOIN delivery
                 ON (pimo.ds_num = delivery.ds_num 
