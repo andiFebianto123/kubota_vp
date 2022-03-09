@@ -104,18 +104,10 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
 
         $this->crud->groupBy('material_outhouse.po_num');
         $this->crud->groupBy('material_outhouse.po_line');
-        // $this->crud->query->having('remaining_qty', '>', 0);
-
-        // $this->crud->groupBy('material_outhouse.matl_item');
-        // dd($this->crud->query->get());
-        // if(Constant::getRole() == 'Admin PTKI'){
-        //     CRUD::column('vend_num')->label('Vend Num');
-        // }
-        // $this->crud->addColumnToSearch('po_num');
 
         CRUD::column('po_num')->label('PO Number');
         CRUD::column('po_line')->label('PO Line');
-        // CRUD::column('status')->label('Status');
+
         CRUD::addColumn([
             'label'     => 'Status', // Table column heading
             'name'      => 'status', // the column that contains the ID of that connected entity;
@@ -148,23 +140,33 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
 
-        $dataDetailMaterial = MaterialOuthouseSummaryPerPo::join('po_line as pl', function($join){
-            $join->on('material_outhouse.po_num', '=', 'pl.po_num');
-            $join->on('material_outhouse.po_line', '=', 'pl.po_line')
-            ->where('pl.status', '=', 'O');
-        });
-        $dataDetailMaterial->join('po', function($join){
-            $join->on('material_outhouse.po_num', '=', 'po.po_num');
-        });
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
-            $dataDetailMaterial->where('vend_num', '=', backpack_auth()->user()->vendor->vend_num);
-        }
-        $dataDetailMaterial->where('material_outhouse.po_num', '=', $this->data['entry']->po_num)
-        ->where('material_outhouse.po_line', '=', $this->data['entry']->po_line);
-        $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
-                            ->where('po_line', $this->data['entry']->po_line)
-                            ->groupBy('matl_item')
-                            ->get();
+        $sql = "SELECT
+                mo1.matl_item,
+                mo1.description,                     
+                ((SELECT sum(lot_qty)  
+                    FROM material_outhouse mo2                                             
+                    WHERE mo2.matl_item = mo1.matl_item 
+                    AND mo1.po_num = mo2.po_num 
+                    AND mo1.po_line = mo2.po_line) -        
+                    (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo                      
+                    JOIN delivery 
+                    ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)                 
+                    WHERE imo.matl_item = mo1.matl_item
+                    AND delivery.po_num = mo1.po_num 
+                    AND delivery.po_line = mo1.po_line
+                    ), 0))
+                ) AS remaining_qty                
+                FROM material_outhouse mo1                
+                WHERE mo1.po_num = '".$this->data['entry']->po_num."' 
+                AND mo1.po_line = '".$this->data['entry']->po_line."' 
+                GROUP BY mo1.matl_item";
+
+        $data_materials = DB::select($sql);
+
+        // $data_materials = MaterialOuthouse::where('po_num', $this->data['entry']->po_num)
+        //                     ->where('po_line', $this->data['entry']->po_line)
+        //                     ->groupBy('matl_item')
+        //                     ->get();
                             
         $this->data['data_materials'] = $data_materials;
 

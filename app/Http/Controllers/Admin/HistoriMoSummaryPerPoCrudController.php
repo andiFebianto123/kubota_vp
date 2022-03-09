@@ -203,6 +203,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
                         ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
                         WHERE imo.matl_item = pimo.matl_item 
                         AND delivery.po_num = '". $delivery->po_num."'
+                        AND delivery.po_line = '". $delivery->po_line."'
                         ".$sql_date."
                     ) AS remaining_qty
                 FROM issued_material_outhouse pimo
@@ -211,6 +212,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
                     AND pimo.ds_line = delivery.ds_line
                 )
                 WHERE delivery.po_num = '".$delivery->po_num."'
+                AND delivery.po_line = '". $delivery->po_line."'
                 ".$sql_date."
                 GROUP BY pimo.matl_item";
 
