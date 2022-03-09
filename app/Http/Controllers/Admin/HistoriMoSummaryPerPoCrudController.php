@@ -35,8 +35,17 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-po');
         CRUD::setEntityNameStrings('histori mo summary per po', 'Summary MO History per PO');
 
-        $sql = "(SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
-                    WHERE imo.ds_num = delivery.ds_num AND imo.ds_line = delivery.ds_line
+        $sql_date = "";
+        if (request('shipped_date')) {
+            $due_date = request('shipped_date');
+            $due_date_d = json_decode($due_date);
+
+            $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
+        }
+
+        $sql = "(SELECT SUM(order_qty) FROM delivery dlv
+                    WHERE delivery.po_num = dlv.po_num AND delivery.po_line = dlv.po_line
+                    ".$sql_date."
                     ) AS sum_qty_order";
         
         $this->crud->query = $this->crud->query->select(
@@ -45,6 +54,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             'delivery.po_line as po_line',
             'delivery.u_m', 
             'delivery.description', 
+            'delivery.due_date', 
             'delivery.shipped_date', 
             'po.vend_num', 
             DB::raw($sql)
@@ -55,7 +65,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
             $join->on('issued_material_outhouse.ds_line', '=', 'delivery.ds_line');
         });
         $this->crud->query->join('po', function($join){
-            $join->on('delivery.po_num', '=', 'delivery.po_num');
+            $join->on('delivery.po_num', '=', 'po.po_num');
         });
 
         if(!in_array(Constant::getRole(), ['Admin PTKI'])){
@@ -107,14 +117,20 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->crud->removeButton('create');
 
         CRUD::column('po_num')->label('PO Number');
+        CRUD::column('po_line')->label('PO Line');
         CRUD::column('description');
-        CRUD::column('sum_qty_order')->label('Qty Used');
+        CRUD::column('sum_qty_order')->label('Qty Order');
         CRUD::column('u_m')->label('UM');
-        CRUD::column('shipped_date')->label('Shipped Date');
+        $this->crud->addColumn([
+            'name'  => 'due_date', // The db column name
+            'label' => 'Due Date', // Table column heading
+            'type'  => 'date',
+            'format' => 'Y-M-d'
+        ]);
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
             'name'  => 'shipped_date',
-            'label' => 'Date range'
+            'label' => 'Date range',
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints

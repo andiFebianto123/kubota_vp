@@ -94,7 +94,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         });
 
         $this->crud->query->join('po', function($join){
-            $join->on('delivery.po_num', '=', 'delivery.po_num');
+            $join->on('delivery.po_num', '=', 'po.po_num');
         });
 
         if(in_array(Constant::getRole(), ['Admin PTKI'])){
@@ -109,18 +109,18 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
                 $this->crud->addClause('where', 'vend_num', $value);
             });
         }else{
-            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         $this->crud->groupBy('issued_material_outhouse.matl_item');
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
         }
-        
+
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('sum_qty_order')->label('Qty Used');
-        CRUD::column('shipped_date')->label('Shipped Date');
+        CRUD::column('sum_qty_order')->label('Qty Total');
+        // CRUD::column('shipped_date')->label('Shipped Date');
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
             'name'  => 'shipped_date',
