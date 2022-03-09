@@ -36,6 +36,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::setEntityNameStrings('histori mo summary per po', 'Summary MO History per PO');
 
         $sql_date = "";
+        
         if (request('shipped_date')) {
             $due_date = request('shipped_date');
             $due_date_d = json_decode($due_date);
@@ -83,11 +84,12 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->crud->addColumn([
             'type'           => 'checkbox_mopo',
             'name'           => 'bulk_actions',
-            'label'          => ' <input type="checkbox" class="crud_bulk_actions_main_checkbox" style="width: 16px; height: 16px;" />',
+            'label'          => '<input type="checkbox" class="crud_bulk_actions_main_checkbox" style="width: 16px; height: 16px;" />',
             'searchLogic'    => false,
             'orderable'      => false,
             'visibleInModal' => false,
         ]);
+
         $this->crud->enableDetailsRow();
     }
 
@@ -134,7 +136,6 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
-            session()->flash('filter_due_date', $value);
             $dates = json_decode($value);
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
@@ -174,17 +175,19 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
 
     public function showDetailsRow($id)
     {
-        // $this->crud->hasAccessOrFail('details_row');
         $entry = $this->crud->getEntry($id);
 
         $this->data['entry'] = $entry;
         $this->data['crud'] = $this->crud;
 
         $sql_date = "";
-        if (session()->has('filter_due_date')) {
-            $due_date = session()->get('filter_due_date');
-            $due_date_d = json_decode($due_date);
+        $url_parent = parse_url(request()->headers->get('referer'));
 
+        if (array_key_exists("query", $url_parent)) {
+            parse_str($url_parent['query'], $param_url);
+
+            $due_date = $param_url['shipped_date'];
+            $due_date_d = json_decode($due_date);
             $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' 
                         AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
         }

@@ -129,7 +129,6 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
           false,
           function ($value) { // if the filter is active, apply these constraints
             $dates = json_decode($value);
-            session()->flash('filter_due_date', $value);
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
         });

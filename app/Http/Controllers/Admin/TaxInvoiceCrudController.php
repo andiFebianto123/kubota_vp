@@ -617,6 +617,17 @@ class TaxInvoiceCrudController extends CrudController
             ], 200);
         }
 
+        $delivery_status = DeliveryStatus::where('id', $request->input('id_payment'))->first();
+
+        if ($delivery_status->executed_flag == 1) {
+
+            return response()->json([
+                'status' => 'failed',
+                'type' => 'warning',
+                'message' => 'Not Allowed!'
+            ], 504);
+        }
+
 
         if(Constant::getRole() != 'Admin PTKI'){
             $vendor = backpack_user()->vendor->vend_num;
@@ -635,7 +646,6 @@ class TaxInvoiceCrudController extends CrudController
             }
         }
         
-
         $comment = new Comment;
         $comment->comment = $request->input('comment');
         $comment->tax_invoice_id = $request->input('id_payment');

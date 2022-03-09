@@ -23,28 +23,12 @@
 				</thead>
 				<tbody>
 					@foreach($data_materials as $data_material)
-					<?php // $total_qty += $data_material->jumlah_lot_qty; ?>
 						<tr>
 							<td>{{ $data_material->matl_item }}</td>
 							<td>{{ $data_material->description }}</td>
 							<td>{{ $data_material->remaining_qty }}</td>
 						</tr>
 					@endforeach
-					<?php 
-						// $available_qty = $total_qty - $issued_qty;
-					?>
-					<!-- <tr>
-						<td colspan="2">Total Qty</td>
-						<td><strong>{{-- $total_qty --}}</strong></td>
-					</tr>
-					<tr>
-						<td colspan="2">Issued Qty</td>
-						<td><strong>{{-- $issued_qty --}}</strong></td>
-					</tr>
-					<tr>
-						<td colspan="2"><strong>Available Material (Total Qty - Issued Qty)</strong></td>
-						<td><strong>{{-- $available_qty --}}</strong></td>
-					</tr> -->
 				</tbody>
 			</table>
 		</div>

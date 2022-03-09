@@ -17,9 +17,10 @@
                 @if($entry->user == backpack_user()->id)
                     <a href="javascript:void(0)" 
                         class="text-success" 
-                        id="comment"
+                        id="comment-{{ $entry->id }}"
                         data-id-tax-invoice = "{{ $entry->id }}"
                         data-route="{{ url('admin/send-comments') }}"
+                        onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
                     >
                         <strong>{{ $column['text'] }}</strong>
                     </a>
@@ -30,16 +31,18 @@
                         data-id-tax-invoice="{{ $entry->id }}" 
                         data-target=".bd-example-modal-lg" 
                         data-route="{{ url('admin/send-comments') }}"
-                        id="comment"
+                        onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
+                        id="comment-{{ $entry->id }}"
                     >
                         <strong>{{ $column['text'] }}</strong>
                     </a>
                 @endif
             @else
                 <a href="javascript:void(0)" 
-                    id="comment" 
+                    id="comment-{{ $entry->id }}"
                     data-id-tax-invoice="{{ $entry->id }}" 
                     class="text-dark"
+                    onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
                     data-route="{{ url('admin/send-comments') }}"
                 >
                     {{ $column['text'] }}
@@ -51,6 +54,7 @@
                         id="comment" 
                         data-id-tax-invoice="{{ $entry->id }}" 
                         class="text-info"
+                        onclick="openCommentModal('{{$entry->executed_flag}}')"
                         data-route="{{ url('admin/send-comments') }}"
                     >
                         <i>Add Comment</i>
@@ -62,45 +66,3 @@
         @endif
     @includeWhen(!empty($column['wrapper']), 'crud::columns.inc.wrapper_end')
 </div>
-@if($entry->executed_flag == 0)
-<script>
-    if(typeof openCommentModal != 'function'){
-        function openCommentModal(){
-            $('a#comment').click(function(e){
-                $('.comment-modal').removeAttr('data-id-tax-invoice');
-                let tax_id = $(this).attr('data-id-tax-invoice');
-                let route = $(this).attr('data-route');
-                if(tax_id !== undefined){
-                    $('.comment-modal').attr('data-id-tax-invoice', tax_id);
-                    $('.comment-modal').attr('data-route', route);
-                }
-                $('.comment-modal').modal('show');
-            });
-        }
-    }
-</script>
-@else
-<script>
-    if(typeof openCommentModal != 'function'){
-        function openCommentModal(){
-            $('a#comment').click(function(e){
-                $('.comment-modal').removeAttr('data-id-tax-invoice');
-                $('.input-message').remove();
-                $('.modal-footer').remove();
-
-                let tax_id = $(this).attr('data-id-tax-invoice');
-                let route = $(this).attr('data-route');
-                if(tax_id !== undefined){
-                    $('.comment-modal').attr('data-id-tax-invoice', tax_id);
-                    $('.comment-modal').attr('data-route', route);
-                }
-                $('.comment-modal').modal('show');
-            });
-        }
-    }
-</script>
-@endif
-
-<script>
-    openCommentModal();
-</script>

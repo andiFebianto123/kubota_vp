@@ -512,6 +512,27 @@
               }
         });
    }
+    if(typeof openCommentModal != 'function'){
+        function openCommentModal(id, ef){
+            // $('a#comment').click(function(e){
+                $('.comment-modal').removeAttr('data-id-tax-invoice');
+                if (ef == 1) {
+                    $('.input-message').hide();
+                    $('.modal-footer').hide();
+                }else{
+                  $('.input-message').show();
+                  $('.modal-footer').show();
+                }
+                let tax_id = $('#comment-'+id).attr('data-id-tax-invoice');
+                let route =  $('#comment-'+id).attr('data-route');
+                if(tax_id !== undefined){
+                    $('.comment-modal').attr('data-id-tax-invoice', tax_id);
+                    $('.comment-modal').attr('data-route', route);
+                }
+                $('.comment-modal').modal('show');
+           // });
+        }
+    }
   </script>
   <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
   <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
