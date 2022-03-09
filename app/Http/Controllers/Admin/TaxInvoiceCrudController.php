@@ -93,14 +93,11 @@ class TaxInvoiceCrudController extends CrudController
         if(Constant::checkPermission('Download Button List Payment')){
             $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
         }
-        // $this->crud->addButtonFromModelFunction('line', 'downloadV2', 'downloadV2', 'end'); 
 
         $this->crud->addButtonFromView('line_2', 'show2', 'show', 'begining');
 
-    //    $this->crud->addClause('where', 'file_faktur_pajak', '!=', null);
-       $this->crud->addClause('where', 'payment_in_process_flag', '=', 1);
-       $this->crud->addClause('where', 'executed_flag', '=', 0);
-       $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
+        $this->crud->addClause('where', 'executed_flag', '=', 0);
+        $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -283,15 +280,6 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud2 = $this->crud2->where('payment_plan_date','>=', $dates->from)
             ->where('payment_plan_date', '<=', $dates->to);
         });
-
-        // COMING SOON
-        // $results = $this->crud->model->select('*', 
-        //     DB::raw("(SELECT vend_num FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as nama_vendor"),
-        //     DB::raw("(SELECT po.po_date FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as po_date"),
-        //     DB::raw("(SELECT po.id FROM `po` WHERE id = (SELECT MAX(id) FROM `po` WHERE po.po_num = delivery_status.po_num)) as id_po")
-        // );
-        // dd($results->get());
-
     }
 
     /**
@@ -348,7 +336,6 @@ class TaxInvoiceCrudController extends CrudController
         $delivery_statuses = DeliveryStatus::select('*', 
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
             ->where('validate_by_fa_flag', 1)
-            ->where('payment_in_process_flag', 1)
             ->where('executed_flag', 0)
             ->orderBy('id', 'desc');
             if(Constant::getRole() != 'Admin PTKI'){
@@ -517,18 +504,6 @@ class TaxInvoiceCrudController extends CrudController
         $db->confirm_flag = 2;
         $db->confirm_date = now();
         $status = $db->save();
-
-        // if($status){
-        //     $me = backpack_user()->id;
-        //     $comment = new Comment;
-        //     $comment->comment = "[REJECT REASON]";
-        //     $comment->tax_invoice_id = $db->id;
-        //     $comment->user_id = $me;
-        //     $comment->status = 1;
-        //     $saving = $comment->save();
-        //     return $saving;
-        // }
-        // return $status;
 
         if($status){
             $me = backpack_user()->id;
@@ -735,8 +710,8 @@ class TaxInvoiceCrudController extends CrudController
             // jika user bukan admin ptki
             $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
         }
-        $this->crud2->where('payment_in_process_flag', 1);
-        $this->crud2->where('executed_flag', 1);
+        
+        $this->crud2->where('executed_flag','!=', 0);
     }
 
 
