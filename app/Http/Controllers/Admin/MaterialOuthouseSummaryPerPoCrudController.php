@@ -15,7 +15,7 @@ use App\Models\MaterialOuthouse;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class MaterialOuthouseSummaryPerPoCrudController extends CrudController 
+class MaterialOuthouseSummaryPerPoCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -24,8 +24,8 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
-     * Configure the CrudPanel object. Apply settings to all operations. 
-     * 
+     * Configure the CrudPanel object. Apply settings to all operations.
+     *
      * @return void
      */
 
@@ -35,16 +35,16 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-po');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per PO');
         $this->crud->query = $this->crud->query->select(
-            'material_outhouse.id as id', 
-            'material_outhouse.po_num as po_num', 
+            'material_outhouse.id as id',
+            'material_outhouse.po_num as po_num',
             'material_outhouse.po_line as po_line',
-            'lot_qty', 
-            'po.vend_num', 
+            'lot_qty',
+            'po.vend_num',
             'pl.status' ,
-            'matl_item', 
-            'pl.u_m', 
+            'matl_item',
+            'pl.u_m',
             'pl.order_qty',
-            'pl.due_date', 
+            'pl.due_date',
             'pl.description'
         );
 
@@ -80,7 +80,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -131,7 +131,13 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         CRUD::column('description');
         CRUD::column('order_qty')->label('Qty Order');
         CRUD::column('u_m')->label('UM');
-        CRUD::column('due_date')->label('Due Date');
+        $this->crud->addColumn([
+            'name'  => 'due_date', // The db column name
+            'label' => 'Due Date', // Table column heading
+            'type'  => 'date',
+            'format' => 'Y-M-d'
+        ]);
+
         $this->crud->setListView('crud::list-mo-po');
     }
 
@@ -157,11 +163,11 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         ->where('material_outhouse.po_line', '=', $this->data['entry']->po_line);
         // $dataDetailMaterial->select(
         //     'material_outhouse.po_line',
-        //     'material_outhouse.matl_item', 
-        //     'material_outhouse.description', 
+        //     'material_outhouse.matl_item',
+        //     'material_outhouse.description',
         //     'material_outhouse.lot_qty as jumlah_lot_qty',
         //     DB::raw("(SUM(material_outhouse.lot_qty) - IFNULL((
-        //         SELECT SUM(issue_qty) FROM issued_material_outhouse 
+        //         SELECT SUM(issue_qty) FROM issued_material_outhouse
         //         LEFT JOIN delivery ON delivery.ds_num = issued_material_outhouse.ds_num
         //         WHERE delivery.po_num = material_outhouse.po_num AND
         //         delivery.po_line = material_outhouse.po_line AND
@@ -186,5 +192,5 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
     }
 
 
-   
+
 }
