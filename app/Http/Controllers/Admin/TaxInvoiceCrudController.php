@@ -39,7 +39,7 @@ class TaxInvoiceCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -47,7 +47,7 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::setModel(\App\Models\TaxInvoice::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/tax-invoice');
         CRUD::setEntityNameStrings('faktur pajak', 'List Payment');
-        $this->crud->query = $this->crud->query->select('*', 
+        $this->crud->query = $this->crud->query->select('*',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
@@ -56,7 +56,7 @@ class TaxInvoiceCrudController extends CrudController
         );
 
         $this->setup2();
-        
+
         if(Constant::getRole() != 'Admin PTKI'){
             // jika user bukan admin ptki
             $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
@@ -70,14 +70,14 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->crud->setListView('vendor.backpack.crud.list-payment');
     }
-    
+
     public function edit(){
         return abort(404);
     }
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -106,17 +106,17 @@ class TaxInvoiceCrudController extends CrudController
             'function' => function($entry) {
                 return $entry->po_num.'-'.$entry->po_line;
             }
-        ]); 
+        ]);
         CRUD::addColumn([
             'name'     => 'ds_num',
             'label'    => 'DS Num',
             'type'     => 'text',
-        ]);   
+        ]);
         CRUD::addColumn([
             'name'     => 'ds_line',
             'label'    => 'DS Line',
             'type'     => 'text',
-        ]);          
+        ]);
         CRUD::addColumn([
             'label'     => 'Item', // Table column heading
             'name'      => 'item', // the column that contains the ID of that connected entity;
@@ -221,7 +221,7 @@ class TaxInvoiceCrudController extends CrudController
                 'placeholder' => 'Pick a vendor'
             ],
             url('admin/test/ajax-vendor-options'),
-            function($value) { 
+            function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')
                 ->where('po.vend_num', $value)
@@ -257,7 +257,7 @@ class TaxInvoiceCrudController extends CrudController
                 'custom_table' => true,
             ],
             url('admin/test/ajax-vendor-options'),
-            function($value) { 
+            function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')
                 ->where('po.vend_num', $value)
@@ -274,7 +274,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'  => 'from_to_2',
             'label' => 'Payment Plan Date',
             'value' => '',
-            'default' => [null,null], 
+            'default' => [null,null],
             'custom_table' => true,
         ],
         false,
@@ -287,7 +287,7 @@ class TaxInvoiceCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -302,7 +302,7 @@ class TaxInvoiceCrudController extends CrudController
             'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
             // optional:
             'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
-        ]); 
+        ]);
 
         CRUD::addField([   // Upload
             'name'      => 'invoice',
@@ -312,7 +312,7 @@ class TaxInvoiceCrudController extends CrudController
             'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
             // optional:
             'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
-        ]); 
+        ]);
 
         CRUD::addField([   // Upload
             'name'      => 'file_surat_jalan',
@@ -322,9 +322,9 @@ class TaxInvoiceCrudController extends CrudController
             'disk'      => 'uploads', // if you store files in the /public folder, please omit this; if you store them in /storage or S3, please specify it;
             // optional:
             'temporary' => 10 // if using a service, such as S3, that requires you to make temporary URLs this will make a URL that is valid for the number of minutes specified
-        ]); 
+        ]);
 
-        CRUD::addField([ 
+        CRUD::addField([
             'name'        => 'ds_nums',
             'label'       => "Delivery Status",
             'type'        => 'checklist_table',
@@ -336,11 +336,11 @@ class TaxInvoiceCrudController extends CrudController
 
     private function deliveryStatus(){
         $table_header = [
-            'PO', 
+            'PO',
             'DS Num',
-            'DS Line', 
-            'Item', 
-            'Description', 
+            'DS Line',
+            'Item',
+            'Description',
             'Payment Plan Date',
             'Unit Price',
             'Qty Received',
@@ -351,10 +351,10 @@ class TaxInvoiceCrudController extends CrudController
             'PPN',
             'PPH',
             'Total',
-            'Confirm',
-            'Updated At',
+            // 'Confirm',
+            // 'Updated At',
         ];
-        $delivery_statuses = DeliveryStatus::select('*', 
+        $delivery_statuses = DeliveryStatus::select('*',
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
             ->where('validate_by_fa_flag', 1)
             ->where('executed_flag', 0)
@@ -366,23 +366,23 @@ class TaxInvoiceCrudController extends CrudController
             $delivery_statuses = $delivery_statuses->get();
         }
         $table_body = [];
-       
+
         foreach ($delivery_statuses as $key => $ds) {
             $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
-            $confirm = "";
-            if($ds->confirm_flag == 0){
-                $confirm = 'Waiting';
-            }else if($ds->confirm_flag == 1){
-                $confirm = 'Accept';
-            }else {
-                $confirm = 'Reject';
-            }
+            // $confirm = "";
+            // if($ds->confirm_flag == 0){
+            //     $confirm = 'Waiting';
+            // }else if($ds->confirm_flag == 1){
+            //     $confirm = 'Accept';
+            // }else {
+            //     $confirm = 'Reject';
+            // }
             $table_body[] =[
                 'column' => [
-                    $ds->po_num.'-'.$ds->po_line, 
-                    $ds->ds_num, 
-                    $ds->ds_line, 
-                    $ds->item, 
+                    $ds->po_num.'-'.$ds->po_line,
+                    $ds->ds_num,
+                    $ds->ds_line,
+                    $ds->item,
                     $ds->description,
                     date('Y-m-d', strtotime($ds->payment_plan_date)),
                     $ds->currency.' '.Constant::getPrice($ds->unit_price),
@@ -394,8 +394,8 @@ class TaxInvoiceCrudController extends CrudController
                     $ds->currency.' '.Constant::getPrice($ds->ppn),
                     $ds->currency.' '.Constant::getPrice($ds->pph),
                     $ds->currency.' '.Constant::getPrice($total),
-                    $confirm,
-                    $ds->updated_at,
+                    // $confirm,
+                    // $ds->updated_at,
                 ],
                 'value' => $ds->id
             ];
@@ -408,7 +408,7 @@ class TaxInvoiceCrudController extends CrudController
     }
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -445,7 +445,7 @@ class TaxInvoiceCrudController extends CrudController
             $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlfile_faktur->getClientOriginalExtension();
             $urlfile_faktur->move('files', $filename);
             $filename = 'files/'.$filename;
-            
+
             foreach ($ds_nums as $key => $ds) {
                 $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
                 if (isset($old_files)) {
@@ -520,13 +520,13 @@ class TaxInvoiceCrudController extends CrudController
         if (isset($old_file->file_surat_jalan)) {
             unlink(public_path($old_file->file_surat_jalan));
         }
-       
+
         $change = DeliveryStatus::where('id', $id)->first();
         $change->file_faktur_pajak = null;
         $change->invoice = null;
         $change->file_surat_jalan = null;
         $success = $change->save();
-        
+
         Comment::where('tax_invoice_id', $id)
             ->forcedelete();
 
@@ -573,7 +573,7 @@ class TaxInvoiceCrudController extends CrudController
                 $vendor = backpack_user()->vendor->vend_num;
                 $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
                 ->where('delivery_status.id', request()->input('id_payment'));
-    
+
                 if($cekVendor->count() > 0){
                     $cekVendor = $cekVendor->select('po.vend_num')->first();
                     if($cekVendor->vend_num != $vendor){
@@ -584,7 +584,7 @@ class TaxInvoiceCrudController extends CrudController
                         ]);
                     }
                 }
-            }   
+            }
             // jika berhasil melewati pengecekan vendor dengan delivery status
             $comment = new Comment;
             $comment->comment = '[REJECT REASON] '.request()->input('comment');
@@ -688,7 +688,7 @@ class TaxInvoiceCrudController extends CrudController
                 }
             }
         }
-        
+
         $comment = new Comment;
         $comment->comment = $request->input('comment');
         $comment->tax_invoice_id = $payment_id;
@@ -741,7 +741,7 @@ class TaxInvoiceCrudController extends CrudController
                         ->where('delivery_status.id', $id)
                         ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date', 'delivery_status.po_release','po_line.item',
                         'vendor.vend_num as vendor_number','vendor.currency as vendor_currency', 'vendor.vend_num as vendor_name', 'delivery_status.no_surat_jalan_vendor','po_line.item_ptki',
-                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery_status.shipped_qty', 'delivery_status.unit_price', 
+                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery_status.shipped_qty', 'delivery_status.unit_price',
                         'delivery_status.tax_status', 'delivery_status.description', ])
                         ->first();
 
@@ -752,7 +752,7 @@ class TaxInvoiceCrudController extends CrudController
 
     private function setup2(){
         $this->crud2 = new TaxInvoice;
-        $this->crud2 = $this->crud2->select('*', 
+        $this->crud2 = $this->crud2->select('*',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
@@ -763,7 +763,7 @@ class TaxInvoiceCrudController extends CrudController
             // jika user bukan admin ptki
             $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
         }
-        
+
         $this->crud2->where('executed_flag','!=', 0);
     }
 
@@ -925,6 +925,6 @@ class TaxInvoiceCrudController extends CrudController
         }else{
             abort(404);
         }
-        
+
     }
 }
