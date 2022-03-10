@@ -594,6 +594,7 @@ class TaxInvoiceCrudController extends CrudController
     public function sendMessage(req $request){
 
         $me = backpack_user()->id;
+        $payment_id = $request->input('id_payment');
 
         $validator = Validator::make($request->all(), [
             'comment' => 'required',
@@ -617,7 +618,7 @@ class TaxInvoiceCrudController extends CrudController
             ], 200);
         }
 
-        $delivery_status = DeliveryStatus::where('id', $request->input('id_payment'))->first();
+        $delivery_status = DeliveryStatus::where('id', $payment_id)->first();
 
         if ($delivery_status->executed_flag == 1) {
 
@@ -632,7 +633,7 @@ class TaxInvoiceCrudController extends CrudController
         if(Constant::getRole() != 'Admin PTKI'){
             $vendor = backpack_user()->vendor->vend_num;
             $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
-            ->where('delivery_status.id', $request->input('id_payment'));
+            ->where('delivery_status.id', $payment_id);
 
             if($cekVendor->count() > 0){
                 $cekVendor = $cekVendor->select('po.vend_num')->first();
@@ -648,7 +649,7 @@ class TaxInvoiceCrudController extends CrudController
         
         $comment = new Comment;
         $comment->comment = $request->input('comment');
-        $comment->tax_invoice_id = $request->input('id_payment');
+        $comment->tax_invoice_id = $payment_id;
         $comment->user_id = $me;
         $comment->status = 1;
         $saving = $comment->save();
@@ -779,22 +780,6 @@ class TaxInvoiceCrudController extends CrudController
         }else{
             $this->crud2->orderBy('id', 'DESC');
         }
-
-        // show newest items first, by default (if no order has been set for the primary column)
-        // if there was no order set, this will be the only one
-        // if there was an order set, this will be the last one (after all others were applied)
-        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
-        // $orderBy = $this->crud->orders;
-        // $table = 'delivery_status';
-        // $key = 'id';
-
-        // $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
-        //     return (isset($item['column']) && $item['column'] === $key)
-        //         || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
-        // });
-
-        // if (! $hasOrderByPrimaryKey) {
-        // }
 
         $entries = $this->crud2->get();
 

@@ -54,7 +54,7 @@
                         id="comment" 
                         data-id-tax-invoice="{{ $entry->id }}" 
                         class="text-info"
-                        onclick="openCommentModal('{{$entry->executed_flag}}')"
+                        onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
                         data-route="{{ url('admin/send-comments') }}"
                     >
                         <i>Add Comment</i>
