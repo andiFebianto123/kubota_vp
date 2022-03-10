@@ -48,7 +48,7 @@
 		          <span class="input-group-text"><i class="la la-calendar"></i></span>
 		        </div>
 		        <input class="form-control pull-right"
-		        		id="daterangepicker2-{{ $filter->key }}"
+		        		id="daterangepicker-{{ $filter->key }}"
 		        		type="text"
                         data-bs-daterangepicker="{{ json_encode($filter->options['date_range_options'] ?? []) }}"
 		        		>
@@ -60,10 +60,36 @@
 	</div>
 </li>
 
+{{-- ########################################### --}}
+{{-- Extra CSS and JS for this particular filter --}}
+
+{{-- FILTERS EXTRA CSS  --}}
+{{-- push things in the after_styles section --}}
+
+@push('crud_list_styles')
+    <!-- include select2 css-->
+	<link rel="stylesheet" type="text/css" href="{{ asset('packages/bootstrap-daterangepicker/daterangepicker.css') }}" />
+	<style>
+		.input-group.date {
+			width: 320px;
+			max-width: 100%; }
+		.daterangepicker.dropdown-menu {
+			z-index: 3001!important;
+		}
+	</style>
+@endpush
+
+
+{{-- FILTERS EXTRA JS --}}
+{{-- push things in the after_scripts section --}}
+
 @push('crud_list_scripts')
+    <script type="text/javascript" src="{{ asset('packages/moment/min/moment-with-locales.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('packages/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
+
   <script>
 
-  		function applyDateRangeFilter2{{$filter->key}}(start, end) {
+  		function applyDateRangeFilter{{$filter->key}}(start, end) {
 
   			if (start && end) {
   				var dates = {
@@ -78,14 +104,14 @@
 
             var parameter = '{{ $filter->name }}';
 	    	// behaviour for ajax table
-			var ajax_table = $('#crudTable2').DataTable();
+			var ajax_table = $('#crudTable').DataTable();
 			var current_url = ajax_table.ajax.url();
 			var new_url = addOrUpdateUriParameter(current_url, parameter, value);
 			// replace the datatables ajax url with new_url and reload it
 			new_url = normalizeAmpersand(new_url.toString());
 			ajax_table.ajax.url(new_url).load();
 			// add filter to URL
-			// crud.updateUrl(new_url);
+			crud.updateUrl(new_url);
 			// mark this filter as active in the navbar-filters
 			if (URI(new_url).hasQuery('{{ $filter->name }}', true)) {
 				$('li[filter-key={{ $filter->key }}]').removeClass('active').addClass('active');
@@ -98,7 +124,7 @@
 
             moment.locale('{{app()->getLocale()}}');
 
-			var dateRangeInput = $('#daterangepicker2-{{ $filter->key }}');
+			var dateRangeInput = $('#daterangepicker-{{ $filter->key }}');
 
             $config = dateRangeInput.data('bs-daterangepicker');
 
@@ -123,8 +149,8 @@
 
 
             dateRangeInput.on('apply.daterangepicker', function(ev, picker) {
-				applyDateRangeFilter2{{$filter->key}}(picker.startDate, picker.endDate);
-				dateRangeInput.val(picker.startDate.format('DD MMM YYYY') + ' - ' + picker.endDate.format('DD MMM YYYY'));
+				applyDateRangeFilter{{$filter->key}}(picker.startDate, picker.endDate);
+                dateRangeInput.val(picker.startDate.format('DD MMM YYYY') + ' - ' + picker.endDate.format('DD MMM YYYY'));
 			});
 			$('li[filter-key={{ $filter->key }}]').on('hide.bs.dropdown', function () {
 				if($('.daterangepicker').is(':visible'))
@@ -133,13 +159,13 @@
 			$('li[filter-key={{ $filter->key }}]').on('filter:clear', function(e) {
 				//if triggered by remove filters click just remove active class,no need to send ajax
 				$('li[filter-key={{ $filter->key }}]').removeClass('active');
-				dateRangeInput.val("");
+                dateRangeInput.val("");
 			});
 			// datepicker clear button
 			$(".daterangepicker-{{ $filter->key }}-clear-button").click(function(e) {
 				e.preventDefault();
-				applyDateRangeFilter2{{$filter->key}}(null, null);
-				dateRangeInput.val("");
+				applyDateRangeFilter{{$filter->key}}(null, null);
+                dateRangeInput.val("");
 			});
 		});
   </script>

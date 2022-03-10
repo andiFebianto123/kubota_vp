@@ -234,9 +234,10 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         $this->crud->addFilter([
-            'type'  => 'date_range',
+            'type'  => 'date_range_list_payment_top',
             'name'  => 'from_to',
-            'label' => 'Payment Plan Date'
+            'label' => 'Payment Plan Date',
+            'value' => ''
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
@@ -272,6 +273,8 @@ class TaxInvoiceCrudController extends CrudController
             'type'  => 'date_range_custom',
             'name'  => 'from_to_2',
             'label' => 'Payment Plan Date',
+            'value' => '',
+            'default' => [null,null], 
             'custom_table' => true,
         ],
         false,

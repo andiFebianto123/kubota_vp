@@ -33,19 +33,15 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
         $sql = "(
             (SELECT sum(lot_qty) FROM material_outhouse mo 
-            JOIN po_line ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
             JOIN po as po1 ON (po1.po_num = mo.po_num) 
             WHERE mo.matl_item = material_outhouse.matl_item 
-            AND mo.po_num = material_outhouse.po_num
-            AND mo.po_line = material_outhouse.po_line
+            AND po.vend_num = po1.vend_num
             ) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
-            JOIN po_line ON (po_line.po_num = delivery.po_num AND po_line.po_line = delivery.po_line)
             JOIN po as po1 ON (po1.po_num = delivery.po_num) 
             WHERE imo.matl_item = material_outhouse.matl_item 
-            AND po_line.po_num = material_outhouse.po_num
-            AND po_line.po_line = material_outhouse.po_line
+            AND po.vend_num = po1.vend_num
             ), 0))
             ) AS mremaining_qty";
 
