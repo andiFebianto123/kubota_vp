@@ -25,6 +25,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
      * 
      * @return void
      */
+
     public function setup()
     {
         CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
@@ -32,17 +33,31 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
         $sql = "(
             (SELECT sum(lot_qty) FROM material_outhouse mo 
-            JOIN po_line
-            ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
-            WHERE mo.matl_item = material_outhouse.matl_item AND (po_line.status = 'O')) -
+            JOIN po_line ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
+            JOIN po as po1 ON (po1.po_num = mo.po_num) 
+            WHERE mo.matl_item = material_outhouse.matl_item 
+            AND mo.po_num = material_outhouse.po_num
+            AND mo.po_line = material_outhouse.po_line
+            ) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
             JOIN po_line ON (po_line.po_num = delivery.po_num AND po_line.po_line = delivery.po_line)
-            WHERE imo.matl_item = material_outhouse.matl_item AND (po_line.status = 'O')), 0))
+            JOIN po as po1 ON (po1.po_num = delivery.po_num) 
+            WHERE imo.matl_item = material_outhouse.matl_item 
+            AND po_line.po_num = material_outhouse.po_num
+            AND po_line.po_line = material_outhouse.po_line
+            ), 0))
             ) AS mremaining_qty";
 
-        $this->crud->query = $this->crud->query->select('material_outhouse.id as id', 'material_outhouse.po_num as po_num', 
-        'material_outhouse.po_line as po_line','lot_qty', 'po.vend_num', 'matl_item', 'material_outhouse.description','pl.status',
+        $this->crud->query = $this->crud->query->select(
+            'material_outhouse.id as id', 
+            'material_outhouse.po_num as po_num', 
+            'material_outhouse.po_line as po_line',
+            'lot_qty', 
+            'po.vend_num', 
+            'matl_item', 
+            'material_outhouse.description',
+            'pl.status',
             DB::raw($sql)
         );
         if(Constant::checkPermission('Read Summary MO')){

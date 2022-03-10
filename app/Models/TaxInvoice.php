@@ -54,6 +54,12 @@ class TaxInvoice extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+
+    public function getPaymentPlanDateAttribute($value)
+    {
+        return date('Y-m-d', strtotime($value));
+    }
+    
     public function download()
     {
         $faktur_pajak = ($this->file_faktur_pajak != null) ? '<a class="btn btn-sm btn-link" target="_blank" href="'.str_replace("files/","file-invoices/",asset($this->file_faktur_pajak)).'" download><i class="la la-cloud-download-alt"></i> Download Faktur</a>' : '';

@@ -32,7 +32,10 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-item');
         CRUD::setEntityNameStrings('histori mo summary per item', 'Summary MO History Per Item');
 
-        $sql_date = "";
+        $first_date = date('Y-m-d',strtotime('first day of this month'));
+        $sql_date = "AND (delivery.shipped_date >= '".$first_date."' 
+                    AND delivery.shipped_date <= '".now()." 23:59:59')";
+        
         if (request('shipped_date')) {
             $due_date = request('shipped_date');
             $due_date_d = json_decode($due_date);
@@ -87,6 +90,13 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
+
+        $first_date = date('Y-m-d',strtotime('first day of this month'));
+        
+        if (!request('shipped_date')) {
+            $this->crud->addClause('where', 'delivery.shipped_date', '>=', $first_date);
+            $this->crud->addClause('where', 'delivery.shipped_date', '<=', now() . ' 23:59:59');
+        }
 
         $this->crud->query->join('delivery', function($join){
             $join->on('issued_material_outhouse.ds_num', '=', 'delivery.ds_num');

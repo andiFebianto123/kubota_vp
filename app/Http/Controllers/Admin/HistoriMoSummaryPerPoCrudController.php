@@ -35,13 +35,16 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/histori-mo-summary-per-po');
         CRUD::setEntityNameStrings('histori mo summary per po', 'Summary MO History per PO');
 
-        $sql_date = "";
+        $first_date = date('Y-m-d',strtotime('first day of this month'));
+        $sql_date = "AND (delivery.shipped_date >= '".$first_date."' 
+                    AND delivery.shipped_date <= '".now()." 23:59:59')";
         
         if (request('shipped_date')) {
             $due_date = request('shipped_date');
             $due_date_d = json_decode($due_date);
 
-            $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
+            $sql_date = "AND (delivery.shipped_date >= '".$due_date_d->from."' 
+                        AND delivery.shipped_date <= '".$due_date_d->to." 23:59:59')";
         }
 
         $sql = "(SELECT SUM(order_qty) FROM delivery dlv
@@ -118,6 +121,13 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('create');
 
+        $first_date = date('Y-m-d',strtotime('first day of this month'));
+        
+        if (!request('shipped_date')) {
+            $this->crud->addClause('where', 'delivery.shipped_date', '>=', $first_date);
+            $this->crud->addClause('where', 'delivery.shipped_date', '<=', now() . ' 23:59:59');
+        }
+        
         CRUD::column('po_num')->label('PO Number');
         CRUD::column('po_line')->label('PO Line');
         CRUD::column('description');
@@ -180,7 +190,10 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $this->data['entry'] = $entry;
         $this->data['crud'] = $this->crud;
 
-        $sql_date = "";
+        $first_date = date('Y-m-d',strtotime('first day of this month'));
+        $sql_date = "AND (delivery.shipped_date >= '".$first_date."' 
+                    AND delivery.shipped_date <= '".now()." 23:59:59')";
+        
         $url_parent = parse_url(request()->headers->get('referer'));
 
         if (array_key_exists("query", $url_parent)) {

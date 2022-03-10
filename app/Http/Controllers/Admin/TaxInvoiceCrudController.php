@@ -332,7 +332,25 @@ class TaxInvoiceCrudController extends CrudController
     }
 
     private function deliveryStatus(){
-        $table_header = ['PO', 'DS Num','DS Line', 'Item', 'Description', 'Unit Price'];
+        $table_header = [
+            'PO', 
+            'DS Num',
+            'DS Line', 
+            'Item', 
+            'Description', 
+            'Payment Plan Date',
+            'Unit Price',
+            'Qty Received',
+            'Qty Rejected',
+            'No Faktur',
+            'No Surat Jalan Vendor',
+            'Harga Sebelum Pajak',
+            'PPN',
+            'PPH',
+            'Total',
+            'Confirm',
+            'Updated At',
+        ];
         $delivery_statuses = DeliveryStatus::select('*', 
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
             ->where('validate_by_fa_flag', 1)
@@ -345,7 +363,17 @@ class TaxInvoiceCrudController extends CrudController
             $delivery_statuses = $delivery_statuses->get();
         }
         $table_body = [];
+       
         foreach ($delivery_statuses as $key => $ds) {
+            $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
+            $confirm = "";
+            if($ds->confirm_flag == 0){
+                $confirm = 'Waiting';
+            }else if($ds->confirm_flag == 1){
+                $confirm = 'Accept';
+            }else {
+                $confirm = 'Reject';
+            }
             $table_body[] =[
                 'column' => [
                     $ds->po_num.'-'.$ds->po_line, 
@@ -353,7 +381,18 @@ class TaxInvoiceCrudController extends CrudController
                     $ds->ds_line, 
                     $ds->item, 
                     $ds->description,
+                    date('Y-m-d', strtotime($ds->payment_plan_date)),
                     $ds->currency.' '.Constant::getPrice($ds->unit_price),
+                    $ds->received_qty,
+                    $ds->rejected_qty,
+                    $ds->no_faktur_pajak,
+                    $ds->no_surat_jalan_vendor,
+                    $ds->currency.' '.Constant::getPrice($ds->harga_sebelum_pajak),
+                    $ds->currency.' '.Constant::getPrice($ds->ppn),
+                    $ds->currency.' '.Constant::getPrice($ds->pph),
+                    $ds->currency.' '.Constant::getPrice($total),
+                    $confirm,
+                    $ds->updated_at,
                 ],
                 'value' => $ds->id
             ];
