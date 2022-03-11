@@ -191,13 +191,14 @@ class TempUploadDeliveryCrudController extends CrudController
     
                     if ($po_line->outhouse_flag == 1 && isset($data_temp->data_attr)) {
                         $data_attrs = json_decode($data_temp->data_attr);
+                        $int_ds_detail = 1;
                         foreach ($data_attrs->attributes as $key => $da) {
                             $material_outhouse = MaterialOuthouse::where('id', $da->id)->first();
                             if (isset($material_outhouse)) {
                                 $insert_outhouse = new IssuedMaterialOuthouse();
                                 $insert_outhouse->ds_num = $ds_num['single'];
                                 $insert_outhouse->ds_line = $ds_line;
-                                $insert_outhouse->ds_detail = $po_line->item;
+                                $insert_outhouse->ds_detail = $int_ds_detail++;
                                 $insert_outhouse->matl_item = $material_outhouse->matl_item;
                                 $insert_outhouse->description =  $material_outhouse->description;
                                 $insert_outhouse->lot =  $material_outhouse->lot;

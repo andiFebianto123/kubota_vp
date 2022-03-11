@@ -414,6 +414,7 @@ class DeliveryCrudController extends CrudController
 
             if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
                 $any_errors = false;
+                $int_ds_detail = 1;
                 foreach ($material_ids as $key => $material_id) {
                     $mo = MaterialOuthouse::where('id', $material_id)->first();
                     $mo_issue_qty = $mo_issue_qtys[$key];
@@ -423,7 +424,7 @@ class DeliveryCrudController extends CrudController
                     $insert_imo = new IssuedMaterialOuthouse();
                     $insert_imo->ds_num = $insert_d->ds_num;
                     $insert_imo->ds_line = $insert_d->ds_line;
-                    $insert_imo->ds_detail = $po_line->item;
+                    $insert_imo->ds_detail = $int_ds_detail++;
                     $insert_imo->matl_item = $mo->matl_item;
                     $insert_imo->description = $mo->description;
                     $insert_imo->lot =  $mo->lot;
