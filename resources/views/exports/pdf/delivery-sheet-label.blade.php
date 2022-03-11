@@ -70,7 +70,7 @@
                         $qtyTotal = $jumlahQtyData - $qtyTotal;
                         $qtyAsli = $qtyTotal;
                     }
-                    $qr_code = 'BOX|'.$delivery->ds_num .'|'.$delivery->ds_line.'|'.$delivery->item.'|'.$delivery->po_num.'|'.$delivery->po_line.'|'.$dbagi.'|'.$delivery->shipped_date;
+                    $qr_code = 'BOX|'.$delivery->ds_num .'|'.$delivery->ds_line.'|'.$delivery->item.'|'.$delivery->po_num.'|'.$delivery->po_line.'|'.$qtyAsli.'|'.$delivery->shipped_date;
         ?>
         <?php
             if($tipe == 'genap'){
