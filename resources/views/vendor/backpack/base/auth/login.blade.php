@@ -42,6 +42,7 @@
     </div>
     @section('after_scripts')
     <script>
+        localStorage.clear();
         $('input').keypress(function (e) {
             if (e.which == 13) {
                 submitAfterValid('form-login')

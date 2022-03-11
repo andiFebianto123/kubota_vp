@@ -160,7 +160,15 @@ class LoginController extends Controller
     }
 
     public function logout () {
-        session()->put('prev_url', url()->previous());
+        $url_parent = parse_url(url()->previous());
+
+        if (array_key_exists("query", $url_parent)) {
+            parse_str($url_parent['query'], $param_url);
+
+            if (isset($param_url['prev_session'])) {
+                session()->put('prev_url', url()->previous());
+            }
+        }
 
         if (backpack_auth()->check()) {
             $user = User::where("id", backpack_auth()->user()->id)->first();
