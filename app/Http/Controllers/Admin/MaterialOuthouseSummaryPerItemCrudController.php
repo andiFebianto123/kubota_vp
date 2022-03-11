@@ -34,14 +34,18 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $sql = "(
             (SELECT sum(lot_qty) FROM material_outhouse mo 
             JOIN po as po1 ON (po1.po_num = mo.po_num) 
+            JOIN po_line ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
             WHERE mo.matl_item = material_outhouse.matl_item 
             AND po.vend_num = po1.vend_num
+            AND po_line.status = 'O'
             ) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
             JOIN po as po1 ON (po1.po_num = delivery.po_num) 
+            JOIN po_line ON (po_line.po_num = delivery.po_num AND po_line.po_line = delivery.po_line) 
             WHERE imo.matl_item = material_outhouse.matl_item 
             AND po.vend_num = po1.vend_num
+            AND po_line.status = 'O'
             ), 0))
             ) AS mremaining_qty";
 
@@ -98,7 +102,8 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
 
         $this->crud->groupBy('matl_item');
         $this->crud->groupBy('pl.status');
-        $this->crud->query->havingRaw("(`pl`.`status` = 'O' and mremaining_qty > 0)");
+        // $this->crud->query->havingRaw("(`pl`.`status` = 'O' and mremaining_qty > 0)");
+        $this->crud->query->havingRaw("(`pl`.`status` = 'O')");
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
