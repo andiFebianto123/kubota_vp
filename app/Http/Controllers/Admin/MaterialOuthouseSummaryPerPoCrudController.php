@@ -163,7 +163,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
                     AND delivery.po_num = '".$this->data['entry']->po_num."'
                     AND delivery.po_line = '".$this->data['entry']->po_line."'
                     ), 0))
-                ) AS remaining_qty                
+                ) AS m_available_qty                
                 FROM material_outhouse mo1 
                 WHERE mo1.po_num = '".$this->data['entry']->po_num."' 
                 AND mo1.po_line = '".$this->data['entry']->po_line."' 

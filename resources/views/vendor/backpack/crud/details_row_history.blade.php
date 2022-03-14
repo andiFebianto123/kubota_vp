@@ -18,7 +18,7 @@
 					<tr>
 						<th>Material Item</th>
 						<th>Description</th>
-						<th>Available Qty</th>
+						<th>Total Qty</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -26,7 +26,7 @@
 						<tr>
 							<td>{{ $data_material->matl_item }}</td>
 							<td>{{ $data_material->description }}</td>
-							<td>{{ $data_material->m_available_qty }}</td>
+							<td>{{ $data_material->m_total_qty }}</td>
 						</tr>
 					@endforeach
 				</tbody>

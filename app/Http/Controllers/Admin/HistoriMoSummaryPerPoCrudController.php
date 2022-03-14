@@ -221,7 +221,7 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
                         AND delivery.po_num = '". $delivery->po_num."'
                         AND delivery.po_line = '". $delivery->po_line."'
                         ".$sql_date."
-                    ) AS remaining_qty
+                    ) AS m_total_qty
                 FROM issued_material_outhouse pimo
                 JOIN delivery
                 ON (pimo.ds_num = delivery.ds_num 
@@ -235,6 +235,6 @@ class HistoriMoSummaryPerPoCrudController extends CrudController
         $data_materials = DB::select($sql);
 
         $this->data['data_materials'] = $data_materials;
-        return view('crud::details_row', $this->data);
+        return view('crud::details_row_history', $this->data);
     }
 }
