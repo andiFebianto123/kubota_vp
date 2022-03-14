@@ -45,10 +45,10 @@ Route::group([
     // route untuk accept all PO
     Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
     // route untuk ajax filter di nomor item di po
-    Route::get('test/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
+    Route::get('filter-po/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
     // route untuk ajax filter vendor untuk mendapatkan kode vendor
-    Route::get('test/ajax-vendor-options', 'VendorCrudController@itemVendorOptions');
-    Route::get('test/ajax-vendor-options2', 'VendorCrudController@itemVendorOptions2');
+    Route::get('filter-vendor/ajax-itempo-options', 'VendorCrudController@itemVendorOptions');
+    Route::get('filter-vendor/ajax-itempo-options2', 'VendorCrudController@itemVendorOptions2');
 
     // Route untuk export PDF print label delivery sheet detail
     // Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelSingle');

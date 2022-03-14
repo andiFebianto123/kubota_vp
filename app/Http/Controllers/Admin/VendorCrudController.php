@@ -104,7 +104,7 @@ class VendorCrudController extends CrudController
                 'label'       => 'Name Vendor',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });
@@ -223,20 +223,21 @@ class VendorCrudController extends CrudController
     public function itemVendorOptions(Request $request){
         $term = $request->input('term');
         return \App\Models\Vendor::where('vend_name', 'like', '%'.$term.'%')
+            ->orWhere('vend_num', 'like', '%'.$term.'%')
         ->select('vend_num', 'vend_name')
         ->get()
         ->mapWithKeys(function($vendor){
-            return [$vendor->vend_num => $vendor->vend_name];
+            return [$vendor->vend_num => $vendor->vend_num.' - '.$vendor->vend_name];
         });
     }
 
     public function itemVendorOptions2(Request $request){
         $term = $request->input('term');
-        return \App\Models\Vendor::where('vend_num', 'like', '%'.$term.'%')
-        ->select('vend_num')
+        return \App\Models\Vendor::where('vend_name', 'like', '%'.$term.'%')
+        ->orWhere('vend_num', 'like', '%'.$term.'%')
         ->get()
         ->mapWithKeys(function($vendor){
-            return [$vendor->vend_num => $vendor->vend_num];
+            return [$vendor->vend_num => $vendor->vend_num.' - '.$vendor->vend_name];
         });
     }
 }

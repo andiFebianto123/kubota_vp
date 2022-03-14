@@ -132,7 +132,7 @@ class PurchaseOrderCrudController extends CrudController
             'name'  => 'item',
             'type'  => 'select2_multiple_ajax_po',
             'label' => 'Number Items',
-            'url' => url('admin/test/ajax-itempo-options'),
+            'url' => url('admin/filter-po/ajax-itempo-options'),
             'placeholder' => 'Pilih item number',
           ],
           function(){
@@ -152,7 +152,7 @@ class PurchaseOrderCrudController extends CrudController
                 'label'       => 'Name Vendor',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });

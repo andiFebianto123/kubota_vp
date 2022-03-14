@@ -220,7 +220,7 @@ class TaxInvoiceCrudController extends CrudController
                 'label'       => 'Name Vendor',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')
@@ -256,7 +256,7 @@ class TaxInvoiceCrudController extends CrudController
                 'placeholder' => 'Pick a vendor',
                 'custom_table' => true,
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')

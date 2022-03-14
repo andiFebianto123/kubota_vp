@@ -55,10 +55,10 @@ class DashboardController extends Controller
             return redirect(url('admin/edit-account-info'));
         }
 
-        $general_message_help = GeneralMessage::where('category', 'help')->get();
-        $general_message_info = GeneralMessage::where('category', 'information')->get();
-        $count_po_all = $this->countPurchaseOrder();
-        $count_po_line_unreads = $this->countPurchaseOrderLine();
+        $generalMessageHelp = GeneralMessage::where('category', 'help')->get();
+        $generalMessageInfo = GeneralMessage::where('category', 'information')->get();
+        $countPoAll = $this->countPurchaseOrder();
+        $countPoLineUnreads = $this->countPurchaseOrderLine();
         $count_delivery = $this->countDelivery();
         $count_delivery_status = $this->countDeliveryStatus();
         $user = User::where('id', backpack_user()->id);
@@ -66,10 +66,10 @@ class DashboardController extends Controller
 
         $data['count_delivery_status'] = $count_delivery_status;
         $data['count_delivery'] = $count_delivery;
-        $data['count_po_all'] = $count_po_all;
-        $data['count_po_line_unreads'] = $count_po_line_unreads;
-        $data['general_message_help'] = $general_message_help;
-        $data['general_message_info'] = $general_message_info;
+        $data['count_po_all'] = $countPoAll;
+        $data['count_po_line_unreads'] = $countPoLineUnreads;
+        $data['general_message_help'] = $generalMessageHelp;
+        $data['general_message_info'] = $generalMessageInfo;
         $data['user_check_password_range'] = $user->get()->first();
 
         if(!Constant::checkPermission('Read dashboard')){

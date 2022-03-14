@@ -136,7 +136,7 @@ class DeliveryStatusCrudController extends CrudController
                 'label'       => 'Name Vendor',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
                 // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
                 // JOIN po p ON p.po_num = d.po_num

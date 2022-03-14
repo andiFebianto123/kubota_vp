@@ -114,7 +114,7 @@ class HistoriMoSummaryPerItemCrudController extends CrudController
                 'label'       => 'Name Vendor',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/test/ajax-vendor-options'),
+            url('admin/filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });
