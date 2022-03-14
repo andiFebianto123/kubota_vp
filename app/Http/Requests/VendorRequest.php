@@ -27,9 +27,9 @@ class VendorRequest extends FormRequest
     {
         return [
             'vend_name' => 'required|min:5|max:255',
-            'vend_email' => 'required',
+            'vend_email' => 'required|email',
             'buyer' => 'required',
-            'buyer_email' => 'required',
+            'buyer_email' => 'required|email',
             'vend_addr' => 'required',
             'vend_num' => 'required|string|unique:vendor,vend_num,'.$this->id.',id',
         ];

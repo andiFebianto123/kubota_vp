@@ -11,7 +11,8 @@ class Configuration extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
+    protected $guarded = ['id'];
     protected $fillable = [
-        'label','name', 'value'
+        'label','name', 'value', 'is_integer'
     ];
 }
