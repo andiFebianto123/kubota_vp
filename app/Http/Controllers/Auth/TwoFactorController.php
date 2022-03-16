@@ -21,7 +21,7 @@ class TwoFactorController extends Controller
     {
         $uid = (backpack_auth()->user()) ? backpack_auth()->user()->id : null;
         if (request("t") && User::where("two_factor_url", request("t"))->where('id', $uid)->exists()) {
-            return view('vendor.backpack.base.auth.two-factor');
+            return view('vendor.backpack.base.auth.two_factor');
         }else{
             return redirect()->to("/");
         }
@@ -29,41 +29,40 @@ class TwoFactorController extends Controller
 
     public function update(Request $request) 
     {
-        $two_factor_code = $request->two_factor_code;
-        $conf_exp_otp = Configuration::where('name', 'expired_otp')->first();
-        $expired_otp = ($conf_exp_otp) ? $conf_exp_otp->value:1; // in day
+        $twoFactorCode = $request->two_factor_code;
+        $confExpOtp = Configuration::where('name', 'expired_otp')->first();
+        $expiredOtp = ($confExpOtp) ? $confExpOtp->value:1; // in day
         $username = backpack_auth()->user()->username;
+        $checkLock = (new AccountAttempt())->checkLock($username, 'otp');
+        $redirectTo = (session()->has('prev_url'))? session()->get('prev_url'): url('admin/dashboard');
+        $checkExistOtp = User::where("id", backpack_auth()->user()->id)
+                            ->where("two_factor_code", $twoFactorCode)
+                            ->where("two_factor_expires_at", '>', Carbon::now())
+                            ->exists();
 
-        $check_lock = (new AccountAttempt())->checkLock($username, 'otp');
-
-        if ($check_lock['status'] == false) {
+        if ($checkLock['status'] == false) {
             return response()->json([
-                'status' => $check_lock['status'],
-                'message' => $check_lock['message']
+                'status' => $checkLock['status'],
+                'message' => $checkLock['message']
             ], 200);
         }
 
-        if (User::where("id", backpack_auth()->user()->id)
-            ->where("two_factor_code", $two_factor_code)
-            ->where("two_factor_expires_at", '>', Carbon::now())
-            ->exists()) 
-            {
+        if ($checkExistOtp){
             $user = User::where("id", backpack_auth()->user()->id)->first();
-            $user->two_factor_code = $two_factor_code;
-            $user->two_factor_expires_at = Carbon::now()->addDay($expired_otp);
+            $user->two_factor_code = $twoFactorCode;
+            $user->two_factor_expires_at = Carbon::now()->addDay($expiredOtp);
             $user->two_factor_url = null;
             $user->last_login = now();
             $user->ip = $this->getClientIp();
             $user->user_agent = $_SERVER['HTTP_USER_AGENT'];
             $user->save();
 
-            $update_otp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
-            $update_otp->two_factor_code = $two_factor_code;
-            $update_otp->expired_at = Carbon::now()->addDay($expired_otp);
-            $update_otp->save();
+            $updateOtp = UserOtp::where("user_id", backpack_auth()->user()->id)->first();
+            $updateOtp->two_factor_code = $twoFactorCode;
+            $updateOtp->expired_at = Carbon::now()->addDay($expiredOtp);
+            $updateOtp->save();
 
             TempCountFailure::where('account', $username)->where('type', 'otp')->delete();
-
         }else{
             $at = (new AccountAttempt())->insert($username, 'otp');
             
@@ -72,14 +71,12 @@ class TwoFactorController extends Controller
                 'message' => (isset($at['message']))?$at['message']:'OTP Tidak Valid!'
                 ], 200);
         }
-        
-        $redirect_to = (session()->has('prev_url'))? session()->get('prev_url'): url('admin/dashboard');
-        
+                
         return response()->json([
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses OTP',
-            'redirect_to' => $redirect_to,
+            'redirect_to' => $redirectTo,
             'validation_errors' => []
         ], 200);
     }

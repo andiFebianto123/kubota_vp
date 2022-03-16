@@ -7,25 +7,13 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\Session;
 use App\Helpers\ForecastConverter;
-use App\Models\PurchaseOrder;
-use App\Models\Forecast;
 use Illuminate\Support\Facades\DB;
-use App\Mail\vendorNewPo;
-use Illuminate\Support\Facades\Mail;
 use DateTime;
 use App\Helpers\Constant;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ForecastExport;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
-
-/**
- * Class ForecastCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class ForecastCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -34,11 +22,6 @@ class ForecastCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\Forecast::class);
@@ -102,16 +85,6 @@ class ForecastCrudController extends CrudController
         }
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
-    // public function index()
-    // {
-
-    // }
 
     protected function setupListOperation()
     {
@@ -119,8 +92,6 @@ class ForecastCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->addButtonFromView('bottom', 'print_forecast', 'print_forecast', 'beginning');
-
-        // $this->crud->allowResponsive();
 
         $this->getFieldAccess();
 
@@ -177,87 +148,66 @@ class ForecastCrudController extends CrudController
         
     }
 
+
     private function dynamicColumns($ffb)
     {
-        // dd($ffb);
-        $arr_filter_forecasts = ['day', 'week', 'month', 'year'];
+        $arrFilterForecasts = ['day', 'week', 'month', 'year'];
 
-        $arr_filters = [
+        $arrFilter = [
             'day' => ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
             'week' => ["Week 1", "Week 2", "Week 3", "Week 4"],
             'month' => ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
             'year' => [2018, 2019, 2020, 2021],
         ];
 
-        $columns = $arr_filters[$ffb]; // ["Week 1", "Week 2", "Week 3", "Week 4"],
-        $index_filter = array_search($ffb, $arr_filter_forecasts); // 1
-        $end_url = "";
-        $link_enabled = false;
-        $session_date = ($index_filter + 1 < sizeof($arr_filter_forecasts))? $arr_filter_forecasts[$index_filter + 1] : "undefined";
-        if ($index_filter > 0) {
-            $link_enabled = true;
+        $columns = $arrFilter[$ffb]; // ["Week 1", "Week 2", "Week 3", "Week 4"],
+        $indexFilter = array_search($ffb, $arrFilterForecasts); // 1
+        $endUrl = "";
+        $linkEnabled = false;
+        $sessionDate = ($indexFilter + 1 < sizeof($arrFilterForecasts))? $arrFilterForecasts[$indexFilter + 1] : "undefined";
+        if ($indexFilter > 0) {
+            $linkEnabled = true;
         }
-        if ($index_filter + 1 < sizeof($arr_filter_forecasts)) {
-            $session_date = $arr_filter_forecasts[$index_filter + 1];
-
-            if (request($session_date) != null) {
-                Session::put($session_date, " > ".request($session_date));
+        if ($indexFilter + 1 < sizeof($arrFilterForecasts)) {
+            $sessionDate = $arrFilterForecasts[$indexFilter + 1];
+            if (request($sessionDate) != null) {
+                Session::put($sessionDate, " > ".request($sessionDate));
             }
         }else{
-            foreach ($arr_filter_forecasts as $key => $value) {
+            foreach ($arrFilterForecasts as $key => $value) {
                 Session::forget($value);
             }
         }
         
         foreach ($columns as $key => $col) {
-            $arr_dynamic_col = [
+            $arrDynamicCol = [
                 'label'     => $col, // Table column heading
                 'name'      => 'forecast_num_' . $key,
-                // 'link'     =>  $end_url,
                 'type'     => 'closure',
                 'function' => function ($entry) {
                     return $entry->qty;
                 }
             ];
-            if ($link_enabled) {
-                $end_url = "?filter_forecast_by=" . $arr_filter_forecasts[$index_filter - 1] . "&" . $ffb . "=";
-                $arr_dynamic_col['link'] = $end_url;
+            if ($linkEnabled) {
+                $endUrl = "?filter_forecast_by=" . $arrFilterForecasts[$indexFilter - 1] . "&" . $ffb . "=";
+                $arrDynamicCol['link'] = $endUrl;
             }
-
-            // CRUD::addColumn($arr_dynamic_col);
         }
         
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+    
     protected function setupCreateOperation()
     {
         CRUD::setValidation(ForecastRequest::class);
-
-
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
+ 
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
     }
+
 
     function applySearchForecast(){
 
@@ -306,7 +256,6 @@ class ForecastCrudController extends CrudController
                 $i++;
                 array_push($selectData, $raw);
             }
-    
     
             $this->crud->query = $this->crud->query->havingRaw(DB::raw("item LIKE '%{$search}%'"))
             ->orHavingRaw('week1 = ?', [$search])
@@ -403,6 +352,7 @@ class ForecastCrudController extends CrudController
         $this->crud->query = $this->crud->query->orderBy('id', 'DESC');
     }
 
+
     public function search(){
         $this->crud->hasAccessOrFail('list');
         // $this->crud->applyUnappliedFilters();
@@ -411,18 +361,13 @@ class ForecastCrudController extends CrudController
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
         if ((request()->input('search') && request()->input('search')['value']) && (request()->input('search')['value'] != '0')) {
-            // filter the results accordingly
-            // recalculate the number of filtered rows
-            // $this->applySearchForecast();
             $search = request()->input('search')['value'];
             $this->crud->query = $this->crud->query->where("item", "LIKE", "%$search%");
             $filteredRows = $this->crud->query->toBase()->getCountForPagination();
         }
-        // start the results according to the datatables pagination
         if (request()->input('start')) {
             $this->crud->skip((int) request()->input('start'));
         }
-        // limit the number of results according to the datatables pagination
         if (request()->input('length')) {
             $this->crud->take((int) request()->input('length'));
         }
@@ -485,7 +430,8 @@ class ForecastCrudController extends CrudController
         return $callback;
     }
 
-    function export2(){
+
+    public function export2(){
         $this->setQuery();
 
         $entries = $this->crud->getEntries();
@@ -531,17 +477,6 @@ class ForecastCrudController extends CrudController
             ]);
         }
 
-        // $this->crud->columnHeader = $start->columnHeader;
-
-        // dd([
-        //     'columnHeader' => $start->columnHeader,
-        //     'column' => $start->getColumns(),
-        //     'column_crud' => $this->crud->columns(), 
-        //     'type' => $start->type,
-        //     'result' => $resultForecast,
-        // ]);
-
-
         $dateFrom = new DateTime($forecast->fromDate);
         $dateTarget = new DateTime($forecast->targetDate);
 
@@ -555,7 +490,8 @@ class ForecastCrudController extends CrudController
             $resultForecast), "{$nameFileDownload}.xlsx");
     }
 
-    function getNameFromNumber($num) {
+    
+    public function getNameFromNumber($num) {
         $numeric = ($num - 1) % 26;
         $letter = chr(65 + $numeric);
         $num2 = intval(($num - 1) / 26);
@@ -566,7 +502,8 @@ class ForecastCrudController extends CrudController
         }
     }
 
-    function export(){
+
+    public function export(){
         $this->setQuery();
 
         $entries = $this->crud->getEntries();
@@ -630,7 +567,5 @@ class ForecastCrudController extends CrudController
         }
         return $convertForecast->exportForecastMonth($nameFileDownload);
     }
-    
-
 
 }

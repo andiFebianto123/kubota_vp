@@ -274,7 +274,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <input type="hidden" name="po_line_ids" class="val-accept">
                 <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-accept-po-line')">Submit</a>
+                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-accept-po-lin')">Submit</button>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
@@ -299,7 +299,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <input type="hidden" name="po_line_ids" class="val-reject">
                 <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-reject-po-line')">Submit</a>
+                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-reject-po-line')">Submit</button>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>

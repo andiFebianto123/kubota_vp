@@ -27,33 +27,23 @@ use App\Models\PurchaseOrderLine;
 use App\Models\Role;
 use Illuminate\Routing\Route;
 
-/**
- * Class UserCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class UserCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
-        CRUD::setModel(\App\Models\User::class);
+        CRUD::setModel(User::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/user');
         CRUD::setEntityNameStrings('user', 'users');
         $this->crud->query = $this->crud->query
-        ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-        ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        ->select('users.*', 'roles.name as nama_role');
+                            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                            ->select('users.*', 'roles.name as nama_role');
+
         if(Constant::checkPermission('Read User')){
             $this->crud->allowAccess('list');
         }else{
@@ -61,12 +51,7 @@ class UserCrudController extends CrudController
         }        
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
@@ -79,12 +64,13 @@ class UserCrudController extends CrudController
         if(!Constant::checkPermission('Delete User')){
             $this->crud->removeButton('delete');
         }
+
         CRUD::column('name');
         CRUD::column('username');
         CRUD::column('email');
         CRUD::addColumn([
-            'label'     => 'Vendor', // Table column heading
-            'name'      => 'vendor_id', // the column that contains the ID of that connected entity;
+            'label'     => 'Vendor', 
+            'name'      => 'vendor_id',
             'entity'    => 'vendor', 
             'type' => 'relationship',
             'attribute' => 'vend_num',
@@ -104,43 +90,20 @@ class UserCrudController extends CrudController
             $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
         }
 
-        // CRUD::addColumn([
-        //     'label'     => 'Role', // Table column heading
-        //     'name'      => 'role_id', // the column that contains the ID of that connected entity;
-        //     'entity'    => 'role', 
-        //     'type' => 'relationship',
-        //     'attribute' => 'name',
-        // ]);
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
         $this->crud->setListView('crud::list-user');
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+    
     protected function setupCreateOperation()
     {
-        $allow_null_venodor = false;
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
-            $allow_null_venodor = true;
+        if(!Constant::checkPermission('Create User')){
+            $this->crud->denyAccess('create');
         }
-        CRUD::setValidation(UserRequest::class);
-       
-        // $this->crud->addField([
-        //     'label'     => 'Role', // Table column heading
-        //     'type'      => 'select',
-        //     'name'      => 'role_id', // the column that contains the ID of that connected entity;
-        //     'entity'    => 'role', // the method that defines the relationship in your Model
-        //     'attribute' => 'name', // foreign key attribute that is shown to user
-        //     'model'     => "App\Models\Role",
-        // ]);
+        $allowNullVendor = false;
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $allowNullVendor = true;
+        }
+        CRUD::setValidation(UserRequest::class); 
 
         $this->crud->addField([   // select2_from_array
             'label' => 'Role',
@@ -150,38 +113,21 @@ class UserCrudController extends CrudController
             'multiple' => false,
             'type' => 'relationship.relationship_select_roles',
             'placeholder' => 'Select an entry',
-            // 'model' => \App\Models\Role::class,
-            // 'type'        => 'select2_from_array',
             'options'     =>  $this->optRoles(),
         ]);
-
-
         $this->crud->addField([   // select2_from_array
             'name'        => 'vendor_id',
             'label'       => "Vendor",
             'type'        => 'select2_from_array',
             'options'     => $this->optVendors(),
-            'allows_null' => $allow_null_venodor,
+            'allows_null' => $allowNullVendor,
         ]);
-        
         CRUD::field('name');
         CRUD::field('username');
         CRUD::field('email');
         CRUD::field('password');
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
 
     private function optVendors()
     {
@@ -190,13 +136,14 @@ class UserCrudController extends CrudController
         }else{
             $vendors = Vendor::where('id', backpack_auth()->user()->vendor->id)->get();
         }
-        $arr_vendor = [];
+        $arrVendor = [];
         foreach ($vendors as $key => $v) {
-            $arr_vendor[$v->id] = $v->vend_num.'-'.$v->vend_name;
+            $arrVendor[$v->id] = $v->vend_num.'-'.$v->vend_name;
         }
 
-        return $arr_vendor;
+        return $arrVendor;
     }
+
 
     private function optRoles()
     {
@@ -205,39 +152,41 @@ class UserCrudController extends CrudController
         }else{
             $roles = Role::where('name', '!=', 'Admin PTKI')->get();
         }
-        $arr_roles = [];
+        $arrRoles = [];
         foreach ($roles as $key => $r) {
-            $arr_roles[$r->id] = $r->name;
+            $arrRoles[$r->id] = $r->name;
         }
 
-        return $arr_roles;
+        return $arrRoles;
     }
 
-    private function handlePermissionNonAdmin($vendor_id){
-        $allow_access = false;
+
+    private function handlePermissionNonAdmin($vendorId){
+        $allowAccess = false;
 
         if(in_array(Constant::getRole(),['Admin PTKI'])){
-            $allow_access = true;
-
+            $allowAccess = true;
         }else{
-            if (backpack_auth()->user()->vendor->id == $vendor_id) {
-                $allow_access = true;
+            if (backpack_auth()->user()->vendor->id == $vendorId) {
+                $allowAccess = true;
             }
         }
 
-        return $allow_access;
+        return $allowAccess;
     }
+
 
     protected function setupUpdateOperation()
     {
-        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
+        $vendorId = $this->crud->getCurrentEntry()->vendor_id;
 
-        if($this->handlePermissionNonAdmin($vendor_id)){
+        if($this->handlePermissionNonAdmin($vendorId)){
             $this->setupCreateOperation();
         }else{
             abort(404);
         }
     }
+
 
     public function store(Request $request)
     {
@@ -245,25 +194,20 @@ class UserCrudController extends CrudController
 
         $request = $this->crud->getRequest();
 
-        // Encrypt password if specified.
         if ($request->input('password')) {
             $request->request->set('password', bcrypt($request->input('password')));
         } 
         $this->crud->setRequest($request);
-        $this->crud->unsetValidation(); // Validation has already been run
+        $this->crud->unsetValidation();
 
         $role = $request->input('roles');
 
-        // hapus key roles nya
         unset($this->crud->getStrippedSaveRequest()['roles']);
-        // insert data usert
         $item = $this->crud->create($this->crud->getStrippedSaveRequest());
-        // setelah insert tambahkan rolenya
         $item->assignRole(RoleSpatie::where('id', $role)->first());
 
         Alert::success(trans('backpack::crud.insert_success'))->flash();
 
-        // save the redirect choice for next time
         $this->crud->setSaveAction();
 
         return $this->crud->performSaveAction($item->getKey());
@@ -272,15 +216,14 @@ class UserCrudController extends CrudController
 
     function update($id)
     {
-        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
+        $vendorId = $this->crud->getCurrentEntry()->vendor_id;
 
-        if(!$this->handlePermissionNonAdmin($vendor_id)){
+        if(!$this->handlePermissionNonAdmin($vendorId)){
             abort(404);
         }
 
         $this->crud->setRequest($this->crud->validateRequest());
 
-        /** @var \Illuminate\Http\Request $request */
         $request = $this->crud->getRequest();
 
         if ($request->input('password')) {
@@ -289,22 +232,16 @@ class UserCrudController extends CrudController
             $request->request->remove('password');
         }
 
-        // dd($request);
         $this->crud->setRequest($request);
-        $this->crud->unsetValidation(); // Validation has already been run
+        $this->crud->unsetValidation();
 
         $role = $request->input('roles');
 
-        $id_user = $request->get($this->crud->model->getKeyName());
+        $userId = $request->get($this->crud->model->getKeyName());
 
-        $getUsers = $this->crud->model::where('id', $id_user)->first();
+        $getUsers = $this->crud->model::where('id', $userId)->first();
 
-        // dd([ 
-        //     'id' => $request->get($this->crud->model->getKeyName()), 
-        //     'update' => $this->crud->getStrippedSaveRequest()
-        // ]);
-
-        DB::table('model_has_roles')->where('model_id', $id_user)->delete();
+        DB::table('model_has_roles')->where('model_id', $userId)->delete();
 
         $getUsers->assignRole(RoleSpatie::where('id', $role)->first());
 
@@ -315,7 +252,6 @@ class UserCrudController extends CrudController
         $this->data['entry'] = $this->crud->entry = $item;
         Alert::success(trans('backpack::crud.update_success'))->flash();
 
-        // save the redirect choice for next time
         $this->crud->setSaveAction();
 
         return $this->crud->performSaveAction($item->getKey());
@@ -324,8 +260,8 @@ class UserCrudController extends CrudController
 
     public function destroy($id)
     {
-        $vendor_id = $this->crud->getCurrentEntry()->vendor_id;
-        if(!$this->handlePermissionNonAdmin($vendor_id)){
+        $vendorId = $this->crud->getCurrentEntry()->vendor_id;
+        if(!$this->handlePermissionNonAdmin($vendorId)){
             abort(404);
         }
 
@@ -348,12 +284,14 @@ class UserCrudController extends CrudController
         }
     }
 
+
     public function templateUsers()
     {
-        return Excel::download(new TemplateUserExport(backpack_auth()->user()), 'template-users-'.date('YmdHis').'.xlsx');
-
+        $filename =  'template-users-'.date('YmdHis').'.xlsx';
+        return Excel::download(new TemplateUserExport(backpack_auth()->user()), $filename);
     }
 
+    
     public function import(requests $request){
 
         $validator = Validator::make($request->all(), [
@@ -375,22 +313,16 @@ class UserCrudController extends CrudController
         }
 
         $file = $request->file('file');
-
-        // membuat nama file unik
-		$nama_file = rand().$file->getClientOriginalName();
-
-        // upload ke folder file_siswa di dalam folder public
-        $file->storeAs('public/file_user', $nama_file);
-		//$file->move('file_anak',$nama_file);
-
+		$filename = rand().$file->getClientOriginalName();
+        $file->storeAs('public/file_user', $filename);
 
         DB::beginTransaction();
         try{
             $import = new UserMasterImport();
-            $import->import(storage_path('/app/public/file_user/'.$nama_file));
+            $import->import(storage_path('/app/public/file_user/'.$filename));
 
-            if(file_exists( storage_path('/app/public/file_user/'.$nama_file))) {
-                unlink(storage_path('/app/public/file_user/'.$nama_file));
+            if(file_exists( storage_path('/app/public/file_user/'.$filename))) {
+                unlink(storage_path('/app/public/file_user/'.$filename));
             }
     
             if(count($import->errorsMessage) > 0){
@@ -402,14 +334,14 @@ class UserCrudController extends CrudController
                     'notification' => 'Ada beberapa data tidak valid proses import',
                 ], 200);
             }
-            // Kode kirim email bisa diletakan disini
+
             if(count($import->dataUsers) > 0){
                 foreach($import->dataUsers as $user){
                     Mail::to($user['email'])
                     ->send(new MailNewUser($user));
                 }
             }
-            // END
+
             DB::commit();
             return response()->json([
                 'status' => true,
@@ -419,9 +351,8 @@ class UserCrudController extends CrudController
 
         }catch(\Exception $e){
             DB::rollback();
-            \Alert::add('error', $e->getMessage())->flash();
+            Alert::add('error', $e->getMessage())->flash();
         }
-
     }
 
    

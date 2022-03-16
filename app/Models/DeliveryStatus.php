@@ -11,6 +11,7 @@ class DeliveryStatus extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
+    
     protected $table = 'delivery_status';
 
     public function purchaseOrder()

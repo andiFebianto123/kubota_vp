@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::group([
     'prefix'     => config('backpack.base.route_prefix', 'admin'),
     'middleware' => ['web', 'twofactor'],
     'namespace'  => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
-    Route::crud('tag', 'TagCrudController');
     Route::crud('purchase-order', 'PurchaseOrderCrudController');
     Route::crud('vendor', 'VendorCrudController');
     Route::crud('user', 'UserCrudController');
@@ -43,15 +44,13 @@ Route::group([
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
     Route::get('validate-ds-po', 'DeliveryCrudController@addOnValidatePo');
     // route untuk accept all PO
-    Route::get('accept-all-po', 'PurchaseOrderCrudController@accept_all_po');
+    Route::get('accept-all-po', 'PurchaseOrderCrudController@acceptAllPo');
     // route untuk ajax filter di nomor item di po
     Route::get('filter-po/ajax-itempo-options', 'PurchaseOrderCrudController@itemPoOptions');
     // route untuk ajax filter vendor untuk mendapatkan kode vendor
     Route::get('filter-vendor/ajax-itempo-options', 'VendorCrudController@itemVendorOptions');
     Route::get('filter-vendor/ajax-itempo-options2', 'VendorCrudController@itemVendorOptions2');
 
-    // Route untuk export PDF print label delivery sheet detail
-    // Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelSingle');
     Route::get('delivery/{id}/print_label', 'PurchaseOrderLineCrudController@exportPdfLabelInstant');
     Route::get('delivery-print-label', 'PurchaseOrderLineCrudController@exportPdfLabel');
     Route::post('delivery-print-label-post', 'PurchaseOrderLineCrudController@exportPdfLabelPost');
@@ -80,9 +79,9 @@ Route::group([
         'uses'      => 'TaxInvoiceCrudController@search2',
         'operation' => 'list',
     ]);
-    Route::crud('histori-mo-summary-per-po', 'HistoriMoSummaryPerPoCrudController');
-    Route::get('histori-mo-summary-per-po/{id}/details', 'HistoriMoSummaryPerPoCrudController@showDetailsRow');
-    Route::crud('histori-mo-summary-per-item', 'HistoriMoSummaryPerItemCrudController');
+    Route::crud('history-mo-summary-per-po', 'HistoryMoSummaryPerPoCrudController');
+    Route::get('history-mo-summary-per-po/{id}/details', 'HistoryMoSummaryPerPoCrudController@showDetailsRow');
+    Route::crud('history-mo-summary-per-item', 'HistoryMoSummaryPerItemCrudController');
     Route::get('template-users', 'UserCrudController@templateUsers');
     Route::post('user-import', 'UserCrudController@import');
 

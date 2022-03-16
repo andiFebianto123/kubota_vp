@@ -19,41 +19,12 @@ class TemplateMassDsSingleSheetExport implements FromArray, WithTitle,  WithHead
 {
     use Exportable;
 
-    public function __construct($title, $po_num)
+    public function __construct($title, $poNum)
     {
-        $this->po_num = $po_num;
+        $this->po_num = $poNum;
         $this->title = $title;
     }
 
-    // public function registerEvents(): array
-    // {
-    //     return [
-    //         AfterSheet::class    => function(AfterSheet $event) {
-    //             $arr_columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    //             foreach ($arr_columns as $key => $col) {
-    //                 $event->sheet->getColumnDimension($col)->setAutoSize(true);
-    //                 $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-    //             }
-    //         },
-    //     ];
-
-    // }
-
-
-
-    // public function view(): View
-    // {
-    //     $po_lines = PurchaseOrderLine::where('po_num', $this->po_num)->get();
-
-    //     $data['po_lines'] = $po_lines;
-
-    //     return view('exports.excel.template-mass-ds', $data);
-    // }
-
-    // public function query()
-    // {
-    //     return PurchaseOrderLine::query()->where('po_num', $this->po_num);
-    // }
 
     public function headings(): array
     {
@@ -69,17 +40,6 @@ class TemplateMassDsSingleSheetExport implements FromArray, WithTitle,  WithHead
         ];
     }
 
-    // public function map($po_line): array
-    // {
-    //     return [
-    //         $po_line->po_num,
-    //         $po_line->po_line,
-    //         '',
-    //         '',
-    //         '',
-    //         ''
-    //     ];
-    // }
 
     public function map($row): array
     {
@@ -94,25 +54,26 @@ class TemplateMassDsSingleSheetExport implements FromArray, WithTitle,  WithHead
         ];
     }
 
+
     public function array(): array
     {
-        $po_lines = PurchaseOrderLine::where('po_num', $this->po_num)
+        $poLines = PurchaseOrderLine::where('po_num', $this->po_num)
                 ->where('status', 'O')
                 ->where('accept_flag', 1)
                 ->get();
-        $arr_po_lines = [];
-        foreach ($po_lines as $key => $po_line) {
-            $arr_po_line = [];
-            $arr_po_line['po_num'] = $po_line->po_num;
-            $arr_po_line['po_line'] = $po_line->po_line;
-            $arr_po_line['ds_delivery_date'] = '';
-            $arr_po_line['serial_number'] = '';
-            $arr_po_line['petugas_vendor'] = '';
-            $arr_po_line['no_surat_jalan'] = '';
-            $arr_po_line['order_qty'] = '';
-            $arr_po_lines[] = $arr_po_line;
+        $arrPoLines = [];
+        foreach ($poLines as $key => $poLine) {
+            $arrPoLine = [];
+            $arrPoLine['po_num'] = $poLine->po_num;
+            $arrPoLine['po_line'] = $poLine->po_line;
+            $arrPoLine['ds_delivery_date'] = '';
+            $arrPoLine['serial_number'] = '';
+            $arrPoLine['petugas_vendor'] = '';
+            $arrPoLine['no_surat_jalan'] = '';
+            $arrPoLine['order_qty'] = '';
+            $arrPoLines[] = $arrPoLine;
         }
-        return $arr_po_lines;
+        return $arrPoLines;
     }
 
 

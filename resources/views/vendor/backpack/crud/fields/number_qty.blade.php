@@ -31,14 +31,14 @@
         if (parseFloat(initCurrent) > parseFloat(maxQty)) {
             $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQty+')</small>')
         }
+
         $('#template-upload-sn').attr('href', initUrl+'?qty='+maxQty)
-    
+        $('#allowed-qty').val(initUrl)
         $( "#current-qty" ).keyup(function() {
             var initUrl = $('#template-upload-sn').attr('init-url')
             var currentQty = parseFloat($(this).val())
             $('#template-upload-sn').attr('href', initUrl+'?qty='+currentQty)
             $('#allowed-qty').val(currentQty)
-
             if (parseFloat(currentQty) > parseFloat(maxQty)) {
                 var message = "Jumlah qty melebihi batas (max. "+maxQty+")"
                 $('.info-qty').html('<small>'+message+'</small>')

@@ -23,7 +23,7 @@ class ForgotPasswordController extends Controller
 
     public function forgotPassword()
     {
-        return view('vendor.backpack.base.auth.forgot-password');
+        return view('vendor.backpack.base.auth.forgot_password');
 
     }
 
@@ -33,7 +33,7 @@ class ForgotPasswordController extends Controller
             UserForgotPassword::where("token", request("t"))
             ->where('expired_at', '>', Carbon::now())
             ->exists()) {
-            return view('vendor.backpack.base.auth.reset-password');
+            return view('vendor.backpack.base.auth.reset_password');
         }else{
             abort(404);
         }

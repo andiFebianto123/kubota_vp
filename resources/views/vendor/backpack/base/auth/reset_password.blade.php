@@ -8,17 +8,15 @@
                 <div class="card-body">
                     <form class="col-md-12 p-t-10" id="form-update-password" role="form" method="POST" action="{{route('forgotpassword.update')}}">
                         {!! csrf_field() !!}
-
                         <div class="form-group">
                             <label class="control-label">New Password</label>
-
                             <div>
                                 <input type="password" class="form-control rect-validation" name="password">
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label class="control-label">New Password Confirmation</label>
-
                             <div>
                                 <input type="password" class="form-control rect-validation" name="password_confirmation">
                             </div>

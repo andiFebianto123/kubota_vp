@@ -21,136 +21,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * Class PurchaseOrderLineCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class PurchaseOrderLineCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-    // use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
-    // use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
-        CRUD::setModel(\App\Models\PurchaseOrderLine::class);
+        CRUD::setModel(PurchaseOrderLine::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/purchase-order-line');
         CRUD::setEntityNameStrings('purchase order line', 'purchase order lines');
         
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
-    protected function setupListOperation()
+
+    public function show()
     {
-        CRUD::column('id');
-        CRUD::column('po_num');
-        CRUD::column('po_line');
-        CRUD::column('po_release');
-        CRUD::column('item');
-        CRUD::column('item_ptki');
-        CRUD::column('w_serial');
-        CRUD::column('description');
-        CRUD::column('po_change');
-        CRUD::column('po_change_date');
-        CRUD::column('order_qty');
-        CRUD::column('inspection_flag');
-        CRUD::column('u_m');
-        CRUD::column('due_date');
-        CRUD::column('unit_price');
-        CRUD::column('wh');
-        CRUD::column('location');
-        CRUD::column('tax_status');
-        CRUD::column('currency');
-        CRUD::column('item_alias');
-        CRUD::column('status');
-        CRUD::column('production_date');
-        CRUD::column('accept_flag');
-        CRUD::column('reason');
-        CRUD::column('read_by');
-        CRUD::column('read_at');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
-    }
-
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
-    protected function setupCreateOperation()
-    {
-        CRUD::setValidation(PurchaseOrderLineRequest::class);
-
-        CRUD::field('id');
-        CRUD::field('po_num');
-        CRUD::field('po_line');
-        CRUD::field('po_release');
-        CRUD::field('item');
-        CRUD::field('item_ptki');
-        CRUD::field('w_serial');
-        CRUD::field('description');
-        CRUD::field('po_change');
-        CRUD::field('po_change_date');
-        CRUD::field('order_qty');
-        CRUD::field('inspection_flag');
-        CRUD::field('u_m');
-        CRUD::field('due_date');
-        CRUD::field('unit_price');
-        CRUD::field('wh');
-        CRUD::field('location');
-        CRUD::field('tax_status');
-        CRUD::field('currency');
-        CRUD::field('item_alias');
-        CRUD::field('status');
-        CRUD::field('production_date');
-        CRUD::field('accept_flag');
-        CRUD::field('reason');
-        CRUD::field('read_by');
-        CRUD::field('read_at');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
-    }
-
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
-    protected function setupUpdateOperation()
-    {
-        $this->setupCreateOperation();
-    }
-
-    function show()
-    {
-
         if(!Constant::checkPermission('Read PO Line Detail')){
             abort(403);
         }
@@ -158,20 +44,33 @@ class PurchaseOrderLineCrudController extends CrudController
         CRUD::setValidation(DeliveryRequest::class);
 
         $entry = $this->crud->getCurrentEntry();
+        $arrPoLineStatus = (new Constant())->statusOFC();
+
         $po = PurchaseOrder::where("po_num", $entry->po_num)
                 ->join('vendor', 'vendor.vend_num', 'po.vend_num')
                 ->get('vendor.currency as vendor_currency')
                 ->first();
-        $deliveries = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
-        $realtime_ds_qty = Delivery::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->sum('shipped_qty');
-        $delivery_statuses = DeliveryStatus::where("po_num", $entry->po_num)->where("po_line", $entry->po_line)->get();
-        $arr_po_line_status = (new Constant())->statusOFC();
+        $deliveries = Delivery::where("po_num", $entry->po_num)
+                        ->where("po_line", $entry->po_line)
+                        ->get();
+        $realtimeDsQty = Delivery::where("po_num", $entry->po_num)
+                            ->where("po_line", $entry->po_line)
+                            ->sum('shipped_qty');
+        $deliveryStatuses = DeliveryStatus::where("po_num", $entry->po_num)
+                            ->where("po_line", $entry->po_line)
+                            ->get();
 
-        $current_qty = ($entry->order_qty < $realtime_ds_qty)? 0 : $entry->order_qty -  $realtime_ds_qty;
-
+        $currentQty = 0;
+        if ($entry->order_qty > $realtimeDsQty) {
+            $currentQty = $entry->order_qty -  $realtimeDsQty;
+        }
         if($entry->outhouse_flag == 1){
-            $args = ['po_num' => $entry->po_num, 'po_line' => $entry->po_line, 'order_qty' => 0];
-            $current_qty = (new DsValidation())->currentMaxQtyOuthouse($args)['datas'];
+            $args = [
+                'po_num' => $entry->po_num, 
+                'po_line' => $entry->po_line, 
+                'order_qty' => 0
+            ];
+            $currentQty = (new DsValidation())->currentMaxQtyOuthouse($args)['datas'];
         }
 
         $this->crud->addField([
@@ -185,7 +84,6 @@ class PurchaseOrderLineCrudController extends CrudController
                 'language' => 'en'
              ],
         ]); 
-         
         $this->crud->addField([
             'type' => 'hidden',
             'name' => 'po_line_id',
@@ -207,9 +105,9 @@ class PurchaseOrderLineCrudController extends CrudController
             'name' => 'shipped_qty',
             'label' => 'Qty',
             'actual_qty' => $entry->shipped_qty,
-            'default' => $current_qty,
+            'default' => $currentQty,
             'attributes' => [
-                'data-max' =>  $current_qty,
+                'data-max' =>  $currentQty,
               ], 
         ]);
         if($entry->w_serial == 1){
@@ -221,63 +119,59 @@ class PurchaseOrderLineCrudController extends CrudController
                 ],
             );
         }
-
         if($entry->outhouse_flag == 1){
             $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
                                     ->where('po_line', $entry->po_line)
                                     ->groupBy('matl_item');
-        
             $this->crud->addField(
                 [
                     'name'  => 'mo_issue_qty',
                     'label' => 'Material Issue',
                     'type'  => 'outhouse_table',
-                    'current_qty' => $current_qty,
+                    'current_qty' => $currentQty,
                     'total_qty_per' => $outhouse_materials->sum('qty_per'),
                     'table_body' => $outhouse_materials->get()
                 ],
             );
         }
 
-        $arr_filters = [];
-        $arr_filters[] = ['po_line.item', '=', $entry->item];
-        $args = [   'filters' => $arr_filters, 
-                    'due_date' => $entry->due_date,
-                    'po_num' => $entry->po_num,
-                    'po_line' => $entry->po_line,
-                ];
-        $unfinished_po_line = (new DsValidation())->unfinishedPoLine($args);
+        $arrFilters = [];
+        $arrFilters[] = ['po_line.item', '=', $entry->item];
+        $args = [   
+            'filters' => $arrFilters, 
+            'due_date' => $entry->due_date,
+            'po_num' => $entry->po_num,
+            'po_line' => $entry->po_line,
+            ];
+        $unfinishedPoLine = (new DsValidation())->unfinishedPoLine($args);
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['po'] = $po;
-        $data['arr_po_line_status'] = $arr_po_line_status;
-        $data['unfinished_po_line'] = $unfinished_po_line;
+        $data['arr_po_line_status'] = $arrPoLineStatus;
+        $data['unfinished_po_line'] = $unfinishedPoLine;
         $data['deliveries'] = $deliveries;
-        $data['delivery_statuses'] = $delivery_statuses;
+        $data['delivery_statuses'] = $deliveryStatuses;
 
-        
-
-        $can_access = false;
+        $canAccess = false;
         if(in_array(Constant::getRole(),['Admin PTKI'])){
-            $can_access = true;
+            $canAccess = true;
         }else{
             $po = PurchaseOrderLine::where('id', $entry->id )->first();
             if (backpack_auth()->user()->vendor->vend_num == $po->purchaseOrder->vend_num) {
-                $can_access = true;
+                $canAccess = true;
             }
         }
         if ($entry->accept_flag == 2) {
-            $can_access = false;
+            $canAccess = false;
         }
         if ($entry->accept_flag == 0 &&  $entry->status == 'O') {
-            $can_access = false;
+            $canAccess = false;
         }
-
-        if ($can_access) {
-            $layout = 'vendor.backpack.crud.purchase-order-line-show';
+        if ($canAccess) {
+            $layout = 'vendor.backpack.crud.purchase_order_line_show';
             if ( in_array($entry->status, ['C', 'F']) ) {
-                $layout = 'vendor.backpack.crud.purchase-order-line-show-readonly';
+                $layout = 'vendor.backpack.crud.purchase_order_line_show_readonly';
             }
         }else{
             abort(404);
@@ -287,9 +181,12 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
 
-    private function optionMaterial($po_num, $po_line){
-        $mos = MaterialOuthouse::where('po_num', $po_num)->where('po_line', $po_line)
-                ->groupBy('matl_item')->get();
+    private function optionMaterial($poNum, $poLine){
+        $mos = MaterialOuthouse::where('po_num', $poNum)
+                ->where('po_line', $poLine)
+                ->groupBy('matl_item')
+                ->get();
+
         $arr_opt = [];
         foreach ($mos as $key => $mo) {
             $arr_opt[$mo->id] = $mo->matl_item.' - '.$mo->description;
@@ -298,25 +195,12 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
 
-    public function update($id)
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-        
-        return redirect($this->crud->route);
-    }
-
-    public function destroy($id)
-    {
-        return true;
-    }
-    
-
     public function exportExcelAccept()
     {
-        return Excel::download(new PurchaseOrderLineAcceptExport, 'poline-'.date('YmdHis').'.xlsx');
-
+        $filename = 'poline-'.date('YmdHis').'.xlsx';
+        return Excel::download(new PurchaseOrderLineAcceptExport, $filename);
     }
+    
 
     public function exportPdfAccept()
     {
@@ -327,18 +211,19 @@ class PurchaseOrderLineCrudController extends CrudController
                                 ,'po_line.u_m', 'po_line.unit_price', 'vendor.vend_name as vendor_name']);
 
         $data['purchase_order_lines'] = $purchase_order_lines;
-    	$pdf = PDF::loadview('exports.pdf.purchaseorderline-accept',$data);
+    	$pdf = PDF::loadview('exports.pdf.po_line_accept',$data);
 
         return $pdf->download('poline-'.date('YmdHis').'-pdf');
     }
 
+
     public function unread($id)
     {
-        $po_line = PurchaseOrderLine::where('id', $id)->first();
-        $po_line->accept_flag = 0;
-        $po_line->read_by = null;
-        $po_line->read_at = null;
-        $po_line->save();
+        $poLine = PurchaseOrderLine::where('id', $id)->first();
+        $poLine->accept_flag = 0;
+        $poLine->read_by = null;
+        $poLine->read_at = null;
+        $poLine->save();
 
         Alert::success("Data has already unread!")->flash();
 
@@ -348,52 +233,50 @@ class PurchaseOrderLineCrudController extends CrudController
 
     public function exportPdfLabelPost(Request $request)
     {
-        $print_all = $request->print_deliveries;
-        $po_num = $request->po_num;
-        $po_line = $request->po_line;
-        $print_deliveries = $request->print_delivery;
-        $with_price = 'yes';
+        $printAll = $request->print_deliveries;
+        $poNum = $request->po_num;
+        $poLine = $request->po_line;
+        $printDeliveries = $request->print_delivery;
         
-        $arr_param['print_all'] = $print_all;
-        $arr_param['po_num'] = $po_num;
-        $arr_param['po_line'] = $po_line;
-        $arr_param['print_delivery'] = $print_deliveries;
+        $arrParam['print_all'] = $printAll;
+        $arrParam['po_num'] = $poNum;
+        $arrParam['po_line'] = $poLine;
+        $arrParam['print_delivery'] = $printDeliveries;
 
-        $str_param = base64_encode(serialize($arr_param));
+        $strParam = base64_encode(serialize($arrParam));
 
-        if (!isset($print_deliveries)) {
+        if (!isset($printDeliveries)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pilih Minimal 1 DS'
                 ], 200);
         }
+
         return response()->json([
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses Generate PDF',
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-print-label').'?param='.$str_param ,
+            'redirect_to' => url('admin/delivery-print-label').'?param='.$strParam ,
             'validation_errors' => []
         ], 200);
     }
 
 
     public function exportPdfLabel(){ 
-        $str_param = request('param');
-        $arr_param = unserialize(base64_decode($str_param));
-        $print_delivery = $arr_param['print_delivery'];
-        $id = 0 ; //$arr_param['id'];
+        $strParam = request('param');
+        $arrParam = unserialize(base64_decode($strParam));
+        $printDelivery = $arrParam['print_delivery'];
+        $id = 0 ;
 
-        // SELECT d.id, po.po_num, d.po_line, d.item, d.description, d.ds_num, po.vend_num, d.shipped_qty, vendor_item.qty_per_box FROM `delivery` d JOIN po ON po.po_num = d.po_num JOIN vendor_item ON vendor_item.item = d.item WHERE d.id = 1
-        if($print_delivery  != null){
+        if($printDelivery  != null){
             $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
             ->join('po', 'po.po_num', 'delivery.po_num')
-            ->whereIn('delivery.id', $print_delivery )
+            ->whereIn('delivery.id', $printDelivery )
             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
             'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
             'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
-            // ->groupBy('delivery.id')->get();
         }else{
             if($id != 0){
                 $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
@@ -403,44 +286,31 @@ class PurchaseOrderLineCrudController extends CrudController
                 ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
                 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
                 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
-            // ->groupBy('delivery.id')->get();
             }
         }
 
         $data['data'] = $db->get();
 
-        $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
-        // return view('exports.pdf.delivery-sheet-label', $data);
-        // return $pdf->download('print-label-'.now().'.pdf');
+        $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
+
         return $pdf->stream();
     }
-
-
-    // public function exportPdfLabelSingle($id){
-    //     if($id != 0){
-    //             $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-    //             ->join('po', 'po.po_num', 'delivery.po_num')
-    //             ->where('delivery.id', $id)
-    //             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-    //             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
-    //     }
-
-    //     $data['data'] = $db->get();
-
-    //     $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
-    //     // return view('exports.pdf.delivery-sheet-label', $data);
-    //     return $pdf->download('print-label-'.now().'.pdf');
-    //     // return $pdf->stream();
-    // }
+    
 
     function exportPdfLabelInstant($id){
-        $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-        ->join('po', 'po.po_num', 'delivery.po_num')
-        ->where('delivery.id', $id)
-        ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-        ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box');
-        $data['data'] = $db->get();
-        $pdf = PDF::loadview('exports.pdf.delivery-sheet-label', $data)->setPaper('A4');
-        return $pdf->download('print-label-'.now().'.pdf');
+        $delivery = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+                ->join('po', 'po.po_num', 'delivery.po_num')
+                ->where('delivery.id', $id)
+                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
+                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
+                'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box')
+                ->get();
+        
+        $data['data'] = $delivery;
+        
+        $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
+
+        return $pdf->stream();
     }
 }

@@ -11,9 +11,8 @@ class Delivery extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
-    protected $table = 'delivery';
-    // protected $primaryKey = 'id';
 
+    protected $table = 'delivery';
     protected $fillable = [
         'id',
         'shipped_qty',
@@ -27,17 +26,18 @@ class Delivery extends Model
         return '<a class="btn btn-sm btn-danger" href="#"><i class="la la-file-pdf"></i> PDF</a>';
     }
 
+
     public function purchaseOrderLine()
     {
         return $this->belongsTo('App\Models\PurchaseOrderLine', ['po_num', 'po_line'],  ['po_num', 'po_line']);
-
     }
+
 
     public function getShippedDateAttribute($value)
     {
         return date('Y-m-d', strtotime($value));
-
     }
+
 
     public function pdfCheck($crud = false)
     {

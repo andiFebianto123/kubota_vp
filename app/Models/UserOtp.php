@@ -13,6 +13,8 @@ class UserOtp extends Model
     {
         $this->attributes['created_at'] = date("Y/m/d H:i:s", strtotime($value));
     }
+
+    
     public function setUpdatedAtAttribute($value)
     {
         $this->attributes['updated_at'] = date("Y/m/d H:i:s", strtotime($value));

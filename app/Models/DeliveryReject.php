@@ -11,5 +11,6 @@ class DeliveryReject extends Model
 {
     use HasFactory;
     use RevisionableTrait;
+    
     protected $table = 'delivery_reject';
 }

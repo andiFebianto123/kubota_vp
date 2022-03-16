@@ -183,3 +183,16 @@
     height: auto !important;
 }
 
+.btn-outline-vp-primary{
+    border-color: #47a3a5;
+    color: #47a3a5;
+    background: #ffffff;
+    border-radius: .2rem;
+}
+
+.btn-outline-vp-primary:hover{
+    border-color: #47a3a5;
+    background-color: #47a3a5;
+    color: #ffffff;
+    cursor: pointer;
+}

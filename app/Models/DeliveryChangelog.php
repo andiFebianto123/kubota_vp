@@ -10,5 +10,6 @@ class DeliveryChangelog extends Model
 {
     use HasFactory;
     use RevisionableTrait;
+    
     protected $table = 'delivery_changelog';
 }

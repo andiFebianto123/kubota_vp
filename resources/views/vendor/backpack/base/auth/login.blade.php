@@ -8,10 +8,8 @@
                 <div class="card-body">
                     <form id="form-login" class="col-md-12 p-t-10"  method="post" action="{{ route('rectmedia.auth.authenticate') }}">
                         {!! csrf_field() !!}
-
                         <div class="form-group">
                             <label class="control-label">Username</label>
-
                             <div>
                                 <input type="text" class="form-control rect-validation" name="username" id="username">
                             </div>
@@ -19,7 +17,6 @@
 
                         <div class="form-group">
                             <label class="control-label" for="password">Password</label>
-
                             <div>
                                 <input type="password" class="form-control rect-validation" name="password" id="password">
                             </div>
@@ -46,7 +43,7 @@
         $('input').keypress(function (e) {
             if (e.which == 13) {
                 submitAfterValid('form-login')
-                return false;    //<---- Add this line
+                return false; 
             }
         });
     </script>

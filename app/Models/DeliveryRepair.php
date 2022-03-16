@@ -10,5 +10,6 @@ class DeliveryRepair extends Model
 {
     use HasFactory;
     use RevisionableTrait;
+    
     protected $table = 'delivery_repair';
 }

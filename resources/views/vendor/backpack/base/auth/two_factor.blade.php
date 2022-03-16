@@ -6,22 +6,20 @@
             <img src="{{asset('img/logo-kubota.png')}}" style="width: 100px;" class="img img-fluid" alt="">
             <div class="card">
                 <div class="card-body">
-                    <form class="col-md-12 p-t-10" id="form-forgot-password" role="form" method="POST" action="{{route('forgotpassword.sendlink')}}">
+                    <form class="col-md-12 p-t-10" id="form-two-factor" role="form" method="POST" action="{{route('twofactor.update')}}">
                         {!! csrf_field() !!}
-
                         <div class="form-group">
-                            <label class="control-label">Masukkan Email Anda</label>
+                            <label class="control-label">Masukkan OTP yang telah Anda terima</label>
                             <div>
-                                <input type="email" class="form-control rect-validation" name="email">
+                                <input type="text" class="form-control rect-validation" name="two_factor_code">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div>
-                                <button type="button" id="btn-for-form-forgot-password" onclick="submitAfterValid('form-forgot-password')" class="btn btn-block btn-primary-vp">
-                                    Kirim
+                                <button type="button" id="btn-for-form-two-factor" onclick="submitAfterValid('form-two-factor')" class="btn btn-block btn-primary-vp">
+                                    Next
                                 </button>
-                                <small>Anda akan menerima email berisi link untuk mengupdate password </small>
                             </div>
                         </div>
                     </form>
@@ -33,8 +31,8 @@
     <script>
         $('input').keypress(function (e) {
             if (e.which == 13) {
-                submitAfterValid('form-forgot-password')
-                return false;    //<---- Add this line
+                submitAfterValid('form-two-factor')
+                return false; 
             }
         });
     </script>

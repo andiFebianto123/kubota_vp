@@ -307,8 +307,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onClick="sendMessage(event)">Send Message</button>
+          <button type="button" class="btn btn-sm btn-outline-vp-primary" onClick="sendMessage(event)" >Submit</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
@@ -331,8 +331,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onClick="sendReject(event)" >Submit</button>
+          <button type="button" class="btn btn-sm btn-outline-vp-primary" onClick="sendReject(event)" >Submit</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>

@@ -33,7 +33,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                         <label class="strong">Total PO</label>
-                            <h2>{{$count_po_all}}</h2>
+                            <h2>{{$count['po_all']}}</h2>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Unread PO Line</label>
-                            <h2>{{$count_po_line_unreads}}</h2>
+                            <h2>{{$count['po_line_unread']}}</h2>
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Delivery Sheet</label>
-                            <h2>{{$count_delivery}}</h2>
+                            <h2>{{$count['delivery']}}</h2>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                     <div class="col-7 col-md-8">
                         <div class="numbers">
                             <label class="strong">Delivery Status</label>
-                            <h2>{{$count_delivery_status}}</h2>
+                            <h2>{{$count['delivery_status']}}</h2>
                         </div>
                     </div>
                 </div>
@@ -126,7 +126,7 @@
             </div>
             <div class="card-body">
                 <div class="accordion" id="accordionExample">
-                    @foreach($general_message_help as $key => $gm)
+                    @foreach($generalMessage['help'] as $key => $gm)
                     <div class="card mb-2">
                         <div class="card-header" id="heading-{{$key}}">
                             <h2 class="mb-0">
@@ -156,7 +156,7 @@
                 <h5 class="text-white text-bold mb-0"> <i class="la la-info-circle"></i> Information</h5>
             </div>
             <div class="card-body">
-                @foreach($general_message_info as $key => $gm)
+                @foreach($generalMessage['info'] as $key => $gm)
                 <div class="information-section mb-2">
                     <h6>{{$gm->title}}</h6>
                     {!! $gm->content !!}

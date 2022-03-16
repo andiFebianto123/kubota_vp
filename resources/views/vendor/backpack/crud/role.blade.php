@@ -202,8 +202,8 @@
           </form>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="change-role">Save changes</button>
+            <button type="button" class="btn btn-sm btn-outline-vp-primary" id="change-role">Save</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Cancel</button>
         </div>
         </div>
     </div>

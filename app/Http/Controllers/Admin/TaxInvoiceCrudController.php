@@ -15,18 +15,11 @@ use Prologue\Alerts\Facades\Alert;
 use App\Helpers\Constant;
 use App\Models\TaxInvoice;
 use App\Models\Comment;
+use App\Models\PurchaseOrder;
 use App\Models\Vendor;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-
-use Carbon\Carbon;
 
 
-/**
- * Class TaxInvoiceCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class TaxInvoiceCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -37,11 +30,6 @@ class TaxInvoiceCrudController extends CrudController
 
     public $crud2;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     *
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\TaxInvoice::class);
@@ -58,7 +46,6 @@ class TaxInvoiceCrudController extends CrudController
         $this->setup2();
 
         if(Constant::getRole() != 'Admin PTKI'){
-            // jika user bukan admin ptki
             $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
         }
 
@@ -68,19 +55,10 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud->denyAccess('list');
         }
 
-        $this->crud->setListView('vendor.backpack.crud.list-payment');
+        $this->crud->setListView('vendor.backpack.crud.list_payment');
     }
 
-    public function edit(){
-        return abort(404);
-    }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     *
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
         $this->crud->removeButton('delete');
@@ -247,7 +225,7 @@ class TaxInvoiceCrudController extends CrudController
           });
         $this->crud->button_create = 'Invoice and Tax';
 
-        // ini buat table yang ke 2
+        // for secondary table
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             $this->crud->addFilter([
                 'name'        => 'vendor2',
@@ -285,12 +263,8 @@ class TaxInvoiceCrudController extends CrudController
         });
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     *
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+
+    
     protected function setupCreateOperation()
     {
         CRUD::setValidation(TaxInvoiceRequest::class);
@@ -334,8 +308,9 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->setCreateView('vendor.backpack.crud.create-tax');
     }
 
+
     private function deliveryStatus(){
-        $table_header = [
+        $tableHeader = [
             'PO',
             'DS Num',
             'DS Line',
@@ -351,33 +326,23 @@ class TaxInvoiceCrudController extends CrudController
             'PPN',
             'PPH',
             'Total',
-            // 'Confirm',
-            // 'Updated At',
         ];
-        $delivery_statuses = DeliveryStatus::select('*',
+        $deliveryStatuses = DeliveryStatus::select('*',
             DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
             ->where('validate_by_fa_flag', 1)
             ->where('executed_flag', 0)
             ->orderBy('id', 'desc');
             if(Constant::getRole() != 'Admin PTKI'){
-            $delivery_statuses = $delivery_statuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
+            $deliveryStatuses = $deliveryStatuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
             ->get();
         }else{
-            $delivery_statuses = $delivery_statuses->get();
+            $deliveryStatuses = $deliveryStatuses->get();
         }
-        $table_body = [];
+        $tableBody = [];
 
-        foreach ($delivery_statuses as $key => $ds) {
+        foreach ($deliveryStatuses as $key => $ds) {
             $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
-            // $confirm = "";
-            // if($ds->confirm_flag == 0){
-            //     $confirm = 'Waiting';
-            // }else if($ds->confirm_flag == 1){
-            //     $confirm = 'Accept';
-            // }else {
-            //     $confirm = 'Reject';
-            // }
-            $table_body[] =[
+            $tableBody[] =[
                 'column' => [
                     $ds->po_num.'-'.$ds->po_line,
                     $ds->ds_num,
@@ -394,27 +359,21 @@ class TaxInvoiceCrudController extends CrudController
                     $ds->currency.' '.Constant::getPrice($ds->ppn),
                     $ds->currency.' '.Constant::getPrice($ds->pph),
                     $ds->currency.' '.Constant::getPrice($total),
-                    // $confirm,
-                    // $ds->updated_at,
                 ],
                 'value' => $ds->id
             ];
         }
 
-        $table['header'] = $table_header;
-        $table['body'] = $table_body;
+        $table['header'] = $tableHeader;
+        $table['body'] = $tableBody;
 
         return $table;
     }
-    /**
-     * Define what happens when the Update operation is loaded.
-     *
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
+    
+
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        $this->crud->denyAccess('update');
     }
 
 
@@ -423,33 +382,35 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->setRequest($this->crud->validateRequest());
         $request = $this->crud->getRequest();
 
-        $urlfile_faktur = $request->file_faktur_pajak;
-        $urlfile_invoice = $request->invoice;
-        $urlfile_surat_jalan = $request->file_surat_jalan;
-        $ds_nums = $request->input('ds_nums');
+        $urlFileFaktur = $request->file_faktur_pajak;
+        $urlFileInvoice = $request->invoice;
+        $urlFileSuratJalan = $request->file_surat_jalan;
+        $dsNums = $request->input('ds_nums');
 
         $filename = "";
-        $not_exist_faktur = false;
-        foreach ($ds_nums as $key => $ds) {
+        $notExistFaktur = false;
+        foreach ($dsNums as $key => $ds) {
             $faktur_pajak = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
             if (!isset($faktur_pajak)) {
-                $not_exist_faktur = true;
+                $notExistFaktur = true;
             }
         }
 
-        if ($not_exist_faktur) {
-            Validator::make($request->all(), ['file_faktur_pajak' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,png,jpg,jpeg'])->validate();
+        if ($notExistFaktur) {
+            Validator::make($request->all(), 
+                ['file_faktur_pajak' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,png,jpg,jpeg'])
+                ->validate();
         }
 
-        if ($urlfile_faktur) {
-            $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlfile_faktur->getClientOriginalExtension();
-            $urlfile_faktur->move('files', $filename);
+        if ($urlFileFaktur) {
+            $filename = 'faktur_pajak_'.date('ymdhis').'.'.$urlFileFaktur->getClientOriginalExtension();
+            $urlFileFaktur->move('files', $filename);
             $filename = 'files/'.$filename;
 
-            foreach ($ds_nums as $key => $ds) {
-                $old_files = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
-                if (isset($old_files)) {
-                    $will_unlink_file =  $old_files;
+            foreach ($dsNums as $key => $ds) {
+                $oldFiles = DeliveryStatus::where('id', $ds)->first()->file_faktur_pajak;
+                if (isset($oldFiles)) {
+                    $will_unlink_file =  $oldFiles;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -458,17 +419,16 @@ class TaxInvoiceCrudController extends CrudController
             }
         }
 
-
         // input invoice
-        if($urlfile_invoice){
-            $filenameInvoice = 'faktur_pajak_invoice'.date('ymdhis').'.'.$urlfile_invoice->getClientOriginalExtension();
-            $urlfile_invoice->move('files', $filenameInvoice);
+        if($urlFileInvoice){
+            $filenameInvoice = 'faktur_pajak_invoice'.date('ymdhis').'.'.$urlFileInvoice->getClientOriginalExtension();
+            $urlFileInvoice->move('files', $filenameInvoice);
             $filenameInvoice = 'files/'.$filenameInvoice;
 
-            foreach ($ds_nums as $key => $ds) {
-                $old_files = DeliveryStatus::where('id', $ds)->first()->invoice;
-                if (isset($old_files)) {
-                    $will_unlink_file =  $old_files;
+            foreach ($dsNums as $key => $ds) {
+                $oldFiles = DeliveryStatus::where('id', $ds)->first()->invoice;
+                if (isset($oldFiles)) {
+                    $will_unlink_file =  $oldFiles;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -478,16 +438,16 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         // input file surat jalan
-        if($urlfile_surat_jalan){
-            $filenameSuratJalan = 'faktur_pajak_surat_jalan'.date('ymdhis').'.'.$urlfile_surat_jalan->getClientOriginalExtension();
-            $urlfile_surat_jalan->move('files', $filenameSuratJalan);
+        if($urlFileSuratJalan){
+            $filenameSuratJalan = 'faktur_pajak_surat_jalan'.date('ymdhis').'.'.$urlFileSuratJalan->getClientOriginalExtension();
+            $urlFileSuratJalan->move('files', $filenameSuratJalan);
             $filenameSuratJalan = 'files/'.$filenameSuratJalan;
 
-            foreach ($ds_nums as $key => $ds) {
-                $old_files = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
+            foreach ($dsNums as $key => $ds) {
+                $oldFiles = DeliveryStatus::where('id', $ds)->first()->file_surat_jalan;
 
-                if (isset($old_files)) {
-                    $will_unlink_file = $old_files;
+                if (isset($oldFiles)) {
+                    $will_unlink_file = $oldFiles;
                     unlink(public_path($will_unlink_file));
                 }
                 $change = DeliveryStatus::where('id', $ds)->first();
@@ -510,15 +470,15 @@ class TaxInvoiceCrudController extends CrudController
 
         $id = $this->crud->getCurrentEntryId() ?? $id;
 
-        $old_file = DeliveryStatus::where('id', $id)->first();
-        if (isset($old_file->file_faktur_pajak)) {
-            unlink(public_path($old_file->file_faktur_pajak));
+        $oldFile = DeliveryStatus::where('id', $id)->first();
+        if (isset($oldFile->file_faktur_pajak)) {
+            unlink(public_path($oldFile->file_faktur_pajak));
         }
-        if (isset($old_file->invoice)) {
-            unlink(public_path($old_file->invoice));
+        if (isset($oldFile->invoice)) {
+            unlink(public_path($oldFile->invoice));
         }
-        if (isset($old_file->file_surat_jalan)) {
-            unlink(public_path($old_file->file_surat_jalan));
+        if (isset($oldFile->file_surat_jalan)) {
+            unlink(public_path($oldFile->file_surat_jalan));
         }
 
         $change = DeliveryStatus::where('id', $id)->first();
@@ -532,6 +492,7 @@ class TaxInvoiceCrudController extends CrudController
 
         return $success;
     }
+    
 
     public function confirmFakturPajak($id){
         $db = $this->crud->model::where('id', $id)->first();
@@ -540,6 +501,7 @@ class TaxInvoiceCrudController extends CrudController
         $status = $db->save();
         return $status;
     }
+
 
     public function confirmRejectFakturPajak($id){
         $db = $this->crud->model::where('id', $id)->first();
@@ -585,7 +547,7 @@ class TaxInvoiceCrudController extends CrudController
                     }
                 }
             }
-            // jika berhasil melewati pengecekan vendor dengan delivery status
+
             $comment = new Comment;
             $comment->comment = '[REJECT REASON] '.request()->input('comment');
             $comment->tax_invoice_id = request()->input('id_payment');
@@ -600,11 +562,12 @@ class TaxInvoiceCrudController extends CrudController
         }
     }
 
+
     public function showComments(req $request){
         if($request->input('id_payment')){
-            $id_invoice = $request->input('id_payment');
+            $invoiceId = $request->input('id_payment');
             $comments = Comment::join('users', 'users.id', 'comments.user_id')
-            ->where('tax_invoice_id', $id_invoice)
+            ->where('tax_invoice_id', $invoiceId)
             ->select('comments.id', 'comment', 'name', 'user_id', 'comments.created_at')
             ->get();
             $data = $comments->mapWithKeys(function($data, $index){
@@ -618,7 +581,7 @@ class TaxInvoiceCrudController extends CrudController
                 ]];
             });
 
-            $editComments = Comment::where('tax_invoice_id', $id_invoice)
+            Comment::where('tax_invoice_id', $invoiceId)
             ->where('user_id', '!=', backpack_user()->id)
             ->update(['status' => 0]);
 
@@ -633,10 +596,11 @@ class TaxInvoiceCrudController extends CrudController
         ], 404);
     }
 
+
     public function sendMessage(req $request){
 
         $me = backpack_user()->id;
-        $payment_id = $request->input('id_payment');
+        $paymentId = $request->input('id_payment');
 
         $validator = Validator::make($request->all(), [
             'comment' => 'required',
@@ -660,10 +624,9 @@ class TaxInvoiceCrudController extends CrudController
             ], 200);
         }
 
-        $delivery_status = DeliveryStatus::where('id', $payment_id)->first();
+        $deliveryStatus = DeliveryStatus::where('id', $paymentId)->first();
 
-        if ($delivery_status->executed_flag == 1) {
-
+        if ($deliveryStatus->executed_flag == 1) {
             return response()->json([
                 'status' => 'failed',
                 'type' => 'warning',
@@ -671,11 +634,10 @@ class TaxInvoiceCrudController extends CrudController
             ], 504);
         }
 
-
         if(Constant::getRole() != 'Admin PTKI'){
             $vendor = backpack_user()->vendor->vend_num;
             $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
-            ->where('delivery_status.id', $payment_id);
+            ->where('delivery_status.id', $paymentId);
 
             if($cekVendor->count() > 0){
                 $cekVendor = $cekVendor->select('po.vend_num')->first();
@@ -691,17 +653,17 @@ class TaxInvoiceCrudController extends CrudController
 
         $comment = new Comment;
         $comment->comment = $request->input('comment');
-        $comment->tax_invoice_id = $payment_id;
+        $comment->tax_invoice_id = $paymentId;
         $comment->user_id = $me;
         $comment->status = 1;
-        $saving = $comment->save();
-        if($saving){
+        $saved = $comment->save();
+        if($saved){
             return response()->json([
                 'status' => 'success',
             ], 200);
         }
-
     }
+
 
     public function deleteMessage(req $request){
         $mesage = Comment::where('id', $request->input('id'))->delete();
@@ -712,43 +674,49 @@ class TaxInvoiceCrudController extends CrudController
         }
     }
 
-    function show()
+
+    public function show()
     {
         $entry = $this->crud->getCurrentEntry();
 
-        $delivery_status = DeliveryStatus::where('ds_num', $entry->ds_num )
+        if (!$this->handlePermissionNonAdmin($entry->po_num)) {
+            abort(404);
+        }
+
+        $deliveryStatus = DeliveryStatus::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)
                             ->first();
 
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
-        $data['delivery_status'] = $delivery_status;
+        $data['delivery_status'] = $deliveryStatus;
 
-        // dd($entry);
-        return view('vendor.backpack.crud.list-payment-show', $data);
+        return view('vendor.backpack.crud.list_payment_show', $data);
     }
+
 
     private function detailDS($id)
     {
-        $delivery_show = DeliveryStatus::leftjoin('po_line', function ($join) {
+        $deliveryShow = DeliveryStatus::leftjoin('po_line', function ($join) {
                             $join->on('po_line.po_num', 'delivery_status.po_num')
-                                ->orOn('po_line.po_line', 'delivery_status.po_line');
+                                ->on('po_line.po_line', 'delivery_status.po_line');
                         })
                         ->leftJoin('po', 'po.po_num', 'po_line.po_num')
-                        // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery_status.id', $id)
-                        ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date', 'delivery_status.po_release','po_line.item',
-                        'vendor.vend_num as vendor_number','vendor.currency as vendor_currency', 'vendor.vend_num as vendor_name', 'delivery_status.no_surat_jalan_vendor','po_line.item_ptki',
+                        ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date', 
+                        'delivery_status.po_release','po_line.item','vendor.vend_num as vendor_number','vendor.currency as vendor_currency',
+                        'vendor.vend_num as vendor_name', 'delivery_status.no_surat_jalan_vendor','po_line.item_ptki',
                         'po.po_num as po_number','po_line.po_line as po_line', 'delivery_status.shipped_qty', 'delivery_status.unit_price',
-                        'delivery_status.tax_status', 'delivery_status.description', ])
+                        'delivery_status.tax_status', 'delivery_status.description'])
                         ->first();
 
-        $data['delivery_show'] = $delivery_show;
+        $data['delivery_show'] = $deliveryShow;
 
         return $data;
     }
+
 
     private function setup2(){
         $this->crud2 = new TaxInvoice;
@@ -768,17 +736,11 @@ class TaxInvoiceCrudController extends CrudController
     }
 
 
-    /**
-     * The search function that is called by the data table.
-     *
-     * @return array JSON Array of cells in HTML form.
-     */
     public function search2()
     {
         $this->crud->hasAccessOrFail('list');
 
         $this->crud->applyUnappliedFilters();
-
 
         $totalRows = $this->crud2->count();
         $filteredRows = $this->crud2->toBase()->getCountForPagination();
@@ -797,26 +759,15 @@ class TaxInvoiceCrudController extends CrudController
         }
         // limit the number of results according to the datatables pagination
         if (request()->input('length')) {
-            // $this->crud2->take((int) request()->input('length'));
             $this->crud2->take((int) request()->input('length'));
         }
-        // overwrite any order set in the setup() method with the datatables order
         if (request()->input('order')) {
-            // clear any past orderBy rules
-            // $this->crud->query->getQuery()->orders = null;
             foreach ((array) request()->input('order') as $order) {
-                $column_number = (int) $order['column'];
-                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
-                $column = $this->crud->findColumnById($column_number);
+                $columnNumber = (int) $order['column'];
+                $columnDirection = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($columnNumber);
                 if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
-                    // apply the current orderBy rules
-                    // $this->crud->orderByWithPrefix($column['name'], $column_direction);
-                    $this->crud2->orderBy($column['name'], $column_direction);
-                }
-
-                // check for custom order logic in the column definition
-                if (isset($column['orderLogic'])) {
-                    // $this->crud->customOrderBy($column, $column_direction);
+                    $this->crud2->orderBy($column['name'], $columnDirection);
                 }
             }
         }else{
@@ -829,16 +780,6 @@ class TaxInvoiceCrudController extends CrudController
     }
 
 
-
-    /**
-     * Created the array to be fed to the data table.
-     *
-     * @param  array  $entries  Eloquent results.
-     * @param  int  $totalRows
-     * @param  int  $filteredRows
-     * @param  bool|int  $startIndex
-     * @return array
-     */
     public function getEntriesAsJsonForDatatables2($entries, $totalRows, $filteredRows, $startIndex = false, $lineButton)
     {
         $rows = [];
@@ -860,13 +801,7 @@ class TaxInvoiceCrudController extends CrudController
         ];
     }
 
-    /**
-     * Get the HTML of the cells in a table row, for a certain DB entry.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $entry  A db entry of the current entity;
-     * @param  bool|int  $rowNumber  The number shown to the user as row number (index);
-     * @return array Array of HTML cell contents.
-     */
+    
     public function getRowViews2($entry, $rowNumber = false, $lineButton)
     {
         $row_items = [];
@@ -897,12 +832,7 @@ class TaxInvoiceCrudController extends CrudController
         return $row_items;
     }
 
-    /**
-     * Add conditions to the CRUD query for a particular search term.
-     *
-     * @param  string  $searchTerm  Whatever string the user types in the search bar.
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
+    
     public function applySearchTerm2($searchTerm)
     {
         return $this->crud2->where(function ($query) use ($searchTerm) {
@@ -926,5 +856,21 @@ class TaxInvoiceCrudController extends CrudController
             abort(404);
         }
 
+    }
+
+
+    private function handlePermissionNonAdmin($poNum){
+        $allowAccess = false;
+
+        if(in_array(Constant::getRole(),['Admin PTKI'])){
+            $allowAccess = true;
+        }else{
+            $vendNum = PurchaseOrder::where('po_num', $poNum)->first()->vend_num;
+            if (backpack_auth()->user()->vendor->vend_num == $vendNum) {
+                $allowAccess = true;
+            }
+        }
+
+        return $allowAccess;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Helpers;
 
 use App\Models\Delivery;
@@ -11,152 +12,148 @@ use Illuminate\Support\Facades\DB;
 class DsValidation
 {
 
-  public function currentMaxQty($args){
-    $po_num = $args['po_num'];
-    $po_line = $args['po_line'];
-    $order_qty = $args['order_qty'];
+  public function currentMaxQty($args)
+  {
+    $poNum = $args['po_num'];
+    $poLine = $args['po_line'];
 
-    $qty_initial = PurchaseOrderLine::where("po_num", $po_num)
-                   ->where("po_line", $po_line)
-                   ->orderBy('po_change', 'desc')
-                   ->first()->order_qty;
+    $qtyInitial = PurchaseOrderLine::where("po_num", $poNum)
+      ->where("po_line", $poLine)
+      ->orderBy('po_change', 'desc')
+      ->first()
+      ->order_qty;
 
-    $realtime_ds_qty = Delivery::where("po_num", $po_num)
-                      ->where("po_line", $po_line)
-                      ->sum('shipped_qty');
+    $realtimeDsQty = Delivery::where("po_num", $poNum)
+      ->where("po_line", $poLine)
+      ->sum('shipped_qty');
 
-    $realtime_qty = $qty_initial - $realtime_ds_qty;
-    
+    $realtimeQty = $qtyInitial - $realtimeDsQty;
+
     return [
-      'datas'  => $realtime_qty,
+      'datas'  => $realtimeQty,
       'mode'   => 'danger',
-      'message' => 'Maksimum Qty '. $realtime_qty
+      'message' => 'Maksimum Qty ' . $realtimeQty
     ];
   }
 
-  public function currentMaxQtyOuthouse($args){
-    $po_num = $args['po_num'];
-    $po_line = $args['po_line'];
-    $order_qty = $args['order_qty'];
 
-    $realtime_ds_qty = MaterialOuthouse::where("po_num", $po_num)
-                      ->where("po_line", $po_line)
-                      ->get();
+  public function currentMaxQtyOuthouse($args)
+  {
+    $poNum = $args['po_num'];
+    $poLine = $args['po_line'];
 
-    $arr_min_qty = [];
-    $current_qty = 0;
-    foreach ($realtime_ds_qty as $key => $rdq) {
-      $arr_min_qty[] = ($rdq)? $rdq->remaining_qty/$rdq->qty_per : 0;
+    $realtimeDsQty = MaterialOuthouse::where("po_num", $poNum)
+      ->where("po_line", $poLine)
+      ->get();
+
+    $arrMinQty = [];
+    $currentQty = 0;
+    foreach ($realtimeDsQty as $key => $rdq) {
+      $arrMinQty[] = ($rdq) ? $rdq->remaining_qty / $rdq->qty_per : 0;
     }
-    if (sizeof($arr_min_qty) > 0) {
-      $current_qty = min($arr_min_qty); 
+    if (sizeof($arrMinQty) > 0) {
+      $currentQty = min($arrMinQty);
     }
-    
+
     return [
-      'datas'  => $current_qty,
+      'datas'  => $currentQty,
       'mode'   => 'danger',
-      'message' => 'Maksimum Qty '. $current_qty
+      'message' => 'Maksimum Qty ' . $currentQty
     ];
   }
+
 
   public function unfinishedPoLine($args)
   {
-    
     $due_date = $args['due_date'];
-    $po_num = $args['po_num'];
-    $po_line = $args['po_line'];
+    $poNum = $args['po_num'];
+    $poLine = $args['po_line'];
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
-    $po = PurchaseOrder::where('po_num', $po_num)->first();
-    
-    $old_po = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
-                  ->where('po_line.status', 'O')
-                  ->where('po_line.outhouse_flag', 0)
-                  ->where('po_line.po_num', '<=', $po_num)
-                  ->where('po.vend_num', '<=', $po->vend_num)
-                  ->whereDate('po_line.due_date', '<=', date('Y-m-d',strtotime($due_date)))
-                  ->where($filters)         
-                  ->orderBy('po_line.po_line','asc')
-                  ->orderBy('po_line.po_num','asc')
-                  ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+    $po = PurchaseOrder::where('po_num', $poNum)->first();
+    $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+      ->where('po_line.status', 'O')
+      ->where('po_line.outhouse_flag', 0)
+      ->where('po_line.po_num', '<=', $poNum)
+      ->where('po.vend_num', '<=', $po->vend_num)
+      ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
+      ->where($filters)
+      ->orderBy('po_line.po_line', 'asc')
+      ->orderBy('po_line.po_num', 'asc')
+      ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
-      $arr_old_po = [];
-      foreach ($old_po as $key => $op) {
-        $show = false;
-        if ($op->total_shipped_qty < $op->order_qty) {
-          $show = true;
-        }
-        if ($po_num == $op->po_num) {
-          if ($po_line <= $op->po_line) {
-            $show = false;
-          }
-        }
-        
-        if ($show) {
-          $arr_old_po[] = $op;
+    $arrOldPo = [];
+    foreach ($oldPo as $key => $op) {
+      $show = false;
+      if ($op->total_shipped_qty < $op->order_qty) {
+        $show = true;
+      }
+      if ($poNum == $op->po_num) {
+        if ($poLine <= $op->po_line) {
+          $show = false;
         }
       }
-      $arr_old_po = collect($arr_old_po)->sortBy('num_line')->take(1);
+      if ($show) {
+        $arrOldPo[] = $op;
+      }
+    }
+    $arrOldPo = collect($arrOldPo)->sortBy('num_line')->take(1);
 
-      return [
-        'datas'  => $arr_old_po,
-        'mode'   => 'danger',
-        'message' => 'Selesaikan terlebih dahulu PO yang lama!'
-      ];
+    return [
+      'datas'  => $arrOldPo,
+      'mode'   => 'danger',
+      'message' => 'Selesaikan terlebih dahulu PO yang lama!'
+    ];
   }
 
 
   public function unfinishedPoLineMass($args)
   {
-    
     $due_date = $args['due_date'];
-    $po_num = $args['po_num'];
-    $po_line = $args['po_line'];
+    $poNum = $args['po_num'];
+    $poLine = $args['po_line'];
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
-    $po = PurchaseOrder::where('po_num', $po_num)->first();
-    
-    $old_po = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
-                  ->where('po_line.status', 'O')
-                  ->where('po_line.outhouse_flag', 0)
-                  ->where('po_line.po_num', '<=', $po_num)
-                  ->where('po.vend_num', '<=', $po->vend_num)
-                  ->whereDate('po_line.due_date', '<=', date('Y-m-d',strtotime($due_date)))
-                  ->where($filters)         
-                  ->orderBy('po_line.po_line','asc')
-                  ->orderBy('po_line.po_num','asc')
-                  ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+    $po = PurchaseOrder::where('po_num', $poNum)->first();
+    $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+      ->where('po_line.status', 'O')
+      ->where('po_line.outhouse_flag', 0)
+      ->where('po_line.po_num', '<=', $poNum)
+      ->where('po.vend_num', '<=', $po->vend_num)
+      ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
+      ->where($filters)
+      ->orderBy('po_line.po_line', 'asc')
+      ->orderBy('po_line.po_num', 'asc')
+      ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
-      $arr_old_po = [];
-      foreach ($old_po as $key => $op) {
-        $show = false;
-        if ($op->total_shipped_qty < $op->order_qty) {
-          $show = true;
-          $temp_po = TempUploadDelivery::where('po_num', $op->po_num)->where('po_line', $op->po_line)->first();
-          if (isset($temp_po)) {
-            if ($temp_po->shipped_qty + $op->total_shipped_qty == $op->order_qty) {
-              $show = false;
-            }
-          }
-        }
-        if ($po_num == $op->po_num) {
-          if ($po_line <= $op->po_line) {
+    $arrOldPo = [];
+    foreach ($oldPo as $key => $op) {
+      $show = false;
+      if ($op->total_shipped_qty < $op->order_qty) {
+        $show = true;
+        $tempPo = TempUploadDelivery::where('po_num', $op->po_num)->where('po_line', $op->po_line)->first();
+        if (isset($tempPo)) {
+          if ($tempPo->shipped_qty + $op->total_shipped_qty == $op->order_qty) {
             $show = false;
           }
         }
-        
-        if ($show) {
-          $arr_old_po[] = $op;
+      }
+      if ($poNum == $op->po_num) {
+        if ($poLine <= $op->po_line) {
+          $show = false;
         }
       }
-      $arr_old_po = collect($arr_old_po)->sortBy('num_line')->take(1);
 
-      return [
-        'datas'  => $arr_old_po,
-        'mode'   => 'danger',
-        'message' => 'Selesaikan terlebih dahulu PO yang lama!'
-      ];
+      if ($show) {
+        $arrOldPo[] = $op;
+      }
+    }
+    $arrOldPo = collect($arrOldPo)->sortBy('num_line')->take(1);
+
+    return [
+      'datas'  => $arrOldPo,
+      'mode'   => 'danger',
+      'message' => 'Selesaikan terlebih dahulu PO yang lama!'
+    ];
   }
-
-  
 }

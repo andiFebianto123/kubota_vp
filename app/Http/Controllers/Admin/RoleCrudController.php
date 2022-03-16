@@ -15,24 +15,14 @@ use App\Models\ModelHasRole;
 use Exception;
 use Prologue\Alerts\Facades\Alert;
 
-/**
- * Class RoleCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
+
 class RoleCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    // use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
-
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations. 
-     * 
-     * @return void
-     */
+  
     public function setup()
     {
         CRUD::setModel(\App\Models\Role::class);
@@ -49,12 +39,7 @@ class RoleCrudController extends CrudController
         $this->crud->setListView('backpack::crud.role', $this);
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+
     protected function setupListOperation()
     {
 
@@ -72,22 +57,15 @@ class RoleCrudController extends CrudController
         if(!Constant::checkPermission('Delete Role')){
             $this->crud->removeButton('delete');
         }
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+
     protected function setupCreateOperation()
     {
+        if(!Constant::checkPermission('Create Role')){
+            $this->crud->denyAccess('create');
+        }
+
         CRUD::setValidation(RoleRequest::class);
         CRUD::field('name');
         CRUD::addField([
@@ -95,26 +73,19 @@ class RoleCrudController extends CrudController
             'type' => 'hidden',
             'value' => 'web'
         ]);
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
+    
     protected function setupUpdateOperation()
     {
+        if(!Constant::checkPermission('Update Role')){
+            $this->crud->denyAccess('update');
+        }
         $this->setupCreateOperation();
     }
 
-    function getPermissionOfRole(){
+
+    public function getPermissionOfRole(){
         $role = RoleSpatie::find(request()->input('role'));
         if($role == null){
             return response()->json([
@@ -165,7 +136,8 @@ class RoleCrudController extends CrudController
         ], 200);
     }
 
-    function changeRolePermission(Request $request){
+
+    public function changeRolePermission(Request $request){
         if($request->input('role') != null){
             // dapatkan id role
             $role = $request->input('role');
@@ -194,14 +166,6 @@ class RoleCrudController extends CrudController
                     'message' => $e->getMessage()
                 ], 400);
             }
-            // }else{
-            //     // jika permission kosong
-            //     return response()->json([
-            //         'status' => false,
-            //         'alert' => 'warning',
-            //         'message' => 'Permission tidak ada yang dipilih'
-            //     ], 200);
-            // }
         }else{
             // jika role kosong
             return response()->json([
@@ -211,6 +175,7 @@ class RoleCrudController extends CrudController
             ], 200);
         }
     }
+
 
     function showPermission(Request $req){
         if($req->input('role') != null){
@@ -242,6 +207,7 @@ class RoleCrudController extends CrudController
         }
     }
 
+
     public function destroy($id)
     {
         $this->crud->hasAccessOrFail('delete');
@@ -250,19 +216,19 @@ class RoleCrudController extends CrudController
 
         DB::beginTransaction();
         try{
-            $allow_delete = true;
+            $allowDelete = true;
             if(ModelHasRole::where('role_id', $id)->exists()){
-                $allow_delete = false;
+                $allowDelete = false;
             }
-            if ($allow_delete) {
+            if ($allowDelete) {
                 $response = $this->crud->delete($id);
                 DB::commit();
                 return $response;
             }else{
                 DB::rollback();
-                $custom_message['danger'][0] = 'This role is still in use';
+                $customMessage['danger'][0] = 'This role is still in use';
                 
-                return $custom_message;  
+                return $customMessage;  
             }
             
         }

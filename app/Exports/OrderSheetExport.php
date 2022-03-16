@@ -1,7 +1,6 @@
 <?php
 namespace App\Exports;
 
-use App\Models\PurchaseOrder;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -13,10 +12,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class OrderSheetExport implements FromView, WithEvents, WithDrawings
 {
-    public function __construct($data_fc)
+    public function __construct($dataFc)
     {
-        $this->data_fc = $data_fc;
+        $this->data_fc = $dataFc;
     }
+
 
     public function drawings()
     {
@@ -30,26 +30,25 @@ class OrderSheetExport implements FromView, WithEvents, WithDrawings
         return $drawing;
     }
 
+
     public function registerEvents(): array
     {
         return [
             AfterSheet::class    => function(AfterSheet $event) {
-                $arr_columns = range('A', 'O');
-                foreach ($arr_columns as $key => $col) {
+                $arrColumns = range('A', 'O');
+                foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
             },
         ];
-
     }
 
 
     public function view(): View
     {
-       
         $data = $this->data_fc;
 
-        return view('exports.excel.order-sheet', $data);
+        return view('exports.excel.order_sheet', $data);
     }
 }

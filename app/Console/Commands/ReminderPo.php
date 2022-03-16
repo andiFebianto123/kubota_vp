@@ -60,8 +60,8 @@ class ReminderPo extends Command
         ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
         ->where('po_line.accept_flag', 0)
         ->get();
-        $po_number_grouped = collect($dataPo);
-        $groupByPoLine = $po_number_grouped->unique(function ($item) {
+        $poNumberGrouped = collect($dataPo);
+        $groupByPoLine = $poNumberGrouped->unique(function ($item) {
             return $item['po_number'].$item['ID'];
         })->toArray(); // data ini nanti dipakai buat menemukan ID untuk dikirim ke email
 
@@ -88,7 +88,7 @@ class ReminderPo extends Command
                     ->send(new vendorNewPo($details));
                 }
 
-                $updateDataPoLine = \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
+                \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
                 ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
                 ->where('accept_flag', 0)
                 ->update([

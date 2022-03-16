@@ -18,13 +18,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Prologue\Alerts\Facades\Alert;
-use PDF;
 
-/**
- * Class TempUploadDeliveryCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class TempUploadDeliveryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -33,11 +27,6 @@ class TempUploadDeliveryCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\TempUploadDelivery::class);
@@ -45,21 +34,14 @@ class TempUploadDeliveryCrudController extends CrudController
         CRUD::setEntityNameStrings('temp upload delivery', 'temp upload deliveries');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+
     protected function setupListOperation()
     {
         $this->crud->removeButton('create');
         $this->crud->removeButton('show');
-        $this->crud->addButtonFromView('top', 'insertfromtemp', 'insertfromtemp', 'beginning');
-        $this->crud->addButtonFromView('top', 'insertprintfromtemp', 'insertprintfromtemp', 'beginning');
-        $this->crud->addButtonFromView('top', 'canceltemp', 'canceltemp', 'end');
-        // $this->crud->addButtonFromModelFunction('top', 'insert_db', 'insertToDB', 'beginning');
-        // $this->crud->addButtonFromModelFunction('top', 'cancel_db', 'cancelInsert', 'end');
+        $this->crud->addButtonFromView('top', 'insert_from_temp', 'insert_from_temp', 'beginning');
+        $this->crud->addButtonFromView('top', 'insert_print_from_temp', 'insert_print_from_temp', 'beginning');
+        $this->crud->addButtonFromView('top', 'cancel_temp', 'cancel_temp', 'end');
         $this->crud->addClause('where','user_id', backpack_auth()->user()->id);
         $this->crud->orderBy('po_num', 'asc');        
         $this->crud->orderBy('po_line', 'asc');        
@@ -69,7 +51,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'label'    => 'PO',
             'type'     => 'closure',
             'function' => function($entry) {
-                return $entry->po_num. '-'.$entry->po_line;
+                return $entry->po_num.'-'.$entry->po_line;
             }
         ]);
 
@@ -86,7 +68,6 @@ class TempUploadDeliveryCrudController extends CrudController
             'label'     => 'Description', // Table column heading
             'name'    => 'po_description', 
         ]);
-
         CRUD::addColumn([
             'label'     => 'Qty', // Table column heading
             'name'      => 'shipped_qty', 
@@ -106,149 +87,136 @@ class TempUploadDeliveryCrudController extends CrudController
             'function_name' => 'getValidationText',
             'limit' => 1000
         ]);
-       
-        // Alert::success("Successfully Save Multiple DS!")->flash();
-
     }
+    
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(TempUploadDeliveryRequest::class);
-  
-        CRUD::field('petugas_vendor');
-        CRUD::field('no_surat_jalan_vendor');
-        CRUD::field('order_qty');
-        CRUD::field('serial_number');
+        $this->crud->denyAccess('create');
     }
 
 
     private function insertMassData(){
-        $data_temps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
-        $arr_ids = [];
+        $dataTemps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+        $arrIds = [];
         DB::beginTransaction();
 
         try{
-            $success_insert = 0;
-            $total_insert = sizeof($data_temps);
-            foreach ($data_temps as $key => $data_temp) {
-                $po_line = PurchaseOrderLine::where('po_num', $data_temp->po_num)
-                            ->where('po_line', $data_temp->po_line)
+            $successInsert = 0;
+            $totalInsert = sizeof($dataTemps);
+            foreach ($dataTemps as $key => $dataTemp) {
+                $poLine = PurchaseOrderLine::where('po_num', $dataTemp->po_num)
+                            ->where('po_line', $dataTemp->po_line)
                             ->orderBy('po_change', 'desc')
                             ->first();
-                $ds_num =  (new Constant())->codeDs($data_temp->po_num, $data_temp->po_line, $data_temp->delivery_date);
+                $ds_num =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->po_line, $dataTemp->delivery_date);
                 $ds_line = $ds_num['line'];
     
-                $insert = new Delivery();
-                $insert->ds_num = $ds_num['single'];
-                $insert->group_ds_num = $ds_num['group'];
-                $insert->po_line = $data_temp->po_line;
-                $insert->po_num = $data_temp->po_num;
-                $insert->po_release = 0;
-                $insert->ds_line = $ds_line;
-                $insert->item = $po_line->item;
-                $insert->description = $po_line->description;
-                $insert->u_m = $po_line->u_m;
-                $insert->due_date = $po_line->due_date;
-                $insert->unit_price = $po_line->unit_price;
-                $insert->wh = $po_line->wh;
-                $insert->location = $po_line->location;
-                $insert->tax_status = $po_line->tax_status;
-                $insert->currency = $po_line->currency;
-                $insert->shipped_qty = $data_temp->shipped_qty;
-                $insert->shipped_date = date('Y-m-d', strtotime($data_temp->delivery_date));
-                $insert->order_qty = $po_line->order_qty;
-                $insert->w_serial = ($data_temp->serial_number) ? $data_temp->serial_number : 0;
-                $insert->petugas_vendor = $data_temp->petugas_vendor;
-                $insert->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
+                $insertDlv = new Delivery();
+                $insertDlv->ds_num = $ds_num['single'];
+                $insertDlv->group_ds_num = $ds_num['group'];
+                $insertDlv->po_line = $dataTemp->po_line;
+                $insertDlv->po_num = $dataTemp->po_num;
+                $insertDlv->po_release = 0;
+                $insertDlv->ds_line = $ds_line;
+                $insertDlv->item = $poLine->item;
+                $insertDlv->description = $poLine->description;
+                $insertDlv->u_m = $poLine->u_m;
+                $insertDlv->due_date = $poLine->due_date;
+                $insertDlv->unit_price = $poLine->unit_price;
+                $insertDlv->wh = $poLine->wh;
+                $insertDlv->location = $poLine->location;
+                $insertDlv->tax_status = $poLine->tax_status;
+                $insertDlv->currency = $poLine->currency;
+                $insertDlv->shipped_qty = $dataTemp->shipped_qty;
+                $insertDlv->shipped_date = date('Y-m-d', strtotime($dataTemp->delivery_date));
+                $insertDlv->order_qty = $poLine->order_qty;
+                $insertDlv->w_serial = ($dataTemp->serial_number) ? $dataTemp->serial_number : 0;
+                $insertDlv->petugas_vendor = $dataTemp->petugas_vendor;
+                $insertDlv->no_surat_jalan_vendor = $dataTemp->no_surat_jalan_vendor;
     
-                if ($po_line->status == 'O' && $po_line->accept_flag == 1 && $data_temp->category_validation != 'danger') {
-                    $insert->save();
+                if ($poLine->status == 'O' && $poLine->accept_flag == 1 && $dataTemp->category_validation != 'danger') {
+                    $insertDlv->save();
     
-                    $insert_dstatus = new DeliveryStatus();
-                    $insert_dstatus->ds_num = $ds_num['single'];
-                    $insert_dstatus->po_num = $po_line->po_num;
-                    $insert_dstatus->po_line = $po_line->po_line;
-                    $insert_dstatus->po_release = $po_line->po_release;
-                    $insert_dstatus->ds_line = $ds_line;
-                    $insert_dstatus->item = $po_line->item;
-                    $insert_dstatus->description = $po_line->description;
-                    $insert_dstatus->unit_price = $po_line->unit_price;
-                    $insert_dstatus->tax_status = $po_line->tax_status;
-                    $insert_dstatus->shipped_qty = $data_temp->shipped_qty;
-                    $insert_dstatus->petugas_vendor = $data_temp->petugas_vendor;
-                    $insert_dstatus->no_surat_jalan_vendor = $data_temp->no_surat_jalan_vendor;
-                    $insert_dstatus->created_by = backpack_auth()->user()->id;
-                    $insert_dstatus->updated_by = backpack_auth()->user()->id;
-                    $insert_dstatus->save();
+                    $insertDlvStatus = new DeliveryStatus();
+                    $insertDlvStatus->ds_num = $ds_num['single'];
+                    $insertDlvStatus->po_num = $poLine->po_num;
+                    $insertDlvStatus->po_line = $poLine->po_line;
+                    $insertDlvStatus->po_release = $poLine->po_release;
+                    $insertDlvStatus->ds_line = $ds_line;
+                    $insertDlvStatus->item = $poLine->item;
+                    $insertDlvStatus->description = $poLine->description;
+                    $insertDlvStatus->unit_price = $poLine->unit_price;
+                    $insertDlvStatus->tax_status = $poLine->tax_status;
+                    $insertDlvStatus->shipped_qty = $dataTemp->shipped_qty;
+                    $insertDlvStatus->petugas_vendor = $dataTemp->petugas_vendor;
+                    $insertDlvStatus->no_surat_jalan_vendor = $dataTemp->no_surat_jalan_vendor;
+                    $insertDlvStatus->created_by = backpack_auth()->user()->id;
+                    $insertDlvStatus->updated_by = backpack_auth()->user()->id;
+                    $insertDlvStatus->save();
     
-                    $arr_ids[] = $insert->id;
+                    $arrIds[] = $insertDlv->id;
     
-                    if ($po_line->outhouse_flag == 1 && isset($data_temp->data_attr)) {
-                        $data_attrs = json_decode($data_temp->data_attr);
+                    if ($poLine->outhouse_flag == 1 && isset($dataTemp->data_attr)) {
+                        $dataAttrs = json_decode($dataTemp->data_attr);
                         $int_ds_detail = 1;
-                        foreach ($data_attrs->attributes as $key => $da) {
-                            $material_outhouse = MaterialOuthouse::where('id', $da->id)->first();
-                            if (isset($material_outhouse)) {
-                                $insert_outhouse = new IssuedMaterialOuthouse();
-                                $insert_outhouse->ds_num = $ds_num['single'];
-                                $insert_outhouse->ds_line = $ds_line;
-                                $insert_outhouse->ds_detail = $int_ds_detail++;
-                                $insert_outhouse->matl_item = $material_outhouse->matl_item;
-                                $insert_outhouse->description =  $material_outhouse->description;
-                                $insert_outhouse->lot =  $material_outhouse->lot;
-                                $insert_outhouse->issue_qty =  $da->qty;
-                                $insert_outhouse->save();
+                        foreach ($dataAttrs->attributes as $key => $da) {
+                            $materialOuthouse = MaterialOuthouse::where('id', $da->id)->first();
+                            if (isset($materialOuthouse)) {
+                                $insertOuthouse = new IssuedMaterialOuthouse();
+                                $insertOuthouse->ds_num = $ds_num['single'];
+                                $insertOuthouse->ds_line = $ds_line;
+                                $insertOuthouse->ds_detail = $int_ds_detail++;
+                                $insertOuthouse->matl_item = $materialOuthouse->matl_item;
+                                $insertOuthouse->description =  $materialOuthouse->description;
+                                $insertOuthouse->lot =  $materialOuthouse->lot;
+                                $insertOuthouse->issue_qty =  $da->qty;
+                                $insertOuthouse->save();
                             }
                         }
                     }
 
-                    if ( $po_line->outhouse_flag == 1) {
-                        $outhouse_materials = MaterialOuthouse::where('po_num', $po_line->po_num)
-                                    ->where('po_line', $po_line->po_line)
+                    if ( $poLine->outhouse_flag == 1) {
+                        $outhouseMaterials = MaterialOuthouse::where('po_num', $poLine->po_num)
+                                    ->where('po_line', $poLine->po_line)
                                     ->groupBy('matl_item')
                                     ->get();
 
-                        foreach ($outhouse_materials as $key => $om) {
-                            $issued_qty =  $data_temp->shipped_qty * $om->qty_per;
+                        foreach ($outhouseMaterials as $key => $om) {
+                            $issuedQty =  $dataTemp->shipped_qty * $om->qty_per;
         
-                            $insert_imo = new IssuedMaterialOuthouse();
-                            $insert_imo->ds_num =  $ds_num['single'];
-                            $insert_imo->ds_line = $ds_line;
-                            $insert_imo->ds_detail = $po_line->item;
-                            $insert_imo->matl_item = $om->matl_item;
-                            $insert_imo->description = $om->description;
-                            $insert_imo->lot =  $om->lot;
-                            $insert_imo->issue_qty = $issued_qty;
-                            $insert_imo->created_by = backpack_auth()->user()->id;
-                            $insert_imo->updated_by = backpack_auth()->user()->id;
-                            $insert_imo->save();
+                            $insertImo = new IssuedMaterialOuthouse();
+                            $insertImo->ds_num =  $ds_num['single'];
+                            $insertImo->ds_line = $ds_line;
+                            $insertImo->ds_detail = $poLine->item;
+                            $insertImo->matl_item = $om->matl_item;
+                            $insertImo->description = $om->description;
+                            $insertImo->lot =  $om->lot;
+                            $insertImo->issue_qty = $issuedQty;
+                            $insertImo->created_by = backpack_auth()->user()->id;
+                            $insertImo->updated_by = backpack_auth()->user()->id;
+                            $insertImo->save();
                         }
                     }
-                    $success_insert++;
+                    $successInsert++;
                 }
             }
     
             $message = "";
             $alert = "";
             $status = false;
-            if ($success_insert == $total_insert && $total_insert > 0) {
+            if ($successInsert == $totalInsert && $totalInsert > 0) {
                 $status = true;
                 $alert = "success";
-                $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
-            }else if ($success_insert < $total_insert && $success_insert > 0) {
+                $message = "Data has been imported successfully (".$successInsert."/". $totalInsert.")";
+            }else if ($successInsert < $totalInsert && $successInsert > 0) {
                 $status = true;
                 $alert = "warning";
-                $message = "Data has been imported successfully (".$success_insert."/". $total_insert.")";
-            }else if($success_insert == 0){
+                $message = "Data has been imported successfully (".$successInsert."/". $totalInsert.")";
+            }else if($successInsert == 0){
                 $status = false;
                 $alert = "danger";
-                $message = "Failure import data (".$success_insert."/". $total_insert.")";
+                $message = "Failure import data (".$successInsert."/". $totalInsert.")";
             }
 
             if ($status) {
@@ -257,10 +225,7 @@ class TempUploadDeliveryCrudController extends CrudController
             }else{
                 DB::rollback();
             }
-
-            
-
-            return ['status' => $status, 'arr_ids' => $arr_ids, 'message' => $message, 'alert' => $alert];
+            return ['status' => $status, 'arr_ids' => $arrIds, 'message' => $message, 'alert' => $alert];
 
         }catch(\Exception $e){
             DB::rollback();
@@ -272,6 +237,7 @@ class TempUploadDeliveryCrudController extends CrudController
             ], 500);
         }
     }
+
 
     public function insertToDb(Request $request)
     {
@@ -290,22 +256,22 @@ class TempUploadDeliveryCrudController extends CrudController
     {
         $imd = $this->insertMassData();
 
-        $arr_ids = $imd['arr_ids'];
+        $arrIds = $imd['arr_ids'];
 
-        $arr_param['print_all'] = false;
-        $arr_param['po_num'] = '-';
-        $arr_param['po_line'] = '-';
-        $arr_param['print_delivery'] = $arr_ids;
-        $arr_param['with_price'] = 'yes';
+        $arrParam['print_all'] = false;
+        $arrParam['po_num'] = '-';
+        $arrParam['po_line'] = '-';
+        $arrParam['print_delivery'] = $arrIds;
+        $arrParam['with_price'] = 'yes';
 
-        $str_param = base64_encode(serialize($arr_param));
+        $strParam = base64_encode(serialize($arrParam));
 
         return response()->json([
             'status' => $imd['status'],
             'alert' => $imd['alert'],
             'message' => $imd['message'],
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
+            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
             'validation_errors' => []
         ], 200);
 
@@ -322,15 +288,18 @@ class TempUploadDeliveryCrudController extends CrudController
     {
         CRUD::setValidation(DeliveryRequest::class);
 
-        // $this->crud->hasAccessOrFail('update');
         $entry = $this->crud->getCurrentEntry();
-        $po_line = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
+        $poLine = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
 
-        $ds_validation = new DsValidation();
-        $args = ['po_num' => $entry->po_num, 'po_line' => $entry->po_line, 'order_qty' => $po_line->order_qty ];
-        $current_qty = $ds_validation->currentMaxQty($args)['datas'];
+        $dsValidation = new DsValidation();
+        $args = [
+            'po_num' => $entry->po_num, 
+            'po_line' => $entry->po_line, 
+            'order_qty' => $poLine->order_qty 
+        ];
+        $currentQty = $dsValidation->currentMaxQty($args)['datas'];
 
-        $arr_po_line_status = (new Constant())->statusOFC();
+        $arrPoLineStatus = (new Constant())->statusOFC();
 
         $this->crud->addField([
             'label' => 'Delivery Date From Vendor',
@@ -343,7 +312,6 @@ class TempUploadDeliveryCrudController extends CrudController
                 'language' => 'en'
              ],
         ]); 
-         
         $this->crud->addField([
             'type' => 'hidden',
             'name' => 'po_line_id',
@@ -355,13 +323,12 @@ class TempUploadDeliveryCrudController extends CrudController
             'label' => 'Petugas Vendor',
             'value' => $entry->petugas_vendor
         ]);    
-         $this->crud->addField([
+        $this->crud->addField([
             'type' => 'text',
             'label' => 'No Surat Jalan',
             'name' => 'no_surat_jalan_vendor',
             'value' => $entry->no_surat_jalan_vendor
         ]);        
-        
         $this->crud->addField([
             'type' => 'number_qty',
             'name' => 'shipped_qty',
@@ -369,10 +336,10 @@ class TempUploadDeliveryCrudController extends CrudController
             'actual_qty' => $entry->shipped_qty,
             'default' => $entry->shipped_qty,
             'attributes' => [
-                'data-max' =>  $current_qty,
+                'data-max' =>  $currentQty,
               ], 
         ]);
-        if($po_line->w_serial == 1){
+        if($poLine->w_serial == 1){
             $this->crud->addField(
                 [
                     'name'  => 'sn_childs[]',
@@ -381,9 +348,8 @@ class TempUploadDeliveryCrudController extends CrudController
                 ],
             );
         }
-
-        if($po_line->outhouse_flag == 1){
-            $outhouse_materials = MaterialOuthouse::where('po_num', $entry->po_num)
+        if($poLine->outhouse_flag == 1){
+            $outhouseMaterials = MaterialOuthouse::where('po_num', $entry->po_num)
                                     ->where('po_line', $entry->po_line);
 
             $this->crud->addField(
@@ -391,35 +357,33 @@ class TempUploadDeliveryCrudController extends CrudController
                     'name'  => 'material_issues',
                     'label' => 'Material Issue',
                     'type'  => 'outhouse_table',
-                    'current_qty' => $current_qty,
-                    'total_qty_per' => $outhouse_materials->sum('qty_per'),
-                    'table_body' => $outhouse_materials->get(),
+                    'current_qty' => $currentQty,
+                    'total_qty_per' => $outhouseMaterials->sum('qty_per'),
+                    'table_body' => $outhouseMaterials->get(),
                     'data_table' => (isset($entry->data_attr)) ? json_decode($entry->data_attr): null
                 ],
             );
         }
 
-        $arr_filters = [];
-        $arr_filters[] = ['po_line.item', '=', $po_line->item];
-        // $arr_filters[] = ['po_line.po_num', '!=', $entry->po_num];
+        $arrFilters = [];
+        $arrFilters[] = ['po_line.item', '=', $poLine->item];
         $args = [
-            'filters' => $arr_filters, 
-            'due_date' => $po_line->due_date,
+            'filters' => $arrFilters, 
+            'due_date' => $poLine->due_date,
             'po_num' => $entry->po_num,
             'po_line' => $entry->po_line,
-         ];
-
+        ];
         $unfinished_po_line = (new DsValidation())->unfinishedPoLineMass($args);
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
-        $data['po_line'] = $po_line;
+        $data['po_line'] = $poLine;
         $data['title'] = trans('backpack::crud.edit').' '.$this->crud->entity_name;
         $data['id'] = $id;
-        $data['arr_po_line_status'] = $arr_po_line_status;
+        $data['arr_po_line_status'] = $arrPoLineStatus;
         $data['unfinished_po_line'] = $unfinished_po_line;
 
-        return view('vendor.backpack.crud.form-edit-temp', $data);
+        return view('vendor.backpack.crud.form_edit_temp', $data);
     }
 
 
@@ -427,64 +391,67 @@ class TempUploadDeliveryCrudController extends CrudController
     {
         $this->crud->setRequest($this->crud->validateRequest());
         $entry = $this->crud->getCurrentEntry();
-
         $request = $this->crud->getRequest();
-        $shipped_qty = $request->input('shipped_qty');
-        $shipped_date = $request->input('shipped_date');
+        $shippedQty = $request->input('shipped_qty');
+        $shippedDate = $request->input('shipped_date');
         $petugas_vendor = $request->input('petugas_vendor');
-        $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
-        $sn_childs = $request->input('sn_childs');
-        $material_ids = $request->input('material_ids');
-        $material_issues = $request->input('material_issues');
+        $noSuraJalanVendor = $request->input('no_surat_jalan_vendor');
+        $snChilds = $request->input('sn_childs');
+        $materialIds = $request->input('material_ids');
+        $materialIssues = $request->input('material_issues');
 
-        $po_line = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
+        $poLine = PurchaseOrderLine::where('po_num', $entry->po_num)
+                    ->where('po_line', $entry->po_line)
+                    ->first();
 
-        $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
+        $alertFor = "";
+        $args = [
+            'po_num' => $poLine->po_num, 
+            'po_line' => $poLine->po_line , 
+            'order_qty' => $shippedQty
+        ];
         $cmq =  (new DsValidation())->currentMaxQty($args);
-        $alert_for = "";
-
-        if ($po_line->outhouse_flag == 1) {
-            $alert_for = " Outhouse";
-            $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
+        if ($poLine->outhouse_flag == 1) {
+            $alertFor = " Outhouse";
+            $cmq = (new DsValidation())->currentMaxQtyOuthouse($args);
         }
 
-        if ($cmq['datas'] < $shipped_qty) {
+        if ($cmq['datas'] < $shippedQty) {
             $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal '.$cmq['datas'] ];
 
             return response()->json([
                 'status' => false,
                 'alert' => 'danger',
-                'message' => "Qty Alert ".$alert_for,
+                'message' => "Qty Alert ".$alertFor,
                 'errors' => $errors
             ], 422);
         }
 
-        $arr_datas = [];
-        if (isset($sn_childs)) {
-            $arr_datas = ['type' =>'serial_number'];
+        $arrDatas = [];
+        if (isset($snChilds)) {
+            $arrDatas = ['type' =>'serial_number'];
 
-            foreach ($sn_childs as $j => $snc) {
-                $arr_datas['attributes'][] = $snc;
+            foreach ($snChilds as $j => $snc) {
+                $arrDatas['attributes'][] = $snc;
             }
         }
 
-        if (isset($material_ids)) {
-            $arr_datas = ['type' =>'material_outhouse'];
+        if (isset($materialIds)) {
+            $arrDatas = ['type' =>'material_outhouse'];
             $any_errors = false;
-            foreach ($material_ids as $k => $oi) {
+            foreach ($materialIds as $k => $oi) {
                 $mo = MaterialOuthouse::where('id', $oi)->first();
-                $issued_qty =  $shipped_qty * $mo->qty_per;
-                $lot_qty =  $mo->lot_qty;
+                $issuedQty = $shippedQty * $mo->qty_per;
+                $lotQty = $mo->lot_qty;
 
-                $arr_datas['attributes'][] = ['id' => $oi, 'qty' => $material_issues[$k]];
+                $arrDatas['attributes'][] = ['id' => $oi, 'qty' => $materialIssues[$k]];
 
-                if ($issued_qty > $lot_qty ) {
+                if ($issuedQty > $lotQty ) {
                     $any_errors = true;
                 }
             }
 
             if ($any_errors) {
-
                 $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
 
                 return response()->json([
@@ -496,14 +463,14 @@ class TempUploadDeliveryCrudController extends CrudController
             }
         }
 
-        $data_attr = json_encode($arr_datas);
+        $dataAttr = json_encode($arrDatas);
         
         $change = TempUploadDelivery::where('id', $id)->first();
-        $change->shipped_qty = $shipped_qty;
-        $change->delivery_date = $shipped_date;
+        $change->shipped_qty = $shippedQty;
+        $change->delivery_date = $shippedDate;
         $change->petugas_vendor = $petugas_vendor;
-        $change->no_surat_jalan_vendor = $no_surat_jalan_vendor;
-        $change->data_attr = $data_attr;
+        $change->no_surat_jalan_vendor = $noSuraJalanVendor;
+        $change->data_attr = $dataAttr;
         $change->save();
 
         $message = 'Sukses Update !';

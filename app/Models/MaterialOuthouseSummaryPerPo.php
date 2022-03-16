@@ -12,8 +12,8 @@ class MaterialOuthouseSummaryPerPo extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
+
     protected $table = 'material_outhouse';
-        // protected $fillable = [];
     protected $appends = ['qty_issued', 'remaining_qty', 'po_num_line'];
 
     public function getPoNumLineAttribute(){
@@ -21,49 +21,50 @@ class MaterialOuthouseSummaryPerPo extends Model
     }
 
     public function getLotQtyHeader(){
-        $lot_qty = MaterialOuthouse::where('po_num', $this->po_num)
+        $lotQty = MaterialOuthouse::where('po_num', $this->po_num)
                     ->where('po_line', $this->po_line)
                     ->sum('lot_qty');
-        return $lot_qty;
+        return $lotQty;
     }
+    
 
     public function getQtyIssuedHeader(){
-        $qty_issued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
+        $qtyIssued = IssuedMaterialOuthouse::leftJoin('delivery', 'delivery.ds_num', 'issued_material_outhouse.ds_num')
                         ->where('delivery.po_num', $this->po_num)
                         ->where('delivery.po_line', $this->po_line)
                         ->sum('issue_qty');
-        return $qty_issued;
+        return $qtyIssued;
     }
 
     public function getRemainingHeaderAttribute(){
-        $lot_qty = $this->getLotQtyHeader();
-        $qty_issued = $this->getQtyIssuedHeader();
-        $qty = $lot_qty - $qty_issued;
+        $lotQty = $this->getLotQtyHeader();
+        $qtyIssued = $this->getQtyIssuedHeader();
+        $qty = $lotQty - $qtyIssued;
         return $qty;
     }
 
     public function getLotQtyAttribute()
     {
-        $lot_qty = MaterialOuthouse::where('po_num', $this->po_num)
+        $lotQty = MaterialOuthouse::where('po_num', $this->po_num)
                     ->where('po_line', $this->po_line)
                     ->sum('lot_qty');
-        return $lot_qty;
+        return $lotQty;
     }
 
     public function getQtyIssuedAttribute()
     {
-        $qty_issued = IssuedMaterialOuthouse::whereHas('delivery', function($query) {
+        $qtyIssued = IssuedMaterialOuthouse::whereHas('delivery', function($query) {
             $query->where('po_num', $this->po_num);
             // $query->where('po_line', $this->po_num);
          })->where('matl_item', $this->matl_item)->sum('issue_qty');
 
-        return $qty_issued;
+        return $qtyIssued;
     }
 
     public function getRemainingQtyAttribute()
     {
-        $qty_issued = $this->getQtyIssuedAttribute();
-        $qty = $this->lot_qty - $qty_issued;
+        $qtyIssued = $this->getQtyIssuedAttribute();
+        $qty = $this->lot_qty - $qtyIssued;
         
         return $qty;
     }

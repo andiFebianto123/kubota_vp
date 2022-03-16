@@ -16,7 +16,7 @@
                 <input type="file" name="file_po" class="form-control py-1 rect-validation">
 
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
+                    <button id="btn-for-form-import-ds" type="button" class="btn btn-sm m-1 btn-outline-vp-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>

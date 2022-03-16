@@ -11,6 +11,7 @@ class GeneralMessage extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
+    
     protected $fillable = [
         'title','content', 'category'
     ];

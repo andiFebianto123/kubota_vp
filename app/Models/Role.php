@@ -16,6 +16,7 @@ class Role extends Model
         'name',
         'guard_name',
     ];
+    
 
     function permission(){
         $id = $this->id;

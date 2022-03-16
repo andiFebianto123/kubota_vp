@@ -10,28 +10,19 @@ use App\Imports\SerialNumberImport;
 use App\Models\Delivery;
 use App\Models\DeliveryReject;
 use App\Models\DeliveryRepair;
-use App\Models\DeliverySerial;
 use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
-use App\Models\PurchaseOrder;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
-use Endroid\QrCode\Writer\PngWriter;
-use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Class DeliveryCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class DeliveryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -40,14 +31,9 @@ class DeliveryCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Delivery::class);
+        CRUD::setModel(Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
         CRUD::setEntityNameStrings('delivery sheet', 'delivery sheets');
         $this->crud->denyAccess('list');
@@ -60,23 +46,18 @@ class DeliveryCrudController extends CrudController
         return abort(404);
     }
 
+
     public function edit(){
         return abort(404);
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+
     protected function setupListOperation()
     {
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->enableBulkActions();
 
-        // khusus role adminPTKI
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
 
         if(in_array(Constant::getRole(),['Admin PTKI'])){
@@ -85,7 +66,6 @@ class DeliveryCrudController extends CrudController
             if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
                 $this->crud->removeButton('delete');
             }
-    
             if(Constant::checkPermission('Print Label')){
                 $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
             }
@@ -96,23 +76,23 @@ class DeliveryCrudController extends CrudController
 
 
         CRUD::addColumn([
-            'label'     => 'DS Number', // Table column heading
-            'name'      => 'ds_num', // the column that contains the ID of that connected entity;
+            'label'     => 'DS Number', 
+            'name'      => 'ds_num', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'DS Line', // Table column heading
-            'name'      => 'ds_line', // the column that contains the ID of that connected entity;
+            'label'     => 'DS Line', 
+            'name'      => 'ds_line', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Shipped Date', // Table column heading
-            'name'      => 'shipped_date', // the column that contains the ID of that connected entity;
+            'label'     => 'Shipped Date', 
+            'name'      => 'shipped_date', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'PO', // Table column heading
-            'name'      => 'po_po_line', // the column that contains the ID of that connected entity;
+            'label'     => 'PO', 
+            'name'      => 'po_po_line', 
             'type'     => 'closure',
             'function' => function($entry) {
                 $val = $entry->po_num."-".$entry->po_line;
@@ -120,23 +100,23 @@ class DeliveryCrudController extends CrudController
             }
         ]);
         CRUD::addColumn([
-            'label'     => 'Order Qty', // Table column heading
-            'name'      => 'order_qty', // the column that contains the ID of that connected entity;
+            'label'     => 'Order Qty', 
+            'name'      => 'order_qty', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Shipped Qty', // Table column heading
-            'name'      => 'shipped_qty', // the column that contains the ID of that connected entity;
+            'label'     => 'Shipped Qty', 
+            'name'      => 'shipped_qty', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'DO Number', // Table column heading
-            'name'      => 'no_surat_jalan_vendor', // the column that contains the ID of that connected entity;
+            'label'     => 'DO Number', 
+            'name'      => 'no_surat_jalan_vendor', 
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Operator', // Table column heading
-            'name'      => 'petugas_vendor', // the column that contains the ID of that connected entity;
+            'label'     => 'Operator', 
+            'name'      => 'petugas_vendor', 
             'type' => 'text',
         ]);
 
@@ -149,9 +129,6 @@ class DeliveryCrudController extends CrudController
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
-                // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
-                // JOIN po p ON p.po_num = d.po_num
-                // WHERE p.vend_num = 'V001303'
                 $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
                 ->select('delivery.id as id')
                 ->where('po.vend_num', $value)
@@ -165,12 +142,7 @@ class DeliveryCrudController extends CrudController
         
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+    
     protected function setupCreateOperation()
     {
 
@@ -202,42 +174,40 @@ class DeliveryCrudController extends CrudController
         CRUD::field('serial_number');
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
+  
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
     }
 
-    function show()
+
+    public function show()
     {
         $entry = $this->crud->getCurrentEntry();
 
-        $delivery_status = DeliveryStatus::where('ds_num', $entry->ds_num )
+        $deliveryStatus = DeliveryStatus::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)
                             ->first();
 
-        $delivery_rejects = DeliveryReject::where('ds_num', $entry->ds_num )
-                            ->where('ds_line', $entry->ds_line)->get();
+        $deliveryRejects = DeliveryReject::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)
+                            ->get();
         
-        $delivery_repairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
-                            ->where('ds_line_reject', $entry->ds_line)->get();
+        $deliveryRepairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
+                            ->where('ds_line_reject', $entry->ds_line)
+                            ->get();
         
-        $qty_reject_count = DeliveryReject::where('ds_num', $entry->ds_num )
-                            ->where('ds_line', $entry->ds_line)->sum('rejected_qty');
-        
+        $qtyRejectCount = DeliveryReject::where('ds_num', $entry->ds_num )
+                            ->where('ds_line', $entry->ds_line)
+                            ->sum('rejected_qty');
         
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
-        $data['delivery_status'] = $delivery_status;
-        $data['delivery_rejects'] = $delivery_rejects;
-        $data['delivery_repairs'] = $delivery_repairs;
-        $data['qty_reject_count'] = $qty_reject_count;
+        $data['delivery_status'] = $deliveryStatus;
+        $data['delivery_rejects'] = $deliveryRejects;
+        $data['delivery_repairs'] = $deliveryRepairs;
+        $data['qty_reject_count'] = $qtyRejectCount;
         $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
 
@@ -252,87 +222,94 @@ class DeliveryCrudController extends CrudController
         }
 
         if ($can_access) {
-            return view('vendor.backpack.crud.delivery-show', $data);
+            return view('vendor.backpack.crud.delivery_show', $data);
         }else{
             abort(404);
         }
     }
 
+
     private function detailDS($id)
     {
-        $delivery_show = Delivery::leftjoin('po_line', function ($join) {
+        $deliveryShow = Delivery::leftjoin('po_line', function ($join) {
                             $join->on('po_line.po_num', 'delivery.po_num')
                                 ->on('po_line.po_line', 'delivery.po_line');
                         })
                         ->leftJoin('po', 'po.po_num', 'delivery.po_num')
-                        // ->leftJoin('delivery_statuses', 'delivery_statuses.ds_num', 'deliveries.ds_num')
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery.id', $id)
-                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 'delivery.po_release','po_line.item','delivery.u_m',
-                        'vendor.vend_num as vendor_number','vendor.currency as vendor_currency','vendor.vend_name as vendor_name', 'delivery.no_surat_jalan_vendor','po_line.item_ptki',
-                        'po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 
-                        'delivery.tax_status', 'delivery.description', 'delivery.wh', 'delivery.location', 'po_line.inspection_flag'])
+                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 
+                        'delivery.po_release','po_line.item','delivery.u_m', 'vendor.vend_num as vendor_number',
+                        'vendor.currency as vendor_currency','vendor.vend_name as vendor_name', 'delivery.no_surat_jalan_vendor',
+                        'po_line.item_ptki','po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 
+                        'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 
+                        'delivery.wh', 'delivery.location', 'po_line.inspection_flag'])
                         ->first();
 
-        $issued_mos = IssuedMaterialOuthouse::where('ds_num', $delivery_show->ds_num )
-                        ->where('ds_line', $delivery_show->ds_line)->get();
+        $issued_mos = IssuedMaterialOuthouse::where('ds_num', $deliveryShow->ds_num )
+                        ->where('ds_line', $deliveryShow->ds_line)->get();
 
         $qr_code = "DSW|";
-        $qr_code .= $delivery_show->ds_num."|";
-        $qr_code .= $delivery_show->ds_line."|";
-        $qr_code .= $delivery_show->po_number."|";
-        $qr_code .= $delivery_show->po_line."|";
-        $qr_code .= $delivery_show->po_release."|";
-        $qr_code .= $delivery_show->item_ptki."|";
-        $qr_code .= $delivery_show->shipped_qty."|";
-        $qr_code .= $delivery_show->u_m."|";
-        $qr_code .= $delivery_show->unit_price."|";
-        $qr_code .= date("Y-m-d", strtotime($delivery_show->shipped_date))."|";
-        $qr_code .= $delivery_show->no_surat_jalan_vendor;
+        $qr_code .= $deliveryShow->ds_num."|";
+        $qr_code .= $deliveryShow->ds_line."|";
+        $qr_code .= $deliveryShow->po_number."|";
+        $qr_code .= $deliveryShow->po_line."|";
+        $qr_code .= $deliveryShow->po_release."|";
+        $qr_code .= $deliveryShow->item_ptki."|";
+        $qr_code .= $deliveryShow->shipped_qty."|";
+        $qr_code .= $deliveryShow->u_m."|";
+        $qr_code .= $deliveryShow->unit_price."|";
+        $qr_code .= date("Y-m-d", strtotime($deliveryShow->shipped_date))."|";
+        $qr_code .= $deliveryShow->no_surat_jalan_vendor;
 
-        $data['delivery_show'] = $delivery_show;
+        $data['delivery_show'] = $deliveryShow;
         $data['qr_code'] = $qr_code;
         $data['issued_mos'] = $issued_mos;
 
         return $data;
     }
 
+
     public function store(Request $request)
     {
         $this->crud->setRequest($this->crud->validateRequest());
         $request = $this->crud->getRequest();
 
-        $po_line_id = $request->input('po_line_id');
-        $shipped_qty = $request->input('shipped_qty');
-        $shipped_date = $request->input('shipped_date');
-        $petugas_vendor = $request->input('petugas_vendor');
-        $no_surat_jalan_vendor = $request->input('no_surat_jalan_vendor');
-        $material_ids = $request->input('material_ids');
-        $mo_issue_qtys = $request->input('mo_issue_qty');
-        $sn_childs = $request->input('sn_childs');
+        $poLineId = $request->input('po_line_id');
+        $shippedQty = $request->input('shipped_qty');
+        $shippedDate = $request->input('shipped_date');
+        $petugasVendor = $request->input('petugas_vendor');
+        $noSuratJalanVendor = $request->input('no_surat_jalan_vendor');
+        $materialIds = $request->input('material_ids');
+        $moIssueQtys = $request->input('mo_issue_qty');
+        $snChilds = $request->input('sn_childs');
 
-        $po_line = PurchaseOrderLine::where('po_line.id', $po_line_id)
+        $poLine = PurchaseOrderLine::where('po_line.id', $poLineId)
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
         
-        $ds_num =  (new Constant())->codeDs($po_line->po_num, $po_line->po_line, $shipped_date);
+        // ds num generator from global function
+        $dsNum =  (new Constant())->codeDs($poLine->po_num, $poLine->po_line, $shippedDate);
 
-        $args = ['po_num' => $po_line->po_num, 'po_line' => $po_line->po_line , 'order_qty' => $shipped_qty];
-        $cmq =  (new DsValidation())->currentMaxQty($args);
-        $alert_for = "";
-
-        if ($po_line->outhouse_flag == 1) {
-            $alert_for = " Outhouse";
+        $alertFor = "";
+        $args = [
+            'po_num' => $poLine->po_num, 
+            'po_line' => $poLine->po_line , 
+            'order_qty' => $shippedQty
+        ];
+        // DS validation function available at App\Helpers\DsValidation
+        $cmq = (new DsValidation())->currentMaxQty($args);
+        if ($poLine->outhouse_flag == 1) {
+            $alertFor = " Outhouse";
             $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
         }
-
-        if ($cmq['datas'] < $shipped_qty) {
+        if ($cmq['datas'] < $shippedQty) {
             $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
 
             return response()->json([
                 'status' => false,
                 'alert' => 'danger',
-                'message' => "Qty Alert ".$alert_for,
+                'message' => "Qty Alert ".$alertFor,
                 'errors' => $errors
             ], 422);
         }
@@ -340,104 +317,107 @@ class DeliveryCrudController extends CrudController
         DB::beginTransaction();
 
         try{
-            $insert_d = new Delivery();
-            $insert_d->ds_num = $ds_num['single'];
-            $insert_d->po_num = $po_line->po_num;
-            $insert_d->po_line = $po_line->po_line;
-            $insert_d->po_release = $po_line->po_release;
-            $insert_d->ds_line = $ds_num['line'];
-            $insert_d->item = $po_line->item;
-            $insert_d->description = $po_line->description;
-            $insert_d->u_m = $po_line->u_m;
-            $insert_d->due_date = $po_line->due_date;
-            $insert_d->unit_price = $po_line->unit_price;
-            $insert_d->wh = $po_line->wh;
-            $insert_d->location = $po_line->location;
-            $insert_d->tax_status = $po_line->tax_status;
-            $insert_d->currency = $po_line->currency;
-            $insert_d->shipped_qty = $shipped_qty;
-            $insert_d->shipped_date = $shipped_date;
-            $insert_d->order_qty = $po_line->order_qty;
-            $insert_d->w_serial = $po_line->w_serial;
-            $insert_d->petugas_vendor = $petugas_vendor;
-            $insert_d->no_surat_jalan_vendor = $no_surat_jalan_vendor;
-            $insert_d->created_by = backpack_auth()->user()->id;
-            $insert_d->updated_by = backpack_auth()->user()->id;
-            $insert_d->save();
+            // Insert delivery sheet 
+            $insertDsheet = new Delivery();
+            $insertDsheet->ds_num = $dsNum['single'];
+            $insertDsheet->po_num = $poLine->po_num;
+            $insertDsheet->po_line = $poLine->po_line;
+            $insertDsheet->po_release = $poLine->po_release;
+            $insertDsheet->ds_line = $dsNum['line'];
+            $insertDsheet->item = $poLine->item;
+            $insertDsheet->description = $poLine->description;
+            $insertDsheet->u_m = $poLine->u_m;
+            $insertDsheet->due_date = $poLine->due_date;
+            $insertDsheet->unit_price = $poLine->unit_price;
+            $insertDsheet->wh = $poLine->wh;
+            $insertDsheet->location = $poLine->location;
+            $insertDsheet->tax_status = $poLine->tax_status;
+            $insertDsheet->currency = $poLine->currency;
+            $insertDsheet->shipped_qty = $shippedQty;
+            $insertDsheet->shipped_date = $shippedDate;
+            $insertDsheet->order_qty = $poLine->order_qty;
+            $insertDsheet->w_serial = $poLine->w_serial;
+            $insertDsheet->petugas_vendor = $petugasVendor;
+            $insertDsheet->no_surat_jalan_vendor = $noSuratJalanVendor;
+            $insertDsheet->created_by = backpack_auth()->user()->id;
+            $insertDsheet->updated_by = backpack_auth()->user()->id;
+            $insertDsheet->save();
 
+            // Insert delivery status 
+            $insertDstatus = new DeliveryStatus();
+            $insertDstatus->ds_num = $dsNum['single'];
+            $insertDstatus->po_num = $poLine->po_num;
+            $insertDstatus->po_line = $poLine->po_line;
+            $insertDstatus->po_release = $poLine->po_release;
+            $insertDstatus->ds_line = $dsNum['line'];
+            $insertDstatus->item = $poLine->item;
+            $insertDstatus->description = $poLine->description;
+            $insertDstatus->unit_price = $poLine->unit_price;
+            $insertDstatus->shipped_qty = $shippedQty;
+            $insertDstatus->petugas_vendor = $petugasVendor;
+            $insertDstatus->no_surat_jalan_vendor = $noSuratJalanVendor;
+            $insertDstatus->created_by = backpack_auth()->user()->id;
+            $insertDstatus->updated_by = backpack_auth()->user()->id;
+            $insertDstatus->save();
 
-            $insert_dstatus = new DeliveryStatus();
-            $insert_dstatus->ds_num = $ds_num['single'];
-            $insert_dstatus->po_num = $po_line->po_num;
-            $insert_dstatus->po_line = $po_line->po_line;
-            $insert_dstatus->po_release = $po_line->po_release;
-            $insert_dstatus->ds_line = $ds_num['line'];
-            $insert_dstatus->item = $po_line->item;
-            $insert_dstatus->description = $po_line->description;
-            $insert_dstatus->unit_price = $po_line->unit_price;
-            $insert_dstatus->shipped_qty = $shipped_qty;
-            $insert_dstatus->petugas_vendor = $petugas_vendor;
-            $insert_dstatus->no_surat_jalan_vendor = $no_surat_jalan_vendor;
-            $insert_dstatus->created_by = backpack_auth()->user()->id;
-            $insert_dstatus->updated_by = backpack_auth()->user()->id;
-            $insert_dstatus->save();
-
-            if ( $po_line->w_serial == 1 && isset($sn_childs)) {
-
-                foreach ($sn_childs as $key => $sn_child) {
-                    if (isset($sn_child)) {
+            // this rule for po with serial number
+            if ( $poLine->w_serial == 1 && isset($snChilds)) {
+                foreach ($snChilds as $key => $snChild) {
+                    if (isset($snChild)) {
                         $uid = backpack_auth()->user()->id;
+                        // sql query to prevent duplicate ds_detail
+                        $sqlQuery = "INSERT INTO delivery_serial (ds_num, 
+                                    ds_line, 
+                                    no_mesin, 
+                                    created_by, 
+                                    updated_by, 
+                                    created_at, 
+                                    updated_at, 
+                                    ds_detail ) 
+                                    SELECT '".$insertDsheet->ds_num."',
+                                    '".$insertDsheet->ds_line."',
+                                    '".$snChild."',
+                                    '".$uid ."',
+                                    '".$uid ."',
+                                    '".now() ."',
+                                    '".now() ."',
+                                    COUNT(*)+1 
+                                    FROM delivery_serial 
+                                    WHERE ds_num = '".$insertDsheet->ds_num."' 
+                                    AND ds_line = '".$insertDsheet->ds_line."'";
 
-                        $sql_query = "INSERT INTO delivery_serial (ds_num, 
-                        ds_line, 
-                        no_mesin, 
-                        created_by, 
-                        updated_by, 
-                        created_at, 
-                        updated_at, 
-                        ds_detail ) 
-                        SELECT '".$insert_d->ds_num."',
-                        '".$insert_d->ds_line."',
-                        '".$sn_child."',
-                        '".$uid ."',
-                        '".$uid ."',
-                        '".now() ."',
-                        '".now() ."',
-                        COUNT(*)+1 
-                        FROM delivery_serial 
-                        WHERE ds_num = '".$insert_d->ds_num."' AND ds_line = '".$insert_d->ds_line."'";
-
-                        DB::statement($sql_query);
+                        DB::statement($sqlQuery);
                     }
                 }
             }
 
-            if ( $po_line->outhouse_flag == 1 && isset($material_ids)) {
-                $any_errors = false;
-                $int_ds_detail = 1;
-                foreach ($material_ids as $key => $material_id) {
-                    $mo = MaterialOuthouse::where('id', $material_id)->first();
-                    $mo_issue_qty = $mo_issue_qtys[$key];
-                    $issued_qty =  $shipped_qty * $mo->qty_per;
-                    $remaining_qty =  $mo->remaining_qty;
+            // this rule for po with material outhouse
+            if ( $poLine->outhouse_flag == 1 && isset($materialIds)) {
+                $anyErrors = false;
+                $intDsDetail = 1;
+                foreach ($materialIds as $key => $materialId) {
+                    $mo = MaterialOuthouse::where('id', $materialId)->first();
+                    $moIssueQty = $moIssueQtys[$key];
+                    $issuedQty =  $shippedQty * $mo->qty_per;
+                    $remainingQty =  $mo->remaining_qty;
 
-                    $insert_imo = new IssuedMaterialOuthouse();
-                    $insert_imo->ds_num = $insert_d->ds_num;
-                    $insert_imo->ds_line = $insert_d->ds_line;
-                    $insert_imo->ds_detail = $int_ds_detail++;
-                    $insert_imo->matl_item = $mo->matl_item;
-                    $insert_imo->description = $mo->description;
-                    $insert_imo->lot =  $mo->lot;
-                    $insert_imo->issue_qty = $mo_issue_qty;
-                    $insert_imo->created_by = backpack_auth()->user()->id;
-                    $insert_imo->updated_by = backpack_auth()->user()->id;
-                    $insert_imo->save();
-                    if ($issued_qty > $remaining_qty ) {
-                        $any_errors = true;
+                    $insertImo = new IssuedMaterialOuthouse();
+                    $insertImo->ds_num = $insertDsheet->ds_num;
+                    $insertImo->ds_line = $insertDsheet->ds_line;
+                    $insertImo->ds_detail = $intDsDetail++;
+                    $insertImo->matl_item = $mo->matl_item;
+                    $insertImo->description = $mo->description;
+                    $insertImo->lot =  $mo->lot;
+                    $insertImo->issue_qty = $moIssueQty;
+                    $insertImo->created_by = backpack_auth()->user()->id;
+                    $insertImo->updated_by = backpack_auth()->user()->id;
+                    $insertImo->save();
+                    if ($issuedQty > $remainingQty ) {
+                        $anyErrors = true;
                     }
                 }
 
-                if ($any_errors) {
+                if ($anyErrors) {
                     DB::rollBack();
 
                     $errors = ['mo_issue_qty' => 'Jumlah Qty melebihi batas maksimal'];
@@ -461,7 +441,7 @@ class DeliveryCrudController extends CrudController
                 'status' => true,
                 'alert' => 'success',
                 'message' => $message,
-                'redirect_to' => url('admin/purchase-order-line/'.$po_line_id.'/show'),
+                'redirect_to' => url('admin/purchase-order-line/'.$poLineId.'/show'),
                 'validation_errors' => []
             ], 200);
 
@@ -476,81 +456,78 @@ class DeliveryCrudController extends CrudController
         }
     }
 
+
     public function exportPdf()
     {
         $id = request('id');
-        $with_price = request('wh');
+        $withPrice = request('wh');
 
         $data['delivery_show'] = $this->detailDS($id)['delivery_show'];
         $data['qr_code'] = $this->detailDS($id)['qr_code'];
         $data['issued_mos'] = $this->detailDS($id)['issued_mos'];
-        $data['with_price'] = $with_price;
+        $data['with_price'] = $withPrice;
 
-    	$pdf = PDF::loadview('exports.pdf.delivery-sheet',$data);
+    	$pdf = PDF::loadview('exports.pdf.delivery_sheet',$data);
+
         return $pdf->stream();
-
-        // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
     
 
     public function exportMassPdf()
     {
-        $str_param = request('param');
-        $arr_param = unserialize(base64_decode($str_param));
+        $strParam = request('param');
+        $arrParam = unserialize(base64_decode($strParam));
 
-        $print_all = $arr_param['print_all'];
-        $po_num = $arr_param['po_num'];
-        $po_line = $arr_param['po_line'];
-        $print_deliveries = $arr_param['print_delivery'];
-        $with_price = $arr_param['with_price'];
+        $printAll = $arrParam['print_all'];
+        $poNum = $arrParam['po_num'];
+        $poLine = $arrParam['po_line'];
+        $printDeliveries = $arrParam['print_delivery'];
+        $withPrice = $arrParam['with_price'];
 
-        if ($print_all) {
-            $deliveries = Delivery::where('po_num', $po_num)
-                        ->where('po_line', $po_line)
-                        ->get();
+        if ($printAll) {
+            $deliveries = Delivery::where('po_num', $poNum)
+                            ->where('po_line', $poLine)
+                            ->get();
         }else{
-            $deliveries = Delivery::whereIn('id', $print_deliveries)
-                    ->get();
+            $deliveries = Delivery::whereIn('id', $printDeliveries)
+                            ->get();
         }
 
-        $arr_deliveries = [];
-
+        $arrDeliveries = [];
         foreach ($deliveries as $key => $delivery) {
-            $arr_deliveries[] = [
+            $arrDeliveries[] = [
                 'delivery_show' => $this->detailDS($delivery->id)['delivery_show'],
                 'qr_code' => $this->detailDS($delivery->id)['qr_code'],
                 'issued_mos' =>  $this->detailDS($delivery->id)['issued_mos'],
-                'with_price' => $with_price
+                'with_price' => $withPrice
             ];
         }
 
-        $data['deliveries'] = $arr_deliveries;
+        $data['deliveries'] = $arrDeliveries;
 
-    	$pdf = PDF::loadview('exports.pdf.delivery-sheet-multiple',$data);
+    	$pdf = PDF::loadview('exports.pdf.delivery_sheet_multiple',$data);
         
         return $pdf->stream();
-
-        // return $pdf->download('delivery-sheet-'.date('YmdHis').'-pdf');
     }
 
 
     public function exportMassPdfPost(Request $request)
     {
-        $print_all = $request->print_deliveries;
-        $po_num = $request->po_num;
-        $po_line = $request->po_line;
-        $print_deliveries = $request->print_delivery;
-        $with_price = 'yes';
+        $printAll = $request->print_deliveries;
+        $poNum = $request->po_num;
+        $poLine = $request->po_line;
+        $printDeliveries = $request->print_delivery;
+        $withPrice = 'yes';
         
-        $arr_param['print_all'] = $print_all;
-        $arr_param['po_num'] = $po_num;
-        $arr_param['po_line'] = $po_line;
-        $arr_param['print_delivery'] = $print_deliveries;
-        $arr_param['with_price'] = $with_price;
+        $arrParam['print_all'] = $printAll;
+        $arrParam['po_num'] = $poNum;
+        $arrParam['po_line'] = $poLine;
+        $arrParam['print_delivery'] = $printDeliveries;
+        $arrParam['with_price'] = $withPrice;
 
-        $str_param = base64_encode(serialize($arr_param));
+        $strParam = base64_encode(serialize($arrParam));
 
-        if (!isset($print_deliveries)) {
+        if (!isset($printDeliveries)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pilih Minimal 1 DS'
@@ -561,28 +538,29 @@ class DeliveryCrudController extends CrudController
             'alert' => 'success',
             'message' => 'Sukses Generate PDF',
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
+            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
             'validation_errors' => []
         ], 200);
     }
 
+
     public function exportMassPdfPost2(Request $request)
     {
-        $print_all = $request->print_deliveries;
-        $po_num = $request->po_num;
-        $po_line = $request->po_line;
-        $print_deliveries = $request->print_delivery;
-        $with_price = 'no';
+        $printAll = $request->print_deliveries;
+        $poNum = $request->po_num;
+        $poLine = $request->po_line;
+        $printDeliveries = $request->print_delivery;
+        $withPrice = 'no';
         
-        $arr_param['print_all'] = $print_all;
-        $arr_param['po_num'] = $po_num;
-        $arr_param['po_line'] = $po_line;
-        $arr_param['print_delivery'] = $print_deliveries;
-        $arr_param['with_price'] = $with_price;
+        $arrParam['print_all'] = $printAll;
+        $arrParam['po_num'] = $poNum;
+        $arrParam['po_line'] = $poLine;
+        $arrParam['print_delivery'] = $printDeliveries;
+        $arrParam['with_price'] = $withPrice;
 
-        $str_param = base64_encode(serialize($arr_param));
+        $strParam = base64_encode(serialize($arrParam));
 
-        if (!isset($print_deliveries)) {
+        if (!isset($printDeliveries)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pilih Minimal 1 DS'
@@ -593,7 +571,7 @@ class DeliveryCrudController extends CrudController
             'alert' => 'success',
             'message' => 'Sukses Generate PDF',
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$str_param ,
+            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
             'validation_errors' => []
         ], 200);
     }
@@ -602,10 +580,11 @@ class DeliveryCrudController extends CrudController
     public function exportTemplateSerialNumber()
     {
         $qty = request('qty');
+        $filename = 'template-sn-'.date('YmdHis').'.xlsx';
 
-        return Excel::download(new TemplateSerialNumberExport($qty), 'template-sn-'.date('YmdHis').'.xlsx');
-
+        return Excel::download(new TemplateSerialNumberExport($qty), $filename);
     }
+
 
     public function importSn(Request $request)
     {
@@ -613,29 +592,27 @@ class DeliveryCrudController extends CrudController
             'file_sn' => 'required|mimes:xlsx,xls',
         ];
 
-        $allowed_qty = $request->allowed_qty;
+        $allowedQty = $request->allowed_qty;
         $file = $request->file('file_sn');
-        
-
         $attrs['filename'] = $file;
 
         $rows = Excel::toArray(new SerialNumberImport($attrs), $file )[0];
 
         unset($rows[0]);
-        $value_row = [];
-        $valid_row = 0;
+        $valueRow = [];
+        $validRow = 0;
         foreach ($rows as $key => $value) {
             if (isset($value[1])) {
-                $value_row[] = ['serial_number' => $value[1]];
-                $valid_row ++;
+                $valueRow[] = ['serial_number' => $value[1]];
+                $validRow ++;
             }
         }
-        if ($allowed_qty <= sizeof($rows) && $allowed_qty > 0) {
+        if ($allowedQty <= sizeof($rows) && $allowedQty > 0) {
             
             return response()->json([
                 'status' => true,
                 'alert' => 'success',
-                'datas' => $value_row
+                'datas' => $valueRow
             ], 200);
         }else{
             return response()->json([
@@ -643,8 +620,6 @@ class DeliveryCrudController extends CrudController
                 'message' => 'Jumlah Qty dan Serial Number tidak sama!'
                 ], 200);
         }
-        
-
     }
 
 

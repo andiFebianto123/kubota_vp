@@ -33,8 +33,8 @@ $field['min_rows'] = $field['min_rows'] ?? 0;
                     <input type="hidden" name="allowed_qty" class="form-control py-1 rect-validation" id="allowed-qty">
 
                     <div class="mt-4 text-right">
-                        <button id="btn-for-form-import-sn" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValidMass('form-import-sn')">Import</a>
-                            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                        <button id="btn-for-form-import-sn" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-import-sn')">Import</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                     </div>
                 </form>
             </div>

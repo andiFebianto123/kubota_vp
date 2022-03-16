@@ -19,19 +19,18 @@ class TemplateMassDsExport implements  FromView, WithEvents
         $this->count_data = 0;
     }
 
+
     public function view(): View
     {
         $filters = [];
-        $many_data = 0;
+        $manyData = 0;
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
-            $filters = [];
-        }else{
+        if(!in_array(Constant::getRole(),['Admin PTKI'])){
             $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
         }
 
         $pos = PurchaseOrder::where($filters)->orderBy('po_num','asc')->get();
-        $arr_po_lines = [];
+        $arrPoLines = [];
         foreach ($pos as $key => $po) {
             $po_lines = PurchaseOrderLine::where('po.po_num', $po->po_num )
                                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
@@ -41,9 +40,10 @@ class TemplateMassDsExport implements  FromView, WithEvents
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
                                 ->get();
+                                
             $cols = collect($po_lines)->unique('po_line')->sortBy('po_line');
             foreach ($cols as $key => $col) {
-                $arr_po_lines[] = [
+                $arrPoLines[] = [
                     'po_num' => $col->po_num,
                     'po_line' => $col->po_line,
                     'item' => $col->item,
@@ -53,24 +53,21 @@ class TemplateMassDsExport implements  FromView, WithEvents
                     'order_qty' => $col->order_qty,
                     'po_change' => $col->po_change,
                 ];
-                $many_data++;
+                $manyData++;
             }
-
-            $this->count_data = $many_data;
-            
+            $this->count_data = $manyData;
         }
-
-
-        $data['po_lines'] = $arr_po_lines;
+        $data['po_lines'] = $arrPoLines;
     
-        return view('exports.excel.template-mass-ds', $data);
+        return view('exports.excel.template_mass_ds', $data);
     }
+
 
     public function registerEvents(): array
     {
         return [
             AfterSheet::class    => function(AfterSheet $event) {
-                $style_header = [
+                $styleHeader = [
                     //Set font style
                     'font' => [
                         'bold'      =>  true,
@@ -87,7 +84,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
         
                 ];
 
-                $style_group_protected = [
+                $styleGroupProtected = [
                     //Set background style
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -98,23 +95,17 @@ class TemplateMassDsExport implements  FromView, WithEvents
         
                 ];
 
-                $arr_columns = range('A', 'M');
-                foreach ($arr_columns as $key => $col) {
+                $arrColumns = range('A', 'M');
+                foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
                 
-                $many_data = $this->count_data +1;
-                $event->sheet->getDelegate()->getStyle('A1:M1')->applyFromArray($style_header);
-                $event->sheet->getDelegate()->getStyle('B2:H'.$many_data)->applyFromArray($style_group_protected);
+                $manyData = $this->count_data +1;
+                $event->sheet->getDelegate()->getStyle('A1:M1')->applyFromArray($styleHeader);
+                $event->sheet->getDelegate()->getStyle('B2:H'.$manyData)->applyFromArray($styleGroupProtected);
                 $event->sheet->protectCells('B2:H10', 'PHP');
-
-                // $event->sheet->getProtection()->setPassword('kubota');
-                // $event->sheet->getProtection()->setSheet(true);
-                // $event->sheet->getStyle('I2:L10')->getProtection()
-                // ->setLocked(Protection::PROTECTION_UNPROTECTED);
             },
         ];
     }
-
 }

@@ -206,9 +206,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/form.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/create.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
+
 <div id="modalWarningQty" class="modal fade" role="dialog">
   <div class="modal-dialog">
-    <!-- Modal content-->
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">Peringatan!</h5>
@@ -224,10 +224,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+
 <div id="modalAlertDueDate" class="modal fade" role="dialog">
   <div class="modal-dialog">
-
-    <!-- Modal content-->
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title text-danger">Peringatan!</h5>
@@ -241,6 +240,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+
 @stack('crud_fields_scripts')
 <script>
     var urlMassDs = "{{url('admin/delivery-export-mass-pdf-post')}}"
@@ -416,9 +416,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
       }
 	}
-
-	// make it so that the function above is run after each DataTable draw event
-	// crud.addFunctionToDataTablesDrawEventQueue('deleteEntry');
 </script>
 @include('vendor.backpack.crud.extendscript-outhouse')
 @endsection

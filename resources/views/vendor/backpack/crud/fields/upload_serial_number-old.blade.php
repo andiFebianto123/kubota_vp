@@ -133,7 +133,7 @@
                 <input type="file" name="file_sn" class="form-control py-1 rect-validation">
 
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-import-sn" type="button" class="btn btn-sm btn-outline-primary" onclick="submitAfterValidMass('form-import-sn')">Import</a>
+                    <button id="btn-for-form-import-sn" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-import-sn')">Import</button>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>

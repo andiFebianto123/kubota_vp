@@ -14,25 +14,24 @@ class TemplateSerialNumberExport implements FromView, WithEvents
         $this->qty = $qty;
     }
 
+
     public function registerEvents(): array
     {
         return [
             AfterSheet::class    => function(AfterSheet $event) {
-                $arr_columns = range('A', 'B');
-                foreach ($arr_columns as $key => $col) {
+                $arrColumns = range('A', 'B');
+                foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
             },
         ];
-
     }
 
 
     public function view(): View
     {
         $data['qty'] = $this->qty;
-    
-        return view('exports.excel.template-serial-number', $data);
+        return view('exports.excel.template_serial_number', $data);
     }
 }

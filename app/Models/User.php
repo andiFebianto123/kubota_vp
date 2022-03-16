@@ -11,18 +11,12 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Venturecraft\Revisionable\RevisionableTrait;
 
-
 class User extends Authenticatable
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
     use RevisionableTrait;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
     protected $fillable = [
         'name',
         'username',
@@ -32,21 +26,11 @@ class User extends Authenticatable
         'password'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
@@ -56,10 +40,6 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Vendor', 'vendor_id', 'id');
     }
 
-    // public function role()
-    // {
-    //     return $this->belongsTo('App\Models\Role', 'role_id', 'id');
-    // }
 
     public function showRole(){
         $roleName = $this->getRoleNames();
@@ -68,15 +48,14 @@ class User extends Authenticatable
         }
         return '-';
     }
-
-    // public function setPasswordAttribute($value) {
-    //     $this->attributes['password'] = Hash::make($value);
-    // }
+    
 
     public function setCreatedAtAttribute($value)
     {
         $this->attributes['created_at'] = date("Y/m/d H:i:s", strtotime($value));
     }
+
+
     public function setUpdatedAtAttribute($value)
     {
         $this->attributes['updated_at'] = date("Y/m/d H:i:s", strtotime($value));

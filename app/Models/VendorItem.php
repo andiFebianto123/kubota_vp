@@ -10,6 +10,6 @@ class VendorItem extends Model
 {
     use HasFactory;
     use RevisionableTrait;
-    protected $table = 'vendor_item';
 
+    protected $table = 'vendor_item';
 }

@@ -65,11 +65,11 @@ class LoginController extends Controller
 
         $token = md5(date("Ymd His"));
 
-        $insert_otp = new UserForgotPassword();
-        $insert_otp->email = $email;
-        $insert_otp->token = $token;
-        $insert_otp->expired_at = Carbon::now()->addMinutes(5);
-        $insert_otp->save();
+        $insertOtp = new UserForgotPassword();
+        $insertOtp->email = $email;
+        $insertOtp->token = $token;
+        $insertOtp->expired_at = Carbon::now()->addMinutes(5);
+        $insertOtp->save();
 
         $details = [
             'title' => 'Mail from Kubota.com',
@@ -83,54 +83,51 @@ class LoginController extends Controller
         return view('vendor.backpack.base.auth.forgot-password');
     }
 
+
     public function authenticate(Request $request)
     {
         $input = $request->all();
      
         $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        $check_lock = (new AccountAttempt())->checkLock($input['username'], 'login');
+        $checkLock = (new AccountAttempt())->checkLock($input['username'], 'login');
 
-        if ($check_lock['status'] == false) {
+        if ($checkLock['status'] == false) {
             return response()->json([
-                'status' => $check_lock['status'],
-                'message' => $check_lock['message']
+                'status' => $checkLock['status'],
+                'message' => $checkLock['message']
             ], 200);
         }
 
 
-        if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))
-        ) 
+        if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
         {
-            $two_factor_code = strtoupper(substr(md5(date("Ymd His")), 0, 8));
-            $two_factor_url = md5($two_factor_code);
+            $twoFactorCode = strtoupper(substr(md5(date("Ymd His")), 0, 8));
+            $two_factor_url = md5($twoFactorCode);
 
             $details = [
                 'title' => 'Mail from Kubota.com',
                 'message' => 'Kode OTP anda adalah',
                 'type' => 'otp',
-                'otp_code' => "<span style='font-size:30px;'>".$two_factor_code. "</span>",
+                'otp_code' => "<span style='font-size:30px;'>".$twoFactorCode. "</span>",
                 'otp_url' => route("twofactor")."?t=".$two_factor_url
             ];
 
             $user = User::where("id", backpack_auth()->user()->id)->first();
-            $user->two_factor_code = $two_factor_code;
+            $user->two_factor_code = $twoFactorCode;
             $user->two_factor_url = $two_factor_url;
             $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
             $user->save();
 
-            $insert_otp = new UserOtp(); 
-            $insert_otp->user_id = backpack_auth()->user()->id;
-            $insert_otp->two_factor_code = $two_factor_code;
-            $insert_otp->two_factor_url = $two_factor_url;
-            $insert_otp->expired_at = Carbon::now()->addMinutes(5);
-            $insert_otp->save();
+            $insertOtp = new UserOtp(); 
+            $insertOtp->user_id = backpack_auth()->user()->id;
+            $insertOtp->two_factor_code = $twoFactorCode;
+            $insertOtp->two_factor_url = $two_factor_url;
+            $insertOtp->expired_at = Carbon::now()->addMinutes(5);
+            $insertOtp->save();
 
             TempCountFailure::where('account', $input['username'])->where('type', 'login')->delete();
-
             Mail::to($user->email)->send(new TwoFactorMail($details));
-
-            // Mail::to($user->email)->send(new vendorNewPo($details));
 
             return response()->json([
                 'status' => true,
@@ -147,9 +144,9 @@ class LoginController extends Controller
                 'status' => false,
                 'message' => (isset($at['message']))?$at['message']:'Username atau Password Salah'
                 ], 200);
-            
         }
     }
+
 
     protected function validator(array $data)
     {
@@ -159,11 +156,12 @@ class LoginController extends Controller
         ]);
     }
 
-    public function logout () {
-        $url_parent = parse_url(url()->previous());
 
-        if (array_key_exists("query", $url_parent)) {
-            parse_str($url_parent['query'], $param_url);
+    public function logout () {
+        $urlParent = parse_url(url()->previous());
+
+        if (array_key_exists("query", $urlParent)) {
+            parse_str($urlParent['query'], $param_url);
 
             if (isset($param_url['prev_session'])) {
                 session()->put('prev_url', url()->previous());
@@ -181,6 +179,7 @@ class LoginController extends Controller
         backpack_auth()->logout();
         return redirect()->route("rectmedia.auth.login");
     }
+    
 
     protected function guard()
     {

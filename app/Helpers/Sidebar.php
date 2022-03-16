@@ -41,22 +41,6 @@ class Sidebar
         'access' => Constant::checkPermission('Read Delivery Status in Table'),
         'childrens' => []
       ],
-      // [
-      //   'name' => 'Delivery Serial',
-      //   'url' => backpack_url('delivery-serial'),
-      //   'icon' => 'la-qrcode',
-      //   'key' => 'delivery-serial',
-      //   'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
-      //   'childrens' => []
-      // ],
-      // [
-      //   'name' => 'Material Outhouse',
-      //   'url' => backpack_url('material-outhouse'),
-      //   'icon' => 'la-cube',
-      //   'key' => 'material-outhouse',
-      //   'roles' => ['Admin PTKI', 'Warehouse Vendor', 'Marketing Vendor', 'Finance Vendor'],
-      //   'childrens' => []
-      // ],
       [
         'name' => 'Summary MO',
         'url' => '#',
@@ -83,11 +67,11 @@ class Sidebar
         'childrens' => [
           [
             'name' => 'History Per Item',
-            'url' => backpack_url('histori-mo-summary-per-item'),
+            'url' => backpack_url('history-mo-summary-per-item'),
           ],
           [
             'name' => 'History Per Po',
-            'url' => backpack_url('histori-mo-summary-per-po'),
+            'url' => backpack_url('history-mo-summary-per-po'),
           ]
         ]
       ],

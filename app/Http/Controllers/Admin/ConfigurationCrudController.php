@@ -7,27 +7,17 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\Constant;
+use App\Models\Configuration;
 
-/**
- * Class ConfigurationCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
 class ConfigurationCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Configuration::class);
+        CRUD::setModel(Configuration::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/configuration');
         CRUD::setEntityNameStrings('configuration', 'configurations');
         if(Constant::checkPermission('Read Configuration')){
@@ -37,12 +27,7 @@ class ConfigurationCrudController extends CrudController
         }
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+  
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
@@ -56,14 +41,13 @@ class ConfigurationCrudController extends CrudController
         CRUD::column('value');
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+ 
     protected function setupCreateOperation()
     {
+        if(!Constant::checkPermission('Create Configuration')){
+            $this->crud->denyAccess('create');
+        }
+
         CRUD::setValidation(ConfigurationRequest::class);
         $this->crud->addField(
             [
@@ -78,16 +62,15 @@ class ConfigurationCrudController extends CrudController
         CRUD::field('value');
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
+    
     protected function setupUpdateOperation()
     {
+        if(!Constant::checkPermission('Update Configuration')){
+            $this->crud->denyAccess('update');
+        }
         $this->setupCreateOperation();
     }
+
 
     public function exportDb()
     {

@@ -5,13 +5,10 @@ namespace App\Http\Controllers\Admin;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use App\Helpers\Constant;
+use App\Models\MaterialOuthouseSummaryPerItem;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Class MaterialOuthouseCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
+
 class MaterialOuthouseSummaryPerItemCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -20,17 +17,13 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
 
     public function setup()
     {
-        CRUD::setModel(\App\Models\MaterialOuthouseSummaryPerItem::class);
+        CRUD::setModel(MaterialOuthouseSummaryPerItem::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
+        
         $sql = "(
             (SELECT sum(lot_qty) FROM material_outhouse mo 
             JOIN po as po1 ON (po1.po_num = mo.po_num) 
@@ -47,7 +40,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             AND po.vend_num = po1.vend_num
             AND po_line.status = 'O'
             ), 0))
-            ) AS mremaining_qty";
+            ) AS mavailable_material";
 
         $this->crud->query = $this->crud->query->select(
             'material_outhouse.id as id', 
@@ -67,24 +60,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         }
     }
 
-    public function create(){
-        return abort(404);
-    }
-
-    public function edit(){
-        return abort(404);
-    }
-
-    public function show(){
-        return abort(404);
-    }
-    
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
+   
     protected function setupListOperation()
     {
         $this->crud->removeButton('show');
@@ -102,8 +78,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
 
         $this->crud->groupBy('matl_item');
         $this->crud->groupBy('pl.status');
-        // $this->crud->query->havingRaw("(`pl`.`status` = 'O' and mremaining_qty > 0)");
-        $this->crud->query->havingRaw("(`pl`.`status` = 'O')");
+        $this->crud->addClause("where", "pl.status", "O");
 
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
@@ -124,8 +99,25 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
 
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
-        CRUD::column('mremaining_qty')->label('Available Material');
+        CRUD::column('mavailable_material')->label('Available Material');
+    }
 
+
+    protected function setupCreateOperation()
+    {
+        $this->crud->denyAccess('create');
+    }
+
+    
+    protected function setupUpdateOperation()
+    {
+        $this->crud->denyAccess('update');
+    }
+
+
+    protected function setupShowOperation()
+    {
+        $this->crud->denyAccess('show');
     }
    
 }
