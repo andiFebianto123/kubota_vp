@@ -169,6 +169,9 @@ function submitAsyncPost(formId, attrs) {
                     type: "success",
                     text: response.message
                   }).show();
+                setTimeout(function() { 
+                    location.reload(true)
+                }, 3000);
             } else {
                 new Noty({
                     type: "danger",
@@ -216,7 +219,6 @@ function messageStatusGeneral(currentID,message ,status = 'danger' ) {
 
 function blockTempValidation() {
     if ($('.validation-row-temp').find('text-danger')) {
-        // console.log('bener');
     }
     $.each($('.validation-row-temp'), function( k, v ) {
         console.log(k);

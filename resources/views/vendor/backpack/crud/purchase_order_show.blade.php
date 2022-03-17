@@ -322,6 +322,8 @@ if (totalPoLine == 0) {
     $('#check-all-cb').remove()
 }
 $( document ).ready(function() {
+    changeTableVisibility($('#status-po').val())
+
     $('[data-toggle="tooltip"]').tooltip()
     $('#check-all-cb').change(function () {
         totalChecked = 0
@@ -366,12 +368,7 @@ $( document ).ready(function() {
 
     $('#status-po').change(function () {
         var valStatus = $(this).val()
-        if (valStatus) {
-            $('.row-po-lines').fadeOut(1000);
-            $('.po-status-'+valStatus).fadeIn(1000);
-        }else{
-            $('.row-po-lines').fadeIn(1000);
-        }
+        changeTableVisibility(valStatus)
     })
 
     $('.check-read-po-lines').change(function () {
@@ -393,6 +390,16 @@ $( document ).ready(function() {
         $(".total-mass").text(totalCheckedRead)
     })
 })
+
+
+function changeTableVisibility(valStatus) {
+    if (valStatus) {
+        $('.row-po-lines').hide();
+        $('.po-status-'+valStatus).fadeIn(1000);
+    }else{
+        $('.row-po-lines').fadeIn(1000);
+    }
+}
 
 
 function changeBtn(v){
