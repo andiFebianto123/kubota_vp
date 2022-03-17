@@ -128,14 +128,71 @@ function submitAjaxValid(formId, attrs) {
             $(".progress-loading").remove()
             var messageErr = "Something Went Wrong"
             if (xhr.responseJSON) {
-                messageErr = xhr.responseJSON.message
-                $.each(xhr.responseJSON.errors,function(field_name,error){
-                    messageErr += "<li>"+error+"</li>"
-                    //$("#"+formId+' [name='+field_name+']').append('<span class="text-strong textdanger">' +error+ '</span>')
-                })
+                if (xhr.responseJSON.message != "") {
+                    messageErr = xhr.responseJSON.message
+                    $.each(xhr.responseJSON.errors,function(field_name,error){
+                        messageErr += "<li>"+error+"</li>"
+                        //$("#"+formId+' [name='+field_name+']').append('<span class="text-strong textdanger">' +error+ '</span>')
+                    })
+                }
+                
             }
-            
+
             messageStatusGeneral("#"+formId, messageErr)
+        }
+    });
+}
+
+
+function submitAsyncPost(formId, attrs) {
+    var initText = $('#btn-for-'+formId).html()
+
+    var imgLoading = "<img src='"+baseUrl+"/img/loading-buffering.gif' width='20px'>"
+    $('#btn-for-'+formId).html(imgLoading+' Processing...')
+    $('#btn-for-'+formId).attr('disabled', 'disabled')
+    
+    $('.rect-validation').css({ "border": "1px solid #428fc7" })
+    $(".progress-loading").remove()
+    blinkElement('.btn')
+    setInterval(blinkElement, 1000);
+
+    $.ajax({
+        type: "POST",
+        url: attrs.action,
+        data : attrs.data,
+        success: function(response) {
+            $('#btn-for-'+formId).removeAttr('disabled')
+            $(".progress-loading").remove()
+            $('#btn-for-'+formId).html(initText)
+            if (response.status) {
+                new Noty({
+                    type: "success",
+                    text: response.message
+                  }).show();
+            } else {
+                new Noty({
+                    type: "danger",
+                    text: response.message
+                  }).show();
+            }
+        },
+        error: function(xhr, status, error) {
+            $('#btn-for-'+formId).html(initText)
+            $('#btn-for-'+formId).removeAttr('disabled')
+            $(".progress-loading").remove()
+            var messageErr = "Something Went Wrong"
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.message != "") {
+                    messageErr = xhr.responseJSON.message
+                    $.each(xhr.responseJSON.errors,function(field_name,error){
+                        messageErr += "<li>"+error+"</li>"
+                    })
+                }
+            }
+            new Noty({
+                type: "danger",
+                text: messageErr
+              }).show();
         }
     });
 }

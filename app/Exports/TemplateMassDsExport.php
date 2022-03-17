@@ -103,7 +103,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
                 
                 $manyData = $this->count_data +1;
                 $event->sheet->getDelegate()->getStyle('A1:M1')->applyFromArray($styleHeader);
-                $event->sheet->getDelegate()->getStyle('B2:H'.$manyData)->applyFromArray($styleGroupProtected);
+                $event->sheet->getDelegate()->getStyle('B2:I'.$manyData)->applyFromArray($styleGroupProtected);
                 $event->sheet->protectCells('B2:H10', 'PHP');
             },
         ];

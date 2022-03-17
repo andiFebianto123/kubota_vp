@@ -28,7 +28,7 @@ class PurchaseOrder extends Model
     public function excelExport($crud = false)
     {
         $url = url('admin/purchase-order-export-excel');
-        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export</a>';
+        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export All</a>';
     }
 
     public function getPoDateAttribute($value)

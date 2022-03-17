@@ -19,7 +19,7 @@ use PDF;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use App\Helpers\Constant;
-
+use Illuminate\Support\Facades\DB;
 
 class PurchaseOrderCrudController extends CrudController
 {
@@ -51,11 +51,12 @@ class PurchaseOrderCrudController extends CrudController
         if(!Constant::checkPermission('Read Purchase Order')){
             $this->crud->removeButton('show');
         }
-        if(Constant::checkPermission('Export Purchase Order')){
-            $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'beginning');
-        }
         if(Constant::checkPermission('Send Mail New PO')){
-            $this->crud->addButtonFromView('top', 'accept_vendor', 'accept_vendor', 'end');
+            $this->crud->enableBulkActions();
+            $this->crud->addButtonFromView('top', 'bulk_send_mail_new_po', 'bulk_send_mail_new_po', 'beginning');
+        }
+        if(Constant::checkPermission('Export Purchase Order')){
+            $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'end');
         }
         if(Constant::checkPermission('Import Purchase Order')){
             $this->crud->addButtonFromView('top', 'mass_ds', 'mass_ds', 'end');
@@ -445,6 +446,58 @@ class PurchaseOrderCrudController extends CrudController
             'alert' => 'success',
             'message' => 'Request all Accept PO success',
         ], 200);
+    }
+
+
+    public function sendMailNewPo(Request $request){
+        $poIds = $request->ids;
+
+        DB::beginTransaction();
+        try {
+            $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
+            ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->whereIn('po.id', $poIds);
+
+            if($pos->count() > 0){
+                $getPo = $pos->get();
+                foreach($getPo as $po){
+                    $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+                    $details = [
+                        'type' => 'reminder_po',
+                        'title' => 'Ada PO baru',
+                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL."?prev_session=true" 
+                    ];
+
+                    if($po->emails != null){
+                        $pecahEmailVendor = explode(';', $po->emails);
+                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                        Mail::to($pecahEmailVendor)
+                        ->cc($pecahEmailBuyer)
+                        ->send(new vendorNewPo($details));
+                    }
+                    PurchaseOrder::where('id', $po->ID)->update([
+                        'email_flag' => now()
+                    ]);
+                }
+                DB::commit();
+            }
+
+            return response()->json([
+                'status' => true,
+                'alert' => 'success',
+                'message' => 'Mail Sent Successfully',
+            ], 200);
+
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => $e->getMessage(),
+                'validation_errors' => []
+            ], 500);
+        }
     }
 
 
