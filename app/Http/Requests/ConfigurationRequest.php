@@ -27,7 +27,7 @@ class ConfigurationRequest extends FormRequest
     public function rules()
     {
         $rules = [];
-        $rules['value'] = 'required|numeric';
+        $rules['value'] = 'required|numeric|min:0';
 
         $id = $this->get('id') ?? request()->route('id');
 

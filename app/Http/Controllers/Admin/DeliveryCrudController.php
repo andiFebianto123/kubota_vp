@@ -57,7 +57,7 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->enableBulkActions();
-
+        
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
 
         if(in_array(Constant::getRole(),['Admin PTKI'])){
@@ -92,11 +92,23 @@ class DeliveryCrudController extends CrudController
         ]);
         CRUD::addColumn([
             'label'     => 'PO', 
-            'name'      => 'po_po_line', 
-            'type'     => 'closure',
-            'function' => function($entry) {
-                $val = $entry->po_num."-".$entry->po_line;
-                return $val;
+            'name'      => 'po_po_line',
+            'orderable'  => true, 
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'po_po_line') {
+                    $searchOnlyPo = str_replace("-", "", $searchTerm);
+                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    if (str_contains($searchTerm, '-')) {
+                        $query->orWhere(function($q) use ($searchTerm) {
+                            $searchWithSeparator = explode("-", $searchTerm);
+                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                        });
+                    }
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('po_num', $columnDirection)->select('delivery.*');
             }
         ]);
         CRUD::addColumn([

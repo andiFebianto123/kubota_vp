@@ -83,6 +83,23 @@ class TaxInvoiceCrudController extends CrudController
             'type'     => 'closure',
             'function' => function($entry) {
                 return $entry->po_num.'-'.$entry->po_line;
+            },
+            'orderable'  => true, 
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'po_po_line') {
+                    $searchOnlyPo = str_replace("-", "", $searchTerm);
+                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    if (str_contains($searchTerm, '-')) {
+                        $query->orWhere(function($q) use ($searchTerm) {
+                            $searchWithSeparator = explode("-", $searchTerm);
+                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                        });
+                    }
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('po_num', $columnDirection);
             }
         ]);
         CRUD::addColumn([
@@ -186,6 +203,26 @@ class TaxInvoiceCrudController extends CrudController
                     return 'Accept';
                 }else {
                     return 'Reject';
+                }
+            },
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'confirm_flag') {
+                    $searchLower = strtolower($searchTerm);
+                    $shouldSearch = false;
+                    if (str_contains('waiting', $searchLower)) {
+                        $confirmFlag = "0";
+                        $shouldSearch = true;
+                    }else if(str_contains('accept', $searchLower)){
+                        $confirmFlag = "1";
+                        $shouldSearch = true;
+                    }else if(str_contains('reject', $searchLower)){
+                        $confirmFlag = "2";
+                        $shouldSearch = true;
+                    }
+
+                    if ($shouldSearch) {
+                        $query->orWhere('confirm_flag', '=', $confirmFlag);
+                    }
                 }
             }
         ]);

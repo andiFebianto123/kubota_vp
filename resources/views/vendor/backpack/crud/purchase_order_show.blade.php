@@ -274,7 +274,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <input type="hidden" name="po_line_ids" class="val-accept">
                 <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-accept-po-lin')">Submit</button>
+                    <button id="btn-for-form-accept-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValid('form-accept-po-line')">Submit</button>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
@@ -299,7 +299,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <input type="hidden" name="po_line_ids" class="val-reject">
                 <input type="hidden" name="po_id" value="{{$entry->id}}">
                 <div class="mt-4 text-right">
-                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValidMass('form-reject-po-line')">Submit</button>
+                    <button id="btn-for-form-reject-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValid('form-reject-po-line')">Submit</button>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>      
             </form>
@@ -321,82 +321,79 @@ var totalCheckedRead = 0
 if (totalPoLine == 0) {
     $('#check-all-cb').remove()
 }
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-$('#check-all-cb').change(function () {
-    totalChecked = 0
-    $(".check-po-lines").prop('checked', $(this).prop('checked'))
-    anyChecked = $(this).prop('checked')
-    if ($(this).prop('checked')) {
-        totalChecked = totalPoLine
-    }
-    
-    callButton(anyChecked)
-})
-
-$('.check-po-lines').change(function () {
-    if ($(this).prop('checked')==true){
-        $(this).prop('checked', true) 
-        totalChecked ++
-    }else{
-        $(this).prop('checked', false)
-        totalChecked --
-    }
-    
-    if (totalChecked > 0) {
-        callButton(true) 
-        if (totalChecked == totalPoLine) {
-            $('#check-all-cb').prop('checked', true)
+$( document ).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip()
+    $('#check-all-cb').change(function () {
+        totalChecked = 0
+        $(".check-po-lines").prop('checked', $(this).prop('checked'))
+        anyChecked = $(this).prop('checked')
+        if ($(this).prop('checked')) {
+            totalChecked = totalPoLine
         }
-    }else{
-        $('#check-all-cb').prop('checked', false)
-        callButton(false) 
-    }
-})
+        callButton(anyChecked)
+    })
 
-$('#check-all-cb-read').change(function () {
-    totalCheckedRead = 0
-    $(".check-read-po-lines").prop('checked', $(this).prop('checked'))
-    anyReadChecked = $(this).prop('checked')
-    if ($(this).prop('checked')) {
-        totalCheckedRead = totalPoLineRead
-    }
-
-    $(".total-mass").text(totalCheckedRead)
-})
-
-$('#status-po').change(function () {
-    var valStatus = $(this).val()
-    if (valStatus) {
-        $('.row-po-lines').fadeOut(1000);
-        $('.po-status-'+valStatus).fadeIn(1000);
-    }else{
-        $('.row-po-lines').fadeIn(1000);
-    }
-})
-
-
-
-$('.check-read-po-lines').change(function () {
-    if ($(this).prop('checked')==true){
-        $(this).prop('checked', true) 
-        totalCheckedRead ++
-    }else{
-        $(this).prop('checked', false)
-        totalCheckedRead --
-    }
-    
-    if (totalCheckedRead > 0) {
-        if (totalCheckedRead == totalPoLineRead) {
-            $('#check-all-cb-read').prop('checked', true)
+    $('.check-po-lines').change(function () {
+        if ($(this).prop('checked')==true){
+            $(this).prop('checked', true) 
+            totalChecked ++
+        }else{
+            $(this).prop('checked', false)
+            totalChecked --
         }
-    }else{
-        $('#check-all-cb-read').prop('checked', false)
-    }
-    $(".total-mass").text(totalCheckedRead)
+        
+        if (totalChecked > 0) {
+            callButton(true) 
+            if (totalChecked == totalPoLine) {
+                $('#check-all-cb').prop('checked', true)
+            }
+        }else{
+            $('#check-all-cb').prop('checked', false)
+            callButton(false) 
+        }
+    })
 
+    $('#check-all-cb-read').change(function () {
+        totalCheckedRead = 0
+        $(".check-read-po-lines").prop('checked', $(this).prop('checked'))
+        anyReadChecked = $(this).prop('checked')
+        if ($(this).prop('checked')) {
+            totalCheckedRead = totalPoLineRead
+        }
+
+        $(".total-mass").text(totalCheckedRead)
+    })
+
+    $('#status-po').change(function () {
+        var valStatus = $(this).val()
+        if (valStatus) {
+            $('.row-po-lines').fadeOut(1000);
+            $('.po-status-'+valStatus).fadeIn(1000);
+        }else{
+            $('.row-po-lines').fadeIn(1000);
+        }
+    })
+
+    $('.check-read-po-lines').change(function () {
+        if ($(this).prop('checked')==true){
+            $(this).prop('checked', true) 
+            totalCheckedRead ++
+        }else{
+            $(this).prop('checked', false)
+            totalCheckedRead --
+        }
+        
+        if (totalCheckedRead > 0) {
+            if (totalCheckedRead == totalPoLineRead) {
+                $('#check-all-cb-read').prop('checked', true)
+            }
+        }else{
+            $('#check-all-cb-read').prop('checked', false)
+        }
+        $(".total-mass").text(totalCheckedRead)
+    })
 })
+
 
 function changeBtn(v){
     var htmlButton = ""

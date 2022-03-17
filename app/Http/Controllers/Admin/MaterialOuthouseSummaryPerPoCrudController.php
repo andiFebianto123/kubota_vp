@@ -84,16 +84,38 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
                 if($entry->status == 'O'){
                     return 'Ordered';
                 }
-            }
+            },
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'status') {
+                    $rest = substr($searchTerm, 0, 1);
+                    $query->orWhere('pl.status', 'like', '%'.$rest.'%');
+                }
+            },
         ]);
-        CRUD::column('description');
+        CRUD::addColumn([
+            'label'     => 'Description', 
+            'name'      => 'description',
+            'type' => 'text',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhere('pl.description', 'like', '%'.$searchTerm.'%');
+            },
+        ]);
         CRUD::column('order_qty')->label('Qty Order');
         CRUD::column('u_m')->label('UM');
-        $this->crud->addColumn([
+        CRUD::addColumn([
             'name'  => 'due_date',
             'label' => 'Due Date', 
-            'type'  => 'date',
-            'format' => 'Y-M-d'
+            'type' => 'closure',
+            'orderable'  => true, 
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('pl.due_date', $columnDirection);
+            },
+            'function' => function($entry) {
+                return date('Y-m-d', strtotime($entry->due_date));
+            },
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhere('pl.due_date', 'like', '%'.$searchTerm.'%');
+            },
         ]);
 
         $this->crud->setListView('crud::list_mo_po');

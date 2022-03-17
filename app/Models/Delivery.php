@@ -13,6 +13,7 @@ class Delivery extends Model
     use RevisionableTrait;
 
     protected $table = 'delivery';
+    protected $append = ['po_po_line'];
     protected $fillable = [
         'id',
         'shipped_qty',
@@ -42,5 +43,11 @@ class Delivery extends Model
     public function pdfCheck($crud = false)
     {
         return "<div class='group-price-check'><input type='checkbox'> Dengan Harga</div>";
+    }
+
+
+    public function getPoPoLineAttribute()
+    {
+        return $this->po_num. "-" .$this->po_line;
     }
 }

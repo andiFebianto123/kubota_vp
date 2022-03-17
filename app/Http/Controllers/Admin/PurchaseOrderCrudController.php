@@ -82,8 +82,7 @@ class PurchaseOrderCrudController extends CrudController
         CRUD::addColumn([
             'label'     => 'PO Date', 
             'name'      => 'po_date', 
-            'type' => 'date',
-            'format' => 'YYYY-M-D'
+            'type' => 'text',
         ]);
         CRUD::addColumn([
             'name'     => 'email_flag',

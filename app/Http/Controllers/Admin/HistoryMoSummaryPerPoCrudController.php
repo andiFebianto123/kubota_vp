@@ -96,17 +96,41 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', now() . ' 23:59:59');
         }
         
-        CRUD::column('po_num')->label('PO Number');
+        CRUD::addColumn([
+            'label'     => 'PO Number', 
+            'name'      => 'po_num',
+            'type' => 'text',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhere('delivery.po_num', 'like', '%'.$searchTerm.'%');
+            },
+        ]);
         CRUD::column('po_line')->label('PO Line');
-        CRUD::column('description');
+        CRUD::addColumn([
+            'label'     => 'Description', 
+            'name'      => 'description',
+            'type' => 'text',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhere('delivery.description', 'like', '%'.$searchTerm.'%');
+            },
+        ]);
         CRUD::column('sum_qty_order')->label('Qty Order');
         CRUD::column('u_m')->label('UM');
-        $this->crud->addColumn([
-            'name'  => 'due_date', // The db column name
-            'label' => 'Due Date', // Table column heading
-            'type'  => 'date',
-            'format' => 'Y-M-d'
+        CRUD::addColumn([
+            'name'  => 'due_date',
+            'label' => 'Due Date', 
+            'type' => 'closure',
+            'orderable'  => true, 
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery.due_date', $columnDirection);
+            },
+            'function' => function($entry) {
+                return date('Y-m-d', strtotime($entry->due_date));
+            },
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhere('delivery.due_date', 'like', '%'.$searchTerm.'%');
+            },
         ]);
+
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
             'name'  => 'shipped_date',

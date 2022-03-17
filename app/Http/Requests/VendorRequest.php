@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
+use App\Rules\MultipleMailVendorRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class VendorRequest extends FormRequest
@@ -29,7 +30,10 @@ class VendorRequest extends FormRequest
             'vend_name' => 'required|min:5|max:255',
             'vend_email' => 'required|email',
             'buyer' => 'required',
-            'buyer_email' => 'required|email',
+            'buyer_email' =>  [
+                'required',
+                new MultipleMailVendorRule()
+            ],
             'vend_addr' => 'required',
             'vend_num' => 'required|string|unique:vendor,vend_num,'.$this->id.',id',
         ];
