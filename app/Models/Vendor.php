@@ -18,4 +18,14 @@ class Vendor extends Model
     protected $fillable = [
         'vend_name','vend_num', 'vend_addr', 'currency', 'buyer', 'vend_email', 'buyer_email'
     ];
+
+    public function setVendEmailAttribute($value)
+    {
+        $this->attributes['vend_email'] = str_replace(" ", "", $value);
+    }
+
+    public function setBuyerEmailAttribute($value)
+    {
+        $this->attributes['buyer_email'] = str_replace(" ", "", $value);
+    }
 }

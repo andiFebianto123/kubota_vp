@@ -28,9 +28,12 @@ class VendorRequest extends FormRequest
     {
         return [
             'vend_name' => 'required|min:5|max:255',
-            'vend_email' => 'required|email',
             'buyer' => 'required',
             'buyer_email' =>  [
+                'required',
+                new MultipleMailVendorRule()
+            ],
+            'vend_email' =>  [
                 'required',
                 new MultipleMailVendorRule()
             ],

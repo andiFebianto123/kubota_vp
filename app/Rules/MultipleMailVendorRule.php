@@ -32,10 +32,10 @@ class MultipleMailVendorRule implements Rule
         if (str_contains($value, ',')) { 
             $intSuccess = 0;
             $isValid = false;
-            $emails = explode(",",$value);
+            $emails = str_replace(" ", "", explode(",",$value));
 
             foreach ($emails as $key => $email) {
-                if (str_contains($email, '@')) {
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $intSuccess++;
                 }
             }
