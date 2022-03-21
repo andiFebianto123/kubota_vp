@@ -150,11 +150,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     Total
                                 </td>
                                 <td>
-                                    {{$total_qty}}</td>
+                                    {{$total_qty}}
                                 </td>
                                 <td>
-                                 {{ number_format($total_price,0,',','.')}}</td>
+                                 {{ number_format($total_price,0,',','.')}}
                                 </td>
+                                <td colspan='3'></td>
                             </tr>
                         </tfoot>
                     </table>
