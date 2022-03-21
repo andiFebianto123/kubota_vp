@@ -505,15 +505,25 @@ class PurchaseOrderCrudController extends CrudController
         $term = $request->input('term');
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')
-                    ->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
-                return [$item->item => $item->item];
+                    ->orWhere('description', 'like', '%'.$term.'%')
+                    ->groupBy('item')
+                    ->select('item', 'description')
+                    ->get()
+                    ->mapWithKeys(function($item){
+                    return [$item->item => $item->item.'-'.$item->description];
             });
         }else{
             return PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
                     ->where('vend_num', backpack_auth()->user()->vendor->vend_num)
-                    ->where('item', 'like', '%'.$term.'%')
-                    ->groupBy('item')->select('item')->get()->mapWithKeys(function($item){
-                return [$item->item => $item->item];
+                    ->where(function($q) use ($term) {
+                        $q->where('item', 'like', '%'.$term.'%')
+                          ->orWhere('description', 'like', '%'.$term.'%');
+                    })
+                    ->groupBy('item')
+                    ->select('item', 'description')
+                    ->get()
+                    ->mapWithKeys(function($item){
+                return [$item->item => $item->item.'-'.$item->description];
             });
         }
        
