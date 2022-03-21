@@ -205,15 +205,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     Total
                                 </td>
                                 <td>
-                                    {{$total_qty}}</td>
+                                    {{$total_qty}}
                                 </td>
                                 <td>
-                                 {{ number_format($total_price,0,',','.')}}</td>
+                                 {{ number_format($total_price,0,',','.')}}
                                 </td>
+                                <td colspan='3'></td>
                             </tr>
                         </tfoot>
                     </table>
+                    @if($constant::checkPermission('Print Label Delivery Sheet'))
                     <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
+                    @endif
                     <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
                 </form>
                 @else
