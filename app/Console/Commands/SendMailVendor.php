@@ -62,6 +62,7 @@ class SendMailVendor extends Command
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));
                 }
+                
                 $updatePo = DB::table('po')->where('id', $po->ID)->update([
                     'email_flag' => now()
                 ]);
