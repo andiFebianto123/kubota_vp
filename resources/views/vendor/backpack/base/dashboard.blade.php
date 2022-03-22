@@ -18,6 +18,17 @@
                 </button>
             </div>
         @endif
+        @if(count($list_unread_comment) > 0)
+             <div class="alert alert-comments alert-dismissible fade show" role="alert">
+                 <strong>Hallo, {{Auth::guard('backpack')->user()->username}}</strong>. Ada comment belum terbaca pada :
+                 @foreach($list_unread_comment as $index => $unreadComment) 
+                    <strong>{{$unreadComment['dsNumber']}}-{{$unreadComment['dsLine']}} {{$index < count($list_unread_comment) - 1 ? ', ' : ''}} </strong>
+                 @endforeach
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
     </div>
 </div>
 <div class="row mt-2">

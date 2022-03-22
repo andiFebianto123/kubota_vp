@@ -1,7 +1,13 @@
+
 .btn-primary-vp, .bg-primary-vp, .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     background-color: #48abac;
     border-color: #48abac;
     color: #fff;
+}
+
+.alert-comments{
+    background-color: #cf8f45 !important;
+    color: #fff
 }
 
 .bg-header-kbt{
@@ -196,3 +202,5 @@
     color: #ffffff;
     cursor: pointer;
 }
+
+

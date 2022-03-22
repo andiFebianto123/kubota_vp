@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryStatus;
 use App\Models\GeneralMessage;
 use App\Models\PurchaseOrder;
+use App\Models\Comment;
 use App\Models\PurchaseOrderLine;
 use App\Helpers\Constant;
 use App\Models\User;
@@ -32,7 +33,21 @@ class DashboardController extends Controller
         $countDeliveryStatus = $this->countDeliveryStatus();
         $user = User::where('id', backpack_user()->id);
         $user->select(DB::raw("datediff(current_date(), DATE(last_update_password)) as selisih_pertahun"));
+        
+        $listDsUnRead = [];
+        $unReadComments = Comment::where('status',1)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
+        foreach($unReadComments as $comment){
+            $deliveryStatusData =  DeliveryStatus::where('id',$comment['tax_invoice_id'])->select('ds_num', 'ds_line')->first();
+            if($deliveryStatusData != null){
+                $listDsUnRead[] = [
+                    'dsNumber' => $deliveryStatusData['ds_num'],
+                    'dsLine' => $deliveryStatusData['ds_line']
+                ];
+            }
+        }
 
+
+        
         $count = [
             'delivery' => $countDelivery,
             'delivery_status' => $countDeliveryStatus,
@@ -47,6 +62,7 @@ class DashboardController extends Controller
 
         $data['count'] = $count;
         $data['generalMessage'] = $generalMessage;
+        $data['list_unread_comment'] = $listDsUnRead;
         $data['user_check_password_range'] = $user->get()->first();
 
         return view('vendor.backpack.base.dashboard', $data);
