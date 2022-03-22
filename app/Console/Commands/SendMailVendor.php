@@ -41,7 +41,7 @@ class SendMailVendor extends Command
     public function handle()
     {
         $pos = DB::table('po')->join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('email_flag');
         if($pos->count() > 0){
             # alias terdapat data yang kosong
@@ -50,6 +50,7 @@ class SendMailVendor extends Command
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                 // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
                 $details = [
+                    'po_num' => $po->poNumber,
                     'type' => 'reminder_po',
                     'title' => 'Ada PO baru',
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',

@@ -415,13 +415,14 @@ class PurchaseOrderCrudController extends CrudController
 
     public function acceptAllPo(){
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+        ->select('po.id as ID', 'po.po_num as poNumber','vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('po.email_flag');
         if($pos->count() > 0){
             $getPo = $pos->get();
             foreach($getPo as $po){
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                 $details = [
+                    'po_num' => $po->poNumber,
                     'type' => 'reminder_po',
                     'title' => 'Ada PO baru',
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
@@ -455,7 +456,7 @@ class PurchaseOrderCrudController extends CrudController
         DB::beginTransaction();
         try {
             $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-            ->select('po.id as ID', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
             ->whereIn('po.id', $poIds);
 
             if($pos->count() > 0){
@@ -463,6 +464,7 @@ class PurchaseOrderCrudController extends CrudController
                 foreach($getPo as $po){
                     $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                     $details = [
+                        'po_num' => $po->poNumber,
                         'type' => 'reminder_po',
                         'title' => 'Ada PO baru',
                         'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',

@@ -30,7 +30,7 @@ class vendorNewPo extends Mailable
     public function build()
     {
         // return $this->markdown('emails.sample-mail');
-        return $this->subject('New Purchase Order')
+        return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
         ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
         ->markdown('emails.sample-mail');
     }
