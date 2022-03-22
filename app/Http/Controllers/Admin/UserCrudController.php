@@ -26,6 +26,7 @@ use App\Models\Delivery;
 use App\Models\PurchaseOrderLine;
 use App\Models\Role;
 use Illuminate\Routing\Route;
+use App\Rules\IsValidPassword;
 
 class UserCrudController extends CrudController
 {
@@ -194,6 +195,10 @@ class UserCrudController extends CrudController
 
         $request = $this->crud->getRequest();
 
+        $request->validate([
+            'password' => ['required' , new IsValidPassword()]
+        ]);
+
         if ($request->input('password')) {
             $request->request->set('password', bcrypt($request->input('password')));
         } 
@@ -225,6 +230,12 @@ class UserCrudController extends CrudController
         $this->crud->setRequest($this->crud->validateRequest());
 
         $request = $this->crud->getRequest();
+
+        $request->validate(
+            [
+                'password' => new IsValidPassword()
+            ]
+        );
 
         if ($request->input('password')) {
             $request->request->set('password', bcrypt($request->input('password')));

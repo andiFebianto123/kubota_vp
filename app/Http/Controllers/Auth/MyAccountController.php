@@ -7,6 +7,7 @@ use App\Http\Requests\AccountInfoRequest;
 use Backpack\CRUD\app\Http\Requests\ChangePasswordRequest;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Rules\IsValidPassword;
 use Carbon\Carbon;
 
 class MyAccountController extends Controller
@@ -51,6 +52,11 @@ class MyAccountController extends Controller
 
     public function postChangePasswordForm2(ChangePasswordRequest $request)
     {
+        $request->validate(
+            [
+                'new_password' => ['required',  new IsValidPassword()]
+            ]
+            );
         $user = $this->guard()->user();
         $user->password = Hash::make($request->new_password);
         $user->last_update_password = Carbon::now();
