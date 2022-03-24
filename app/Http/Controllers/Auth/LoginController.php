@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\vendorNewPo;
 use App\Models\TempCountFailure;
+use App\Helpers\EmailLogWriter;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class LoginController extends Controller
 {
@@ -133,9 +136,15 @@ class LoginController extends Controller
             }
             catch(Exception $e){
                 DB::beginTransaction();
-                $subject = "Mail from Kubota.com"
+                $subject = "Mail from Kubota.com";
                 (new EmailLogWriter())->create($subject, $user->email, $e->getMessage());
                 DB::commit();
+
+                return response()->json([
+                    'status' => false,
+                    'alert' => 'error',
+                    'message' => 'Mail not sent. Please check error logs for further information',
+                ], 500);
             }
 
             return response()->json([

@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Models\UserOtp;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use App\Helpers\EmailLogWriter;
 use Exception;
 use App\Imports\UserMasterImport;
 use Illuminate\Support\Facades\DB;
