@@ -16,8 +16,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
+use Exception;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use App\Helpers\EmailLogWriter;
 use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 
@@ -430,11 +432,27 @@ class PurchaseOrderCrudController extends CrudController
                 ];
 
                 if($po->emails != null){
-                    $pecahEmailVendor = explode(';', $po->emails);
-                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
-                    Mail::to($pecahEmailVendor)
-                    ->cc($pecahEmailBuyer)
-                    ->send(new vendorNewPo($details));
+                    try{
+                        $pecahEmailVendor = explode(';', $po->emails);
+                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                        Mail::to($pecahEmailVendor)
+                        ->cc($pecahEmailBuyer)
+                        ->send(new vendorNewPo($details));
+                    }
+                    catch(Exception $e){
+                        $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
+                        $pecahEmailVendor = implode(", ", explode(';', $po->emails));
+                        $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
+                        
+                        (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
+                        DB::commit();
+                        
+                        return response()->json([
+                            'status' => false,
+                            'alert' => 'Error',
+                            'message' => 'Mail not sent. Please check in email logs for further information',
+                        ], 500);
+                    }
                 }
                 PurchaseOrder::where('id', $po->ID)->update([
                     'email_flag' => now()
@@ -470,13 +488,30 @@ class PurchaseOrderCrudController extends CrudController
                         'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
                         'url_button' => $URL."?prev_session=true" 
                     ];
-
+                    
                     if($po->emails != null){
-                        $pecahEmailVendor = explode(';', $po->emails);
-                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
-                        Mail::to($pecahEmailVendor)
-                        ->cc($pecahEmailBuyer)
-                        ->send(new vendorNewPo($details));
+                        try{
+                            $pecahEmailVendor = explode(';', $po->emails);
+                            $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                            Mail::to($pecahEmailVendor)
+                            ->cc($pecahEmailBuyer)
+                            ->send(new vendorNewPo($details));
+                        }
+                        catch(Exception $e){
+                            $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
+                            $pecahEmailVendor = implode(", ", explode(';', $po->emails));
+                            $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
+                            
+                            (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
+                            DB::commit();
+                            
+                            return response()->json([
+                                'status' => false,
+                                'alert' => 'Error',
+                                'message' => 'Mail Not Sent. Please check in email logs for further information',
+                            ], 500);
+                        }
+                            
                     }
                     PurchaseOrder::where('id', $po->ID)->update([
                         'email_flag' => now()

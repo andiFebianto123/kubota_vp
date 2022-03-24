@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use Exception;
 use Log;
 
 class ReminderPo extends Command
@@ -82,11 +83,23 @@ class ReminderPo extends Command
                 ];
 
                 if($po_line['emails'] != null){
-                    $pecahEmailVendor = explode(';', $po_line['emails']); // email nya vendor
-                    $pecahEmailBuyer = ($po_line['buyers'] != null) ? explode(';', $po_line['buyers']) : '';
-                    Mail::to($pecahEmailVendor)
-                    ->cc($pecahEmailBuyer)
-                    ->send(new vendorNewPo($details));
+                    try{
+                        $pecahEmailVendor = explode(';', $po_line['emails']); // email nya vendor
+                        $pecahEmailBuyer = ($po_line['buyers'] != null) ? explode(';', $po_line['buyers']) : '';
+                        Mail::to($pecahEmailVendor)
+                        ->cc($pecahEmailBuyer)
+                        ->send(new vendorNewPo($details));
+                    }
+                    catch(Exception $e){
+                        $subject = 'Reminder accept PO';
+                        $pecahEmailVendor = implode(", ", explode(';', $po_line['emails']));
+                        $pecahEmailBuyer = ($po_line['buyers'] != null) ?  implode(", ", explode(';', $po_line['buyers'])) : '';
+                            
+                        (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
+                        DB::commit();
+                            
+                        return Command::FAILURE;
+                    }
                 }
 
                 \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
