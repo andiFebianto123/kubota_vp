@@ -127,7 +127,16 @@ class LoginController extends Controller
             $insertOtp->save();
 
             TempCountFailure::where('account', $input['username'])->where('type', 'login')->delete();
-            Mail::to($user->email)->send(new TwoFactorMail($details));
+            
+            try{
+                Mail::to($user->email)->send(new TwoFactorMail($details));
+            }
+            catch(Exception $e){
+                DB::beginTransaction();
+                $subject = "Mail from Kubota.com"
+                (new EmailLogWriter())->create($subject, $user->email, $e->getMessage());
+                DB::commit();
+            }
 
             return response()->json([
                 'status' => true,

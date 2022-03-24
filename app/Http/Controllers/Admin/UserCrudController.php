@@ -348,8 +348,15 @@ class UserCrudController extends CrudController
 
             if(count($import->dataUsers) > 0){
                 foreach($import->dataUsers as $user){
-                    Mail::to($user['email'])
-                    ->send(new MailNewUser($user));
+                    try{
+                        Mail::to($user['email'])
+                        ->send(new MailNewUser($user));
+                    }
+                    catch(Exception $e){
+                        $subject = "Data Error User Import"
+                        (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage());
+                        DB::commit();
+                    }
                 }
             }
 
