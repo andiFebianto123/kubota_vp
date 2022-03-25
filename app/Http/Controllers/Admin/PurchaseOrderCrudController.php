@@ -426,7 +426,7 @@ class PurchaseOrderCrudController extends CrudController
                 $details = [
                     'po_num' => $po->poNumber,
                     'type' => 'reminder_po',
-                    'title' => 'Ada PO baru',
+                    'title' => 'Ada PO ' . $po->poNumber . ' baru',
                     'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL."?prev_session=true" 
                 ];
@@ -484,7 +484,7 @@ class PurchaseOrderCrudController extends CrudController
                     $details = [
                         'po_num' => $po->poNumber,
                         'type' => 'reminder_po',
-                        'title' => 'Ada PO baru',
+                        'title' => 'Ada PO ' . $po->poNumber . ' baru',
                         'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
                         'url_button' => $URL."?prev_session=true" 
                     ];
