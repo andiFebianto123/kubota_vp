@@ -38,6 +38,7 @@ class ConfigurationCrudController extends CrudController
         }
 
         CRUD::column('label');
+        CRUD::column('description')->limit(120);
         CRUD::column('value');
     }
 
@@ -59,6 +60,16 @@ class ConfigurationCrudController extends CrudController
                     'disabled'    => 'disabled',
                 ], 
             ]);
+            $this->crud->addField(
+                [
+                    'name'  => 'description',
+                    'type'  => 'text',
+                    'label' => 'Description',
+                    'attributes' => [
+                        'readonly'    => 'readonly',
+                        'disabled'    => 'disabled',
+                    ], 
+                ]);
         CRUD::field('value');
     }
 
