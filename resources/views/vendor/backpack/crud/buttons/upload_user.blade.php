@@ -1,5 +1,5 @@
 <a href="javascript:void(0)" 
-    class="btn btn-primary btn-primary-vp" 
+    class="btn btn-light-vp" 
     data-button-type="updateRole"
     data-toggle="modal" data-target="#upload-modal">
     <i class="la la-upload"></i> Import User

@@ -26,7 +26,12 @@ $field['min_rows'] = $field['min_rows'] ?? 0;
                 <h5 class="modal-title">Import Serial Numbers</h5>
             </div>
             <div class="modal-body">
-                <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{url('admin/template-serial-numbers')}}" init-url="{{url('admin/template-serial-numbers')}}" id="template-upload-sn">template-serial-number.xlsx</a></p>
+                <p>Silahkan menggunakan template di bawah ini untuk mengimport</p>
+                <div class='form-control'>
+                    <a href="{{url('admin/template-serial-numbers')}}" init-url="{{url('admin/template-serial-numbers')}}" id="template-upload-sn">template-serial-number.xlsx</a>
+                </div>
+                <div class ="mt-3" style="border-top: 1px solid gray;">&nbsp</div>
+                <p>Silahkan upload file untuk diimport melalui button dibawah ini </p>
                 <form id="form-import-sn" action="{{url('admin/serial-number-import')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <input type="file" name="file_sn" class="form-control py-1 rect-validation">

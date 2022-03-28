@@ -1,8 +1,16 @@
 
 .btn-primary-vp, .bg-primary-vp, .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     background-color: #48abac;
-    border-color: #48abac;
+    border-color: hsl(181, 41%, 48%);
     color: #fff;
+}
+
+.btn-light-vp{
+    background-color: #d8dbec;
+    border-color: hsl(216, 11%, 83%);
+}
+.btn-light-vp:hover{
+    background-color: #bfc2cf;
 }
 
 .alert-comments{
