@@ -32,6 +32,12 @@ class AddIndexInDeliveryStatus extends Migration
     {
         Schema::table('delivery_status', function (Blueprint $table) {
             // $table->dropIndex(['po_num', 'po_line', 'executed_flag', 'validate_by_fa_flag', 'payment_plan_date']); // Drops index 'geo_state_index'
+            $table->dropIndex(['po_num']); // Drops index
+            $table->dropIndex(['po_line']);
+            $table->dropIndex(['item']);
+            $table->dropIndex(['executed_flag']);
+            $table->dropIndex(['validate_by_fa_flag']);
+            $table->dropIndex(['payment_plan_date']);
         });
     }
 }
