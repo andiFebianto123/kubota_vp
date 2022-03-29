@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use Alert;
 use App\Http\Requests\AccountInfoRequest;
-use Backpack\CRUD\app\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\ChangePasswordRequest;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Rules\IsValidPassword;
