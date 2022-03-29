@@ -36,7 +36,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
                                 ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->where('status', 'O')
-                                ->where('accept_flag', 1)
+                                ->where('accept_flag','!=', 2)
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
                                 ->get();
@@ -62,7 +62,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
         return view('exports.excel.template_mass_ds', $data);
     }
 
-
+    
     public function registerEvents(): array
     {
         return [
