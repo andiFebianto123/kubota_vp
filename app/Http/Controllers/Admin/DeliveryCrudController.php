@@ -97,18 +97,18 @@ class DeliveryCrudController extends CrudController
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
                     $searchOnlyPo = str_replace("-", "", $searchTerm);
-                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    $query->orWhere('delivery.po_num', 'like', '%'.$searchOnlyPo.'%');
                     if (str_contains($searchTerm, '-')) {
                         $query->orWhere(function($q) use ($searchTerm) {
                             $searchWithSeparator = explode("-", $searchTerm);
-                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
-                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                            $q->where('delivery.po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery.po_line', 'like', '%'.$searchWithSeparator[1].'%');
                         });
                     }
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
-                return $query->orderBy('po_num', $columnDirection)->select('delivery.*');
+                return $query->orderBy('delivery.po_num', $columnDirection)->select('delivery.*');
             }
         ]);
         CRUD::addColumn([
@@ -227,7 +227,8 @@ class DeliveryCrudController extends CrudController
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             $can_access = true;
         }else{
-            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')->where('delivery.id', $entry->id )->first();
+            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+                    ->where('delivery.id', $entry->id )->first();
             if (backpack_auth()->user()->vendor->vend_num == $po->vend_num) {
                 $can_access = true;
             }
