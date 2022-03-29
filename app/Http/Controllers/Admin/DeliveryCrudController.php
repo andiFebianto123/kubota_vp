@@ -481,8 +481,9 @@ class DeliveryCrudController extends CrudController
         $data['with_price'] = $withPrice;
 
     	$pdf = PDF::loadview('exports.pdf.delivery_sheet',$data);
+        $filename = 'ds-'.date('YmdHis').'.pdf';
 
-        return $pdf->stream();
+        return $pdf->download($filename);
     }
 
 
