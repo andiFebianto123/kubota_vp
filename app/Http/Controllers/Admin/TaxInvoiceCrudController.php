@@ -39,8 +39,8 @@ class TaxInvoiceCrudController extends CrudController
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
-            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
-            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
+            //DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
+            //DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
 
         $this->setup2();
@@ -56,6 +56,17 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         $this->crud->setListView('vendor.backpack.crud.list_payment');
+    }
+
+    private function getCurrency($entry){
+        $data = PurchaseOrder::where('po_num', $entries->po_num)->first();
+        if($data != null){
+            $vendor = Vendor::where('vend_num', $data->vend_num)->first();
+            if($vendor != null){
+                return $vendor->currency;
+            }
+        }
+        return '';
     }
 
 
@@ -132,7 +143,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'unit_price', // the column that contains the ID of that connected entity;
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                return $this->getCurrency($entry).' '.Constant::getPrice($entry->unit_price);
             }
         ]);
         CRUD::addColumn([
@@ -160,7 +171,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'harga_sebelum_pajak', // the column that contains the ID of that connected entity;
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->harga_sebelum_pajak);
+                return $this->getCurrency($entry). ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
             }
         ]);
         CRUD::addColumn([
@@ -168,7 +179,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'ppn', // the column that contains the ID of that connected entity;
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->ppn);
+                return $this->getCurrency($entry).' '.Constant::getPrice($entry->ppn);
             }
         ]);
         CRUD::addColumn([
@@ -176,7 +187,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'pph', // the column that contains the ID of that connected entity;
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->pph);
+                return $this->getCurrency($entry).' '.Constant::getPrice($entry->pph);
             }
         ]);
         CRUD::addColumn([
@@ -184,10 +195,10 @@ class TaxInvoiceCrudController extends CrudController
             'name' => 'total_ppn',
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+                return $this->getCurrency($entry).' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
             }
         ]);
-        CRUD::addColumn([
+        CRUD::addColumn([ 
             'label' => 'Comments',
             'name' => 'comment',
             'type' => 'comment'
