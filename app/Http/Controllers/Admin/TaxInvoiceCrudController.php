@@ -770,7 +770,9 @@ class TaxInvoiceCrudController extends CrudController
 
     private function setup2(){
         $this->crud2 = new TaxInvoice;
-        $this->crud2 = $this->crud2->select('*',
+        $this->crud2 = $this->crud2->join('po', 'po.po_num', 'delivery_status.po_num')
+                ->join('vendor', 'vendor.vend_num', 'po.vend_num');
+        $this->crud2 = $this->crud2->select('delivery_status.*','vendor.currency',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
