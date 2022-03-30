@@ -35,12 +35,14 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::setModel(\App\Models\TaxInvoice::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/tax-invoice');
         CRUD::setEntityNameStrings('faktur pajak', 'List Payment');
+        $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num')
+                ->join('vendor', 'vendor.vend_num', 'po.vend_num');
         $this->crud->query = $this->crud->query->select('*',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
-            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
-            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
+            //DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
+            //DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
 
         $this->setup2();
@@ -56,6 +58,17 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         $this->crud->setListView('vendor.backpack.crud.list_payment');
+    }
+
+    private function getCurrency($entry){
+        $data = PurchaseOrder::where('po_num', $entry->po_num)->first();
+        if($data != null){
+            $vendor = Vendor::where('vend_num', $data->vend_num)->first();
+            if($vendor != null){
+                return $vendor->currency;
+            }
+        }
+        return '';
     }
 
 
@@ -160,7 +173,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'harga_sebelum_pajak', // the column that contains the ID of that connected entity;
             'type' => 'closure',
             'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->harga_sebelum_pajak);
+                return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
             }
         ]);
         CRUD::addColumn([
@@ -187,7 +200,7 @@ class TaxInvoiceCrudController extends CrudController
                 return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
             }
         ]);
-        CRUD::addColumn([
+        CRUD::addColumn([ 
             'label' => 'Comments',
             'name' => 'comment',
             'type' => 'comment'
@@ -757,12 +770,14 @@ class TaxInvoiceCrudController extends CrudController
 
     private function setup2(){
         $this->crud2 = new TaxInvoice;
-        $this->crud2 = $this->crud2->select('*',
+        $this->crud2 = $this->crud2->join('po', 'po.po_num', 'delivery_status.po_num')
+                ->join('vendor', 'vendor.vend_num', 'po.vend_num');
+        $this->crud2 = $this->crud2->select('delivery_status.*','vendor.currency',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
-            DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
-            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
+            // DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
+            // DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
         if(Constant::getRole() != 'Admin PTKI'){
             // jika user bukan admin ptki

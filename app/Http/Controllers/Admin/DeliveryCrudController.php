@@ -57,7 +57,7 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->enableBulkActions();
-        
+
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
 
         if(in_array(Constant::getRole(),['Admin PTKI'])){
@@ -76,59 +76,59 @@ class DeliveryCrudController extends CrudController
 
 
         CRUD::addColumn([
-            'label'     => 'DS Number', 
-            'name'      => 'ds_num', 
+            'label'     => 'DS Number',
+            'name'      => 'ds_num',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'DS Line', 
-            'name'      => 'ds_line', 
+            'label'     => 'DS Line',
+            'name'      => 'ds_line',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Shipped Date', 
-            'name'      => 'shipped_date', 
+            'label'     => 'Shipped Date',
+            'name'      => 'shipped_date',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'PO', 
+            'label'     => 'PO',
             'name'      => 'po_po_line',
-            'orderable'  => true, 
+            'orderable'  => true,
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
                     $searchOnlyPo = str_replace("-", "", $searchTerm);
-                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    $query->orWhere('delivery.po_num', 'like', '%'.$searchOnlyPo.'%');
                     if (str_contains($searchTerm, '-')) {
                         $query->orWhere(function($q) use ($searchTerm) {
                             $searchWithSeparator = explode("-", $searchTerm);
-                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
-                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                            $q->where('delivery.po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery.po_line', 'like', '%'.$searchWithSeparator[1].'%');
                         });
                     }
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
-                return $query->orderBy('po_num', $columnDirection)->select('delivery.*');
+                return $query->orderBy('delivery.po_num', $columnDirection)->select('delivery.*');
             }
         ]);
         CRUD::addColumn([
-            'label'     => 'Order Qty', 
-            'name'      => 'order_qty', 
+            'label'     => 'Order Qty',
+            'name'      => 'order_qty',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Shipped Qty', 
-            'name'      => 'shipped_qty', 
+            'label'     => 'Shipped Qty',
+            'name'      => 'shipped_qty',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'DO Number', 
-            'name'      => 'no_surat_jalan_vendor', 
+            'label'     => 'DO Number',
+            'name'      => 'no_surat_jalan_vendor',
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'label'     => 'Operator', 
-            'name'      => 'petugas_vendor', 
+            'label'     => 'Operator',
+            'name'      => 'petugas_vendor',
             'type' => 'text',
         ]);
 
@@ -151,10 +151,10 @@ class DeliveryCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
             });
         }
-        
+
     }
 
-    
+
     protected function setupCreateOperation()
     {
 
@@ -170,23 +170,23 @@ class DeliveryCrudController extends CrudController
                 'format'   => 'dd/mm/yyyy',
                 'language' => 'en'
              ],
-        ]);      
+        ]);
         $this->crud->addField([
             'type' => 'hidden',
             'name' => 'po_line_id',
             'value' => request('po_line_id')
-        ]);  
+        ]);
         $this->crud->addField([
             'type' => 'text',
             'name' => 'petugas_vendor',
             'default' => Auth::guard('backpack')->user()->name
-        ]);        
+        ]);
         CRUD::field('no_surat_jalan_vendor');
         CRUD::field('order_qty');
         CRUD::field('serial_number');
     }
 
-  
+
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
@@ -204,15 +204,15 @@ class DeliveryCrudController extends CrudController
         $deliveryRejects = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)
                             ->get();
-        
+
         $deliveryRepairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
                             ->where('ds_line_reject', $entry->ds_line)
                             ->get();
-        
+
         $qtyRejectCount = DeliveryReject::where('ds_num', $entry->ds_num )
                             ->where('ds_line', $entry->ds_line)
                             ->sum('rejected_qty');
-        
+
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
@@ -227,7 +227,8 @@ class DeliveryCrudController extends CrudController
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             $can_access = true;
         }else{
-            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')->where('delivery.id', $entry->id )->first();
+            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+                    ->where('delivery.id', $entry->id )->first();
             if (backpack_auth()->user()->vendor->vend_num == $po->vend_num) {
                 $can_access = true;
             }
@@ -250,11 +251,11 @@ class DeliveryCrudController extends CrudController
                         ->leftJoin('po', 'po.po_num', 'delivery.po_num')
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery.id', $id)
-                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date', 
+                        ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date',
                         'delivery.po_release','po_line.item','delivery.u_m', 'vendor.vend_num as vendor_number',
                         'vendor.currency as vendor_currency','vendor.vend_name as vendor_name', 'delivery.no_surat_jalan_vendor',
-                        'po_line.item_ptki','po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty', 
-                        'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description', 
+                        'po_line.item_ptki','po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty',
+                        'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description',
                         'delivery.wh', 'delivery.location', 'po_line.inspection_flag'])
                         ->first();
 
@@ -299,14 +300,14 @@ class DeliveryCrudController extends CrudController
         $poLine = PurchaseOrderLine::where('po_line.id', $poLineId)
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
-        
+
         // ds num generator from global function
         $dsNum =  (new Constant())->codeDs($poLine->po_num, $poLine->po_line, $shippedDate);
 
         $alertFor = "";
         $args = [
-            'po_num' => $poLine->po_num, 
-            'po_line' => $poLine->po_line , 
+            'po_num' => $poLine->po_num,
+            'po_line' => $poLine->po_line ,
             'order_qty' => $shippedQty
         ];
         // DS validation function available at App\Helpers\DsValidation
@@ -329,12 +330,13 @@ class DeliveryCrudController extends CrudController
         DB::beginTransaction();
 
         try{
-            // Insert delivery sheet 
+            // Insert delivery sheet
             $insertDsheet = new Delivery();
             $insertDsheet->ds_num = $dsNum['single'];
             $insertDsheet->po_num = $poLine->po_num;
             $insertDsheet->po_line = $poLine->po_line;
             $insertDsheet->po_release = $poLine->po_release;
+            $insertDsheet->po_change = $poLine->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
             $insertDsheet->item = $poLine->item;
             $insertDsheet->description = $poLine->description;
@@ -355,7 +357,7 @@ class DeliveryCrudController extends CrudController
             $insertDsheet->updated_by = backpack_auth()->user()->id;
             $insertDsheet->save();
 
-            // Insert delivery status 
+            // Insert delivery status
             $insertDstatus = new DeliveryStatus();
             $insertDstatus->ds_num = $dsNum['single'];
             $insertDstatus->po_num = $poLine->po_num;
@@ -378,14 +380,14 @@ class DeliveryCrudController extends CrudController
                     if (isset($snChild)) {
                         $uid = backpack_auth()->user()->id;
                         // sql query to prevent duplicate ds_detail
-                        $sqlQuery = "INSERT INTO delivery_serial (ds_num, 
-                                    ds_line, 
-                                    no_mesin, 
-                                    created_by, 
-                                    updated_by, 
-                                    created_at, 
-                                    updated_at, 
-                                    ds_detail ) 
+                        $sqlQuery = "INSERT INTO delivery_serial (ds_num,
+                                    ds_line,
+                                    no_mesin,
+                                    created_by,
+                                    updated_by,
+                                    created_at,
+                                    updated_at,
+                                    ds_detail )
                                     SELECT '".$insertDsheet->ds_num."',
                                     '".$insertDsheet->ds_line."',
                                     '".$snChild."',
@@ -393,9 +395,9 @@ class DeliveryCrudController extends CrudController
                                     '".$uid ."',
                                     '".now() ."',
                                     '".now() ."',
-                                    COUNT(*)+1 
-                                    FROM delivery_serial 
-                                    WHERE ds_num = '".$insertDsheet->ds_num."' 
+                                    COUNT(*)+1
+                                    FROM delivery_serial
+                                    WHERE ds_num = '".$insertDsheet->ds_num."'
                                     AND ds_line = '".$insertDsheet->ds_line."'";
 
                         DB::statement($sqlQuery);
@@ -442,7 +444,7 @@ class DeliveryCrudController extends CrudController
                     ], 422);
                 }
             }
-            
+
             DB::commit();
 
             $message = 'Delivery Sheet Created';
@@ -480,10 +482,11 @@ class DeliveryCrudController extends CrudController
         $data['with_price'] = $withPrice;
 
     	$pdf = PDF::loadview('exports.pdf.delivery_sheet',$data);
+        $filename = 'ds-'.date('YmdHis').'.pdf';
 
-        return $pdf->stream();
+        return $pdf->download($filename);
     }
-    
+
 
     public function exportMassPdf()
     {
@@ -518,8 +521,9 @@ class DeliveryCrudController extends CrudController
         $data['deliveries'] = $arrDeliveries;
 
     	$pdf = PDF::loadview('exports.pdf.delivery_sheet_multiple',$data);
-        
-        return $pdf->stream();
+        $filename = 'ds-'.date('YmdHis').'.pdf';
+
+        return $pdf->download($filename);
     }
 
 
@@ -530,7 +534,7 @@ class DeliveryCrudController extends CrudController
         $poLine = $request->po_line;
         $printDeliveries = $request->print_delivery;
         $withPrice = 'yes';
-        
+
         $arrParam['print_all'] = $printAll;
         $arrParam['po_num'] = $poNum;
         $arrParam['po_line'] = $poLine;
@@ -563,7 +567,7 @@ class DeliveryCrudController extends CrudController
         $poLine = $request->po_line;
         $printDeliveries = $request->print_delivery;
         $withPrice = 'no';
-        
+
         $arrParam['print_all'] = $printAll;
         $arrParam['po_num'] = $poNum;
         $arrParam['po_line'] = $poLine;
@@ -620,7 +624,7 @@ class DeliveryCrudController extends CrudController
             }
         }
         if ($allowedQty <= sizeof($rows) && $allowedQty > 0) {
-            
+
             return response()->json([
                 'status' => true,
                 'alert' => 'success',
@@ -647,7 +651,7 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $delivery->ds_line)
                             ->delete();
         }
-        
+
         return true;
     }
 }

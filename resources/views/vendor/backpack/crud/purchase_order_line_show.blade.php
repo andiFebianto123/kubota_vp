@@ -279,8 +279,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                Apakah Anda yakin akan melanjutkan pembuatan DS?
                <p class="list-error"></p>
             </p>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-dismiss="modal" onclick="submitAfterValid('form-delivery')">Ya</a>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
+            <div class="mt-4 text-right">
+                <button type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValid('form-delivery')">Ya</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Tidak</button>
+            </div>
         </div>
     </div>
   </div>
