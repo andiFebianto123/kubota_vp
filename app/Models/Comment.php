@@ -15,6 +15,8 @@ class Comment extends Model
     use RevisionableTrait;
     
     protected $fillable = [
-        'comment','tax_invoice_id', 'user_id', 'status'
+        'comment','tax_invoice_id', 'user_id','read_by', 'status'
     ];
+
+   
 }
