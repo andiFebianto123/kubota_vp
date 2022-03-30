@@ -48,7 +48,8 @@ class TaxInvoiceCrudController extends CrudController
         $this->setup2();
 
         if(Constant::getRole() != 'Admin PTKI'){
-            $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            // $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            $this->crud->query = $this->crud->query->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
         }
 
         if(Constant::checkPermission('Read List Payment')){
@@ -60,16 +61,7 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->setListView('vendor.backpack.crud.list_payment');
     }
 
-    private function getCurrency($entry){
-        $data = PurchaseOrder::where('po_num', $entry->po_num)->first();
-        if($data != null){
-            $vendor = Vendor::where('vend_num', $data->vend_num)->first();
-            if($vendor != null){
-                return $vendor->currency;
-            }
-        }
-        return '';
-    }
+    
 
 
     protected function setupListOperation()
@@ -781,7 +773,8 @@ class TaxInvoiceCrudController extends CrudController
         );
         if(Constant::getRole() != 'Admin PTKI'){
             // jika user bukan admin ptki
-            $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            // $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            $this->crud2 = $this->crud2->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
         }
 
         $this->crud2->where('executed_flag','!=', 0);
