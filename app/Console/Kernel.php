@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('vendor:daily')->dailyAt('12:15');
         $schedule->command('vendor:daily')->dailyAt('18:15');
-        $schedule->command('reminder:po_line')->dailyAt("08:00");
+        $schedule->command('reminder:po_line')->dailyAt("05:30");
 
         $schedule->command('backup:clean')->daily()->at('01:00');
         $schedule->command('backup:run')->daily()->at('01:30');
