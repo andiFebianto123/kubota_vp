@@ -21,7 +21,7 @@
                         <input type="checkbox" name="select_all" value="1" id="{{$field['name']}}-select-all">
                     </th>
                     @foreach($field['table']['table_header'] as $key1 => $col_header)
-                    <th style="white-space: nowrap;">
+                    <th class="text-nowrap">
                         {{$col_header}}
                     </th>
                     @endforeach
@@ -31,6 +31,7 @@
                
             </tbody>
         </table>
+        <div class="section-hidden"></div>
     </div>
     
 @include('crud::fields.inc.wrapper_end')
@@ -57,15 +58,27 @@
         <script>
             $(document).ready( function () {
                 var filterDate = false
-                var rowsSelected = [];
+                var rowsSelected = []
+                var clName = "{{$field['name']}}"
 
-                var table = $("#{{$field['name']}}").DataTable( {
+                var table = $("#"+clName).DataTable( {
                     processing: true,
                     serverSide: true,
+                    ordering: false,
                     scrollX: true,
                     ajax: {
                         url: "{{$field['ajax_url']}}",
-                        dataSrc: 'data'
+                        dataSrc: 'data',
+                        data: function(data){
+                            if (filterDate) {
+                                var min = $('.daterange-table').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                                var max = $('.daterange-table').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                                // Append to data
+                                data.from_date = min;
+                                data.end_date = max;
+                            }
+                            
+                        }
                     },
                     "order":[[1,'asc']],
                     'columnDefs': [{
@@ -77,12 +90,13 @@
                         'render': function (data, type, full, meta){
                             return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                         }
-                    }],
+                        },{
+                            'targets': 1,
+                            'className': 'text-nowrap',
+                        }
+                    ],
                     'rowCallback': function(row, data, dataIndex){
-                        // Get row ID
                         var rowId = data[0];
-
-                        // If row ID is in the list of selected row IDs
                         if($.inArray(rowId, rowsSelected) !== -1){
                             $(row).find('input[type="checkbox"]').prop('checked', true);
                             $(row).addClass('selected');
@@ -92,20 +106,21 @@
 
                 $('thead input[name="select_all"]', table.table().container()).on('click', function(e){
                     if(this.checked){
-                        $("#{{$field['name']}} tbody input[type='checkbox']:not(:checked)").trigger('click');
+                        $("#"+clName+" tbody input[type='checkbox']:not(:checked)").trigger('click');
                     } else {
-                        $("#{{$field['name']}} tbody input[type='checkbox']:checked").trigger('click');
+                        $("#"+clName+" tbody input[type='checkbox']:checked").trigger('click');
                     }
 
                     e.stopPropagation();
                 });
 
 
-                $("#{{$field['name']}} tbody").on('click', 'input[type="checkbox"]', function(e){
+                $("#"+clName+" tbody").on('click', 'input[type="checkbox"]', function(e){
                     var $row = $(this).closest('tr');
                     var data = table.row($row).data();
                     var rowId = data[0];
                     var index = $.inArray(rowId, rowsSelected);
+                    var hiddenHtml = ""
 
                     if(this.checked && index === -1){
                         rowsSelected.push(rowId);
@@ -113,25 +128,27 @@
                         rowsSelected.splice(index, 1);
                     }
 
+                    $.each(rowsSelected, function( index, value ) {
+                        hiddenHtml += "<input type='hidden' name='"+clName+"[]' value='"+value+"'>"
+                    });
+
+                    $(".section-hidden").html(hiddenHtml)
+
                     if(this.checked){
                         $row.addClass('selected');
                     } else {
                         $row.removeClass('selected');
                     }
-
                     e.stopPropagation();
                 });
 
-
-                // $('.checklist-table').DataTable();
                 $('.daterange-table').daterangepicker();
-                $("#{{$field['name']}}_length").html("")
-                $(".group-datapicker").detach().appendTo("#{{$field['name']}}_length")
+                $("#"+clName+"_length").html("")
+                $(".group-datapicker").detach().appendTo("#"+clName+"_length")
                 if ($(window).width() > 800) {
                     $(".group-datapicker").css('width', '260px')
                 }
-                
-            
+
                 $(function() {
                     $('.daterange-table').daterangepicker({
                         opens: 'left',
@@ -142,45 +159,18 @@
                     }, function(start, end, label) {
                         filterDate = true
                         var valueDt = start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY')
-                        $('.checklist-table').DataTable().draw()
+                        table.draw()
                         $('.daterange-table').val(valueDt)
-
-                        // minDate = start;
-                        // maxDate = end;
-                        // console.log(minDate);
-                        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
                     });
 
                     $('.daterange-table').on('cancel.daterangepicker', function(ev, picker) {
                         $(this).val('');
                         filterDate = false
-                        $('.checklist-table').DataTable().draw()
+                        table.draw()
                     });
                 });
 
-                $.fn.dataTable.ext.search.push(
-                    function( settings, data, dataIndex ) {
-                        var min = $('.daterange-table').data('daterangepicker').startDate._d;
-                        var max = $('.daterange-table').data('daterangepicker').endDate._d;
-                        var date = new Date(data[6] );
 
-                        if (filterDate) {
-                            if (
-                            ( min === null && max === null ) ||
-                            ( min === null && date <= max ) ||
-                            ( min <= date   && max === null ) ||
-                            ( min <= date   && date <= max )
-                            ) {
-                                return true;
-                            }
-                        }else{
-                            return true;
-                        }
-
-                        
-                        return false;
-                    }
-                );
             });
 
         </script>

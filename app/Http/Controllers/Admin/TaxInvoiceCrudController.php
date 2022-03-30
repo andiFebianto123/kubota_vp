@@ -37,7 +37,7 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::setEntityNameStrings('faktur pajak', 'List Payment');
         $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num')
                 ->join('vendor', 'vendor.vend_num', 'po.vend_num');
-        $this->crud->query = $this->crud->query->select('*',
+        $this->crud->query = $this->crud->query->select('delivery_status.*','vendor.currency',
             DB::raw("(SELECT comment FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as comment"),
             DB::raw("(SELECT user_id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as user"),
             DB::raw("(SELECT status FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as status"),
@@ -48,7 +48,8 @@ class TaxInvoiceCrudController extends CrudController
         $this->setup2();
 
         if(Constant::getRole() != 'Admin PTKI'){
-            $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            // $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            $this->crud->query = $this->crud->query->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
         }
 
         if(Constant::checkPermission('Read List Payment')){
@@ -60,16 +61,7 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->setListView('vendor.backpack.crud.list_payment');
     }
 
-    private function getCurrency($entry){
-        $data = PurchaseOrder::where('po_num', $entry->po_num)->first();
-        if($data != null){
-            $vendor = Vendor::where('vend_num', $data->vend_num)->first();
-            if($vendor != null){
-                return $vendor->currency;
-            }
-        }
-        return '';
-    }
+    
 
 
     protected function setupListOperation()
@@ -100,15 +92,17 @@ class TaxInvoiceCrudController extends CrudController
             'orderable'  => true, 
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
+                    $q = '';
                     $searchOnlyPo = str_replace("-", "", $searchTerm);
-                    $query->orWhere('delivery_status.po_num', 'like', '%'.$searchOnlyPo.'%');
+                    $q = $query->orWhere('delivery_status.po_num', 'like', '%'.$searchOnlyPo.'%');
                     if (str_contains($searchTerm, '-')) {
-                        $query->orWhere(function($q) use ($searchTerm) {
+                        $q = $query->orWhere(function($q) use ($searchTerm) {
                             $searchWithSeparator = explode("-", $searchTerm);
                             $q->where('delivery_status.po_num', 'like', '%'.$searchWithSeparator[0].'%')
                               ->Where('delivery_status.po_line', 'like', '%'.$searchWithSeparator[1].'%');
                         });
                     }
+                    return $q;
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
@@ -257,7 +251,7 @@ class TaxInvoiceCrudController extends CrudController
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
-                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
+                $this->crud->addClause('whereIn', 'delivery_status.id', $dbGet->unique()->toArray());
             });
         }
 
@@ -293,7 +287,7 @@ class TaxInvoiceCrudController extends CrudController
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
-                $this->crud2 = $this->crud2->whereIn('id', $dbGet->unique()->toArray());
+                $this->crud2 = $this->crud2->whereIn('delivery_status.id', $dbGet->unique()->toArray());
             });
         }
 
@@ -365,37 +359,51 @@ class TaxInvoiceCrudController extends CrudController
         ## Read value
         $draw = request('draw');
         $start = request("start");
-        $rowperpage = request("length"); // Rows display per page
+        $rowperpage = request("length"); 
+        $filters = [];
    
-        $columnIndex_arr = request('order');
-        $columnName_arr = request('columns');
         $order_arr = request('order');
-        $search_arr = request('search');
+        $searchArr = request('search');
+
+        if (request('from_date') != null){
+            $filters[] = ['delivery_status.payment_plan_date', '>=', request('from_date')];
+        }
+        if (request('end_date') != null){
+            $filters[] = ['delivery_status.payment_plan_date', '<=', request('end_date')];
+        }
    
         // $columnIndex = $columnIndex_arr[0]['column']; // Column index
         // $columnName = $columnName_arr[$columnIndex]['data']; // Column name
         // $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+        $searchValue = $searchArr['value']; // Search value
    
         // Total records
-        $countDeliveryStatuses = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
-            ->join('vendor', 'vendor.vend_num', 'po.vend_num')
-            ->where('validate_by_fa_flag', 1)
+        $countDeliveryStatuses = DeliveryStatus::where('validate_by_fa_flag', 1)
             ->where('executed_flag', 0)
             ->count();
         $totalRecords = $countDeliveryStatuses;
-        $totalRecordswithFilter = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
-                        ->join('vendor', 'vendor.vend_num', 'po.vend_num')
-                        ->where('validate_by_fa_flag', 1)
+        $totalRecordswithFilter = DeliveryStatus::where('validate_by_fa_flag', 1)
                         ->where('executed_flag', 0)
-                        ->select('count(*) as allcount')
-                        ->where('po.po_num', 'like', '%' .$searchValue . '%')
+                        ->where($filters)
+                        ->where(function($query) use ($searchValue){
+                            $query->where('delivery_status.po_num','LIKE', '%'.$searchValue.'%')
+                            ->orWhere('delivery_status.ds_num','LIKE', '%'.$searchValue.'%')
+                            ->orWhere('delivery_status.item','LIKE', '%'.$searchValue.'%')
+                            ->orWhere('delivery_status.description','LIKE', '%'.$searchValue.'%');
+                        })
                         ->count();
    
         $deliveryStatuses = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
             ->join('vendor', 'vendor.vend_num', 'po.vend_num')
             ->where('validate_by_fa_flag', 1)
             ->where('executed_flag', 0)
+            ->where($filters)
+            ->where(function($query) use ($searchValue){
+                $query->where('delivery_status.po_num','LIKE', '%'.$searchValue.'%')
+                ->orWhere('delivery_status.ds_num','LIKE', '%'.$searchValue.'%')
+                ->orWhere('delivery_status.item','LIKE', '%'.$searchValue.'%')
+                ->orWhere('delivery_status.description','LIKE', '%'.$searchValue.'%');
+            })
             ->select('delivery_status.*', 'po.vend_num', 'vendor.currency')
             ->orderBy('delivery_status.id', 'desc')
             ->skip($start)
@@ -412,7 +420,6 @@ class TaxInvoiceCrudController extends CrudController
             $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
             $tableBody[] = [
                     $ds->id,
-                    // "<input type='checkbox' name='ds_nums[]' selectRow='true' class='dt-checkboxes' value='{{$ds->id}}'>",
                     $ds->po_num.'-'.$ds->po_line,
                     $ds->ds_num,
                     $ds->ds_line,
@@ -679,7 +686,7 @@ class TaxInvoiceCrudController extends CrudController
 
             Comment::where('tax_invoice_id', $invoiceId)
             ->where('user_id', '!=', backpack_user()->id)
-            ->update(['status' => 0]);
+            ->update(['status' => 0, 'read_by' => backpack_user()->id]);
 
             return response()->json([
                 'result' => $data,
@@ -827,7 +834,8 @@ class TaxInvoiceCrudController extends CrudController
         );
         if(Constant::getRole() != 'Admin PTKI'){
             // jika user bukan admin ptki
-            $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            // $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
+            $this->crud2 = $this->crud2->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
         }
 
         $this->crud2->where('executed_flag','!=', 0);
