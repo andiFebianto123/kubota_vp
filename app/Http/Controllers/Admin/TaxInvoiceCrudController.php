@@ -92,15 +92,17 @@ class TaxInvoiceCrudController extends CrudController
             'orderable'  => true, 
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
+                    $q = '';
                     $searchOnlyPo = str_replace("-", "", $searchTerm);
-                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    $q = $query->orWhere('delivery_status.po_num', 'like', '%'.$searchOnlyPo.'%');
                     if (str_contains($searchTerm, '-')) {
-                        $query->orWhere(function($q) use ($searchTerm) {
+                        $q = $query->orWhere(function($q) use ($searchTerm) {
                             $searchWithSeparator = explode("-", $searchTerm);
-                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
-                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                            $q->where('delivery_status.po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery_status.po_line', 'like', '%'.$searchWithSeparator[1].'%');
                         });
                     }
+                    return $q;
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
@@ -249,7 +251,7 @@ class TaxInvoiceCrudController extends CrudController
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
-                $this->crud->addClause('whereIn', 'id', $dbGet->unique()->toArray());
+                $this->crud->addClause('whereIn', 'delivery_status.id', $dbGet->unique()->toArray());
             });
         }
 
@@ -285,7 +287,7 @@ class TaxInvoiceCrudController extends CrudController
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
-                $this->crud2 = $this->crud2->whereIn('id', $dbGet->unique()->toArray());
+                $this->crud2 = $this->crud2->whereIn('delivery_status.id', $dbGet->unique()->toArray());
             });
         }
 
