@@ -232,13 +232,12 @@ class UserCrudController extends CrudController
 
         $request = $this->crud->getRequest();
 
-        $request->validate(
-            [
-                'password' => new IsValidPassword()
-            ]
-        );
-
         if ($request->input('password')) {
+            $request->validate(
+                [
+                    'password' => new IsValidPassword()
+                ]
+            );
             $request->request->set('password', bcrypt($request->input('password')));
         } else {
             $request->request->remove('password');
