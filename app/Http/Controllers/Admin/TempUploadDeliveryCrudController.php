@@ -117,7 +117,8 @@ class TempUploadDeliveryCrudController extends CrudController
                 $insertDlv->group_ds_num = $ds_num['group'];
                 $insertDlv->po_line = $dataTemp->po_line;
                 $insertDlv->po_num = $dataTemp->po_num;
-                $insertDlv->po_release = 0;
+                $insertDlv->po_change = $poLine->po_change;
+                $insertDlv->po_release = $poLine->po_release;
                 $insertDlv->ds_line = $ds_line;
                 $insertDlv->item = $poLine->item;
                 $insertDlv->description = $poLine->description;
