@@ -336,6 +336,7 @@ class DeliveryCrudController extends CrudController
             $insertDsheet->po_num = $poLine->po_num;
             $insertDsheet->po_line = $poLine->po_line;
             $insertDsheet->po_release = $poLine->po_release;
+            $insertDsheet->po_change = $poLine->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
             $insertDsheet->item = $poLine->item;
             $insertDsheet->description = $poLine->description;
