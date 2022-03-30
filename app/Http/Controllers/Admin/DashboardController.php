@@ -8,6 +8,7 @@ use App\Models\DeliveryStatus;
 use App\Models\GeneralMessage;
 use App\Models\PurchaseOrder;
 use App\Models\Comment;
+use App\Models\Vendor;
 use App\Models\PurchaseOrderLine;
 use App\Helpers\Constant;
 use App\Models\User;
@@ -33,17 +34,47 @@ class DashboardController extends Controller
         $countDeliveryStatus = $this->countDeliveryStatus();
         $user = User::where('id', backpack_user()->id);
         $user->select(DB::raw("datediff(current_date(), DATE(last_update_password)) as selisih_pertahun"));
-        
+       
+
         $listDsUnRead = [];
-        $unReadComments = Comment::where('status',1)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
+        $dataVendor = null;
+        if(Constant::getRole() == "Admin PTKI"){   
+            $unReadComments = Comment::where('status',1)->where('user_id', '!=', backpack_user()->id)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
+        }
+        else{
+            $unReadComments = DB::table('comments')
+                ->join('delivery_status', 'comments.tax_invoice_id', '=', 'delivery_status.id')
+                ->join('po', 'delivery_status.po_num', '=', 'po.po_num')
+                ->join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
+                ->where('comments.status', 1)
+                ->where('comments.user_id', '!=', backpack_user()->id)
+                ->select('comments.*', 'vendor.vend_num as vendNumber')
+                ->get();
+            $dataVendor = Vendor::where('id', backpack_user()->vendor_id)->first();
+        }
+        // $unReadComments = Comment::where('status',1)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
         foreach($unReadComments as $comment){
-            $deliveryStatusData =  DeliveryStatus::where('id',$comment['tax_invoice_id'])->select('ds_num', 'ds_line')->first();
-            if($deliveryStatusData != null){
-                $listDsUnRead[] = [
-                    'dsNumber' => $deliveryStatusData['ds_num'],
-                    'dsLine' => $deliveryStatusData['ds_line']
-                ];
+            if(Constant::getRole() != 'Admin PTKI'){
+                if($dataVendor != null && $dataVendor->vend_num == $comment->vendNumber){
+                    $deliveryStatusData =  DeliveryStatus::where('id',$comment->tax_invoice_id)->select('ds_num', 'ds_line')->first();
+                    if($deliveryStatusData != null){
+                        $listDsUnRead[] = [
+                            'dsNumber' => $deliveryStatusData['ds_num'],
+                            'dsLine' => $deliveryStatusData['ds_line']
+                        ];
+                    }
+                }
             }
+            else{
+                $deliveryStatusData =  DeliveryStatus::where('id',$comment['tax_invoice_id'])->select('ds_num', 'ds_line')->first();
+                if($deliveryStatusData != null){
+                    $listDsUnRead[] = [
+                        'dsNumber' => $deliveryStatusData['ds_num'],
+                        'dsLine' => $deliveryStatusData['ds_line']
+                    ];
+                }
+            }
+           
         }
 
 
