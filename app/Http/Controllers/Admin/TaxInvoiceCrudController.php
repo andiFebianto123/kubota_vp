@@ -101,18 +101,18 @@ class TaxInvoiceCrudController extends CrudController
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
                     $searchOnlyPo = str_replace("-", "", $searchTerm);
-                    $query->orWhere('po_num', 'like', '%'.$searchOnlyPo.'%');
+                    $query->orWhere('delivery_status.po_num', 'like', '%'.$searchOnlyPo.'%');
                     if (str_contains($searchTerm, '-')) {
                         $query->orWhere(function($q) use ($searchTerm) {
                             $searchWithSeparator = explode("-", $searchTerm);
-                            $q->where('po_num', 'like', '%'.$searchWithSeparator[0].'%')
-                              ->Where('po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                            $q->where('delivery_status.po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery_status.po_line', 'like', '%'.$searchWithSeparator[1].'%');
                         });
                     }
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
-                return $query->orderBy('po_num', $columnDirection);
+                return $query->orderBy('delivery_status.po_num', $columnDirection);
             }
         ]);
         CRUD::addColumn([
@@ -351,13 +351,95 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::addField([
             'name'        => 'ds_nums',
             'label'       => "Delivery Status",
-            'type'        => 'checklist_table',
-            'table'       =>  ['table_header' => $this->deliveryStatus()['header'], 'table_body'=> $this->deliveryStatus()['body']]
+            'type'        => 'checklist_table_ajax',
+            'ajax_url'    => url('admin/tax-invoice/ajax-delivery-status'),
+            'table'       =>  ['table_header' => $this->deliveryStatus()['header']]
         ]);
 
         $this->crud->setCreateView('vendor.backpack.crud.create-tax');
     }
 
+
+    public function ajaxDeliveryStatus(){
+
+        ## Read value
+        $draw = request('draw');
+        $start = request("start");
+        $rowperpage = request("length"); // Rows display per page
+   
+        $columnIndex_arr = request('order');
+        $columnName_arr = request('columns');
+        $order_arr = request('order');
+        $search_arr = request('search');
+   
+        // $columnIndex = $columnIndex_arr[0]['column']; // Column index
+        // $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+        // $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+        $searchValue = $search_arr['value']; // Search value
+   
+        // Total records
+        $countDeliveryStatuses = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
+            ->join('vendor', 'vendor.vend_num', 'po.vend_num')
+            ->where('validate_by_fa_flag', 1)
+            ->where('executed_flag', 0)
+            ->count();
+        $totalRecords = $countDeliveryStatuses;
+        $totalRecordswithFilter = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
+                        ->join('vendor', 'vendor.vend_num', 'po.vend_num')
+                        ->where('validate_by_fa_flag', 1)
+                        ->where('executed_flag', 0)
+                        ->select('count(*) as allcount')
+                        ->where('po.po_num', 'like', '%' .$searchValue . '%')
+                        ->count();
+   
+        $deliveryStatuses = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
+            ->join('vendor', 'vendor.vend_num', 'po.vend_num')
+            ->where('validate_by_fa_flag', 1)
+            ->where('executed_flag', 0)
+            ->select('delivery_status.*', 'po.vend_num', 'vendor.currency')
+            ->orderBy('delivery_status.id', 'desc')
+            ->skip($start)
+            ->take($rowperpage);
+        if(Constant::getRole() != 'Admin PTKI'){
+            $deliveryStatuses = $deliveryStatuses->where('po.vend_num', backpack_user()->vendor->vend_num)
+            ->get();
+        }else{
+            $deliveryStatuses = $deliveryStatuses->get();
+        }
+   
+        $tableBody = [];        
+        foreach ($deliveryStatuses as $key => $ds) {
+            $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
+            $tableBody[] = [
+                    $ds->id,
+                    // "<input type='checkbox' name='ds_nums[]' selectRow='true' class='dt-checkboxes' value='{{$ds->id}}'>",
+                    $ds->po_num.'-'.$ds->po_line,
+                    $ds->ds_num,
+                    $ds->ds_line,
+                    $ds->item,
+                    $ds->description,
+                    date('Y-m-d', strtotime($ds->payment_plan_date)),
+                    $ds->currency.' '.Constant::getPrice($ds->unit_price),
+                    $ds->received_qty,
+                    $ds->rejected_qty,
+                    $ds->no_faktur_pajak,
+                    $ds->no_surat_jalan_vendor,
+                    $ds->currency.' '.Constant::getPrice($ds->harga_sebelum_pajak),
+                    $ds->currency.' '.Constant::getPrice($ds->ppn),
+                    $ds->currency.' '.Constant::getPrice($ds->pph),
+                    $ds->currency.' '.Constant::getPrice($total),
+                ];
+        }
+
+        $response = array(
+           "draw" => intval($draw),
+           "iTotalRecords" => $totalRecords,
+           "iTotalDisplayRecords" => $totalRecordswithFilter,
+           "aaData" => $tableBody
+        );
+   
+        return $response;
+    }
 
     private function deliveryStatus(){
         $tableHeader = [
@@ -377,45 +459,9 @@ class TaxInvoiceCrudController extends CrudController
             'PPH',
             'Total',
         ];
-        $deliveryStatuses = DeliveryStatus::select('*',
-            DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency"))
-            ->where('validate_by_fa_flag', 1)
-            ->where('executed_flag', 0)
-            ->orderBy('id', 'desc');
-            if(Constant::getRole() != 'Admin PTKI'){
-            $deliveryStatuses = $deliveryStatuses->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
-            ->get();
-        }else{
-            $deliveryStatuses = $deliveryStatuses->get();
-        }
-        $tableBody = [];
-
-        foreach ($deliveryStatuses as $key => $ds) {
-            $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
-            $tableBody[] =[
-                'column' => [
-                    $ds->po_num.'-'.$ds->po_line,
-                    $ds->ds_num,
-                    $ds->ds_line,
-                    $ds->item,
-                    $ds->description,
-                    date('Y-m-d', strtotime($ds->payment_plan_date)),
-                    $ds->currency.' '.Constant::getPrice($ds->unit_price),
-                    $ds->received_qty,
-                    $ds->rejected_qty,
-                    $ds->no_faktur_pajak,
-                    $ds->no_surat_jalan_vendor,
-                    $ds->currency.' '.Constant::getPrice($ds->harga_sebelum_pajak),
-                    $ds->currency.' '.Constant::getPrice($ds->ppn),
-                    $ds->currency.' '.Constant::getPrice($ds->pph),
-                    $ds->currency.' '.Constant::getPrice($total),
-                ],
-                'value' => $ds->id
-            ];
-        }
-
+        
         $table['header'] = $tableHeader;
-        $table['body'] = $tableBody;
+        $table['body'] = [];
 
         return $table;
     }
