@@ -71,13 +71,15 @@ class DsValidation
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
+    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)->where('po_line', $poLine)->first();
     $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
-      ->where('po_line.po_num', '=', $poNum)
+      ->where('po_line.item', '=', $currentPoLine->item)
       ->where('po.vend_num', '=', $po->vend_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
+      ->orderBy('po_line.due_date', 'asc')
       ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
@@ -97,7 +99,7 @@ class DsValidation
         $arrOldPo[] = $op;
       }
     }
-    $arrOldPo = collect($arrOldPo)->sortBy('num_line')->take(1);
+    $arrOldPo = collect($arrOldPo)->take(1);
 
     return [
       'datas'  => $arrOldPo,
@@ -115,13 +117,15 @@ class DsValidation
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
+    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)->where('po_line', $poLine)->first();
     $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
-      ->where('po_line.po_num', '=', $poNum)
+      ->where('po_line.item', '=', $currentPoLine->item)
       ->where('po.vend_num', '=', $po->vend_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
+      ->orderBy('po_line.due_date', 'asc')
       ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
@@ -148,7 +152,7 @@ class DsValidation
         $arrOldPo[] = $op;
       }
     }
-    $arrOldPo = collect($arrOldPo)->sortBy('num_line')->take(1);
+    $arrOldPo = collect($arrOldPo)->take(1);
 
     return [
       'datas'  => $arrOldPo,
