@@ -625,7 +625,7 @@ class TaxInvoiceCrudController extends CrudController
 
             Comment::where('tax_invoice_id', $invoiceId)
             ->where('user_id', '!=', backpack_user()->id)
-            ->update(['status' => 0]);
+            ->update(['status' => 0, 'read_by' => backpack_user()->id]);
 
             return response()->json([
                 'result' => $data,
