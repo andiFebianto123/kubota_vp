@@ -110,7 +110,7 @@ class TempUploadDelivery extends Model
         if($this->shipped_qty <= 0){
             $arrValidation[] = ['mode' => 'danger', 'message' => 'QTY cannot be 0'];
         }
-        if($this->purchaseOrderLine->status != 1){
+        if($this->purchaseOrderLine->accept_flag != 1){
             $arrValidation[] = ['mode' => 'danger', 'message' => 'This PO LINE has not been accepted'];
         }
         if (!isset($this->petugas_vendor)) {
