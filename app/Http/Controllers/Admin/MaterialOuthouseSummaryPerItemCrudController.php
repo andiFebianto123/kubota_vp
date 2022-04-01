@@ -79,7 +79,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $this->crud->groupBy('matl_item');
         $this->crud->groupBy('pl.status');
         $this->crud->addClause("where", "pl.status", "O");
-
+        
         if(Constant::getRole() == 'Admin PTKI'){
             CRUD::column('vend_num')->label('Vend Num');
             $this->crud->addFilter([

@@ -78,6 +78,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>{{$entry->order_qty}}</td>
                 </tr>
                 <tr>
+                    <td>Due Date</td>
+                    <td>:</td>
+                    <td>{{date('Y-m-d', strtotime($entry->due_date))}}</td>
+                </tr>
+                <tr>
                     <td>Status</td>
                     <td>:</td>
                     <td>    <span class="{{$arr_po_line_status[$entry->status]['color']}}">
