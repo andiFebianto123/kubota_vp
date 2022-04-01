@@ -16,10 +16,12 @@ use App\Models\PurchaseOrderLine;
 use App\Models\StatusHistoryChurch;
 use App\Models\TempUploadDelivery;
 use Carbon\Carbon;
+use Exception;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithStartRow;
@@ -70,13 +72,14 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
             $insert->po_line = $row_po_line;
             $insert->user_id = backpack_auth()->user()->id;
             $insert->shipped_qty = $row_qty;
-            $insert->delivery_date = (isset($row_delivery_date)) ? $this->transformDate($row_delivery_date):now();
+            $insert->delivery_date = (isset($row_delivery_date)) ? $this->transformDate($row_delivery_date): "";
             $insert->petugas_vendor	 = $row_petugas_vendor;
             $insert->no_surat_jalan_vendor = $row_do_number_vendor;
             $insert->save();
         }
         
     }
+
 
     private function transformDate($value, $format = 'Y-m-d')
     {

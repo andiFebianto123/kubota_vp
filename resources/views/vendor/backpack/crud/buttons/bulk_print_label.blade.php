@@ -1,11 +1,11 @@
-<button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel(this)"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
+<button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel(this)"><i class="la la-file-pdf"></i> <span>PDFs Label</span></button>
 
 @push('after_scripts')
 <script>
-    var urlPrintLabel = "{{url('admin/delivery-print-label-post')}}"
+    var urlPrintLabel = "{{url('admin/delivery-export-pdf-mass-label-post')}}"
 
 	function printLabel(button) {
-
+		console.log(urlPrintLabel);
 	    if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)
 	    {
   	        new Noty({

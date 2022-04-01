@@ -471,7 +471,7 @@ class DeliveryCrudController extends CrudController
     }
 
 
-    public function exportPdf()
+    public function exportPdfSingleDs()
     {
         $id = request('id');
         $withPrice = request('wh');
@@ -488,16 +488,26 @@ class DeliveryCrudController extends CrudController
     }
 
 
-    public function exportMassPdf()
+    public function exportPdfMassDsPost(Request $request)
     {
-        $strParam = request('param');
-        $arrParam = unserialize(base64_decode($strParam));
+        $printAll = $request->print_deliveries;
+        $poNum = $request->po_num;
+        $poLine = $request->po_line;
+        $printDeliveries = $request->print_delivery;
+        $withPrice = 'no';
 
-        $printAll = $arrParam['print_all'];
-        $poNum = $arrParam['po_num'];
-        $poLine = $arrParam['po_line'];
-        $printDeliveries = $arrParam['print_delivery'];
-        $withPrice = $arrParam['with_price'];
+        $arrParam['print_all'] = $printAll;
+        $arrParam['po_num'] = $poNum;
+        $arrParam['po_line'] = $poLine;
+        $arrParam['print_delivery'] = $printDeliveries;
+        $arrParam['with_price'] = $withPrice;
+
+        if (!isset($printDeliveries)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pilih Minimal 1 DS'
+                ], 200);
+        }
 
         if ($printAll) {
             $deliveries = Delivery::where('po_num', $poNum)
@@ -519,62 +529,35 @@ class DeliveryCrudController extends CrudController
         }
 
         $data['deliveries'] = $arrDeliveries;
+        $path = public_path('export-pdf/');
 
     	$pdf = PDF::loadview('exports.pdf.delivery_sheet_multiple',$data);
         $filename = 'ds-'.date('YmdHis').'.pdf';
+        $pdf->save($path . '/' . $filename);
+        $pdf->download($filename);
 
-        return $pdf->download($filename);
-    }
-
-
-    public function exportMassPdfPost(Request $request)
-    {
-        $printAll = $request->print_deliveries;
-        $poNum = $request->po_num;
-        $poLine = $request->po_line;
-        $printDeliveries = $request->print_delivery;
-        $withPrice = 'yes';
-
-        $arrParam['print_all'] = $printAll;
-        $arrParam['po_num'] = $poNum;
-        $arrParam['po_line'] = $poLine;
-        $arrParam['print_delivery'] = $printDeliveries;
-        $arrParam['with_price'] = $withPrice;
-
-        $strParam = base64_encode(serialize($arrParam));
-
-        if (!isset($printDeliveries)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Pilih Minimal 1 DS'
-                ], 200);
-        }
         return response()->json([
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses Generate PDF',
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
+            'redirect_to' => asset('export-pdf/'.$filename) ,
             'validation_errors' => []
         ], 200);
     }
 
 
-    public function exportMassPdfPost2(Request $request)
+    public function exportPdfMassLabelPost(Request $request)
     {
         $printAll = $request->print_deliveries;
         $poNum = $request->po_num;
         $poLine = $request->po_line;
         $printDeliveries = $request->print_delivery;
-        $withPrice = 'no';
-
+        
         $arrParam['print_all'] = $printAll;
         $arrParam['po_num'] = $poNum;
         $arrParam['po_line'] = $poLine;
         $arrParam['print_delivery'] = $printDeliveries;
-        $arrParam['with_price'] = $withPrice;
-
-        $strParam = base64_encode(serialize($arrParam));
 
         if (!isset($printDeliveries)) {
             return response()->json([
@@ -582,12 +565,44 @@ class DeliveryCrudController extends CrudController
                 'message' => 'Pilih Minimal 1 DS'
                 ], 200);
         }
+
+        $printDelivery = $arrParam['print_delivery'];
+        $id = 0 ;
+
+        if($printDelivery  != null){
+            $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+            ->join('po', 'po.po_num', 'delivery.po_num')
+            ->whereIn('delivery.id', $printDelivery )
+            ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+            ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
+            'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
+            'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
+        }else{
+            if($id != 0){
+                $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+                ->join('po', 'po.po_num', 'delivery.po_num')
+                ->where('delivery.id', $id)
+                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
+                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
+                'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
+            }
+        }
+
+        $data['data'] = $db->get();
+        $path = public_path('export-pdf/');
+        $filename = 'label-'.date('YmdHis').'.pdf';
+
+        $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
+        $pdf->save($path . '/' . $filename);
+        $pdf->download($filename);
+
         return response()->json([
             'status' => true,
             'alert' => 'success',
             'message' => 'Sukses Generate PDF',
             'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
+            'redirect_to' => asset('export-pdf/'.$filename) ,
             'validation_errors' => []
         ], 200);
     }

@@ -20,7 +20,7 @@
                 <th>Order Qty</th>
                 <th>Change</th>
                 <th>Qty</th>
-                <th>DS Delivery Date</th>
+                <th>DS Delivery Date (ex. 2021-12-30)</th>
                 <th>Petugas Vendor</th>
                 <th>No Surat Jalan</th>
             </tr>

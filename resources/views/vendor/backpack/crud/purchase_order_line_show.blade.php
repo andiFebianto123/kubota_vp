@@ -143,10 +143,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
-                <form id="form-print-mass-ds" action="{{url('admin/delivery-print-label-all')}}" method="post">
-                    @csrf
-                    <input type="hidden" name="po_num"  value="{{$entry->po_num}}" >
-                    <input type="hidden" name="po_line"  value="{{$entry->po_line}}" >
 
                     <table id="ds-table" class="table table-striped mb-0 table-responsive">
                         <thead>
@@ -223,7 +219,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
                     @endif
                     <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
-                </form>
                 @else
                 <p>No Data Available</p>
                 @endif
@@ -311,8 +306,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 </div>
 @stack('crud_fields_scripts')
 <script>
-    var urlMassDs = "{{url('admin/delivery-export-mass-pdf-post')}}"
-    var urlPrintLabel = "{{url('admin/delivery-print-label-post')}}"
+    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
+    var urlPrintLabel = "{{url('admin/delivery-export-pdf-mass-label-post')}}"
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
@@ -321,16 +316,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         $('#ds-table').DataTable();
         initializeFieldsWithJavascript('form');
     } );
-
-    function printLabel(){
-        $("#form-print-mass-ds").attr('action', urlPrintLabel)
-        submitAfterValid('form-print-mass-ds')
-    }
-
-    function printMassDs(){
-        $("#form-print-mass-ds").attr('action', urlMassDs)
-        submitAfterValid('form-print-mass-ds')
-    }
 
     function submitNewDs(){
         var showModal = false
@@ -356,32 +341,45 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         }
     }
 
+    var rowsSelected = []
     var totalChecked = 0
 
-    $('#check-all-cb').change(function () {
+    $('#check-all-cb').change(function (e) {
         totalChecked = 0
         $(".check-delivery").prop('checked', $(this).prop('checked'))
         anyChecked = $(this).prop('checked')
         $(this).val($(this).prop('checked'))
         if ($(this).prop('checked')) {
-            totalChecked = $(this).data('delivery')
+            $("#ds-table tbody input[type='checkbox']").prop("checked", false).trigger("click");
+        }else{
+            $("#ds-table tbody input[type='checkbox']").prop("checked", true).trigger("click");
         }
-        $('#btn-for-form-print-label span').text('PDF Label ('+totalChecked+')')
-        $('#btn-for-form-print-mass-ds span').text('PDF DS ('+totalChecked+')')
+        e.stopPropagation()
     })
 
-    $('.check-delivery').change(function () {
-        if ($(this).prop('checked')==true){
-            $(this).prop('checked', true) 
+    $("#ds-table tbody").on('click', 'input[type="checkbox"]', function(e){
+        var rowId = $(this).val();
+        var index = $.inArray(rowId, rowsSelected);
+        if(this.checked && index === -1){
+            rowsSelected.push(rowId);
+            $(this).prop('checked', true)
             totalChecked ++
-        }else{
-            $(this).prop('checked', false)
+        } else if (!this.checked && index !== -1){
+            rowsSelected.splice(index, 1)
+            $(this).prop('checked', false) 
             totalChecked --
         }
+        e.stopPropagation();
+    });
 
-        $('#btn-for-form-print-label span').text('PDF Label ('+totalChecked+')')
-        $('#btn-for-form-print-mass-ds span').text('PDF DS ('+totalChecked+')')
-    })
+    function printLabel(){
+        submitAjaxValid('form-print-label', {action:urlPrintLabel, data: { print_delivery: rowsSelected}})
+    }
+
+
+    function printMassDs(){
+        submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: rowsSelected}})
+    }
 
     function initializeFieldsWithJavascript(container) {
       var selector;

@@ -22,6 +22,7 @@ use App\Mail\vendorNewPo;
 use App\Helpers\EmailLogWriter;
 use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class PurchaseOrderCrudController extends CrudController
 {
@@ -282,11 +283,21 @@ class PurchaseOrderCrudController extends CrudController
     }
 
 
-    public function templateMassDs()
+    public function templateMassDs(Request $request)
     {
         $filename = 'template-mass-ds-'.date('YmdHis').'.xlsx';
 
-        return Excel::download(new TemplateMassDsExport(backpack_auth()->user()), $filename);
+        Excel::store(new TemplateMassDsExport(backpack_auth()->user()),$filename, 'excel_export');
+        // public_path('export-excel/'.$filename);
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Sukses Generate PDF',
+            'newtab' => true,
+            'redirect_to' => asset('export-excel/'.$filename) ,
+            'validation_errors' => []
+        ], 200);
     }
 
 
@@ -317,27 +328,27 @@ class PurchaseOrderCrudController extends CrudController
 
             session()->flash('message', 'Data has been successfully import');
             session()->flash('status', 'success');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (Throwable $e) {
 
-            $failures = $e->failures();
-            $arrErrors = [];
+            // $failures = $e->mes();
+            // $arrErrors = [];
 
-            foreach ($failures as $failure) {
-                $arrErrors[] = [
-                    'row' => $failure->row(),
-                    'errormsg' => $failure->errors(),
-                    'values' => $failure->values(),
-                ];
-            }
-            $errorMultiples = collect($arrErrors)->unique('row');
+            // foreach ($failures as $failure) {
+            //     $arrErrors[] = [
+            //         'row' => $failure->row(),
+            //         'errormsg' => $failure->errors(),
+            //         'values' => $failure->values(),
+            //     ];
+            // }
+            // $errorMultiples = collect($arrErrors)->unique('row');
 
             return response()->json([
                 'status' => false,
                 'alert' => 'danger',
-                'message' => 'Gagal mengimport data',
+                'message' => 'Gagal mengimport data, periksa kembali file Anda',
                 'validation_errors' => [],
-                'mass_errors' => $errorMultiples
-            ], 200);
+                'mass_errors' => []
+            ], 500);
         }
 
         return response()->json([
