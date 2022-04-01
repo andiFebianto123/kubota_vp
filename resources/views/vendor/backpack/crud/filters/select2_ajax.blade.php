@@ -139,6 +139,7 @@
 				        }
 				    }
 				}).on('change', function (evt) {
+					crud.checkedItems = [];
 					var val = $(this).val();
 					var val_text = $(this).select2('data')[0]?$(this).select2('data')[0].text:null;
 					var parameter = filterName;
