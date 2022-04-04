@@ -155,18 +155,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="mt-4 text-center">
-                <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
+                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
                 {{--
 
                 @if($constant::getRole() == 'Admin PTKI')
-                    <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                    <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                    <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                    <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
                 @else
                     @if($constant::checkPermission('Print DS with Price'))
-                        <a href="{{url('admin/delivery-export-pdf?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                        <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                     @endif
                     @if($constant::checkPermission('Print DS without Price'))
-                        <a href="{{url('admin/delivery-export-pdf?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
+                        <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
                     @endif
                 @endif
 

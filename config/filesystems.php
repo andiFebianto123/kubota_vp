@@ -30,6 +30,11 @@ return [
 
     'disks' => [
 
+        'excel_export' => [
+            'driver' => 'local',
+            'root' => public_path('export-excel'),
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),

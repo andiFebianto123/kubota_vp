@@ -128,6 +128,8 @@
 
                 $(this).change(function() {
 	                var value = '';
+					crud.checkedItems = [];
+
 	                if (Array.isArray($(this).val())) {
 	                    // clean array from undefined, null, "".
 	                    var values = $(this).val().filter(function(e){ return e === 0 || e });

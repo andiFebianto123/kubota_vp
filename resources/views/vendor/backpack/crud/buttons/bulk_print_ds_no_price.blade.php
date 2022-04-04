@@ -1,11 +1,10 @@
-<button type="button" id="btn-for-form-print-mass-ds2" class="btn btn-sm btn-danger" onclick="printMassDs2(this)"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
+<button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs(this)"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
 
 @push('after_scripts')
 <script>
-    var urlMassDs2 = "{{url('admin/delivery-export-mass-pdf-post2')}}"
+    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
 
-	function printMassDs2(button) {
-console.log(crud);
+	function printMassDs(button) {
 		if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)
 		{
 			new Noty({
@@ -15,7 +14,7 @@ console.log(crud);
 
 			return;
 		}
-		submitAjaxValid('form-print-mass-ds2', {action:urlMassDs2, data: { print_delivery: crud.checkedItems }})
+		submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: crud.checkedItems }})
 	}
 </script>
 @endpush

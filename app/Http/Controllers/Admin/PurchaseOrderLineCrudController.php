@@ -231,86 +231,23 @@ class PurchaseOrderLineCrudController extends CrudController
     }
 
 
-    public function exportPdfLabelPost(Request $request)
-    {
-        $printAll = $request->print_deliveries;
-        $poNum = $request->po_num;
-        $poLine = $request->po_line;
-        $printDeliveries = $request->print_delivery;
-        
-        $arrParam['print_all'] = $printAll;
-        $arrParam['po_num'] = $poNum;
-        $arrParam['po_line'] = $poLine;
-        $arrParam['print_delivery'] = $printDeliveries;
-
-        $strParam = base64_encode(serialize($arrParam));
-
-        if (!isset($printDeliveries)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Pilih Minimal 1 DS'
-                ], 200);
-        }
-
-        return response()->json([
-            'status' => true,
-            'alert' => 'success',
-            'message' => 'Sukses Generate PDF',
-            'newtab' => true,
-            'redirect_to' => url('admin/delivery-print-label').'?param='.$strParam ,
-            'validation_errors' => []
-        ], 200);
-    }
-
-
-    public function exportPdfLabel(){ 
-        $strParam = request('param');
-        $arrParam = unserialize(base64_decode($strParam));
-        $printDelivery = $arrParam['print_delivery'];
-        $id = 0 ;
-
-        if($printDelivery  != null){
-            $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-            ->join('po', 'po.po_num', 'delivery.po_num')
-            ->whereIn('delivery.id', $printDelivery )
-            ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-            ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-            'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
-            'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
-        }else{
-            if($id != 0){
-                $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-                ->join('po', 'po.po_num', 'delivery.po_num')
-                ->where('delivery.id', $id)
-                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
-                'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
-            }
-        }
-
-        $data['data'] = $db->get();
-
-        $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
-
-        return $pdf->stream();
-    }
+    
     
 
-    function exportPdfLabelInstant($id){
-        $delivery = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-                ->join('po', 'po.po_num', 'delivery.po_num')
-                ->where('delivery.id', $id)
-                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-                ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-                'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
-                'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box')
-                ->get();
+    // function exportPdfLabelInstant($id){
+    //     $delivery = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+    //             ->join('po', 'po.po_num', 'delivery.po_num')
+    //             ->where('delivery.id', $id)
+    //             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+    //             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
+    //             'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
+    //             'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box')
+    //             ->get();
         
-        $data['data'] = $delivery;
+    //     $data['data'] = $delivery;
         
-        $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
+    //     $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
 
-        return $pdf->stream();
-    }
+    //     return $pdf->stream();
+    // }
 }

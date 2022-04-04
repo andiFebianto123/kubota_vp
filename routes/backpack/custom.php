@@ -13,10 +13,9 @@ Route::group([
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');
-    Route::get('delivery-export-pdf', 'DeliveryCrudController@exportPdf');
-    Route::get('delivery-export-mass-pdf', 'DeliveryCrudController@exportMassPdf');
-    Route::post('delivery-export-mass-pdf-post', 'DeliveryCrudController@exportMassPdfPost');
-    Route::post('delivery-export-mass-pdf-post2', 'DeliveryCrudController@exportMassPdfPost2');
+    Route::get('delivery-export-pdf-single-ds', 'DeliveryCrudController@exportPdfSingleDs');
+    Route::post('delivery-export-pdf-mass-label-post', 'DeliveryCrudController@exportPdfMassLabelPost');
+    Route::post('delivery-export-pdf-mass-ds-post', 'DeliveryCrudController@exportPdfMassDsPost');
     Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
     Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
     Route::get('template-serial-numbers', 'DeliveryCrudController@exportTemplateSerialNumber');
@@ -40,7 +39,7 @@ Route::group([
     Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
     Route::post('temp-upload-delivery/print-insert-to-db', 'TempUploadDeliveryCrudController@printInsertToDb');
     Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
-    Route::get('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
+    Route::post('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
@@ -72,6 +71,8 @@ Route::group([
     Route::get('export-db', 'ConfigurationCrudController@exportDb');
     Route::get('confirm-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmFakturPajak');
     Route::post('confirm-reject-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmRejectFakturPajak');
+    Route::get('tax-invoice/ajax-delivery-status', 'TaxInvoiceCrudController@ajaxDeliveryStatus');
+
     Route::post('get-comments', 'TaxInvoiceCrudController@showComments');
     Route::post('send-comments', 'TaxInvoiceCrudController@sendMessage');
     Route::post('delete-comments', 'TaxInvoiceCrudController@deleteMessage');

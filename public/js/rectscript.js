@@ -87,15 +87,16 @@ function submitAjaxValid(formId, attrs) {
     var initText = $('#btn-for-'+formId).html()
 
     var imgLoading = "<img src='"+baseUrl+"/img/loading-buffering.gif' width='20px'>"
-    $('#btn-for-'+formId).html(imgLoading+' Processing...')
-    $('#btn-for-'+formId).attr('disabled', 'disabled')
     
     $('.rect-validation').css({ "border": "1px solid #428fc7" })
     $('.error-message').remove()
     $(".progress-loading").remove()
     blinkElement('.btn')
     setInterval(blinkElement, 1000);
-
+    $('.nav-link').attr('onclick', 'alertAnyProcess()')
+    $('#btn-for-'+formId).html(imgLoading+' Processing...')
+    $('#btn-for-'+formId).attr('disabled', 'disabled')
+    
     $.ajax({
         type: "POST",
         url: attrs.action,
@@ -121,6 +122,7 @@ function submitAjaxValid(formId, attrs) {
             } else {
                 messageStatusGeneral("#"+formId, response.message)
             }
+            $('.nav-link').removeAttr('onclick')
         },
         error: function(xhr, status, error) {
             $('#btn-for-'+formId).html(initText)
@@ -135,9 +137,8 @@ function submitAjaxValid(formId, attrs) {
                         //$("#"+formId+' [name='+field_name+']').append('<span class="text-strong textdanger">' +error+ '</span>')
                     })
                 }
-                
             }
-
+            $('.nav-link').removeAttr('onclick')
             messageStatusGeneral("#"+formId, messageErr)
         }
     });
@@ -226,4 +227,8 @@ function blockTempValidation() {
             console.log(k);
         }
     })
+}
+
+function alertAnyProcess() {
+    confirm("Download is still processing... Are you sure want to leave this page")
 }
