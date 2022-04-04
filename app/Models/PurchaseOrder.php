@@ -14,6 +14,15 @@ class PurchaseOrder extends Model
 
     protected $table = 'po';
 
+    protected $fillable = [
+        'po_num',
+        'vend_num',
+        'po_date',
+        'po_change',
+        'email_flag',
+        'session_batch_proccess',
+    ];
+
     public function vendor()
     {
         return $this->belongsTo('App\Models\Vendor', 'vend_num', 'vend_num');

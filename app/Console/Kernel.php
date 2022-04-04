@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\SendMailVendor::class,
-        Commands\ReminderPo::class
+        Commands\ReminderPo::class,
+        Commands\SendMailVendorRealTime::class,
     ];
 
     /**

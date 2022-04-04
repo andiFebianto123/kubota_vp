@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use App\Models\PurchaseOrder;
 
-class SendMailVendor extends Command
+class SendMailVendorRealTime extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'vendor:daily';
+    protected $signature = 'vendor:realtime';
 
     /**
      * The console command description.
@@ -42,8 +42,13 @@ class SendMailVendor extends Command
     public function handle()
     {
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers', 'po.session_batch_proccess')
-        ->whereNull('email_flag');
+        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+        ->whereNull('email_flag')
+        ->where(function($query){
+            return $query->where('session_batch_proccess', 0)
+            ->orWhereNull('session_batch_proccess');
+        });
+
         if($pos->count() > 0){
             # alias terdapat data yang kosong
             $getPo = $pos->get();
@@ -54,7 +59,6 @@ class SendMailVendor extends Command
             }
 
             foreach($getPo as $po){
-                
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                 // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
                 $details = [
@@ -66,6 +70,7 @@ class SendMailVendor extends Command
                 ];
 
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
+
                 if($thePo->session_batch_proccess != null || $thePo->email_flag != null){
                     continue;
                 }
@@ -77,13 +82,11 @@ class SendMailVendor extends Command
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));
                 }
-                // $updatePo = DB::table('po')->where('id', $po->ID)->update([
-                //     'email_flag' => now(),
-                //     'session_batch_proccess' => $batchSession,
-                // ]);
+
                 $thePo->email_flag = now();
                 $thePo->session_batch_proccess = $batchSession;
                 $thePo->save();
+
             }
         }
         $this->info("Cron is working fine!"); 
