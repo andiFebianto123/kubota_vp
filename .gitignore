@@ -2,6 +2,8 @@
 /public/hot
 /public/storage
 /public/files/*
+/public/export-pdf/*
+/public/export-excel/*
 /storage/*.key
 /storage/framework/*
 /vendor
