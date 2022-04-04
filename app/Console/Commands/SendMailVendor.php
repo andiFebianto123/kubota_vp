@@ -53,6 +53,15 @@ class SendMailVendor extends Command
                 $batchSession = $sessionIncrement + 1;
             }
 
+            foreach($getPo as $poo){
+                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
+                if($updatePo->session_batch_proccess == null){
+                    $updatePo->session_batch_proccess = $batchSession;
+                    $updatePo->save();
+                }
+            }
+
+
             foreach($getPo as $po){
                 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
@@ -66,7 +75,7 @@ class SendMailVendor extends Command
                 ];
 
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
-                if($thePo->session_batch_proccess != null || $thePo->email_flag != null){
+                if($thePo->email_flag != null){
                     continue;
                 }
 
@@ -82,7 +91,6 @@ class SendMailVendor extends Command
                 //     'session_batch_proccess' => $batchSession,
                 // ]);
                 $thePo->email_flag = now();
-                $thePo->session_batch_proccess = $batchSession;
                 $thePo->save();
             }
         }
