@@ -51,11 +51,17 @@ class SendMailVendorRealTime extends Command
 
         if($pos->count() > 0){
             # alias terdapat data yang kosong
-            $getPo = $pos->get();
             $sessionIncrement = PurchaseOrder::max('session_batch_proccess');
             $batchSession = 1;
             if($sessionIncrement != null){
                 $batchSession = $sessionIncrement + 1;
+            }
+            $getPo = $pos->get();
+
+            foreach($getPo as $poo){
+                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
+                $updatePo->session_batch_proccess = $batchSession;
+                $updatePo->save();
             }
 
             foreach($getPo as $po){
@@ -71,7 +77,7 @@ class SendMailVendorRealTime extends Command
 
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
 
-                if($thePo->session_batch_proccess != null || $thePo->email_flag != null){
+                if($thePo->email_flag != null){
                     continue;
                 }
 
@@ -84,7 +90,7 @@ class SendMailVendorRealTime extends Command
                 }
 
                 $thePo->email_flag = now();
-                $thePo->session_batch_proccess = $batchSession;
+                // $thePo->session_batch_proccess = $batchSession;
                 $thePo->save();
 
             }
