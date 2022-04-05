@@ -48,7 +48,7 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
         $row_po_num = $row['PO'];
         $row_po_line = $row['PO LINE'];
         $row_qty = $row['Qty'];
-        $row_delivery_date = $row['DS Delivery Date'];
+        $row_delivery_date = $row['DS Delivery Date (ex. 2021-12-30)'];
         $row_petugas_vendor = $row['Petugas Vendor'];
         $row_do_number_vendor = $row['No Surat Jalan'];
         
