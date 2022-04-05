@@ -17,6 +17,7 @@
                 <th>Description</th>
                 <th>Due Date</th>
                 <th>Unit Price</th>
+                <th>Available Qty</th>
                 <th>Order Qty</th>
                 <th>Change</th>
                 <th>Qty</th>
@@ -35,6 +36,7 @@
                     <td>{{ $po_line['description'] }}</td>
                     <td>{{ date('Y-m-d', strtotime($po_line['due_date'])) }}</td>
                     <td>{{ $po_line['unit_price'] }}</td>
+                    <td>{{ $po_line['available_qty'] }}</td>
                     <td>{{ $po_line['order_qty'] }}</td>
                     <td>{{ $po_line['po_change'] }}</td>
                     <td></td>

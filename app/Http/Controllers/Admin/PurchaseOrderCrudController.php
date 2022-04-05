@@ -29,11 +29,15 @@ class PurchaseOrderCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
+
     public function setup()
     {
         CRUD::setModel(PurchaseOrder::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/purchase-order');
         CRUD::setEntityNameStrings('purchase order', 'purchase orders');
+        // $this->crud->filterPoNum = false;
+        // $this->crud->filterVendNum = false;
+
         if(Constant::checkPermission('Read Purchase Order')){
             $this->crud->allowAccess('list');
         }else{
@@ -110,16 +114,24 @@ class PurchaseOrderCrudController extends CrudController
             'placeholder' => 'Pilih item number',
           ],
           function(){
+            session()->put("filter_po_num", null);
+            session()->put("filter_item", null);
           },
           function($values) {
                 $getPoLineSearch = PurchaseOrderLine::whereIn('item', json_decode($values));
                 $keysValue = $getPoLineSearch->select('po_num')->get()->mapWithKeys(function($item, $index){
                     return [$index => $item->po_num];
                 });
+                // $this->crud->filterPoNum = $keysValue->unique()->toArray();
+                session()->put("filter_po_num", $keysValue->unique()->toArray());
+                session()->put("filter_item", $values);
                 $this->crud->addClause('whereIn', 'po_num', $keysValue->unique()->toArray());
           });
 
         if(in_array(Constant::getRole(), ['Admin PTKI'])){
+            if (!request('vendor')) {
+                session()->put("filter_vend_num", null);
+            }
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
@@ -128,7 +140,9 @@ class PurchaseOrderCrudController extends CrudController
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
             function($value) { 
-                $this->crud->addClause('where', 'vend_num', $value);
+                // $this->crud->filterVendNum = $value;
+                    $this->crud->addClause('where', 'vend_num', $value);
+                    session()->put("filter_vend_num", $value);
             });
         }
     }
@@ -286,8 +300,11 @@ class PurchaseOrderCrudController extends CrudController
     public function templateMassDs(Request $request)
     {
         $filename = 'template-mass-ds-'.date('YmdHis').'.xlsx';
+        $attrs['filter_po_num'] = session()->get('filter_po_num') ?? null;
+        $attrs['filter_vend_num'] = session()->get('filter_vend_num') ?? null;
+        $attrs['filter_item'] = session()->get('filter_item') ?? null;
 
-        Excel::store(new TemplateMassDsExport(backpack_auth()->user()),$filename, 'excel_export');
+        Excel::store(new TemplateMassDsExport($attrs),$filename, 'excel_export');
         // public_path('export-excel/'.$filename);
 
         return response()->json([

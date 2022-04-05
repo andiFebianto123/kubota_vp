@@ -2,6 +2,7 @@
 namespace App\Exports;
 
 use App\Helpers\Constant;
+use App\Helpers\DsValidation;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Contracts\View\View;
@@ -14,9 +15,12 @@ use PhpOffice\PhpSpreadsheet\Style\Protection;
 
 class TemplateMassDsExport implements  FromView, WithEvents
 {
-    public function __construct()
+    public function __construct($attrs)
     {
         $this->count_data = 0;
+        $this->filter_vend_num = $attrs['filter_vend_num'];
+        $this->filter_po_num = $attrs['filter_po_num'];
+        $this->filter_item = $attrs['filter_item'];
     }
 
 
@@ -28,12 +32,24 @@ class TemplateMassDsExport implements  FromView, WithEvents
         if(!in_array(Constant::getRole(),['Admin PTKI'])){
             $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
         }
+        if($this->filter_vend_num){
+            $filters[] = ['vend_num', '=', $this->filter_vend_num];
+        }
 
-        $pos = PurchaseOrder::where($filters)->orderBy('po_num','asc')->get();
+        $pos = PurchaseOrder::where($filters);
+        if($this->filter_po_num){
+            $pos = $pos->whereIn('po_num', $this->filter_po_num);
+        }
+        $pos = $pos->orderBy('po_num','asc')->get();
+        $dsValidation = new DsValidation();
+
         $arrPoLines = [];
         foreach ($pos as $key => $po) {
-            $po_lines = PurchaseOrderLine::where('po.po_num', $po->po_num )
-                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+            $po_lines = PurchaseOrderLine::where('po.po_num', $po->po_num );
+            if($this->filter_item){
+                $po_lines = $po_lines->whereIn('item', json_decode($this->filter_item));
+            }
+            $po_lines = $po_lines->leftJoin('po', 'po.po_num', 'po_line.po_num')
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->where('status', 'O')
                                 ->where('accept_flag','!=', 2)
@@ -42,7 +58,18 @@ class TemplateMassDsExport implements  FromView, WithEvents
                                 ->get();
                                 
             $cols = collect($po_lines)->unique('po_line')->sortBy('po_line');
+
             foreach ($cols as $key => $col) {
+                $args2 = [
+                    'po_num' => $col->po_num, 
+                    'po_line' => $col->po_line, 
+                ];
+                
+                $currentMaxQty = $dsValidation->currentMaxQty($args2);
+                if ($col->outhouse_flag == 1) {
+                    $currentMaxQty = $dsValidation->currentMaxQtyOuthouse($args2);       
+                }
+
                 $arrPoLines[] = [
                     'po_num' => $col->po_num,
                     'po_line' => $col->po_line,
@@ -52,6 +79,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
                     'unit_price' => $col->unit_price,
                     'order_qty' => $col->order_qty,
                     'po_change' => $col->po_change,
+                    'available_qty' => $currentMaxQty['datas'],
                 ];
                 $manyData++;
             }
@@ -95,16 +123,16 @@ class TemplateMassDsExport implements  FromView, WithEvents
         
                 ];
 
-                $arrColumns = range('A', 'M');
+                $arrColumns = range('A', 'N');
                 foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
                 
                 $manyData = $this->count_data +1;
-                $event->sheet->getDelegate()->getStyle('A1:M1')->applyFromArray($styleHeader);
-                $event->sheet->getDelegate()->getStyle('B2:I'.$manyData)->applyFromArray($styleGroupProtected);
-                $event->sheet->protectCells('B2:H10', 'PHP');
+                $event->sheet->getDelegate()->getStyle('A1:N1')->applyFromArray($styleHeader);
+                $event->sheet->getDelegate()->getStyle('B2:J'.$manyData)->applyFromArray($styleGroupProtected);
+                $event->sheet->protectCells('B2:J10', 'PHP');
             },
         ];
     }
