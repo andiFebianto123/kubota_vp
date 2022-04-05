@@ -186,7 +186,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
                                     <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
                                     @if($constant::checkPermission('Print Label Delivery Sheet'))
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/print_label')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement="top" title="Print Label"><i class="la la-print"></i></a>
+                                    <button type="button" id="btn-for-form-print-label-{{$delivery->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery->id}}')" ><i class="la la-print"></i></button>
                                     @endif
                                     @if($constant::checkPermission('Delete Delivery Sheet'))
                                     <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
@@ -374,6 +374,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
     function printLabel(){
         submitAjaxValid('form-print-label', {action:urlPrintLabel, data: { print_delivery: rowsSelected}})
+    }
+
+    function printLabelInstant(id){
+        submitAjaxValid('form-print-label-'+id, {action:urlPrintLabel, data: { print_delivery: [id]}})
     }
 
 
