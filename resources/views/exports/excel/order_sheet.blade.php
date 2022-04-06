@@ -180,14 +180,18 @@
                     @endif
                 </td>
                 <td align="right" style="border-right:1px solid #000000;" class="text-nowrap">
-                    @if($po_line->po_change == $po->po_change)
-                    {!! $po_line->change_unit_price_bold !!}
-                    @else
-                    {{$unit_price}}
+                    @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
+                        @if($po_line->po_change == $po->po_change)
+                        {!! $po_line->change_unit_price_bold !!}
+                        @else
+                        {{$unit_price}}
+                        @endif
                     @endif
                 </td>
                 <td align="right" style="border-right:1px solid #000000;" class="text-nowrap">
-                    {{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}
+                    @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
+                        {{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}
+                    @endif
                 </td>
                 <td align="center" style="border-right:1px solid #000000;">
                     {!! date("Y-m-d", strtotime($po_line->production_date)) !!}
@@ -202,7 +206,9 @@
                     <div class="total-price">TOTAL </div>
                 </td>
                 <td colspan="2" style="border-top: 1px solid #000000; border-right: 1px solid #000000;">
+                    @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
                     <div class="total-price"><b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
+                    @endif
                 </td>
             </tr>
             <tr>

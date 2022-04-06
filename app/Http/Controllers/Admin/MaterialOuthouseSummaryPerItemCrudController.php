@@ -39,6 +39,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             WHERE imo.matl_item = material_outhouse.matl_item 
             AND po.vend_num = po1.vend_num
             AND po_line.status = 'O'
+            AND delivery.ds_type != '0R'
             ), 0))
             ) AS mavailable_material";
 

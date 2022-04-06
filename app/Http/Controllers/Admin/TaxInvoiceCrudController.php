@@ -134,14 +134,16 @@ class TaxInvoiceCrudController extends CrudController
             'name'      => 'payment_plan_date', // the column that contains the ID of that connected entity;
             'type' => 'text',
         ]);
-        CRUD::addColumn([
-            'label'     => 'Unit Price', // Table column heading
-            'name'      => 'unit_price', // the column that contains the ID of that connected entity;
-            'type' => 'closure',
-            'function' => function($entry){
-                return $entry->currency.' '.Constant::getPrice($entry->unit_price);
-            }
-        ]);
+        if(Constant::checkPermission('Show Price In List Payment Menu')){
+            CRUD::addColumn([
+                'label'     => 'Unit Price', // Table column heading
+                'name'      => 'unit_price', // the column that contains the ID of that connected entity;
+                'type' => 'closure',
+                'function' => function($entry){
+                    return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                }
+            ]);
+        }
         CRUD::addColumn([
             'label'     => 'Qty Received', // Table column heading
             'name'      => 'received_qty', // the column that contains the ID of that connected entity;
@@ -415,57 +417,60 @@ class TaxInvoiceCrudController extends CrudController
             $deliveryStatuses = $deliveryStatuses->get();
         }
    
-        $tableBody = [];        
+        $tableBodies = [];        
         foreach ($deliveryStatuses as $key => $ds) {
             $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
-            $tableBody[] = [
-                    $ds->id,
-                    $ds->po_num.'-'.$ds->po_line,
-                    $ds->ds_num,
-                    $ds->ds_line,
-                    $ds->item,
-                    $ds->description,
-                    date('Y-m-d', strtotime($ds->payment_plan_date)),
-                    $ds->currency.' '.Constant::getPrice($ds->unit_price),
-                    $ds->received_qty,
-                    $ds->rejected_qty,
-                    $ds->no_faktur_pajak,
-                    $ds->no_surat_jalan_vendor,
-                    $ds->currency.' '.Constant::getPrice($ds->harga_sebelum_pajak),
-                    $ds->currency.' '.Constant::getPrice($ds->ppn),
-                    $ds->currency.' '.Constant::getPrice($ds->pph),
-                    $ds->currency.' '.Constant::getPrice($total),
-                ];
+            $tableBody[] = $ds->id;
+            $tableBody[] = $ds->po_num.'-'.$ds->po_line;
+            $tableBody[] = $ds->ds_num;
+            $tableBody[] = $ds->ds_line;
+            $tableBody[] = $ds->item;
+            $tableBody[] = $ds->description;
+            $tableBody[] = date('Y-m-d', strtotime($ds->payment_plan_date));
+            if(Constant::checkPermission('Show Price In List Payment Menu')){
+                $tableBody[] = $ds->currency.' '.Constant::getPrice($ds->unit_price);
+            }
+            $tableBody[] = $ds->received_qty;
+            $tableBody[] = $ds->rejected_qty;
+            $tableBody[] = $ds->no_faktur_pajak;
+            $tableBody[] = $ds->no_surat_jalan_vendor;
+            $tableBody[] = $ds->currency.' '.Constant::getPrice($ds->harga_sebelum_pajak);
+            $tableBody[] = $ds->currency.' '.Constant::getPrice($ds->ppn);
+            $tableBody[] = $ds->currency.' '.Constant::getPrice($ds->pph);
+            $tableBody[] = $ds->currency.' '.Constant::getPrice($total);
+
+            array_push($tableBodies, $tableBody);
         }
 
         $response = array(
            "draw" => intval($draw),
            "iTotalRecords" => $totalRecords,
            "iTotalDisplayRecords" => $totalRecordswithFilter,
-           "aaData" => $tableBody
+           "aaData" => $tableBodies
         );
    
         return $response;
     }
 
     private function deliveryStatus(){
-        $tableHeader = [
-            'PO',
-            'DS Num',
-            'DS Line',
-            'Item',
-            'Description',
-            'Payment Plan Date',
-            'Unit Price',
-            'Qty Received',
-            'Qty Rejected',
-            'No Faktur',
-            'No Surat Jalan Vendor',
-            'Harga Sebelum Pajak',
-            'PPN',
-            'PPH',
-            'Total',
-        ];
+        $tableHeader = [];
+        $tableHeader[] = 'PO';
+        $tableHeader[] = 'DS Num';
+        $tableHeader[] = 'DS Line';
+        $tableHeader[] = 'Item';
+        $tableHeader[] = 'Description';
+        $tableHeader[] = 'Payment Plan Date';
+        if(Constant::checkPermission('Show Price In List Payment Menu')){
+            $tableHeader[] = 'Unit Price';
+        }
+        $tableHeader[] = 'Qty Received';
+        $tableHeader[] = 'Qty Rejected';
+        $tableHeader[] = 'No Faktur';
+        $tableHeader[] = 'No Surat Jalan Vendor';
+        $tableHeader[] = 'Harga Sebelum Pajak';
+        $tableHeader[] = 'PPN';
+        $tableHeader[] = 'PPH';
+        $tableHeader[] = 'Total';
         
         $table['header'] = $tableHeader;
         $table['body'] = [];

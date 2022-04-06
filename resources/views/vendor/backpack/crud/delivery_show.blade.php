@@ -267,11 +267,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <div class="row">
                         <div class="col-md-6">
                             <table class="table table-striped table-hover">
+                                @if($constant::checkPermission('Show Price In Delivery Sheet Menu'))
                                 <tr>
                                     <td>Unit Price</td>
                                     <td>:</td>
                                     <td> {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                                 </tr>
+                                @endif
                                 <tr>
                                     <td>Vend. Dlv No</td>
                                     <td>:</td>
@@ -297,11 +299,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <td>:</td>
                                     <td> {{$delivery_status->payment_ref_num}}</td>
                                 </tr>
+                                @if($constant::checkPermission('Show Price In Delivery Sheet Menu'))
                                 <tr>
                                     <td>Total</td>
                                     <td>:</td>
                                     <td>{{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
+                                @endif
                             </table>
                         </div>
                         <div class="col-md-6">

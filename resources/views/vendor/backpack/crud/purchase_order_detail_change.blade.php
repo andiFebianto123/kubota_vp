@@ -1,5 +1,5 @@
 @extends(backpack_view('blank'))
-
+@inject('constant', 'App\Helpers\Constant')
 @php
 $defaultBreadcrumbs = [
 trans('backpack::crud.admin') => url(config('backpack.base.route_prefix'), 'dashboard'),
@@ -92,8 +92,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>UM</th>
                             <th>Due Date</th>
                             <th>Tax (%)</th>
+                            @if($constant::checkPermission('Show Price In PO Menu'))
                             <th>Unit Price (IDR)</th>
                             <th>Total Price (IDR)</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -112,9 +114,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->u_m}}</td>
                             <td>{!! $po_line->due_date !!}</td>
                             <td>{{$po_line->tax}}</td>
+                            @if($constant::checkPermission('Show Price In PO Menu'))
                             <td class="text-nowrap">{!! $po_line->unit_price !!}</td>
                             <td class="text-nowrap">{!! $po_line->total_price !!}</td>
-                            
+                            @endif
                         </tr>
                         @endforeach
 

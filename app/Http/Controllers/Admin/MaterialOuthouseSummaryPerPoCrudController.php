@@ -141,6 +141,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
                     ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)  
                     JOIN po ON po.po_num = delivery.po_num
                     WHERE imo.matl_item = mo1.matl_item
+                    AND delivery.ds_type != '0R'
                     AND delivery.po_num = '".$this->data['entry']->po_num."'
                     AND delivery.po_line = '".$this->data['entry']->po_line."'
                     ), 0))

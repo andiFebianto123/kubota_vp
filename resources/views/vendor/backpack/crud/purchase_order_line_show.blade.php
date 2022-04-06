@@ -90,11 +90,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </span>
                     </td>
                 </tr>
+                @if($constant::checkPermission('Show Price In PO Menu'))
                 <tr>
                     <td>Unit Price</td>
                     <td>:</td>
                     <td>{{$entry->purchaseOrder->vendor->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
+                @endif
             </table>
         </div><!-- /.box-body -->
     </div><!-- /.box -->
@@ -156,7 +158,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Group DS</th>
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
                                 <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
+                                @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
                                 <th>Action</th>
@@ -178,7 +182,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->group_ds_num}}</td>
                                 <td>{{date('Y-m-d',strtotime($delivery->shipped_date))}}</td>
                                 <td>{{$delivery->shipped_qty}}</td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
                                 <td>{{number_format($delivery->unit_price,0,',','.')}}</td>
+                                @endif
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
@@ -208,9 +214,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>
                                     {{$total_qty}}
                                 </td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
                                 <td>
                                  {{ number_format($total_price,0,',','.')}}
                                 </td>
+                                @endif
                                 <td colspan='3'></td>
                             </tr>
                         </tfoot>

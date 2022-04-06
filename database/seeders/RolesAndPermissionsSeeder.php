@@ -20,9 +20,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // $this->assignUserRole();
 
-        $this->assignUserRole();
+        // $this->assignUserRole();
 
-        $this->assignRolePermission();
+        // $this->assignRolePermission();
     }
 
     function createRole(){
@@ -454,6 +454,38 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses melihat data Mo di menu history mo'
               ],
               ['name' => 'Read History Summary MO']
+            ],
+            [
+              [
+                "name" => 'Show Price In Delivery Sheet Menu',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat harga di menu delivery sheet'
+              ],
+              ['name' => 'Show Price In Delivery Sheet Menu']
+            ],
+            [
+              [
+                "name" => 'Show Price In Delivery Status Menu',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat harga di menu delivery status'
+              ],
+              ['name' => 'Show Price In Delivery Status Menu']
+            ],
+            [
+              [
+                "name" => 'Show Price In PO Menu',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat harga di menu po'
+              ],
+              ['name' => 'Show Price In PO Menu']
+            ],
+            [
+              [
+                "name" => 'Show Price In List Payment Menu',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses melihat harga di menu list payment'
+              ],
+              ['name' => 'Show Price In List Payment Menu']
             ]
         ];
         foreach($arrPermission as $key => $seed) {
