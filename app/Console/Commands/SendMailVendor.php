@@ -42,12 +42,12 @@ class SendMailVendor extends Command
     public function handle()
     {
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers', 'po.session_batch_proccess')
+        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers', 'po.session_batch_process')
         ->whereNull('email_flag');
         if($pos->count() > 0){
             # alias terdapat data yang kosong
             $getPo = $pos->get();
-            $sessionIncrement = PurchaseOrder::max('session_batch_proccess');
+            $sessionIncrement = PurchaseOrder::max('session_batch_process');
             $batchSession = 1;
             if($sessionIncrement != null){
                 $batchSession = $sessionIncrement + 1;
@@ -55,8 +55,8 @@ class SendMailVendor extends Command
 
             foreach($getPo as $poo){
                 $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
-                if($updatePo->session_batch_proccess == null){
-                    $updatePo->session_batch_proccess = $batchSession;
+                if($updatePo->session_batch_process == null){
+                    $updatePo->session_batch_process = $batchSession;
                     $updatePo->save();
                 }
             }
