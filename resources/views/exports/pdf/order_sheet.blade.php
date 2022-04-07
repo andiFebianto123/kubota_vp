@@ -177,7 +177,7 @@
                                 @endif
                             </td>
                             <td align="right" class="text-nowrap">
-                                @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
+                                @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                                     @if($po_line->po_change == $po->po_change)
                                     {!! $po_line->change_unit_price_bold !!}
                                     @else
@@ -186,7 +186,7 @@
                                 @endif
                             </td>
                             <td align="right" class="text-nowrap">
-                                @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
+                                @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                                     {{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}
                                 @endif
                             </td>
@@ -202,7 +202,7 @@
 
                             </td>
                             <td colspan="2" style="border-top: 1px solid #000000;">
-                                @if(App\Helpers\Constant::checkPermission('Show Price In Menu'))
+                                @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                                 <div class="total-price"><b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
                                 @endif
                             </td>
