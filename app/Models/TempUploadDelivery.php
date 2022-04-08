@@ -19,7 +19,7 @@ class TempUploadDelivery extends Model
         'order_qty',
     ];
 
-    protected $appends = ['po_item', 'po_description', 'category_validation'];
+    protected $appends = ['po_item', 'po_description', 'category_validation', 'available_qty'];
  
     public function cancelInsert($crud = false)
     {
@@ -49,6 +49,11 @@ class TempUploadDelivery extends Model
         return $this->purchaseOrderLine->description;
     }
 
+    public function getAvailableQtyAttribute()
+    {
+        return $this->rowCurrentMaxQty()['datas'];
+    }
+
 
     public function getValidationText(){
         $strValidation = "<label class='validation-row-temp p-0 m-0'>";
@@ -73,27 +78,39 @@ class TempUploadDelivery extends Model
     }
 
 
+    private function rowCurrentMaxQty(){
+        $dsValidation = new DsValidation();
+
+       
+        $args2 = [
+            'po_num' => $this->po_num, 
+            'po_line' => $this->po_line, 
+        ];
+
+        $currentMaxQty = $dsValidation->currentMaxQty($args2);
+        if ($this->purchaseOrderLine->outhouse_flag == 1) {
+            $currentMaxQty = $dsValidation->currentMaxQtyOuthouse($args2);       
+        }
+
+        return $currentMaxQty;
+    }
+
+
     private function rowValidation(){
+        $dsValidation = new DsValidation();
         $arrFilters = [];
         $arrValidation = [];
         $arrFilters[] = ['po_line.item', '=', $this->purchaseOrderLine->item];
+        $currentMaxQty = $this->rowCurrentMaxQty();
+
         $args1 = [  
             'filters' => $arrFilters, 
             'due_date' => $this->purchaseOrderLine->due_date, 
             'po_num' => $this->po_num, 
             'po_line' => $this->po_line
         ];
-        $args2 = [
-            'po_num' => $this->po_num, 
-            'po_line' => $this->po_line, 
-        ];
-
-        $dsValidation = new DsValidation();
         $unfinishedPoLine = $dsValidation->unfinishedPoLineMass($args1);
-        $currentMaxQty = $dsValidation->currentMaxQty($args2);
-        if ($this->purchaseOrderLine->outhouse_flag == 1) {
-            $currentMaxQty = $dsValidation->currentMaxQtyOuthouse($args2);       
-        }
+
         if (sizeof($unfinishedPoLine['datas']) > 0 ) {
             $messageUpl = $unfinishedPoLine['message']." ";
             foreach($unfinishedPoLine['datas'] as $key => $upl){
