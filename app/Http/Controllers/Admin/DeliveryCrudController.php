@@ -213,6 +213,13 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $entry->ds_line)
                             ->sum('rejected_qty');
 
+        $delivery = Delivery::where('ds_num', $deliveryStatus->ref_ds_num)->first();
+        $htmlRefDsNum = '-';
+        if (isset($delivery)) {
+            $url = url('admin/delivery').'/'.$delivery->id.'/show';
+            $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$deliveryStatus->ref_ds_num."</a>";
+        }
+
         $data['crud'] = $this->crud;
         $data['entry'] = $entry;
         $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
@@ -222,6 +229,7 @@ class DeliveryCrudController extends CrudController
         $data['qty_reject_count'] = $qtyRejectCount;
         $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
         $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
+        $data['html_ref_ds_num'] = $htmlRefDsNum;
 
         $can_access = false;
         if(in_array(Constant::getRole(),['Admin PTKI'])){

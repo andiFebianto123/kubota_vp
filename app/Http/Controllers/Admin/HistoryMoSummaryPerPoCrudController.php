@@ -39,7 +39,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 WHERE delivery.po_num = dlv.po_num AND delivery.po_line = dlv.po_line
                 AND (delivery.shipped_date >= '".$startDate."' 
                 AND delivery.shipped_date <= '".$endDate." 23:59:59')
-                AND dlv.ds_type != '0R'
+                AND dlv.ds_type IN ('00','01')
                 ) AS sum_qty_order";
         
         $this->crud->query = $this->crud->query->select(
@@ -199,7 +199,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                         WHERE imo.matl_item = pimo.matl_item 
                         AND delivery.po_num = '". $delivery->po_num."'
                         AND delivery.po_line = '". $delivery->po_line."'
-                        AND delivery.ds_type != '0R'
+                        AND delivery.ds_type IN ('00','01')
                         AND (delivery.shipped_date >= '".$startDate."' 
                         AND delivery.shipped_date <= '".$endDate." 23:59:59')
                     ) AS m_total_qty
@@ -210,7 +210,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 )
                 WHERE delivery.po_num = '".$delivery->po_num."'
                 AND delivery.po_line = '". $delivery->po_line."'
-                AND delivery.ds_type != '0R'
+                AND delivery.ds_type IN ('00','01')
                 AND (delivery.shipped_date >= '".$startDate."' 
                 AND delivery.shipped_date <= '".$endDate." 23:59:59')
                 GROUP BY pimo.matl_item";

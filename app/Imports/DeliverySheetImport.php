@@ -31,9 +31,9 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
-    public function __construct($filename)
+    public function __construct($attrs)
     {
-        $this->filename = $filename;
+        $this->insert_or_update = $attrs['insert_or_update'];
     }
 
     public function collection(Collection $rows)
@@ -45,40 +45,48 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
 
     private function singleRow($row)
     {
-        $row_po_num = $row['PO'];
-        $row_po_line = $row['PO LINE'];
-        $row_qty = $row['Qty'];
-        $row_delivery_date = $row['DS Delivery Date (ex. 2021-12-30)'];
-        $row_petugas_vendor = $row['Petugas Vendor'];
-        $row_do_number_vendor = $row['No Surat Jalan'];
+        $rowPoNum = $row['PO'];
+        $rowPoLine = $row['PO LINE'];
+        $rowQty = $row['Qty'];
+        $rowDeliveryDate = $row['DS Delivery Date (ex. 2021-12-30)'];
+        $rowPetugasVendor = $row['Petugas Vendor'];
+        $rowDoNumberVendor = $row['No Surat Jalan'];
+
+        $existPo = PurchaseOrderLine::where('po_num',  $rowPoNum)
+                    ->where('po_line', $rowPoLine)
+                    ->exists();
         
         $filled = 0;
-
-        if (isset($row_qty) ) {
+        if (isset($rowPetugasVendor) ) {
             $filled ++;
         }
-        if (isset($row_delivery_date) ) {
+        if (isset($rowDoNumberVendor) ) {
             $filled ++;
         }
-        if (isset($row_petugas_vendor) ) {
-            $filled ++;
-        }
-        if (isset($row_do_number_vendor) ) {
-            $filled ++;
-        }
-        if (isset($row_po_num) && isset($row_po_line) && $filled > 0   ) {
-            $insert = new TempUploadDelivery();
-            $insert->po_num = $row_po_num;
-            $insert->po_line = $row_po_line;
-            $insert->user_id = backpack_auth()->user()->id;
-            $insert->shipped_qty = $row_qty;
-            $insert->delivery_date = (isset($row_delivery_date)) ? $this->transformDate($row_delivery_date): "";
-            $insert->petugas_vendor	 = $row_petugas_vendor;
-            $insert->no_surat_jalan_vendor = $row_do_number_vendor;
-            $insert->save();
+        if ($existPo && (isset($rowQty) || $rowQty > 0) && is_numeric($rowQty) && isset($rowDeliveryDate)) {
+            $tud = TempUploadDelivery::firstOrNew([
+                'po_num' => $rowPoNum,
+                'po_line' => $rowPoLine,
+                'user_id' => backpack_auth()->user()->id,
+            ]);
+            $tud->po_num = $rowPoNum;
+            $tud->po_line = $rowPoLine;
+            $tud->user_id = backpack_auth()->user()->id;
+            $tud->shipped_qty = $rowQty;
+            $tud->delivery_date = (isset($rowDeliveryDate)) ? $this->transformDate($rowDeliveryDate): "";
+            $tud->petugas_vendor = $rowPetugasVendor;
+            $tud->no_surat_jalan_vendor = $rowDoNumberVendor;
+            $tud->save();
         }
         
     }
+
+    // public function rules(): array
+    // {
+    //     return [
+    //         'qty' => 'numeric',
+    //     ];
+    // }
 
 
     private function transformDate($value, $format = 'Y-m-d')
@@ -94,4 +102,6 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
     {
         return 1;
     }
+
+
 }

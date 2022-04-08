@@ -40,7 +40,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
                 WHERE imo.matl_item = issued_material_outhouse.matl_item 
                 AND (delivery.shipped_date >= '".$startDate."' 
                 AND delivery.shipped_date <= '".$endDate." 23:59:59')
-                AND delivery.ds_type != '0R'
+                AND delivery.ds_type IN ('00','01')
                 ) AS sum_qty_total";
 
         $this->crud->query = $this->crud->query->select(

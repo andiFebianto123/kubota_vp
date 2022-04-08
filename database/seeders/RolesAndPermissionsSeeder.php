@@ -190,22 +190,6 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             [
               [
-                "name" => "Print DS with Price",
-                "guard_name" => "web",
-                "description" => "Mempunyai akses mencetak DS dengan harga"
-              ],
-              ['name' => 'Print DS with Price'],
-            ],
-            [
-              [
-                "name" => "Print DS without Price",
-                "guard_name" => "web",
-                "description" => "Mempunyai akses mencetak DS tanpa harga"
-              ],
-              ['name' => 'Print DS without Price'],
-            ],
-            [
-              [
                 "name" => "Read Delivery Sheet in Table",
                 "guard_name" => "web",
                 "description" => "Mempunyai akses melihat detail delivery sheet"

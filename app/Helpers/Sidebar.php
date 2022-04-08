@@ -19,11 +19,20 @@ class Sidebar
       ],
       [
         'name' => 'Purchase Order',
-        'url' => backpack_url('purchase-order'),
+        'url' => '#',
         'icon' => 'la-newspaper',
         'key' => 'purchase-order',
         'access' => Constant::checkPermission('Read Purchase Order'),
-        'childrens' => []
+        'childrens' => [
+          [
+            'name' => 'List PO',
+            'url' => backpack_url('purchase-order'),
+          ],
+          [
+            'name' => 'Temporary DS',
+            'url' => backpack_url('temp-upload-delivery'),
+          ]
+        ]
       ],
       [
         'name' => 'Delivery Sheet',

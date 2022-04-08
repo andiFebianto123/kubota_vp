@@ -35,6 +35,7 @@ Route::group([
     Route::get('purchase-order-line/{id}/unread', 'PurchaseOrderLineCrudController@unread');
     Route::get('purchase-order/{id}/{line}/detail-change', 'PurchaseOrderCrudController@detailChange');
     Route::post('send-mail-new-po', 'PurchaseOrderCrudController@sendMailNewPo');
+    Route::get('purchase-order/check-existing-temp', 'PurchaseOrderCrudController@checkExistingTemp');
 
     Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
     Route::post('temp-upload-delivery/print-insert-to-db', 'TempUploadDeliveryCrudController@printInsertToDb');
