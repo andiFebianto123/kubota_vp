@@ -63,7 +63,7 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
         if (isset($rowDoNumberVendor) ) {
             $filled ++;
         }
-        if ($existPo && (isset($rowQty) || $rowQty > 0) && is_numeric($rowQty) && isset($rowDeliveryDate)) {
+        if ($existPo && isset($rowQty) && $rowQty > 0 && is_numeric($rowQty) && isset($rowDeliveryDate)) {
             $tud = TempUploadDelivery::firstOrNew([
                 'po_num' => $rowPoNum,
                 'po_line' => $rowPoLine,
@@ -80,13 +80,6 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
         }
         
     }
-
-    // public function rules(): array
-    // {
-    //     return [
-    //         'qty' => 'numeric',
-    //     ];
-    // }
 
 
     private function transformDate($value, $format = 'Y-m-d')

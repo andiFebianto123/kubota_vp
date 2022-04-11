@@ -134,6 +134,24 @@ class DeliveryCrudController extends CrudController
             'name'      => 'petugas_vendor',
             'type' => 'text',
         ]);
+        CRUD::addColumn([
+            'name'     => 'ref_ds_num',
+            'label'    => 'Ref DS Num',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $delivery = Delivery::where('ds_num', $entry->ref_ds_num)
+                    ->where('ds_line', $entry->ref_ds_line)
+                    ->first();
+                $html = '';
+                if (isset($delivery)) {
+                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
+                }
+                
+                return $html;
+            }
+        ]);
+        CRUD::column('ref_ds_line')->label('Ref DS Line');
 
         if(Constant::getRole() == 'Admin PTKI'){
             $this->crud->addFilter([
@@ -237,13 +255,13 @@ class DeliveryCrudController extends CrudController
                             ->where('ds_line', $dsLine)
                             ->sum('rejected_qty');
 
-        $deliveryFromRef = Delivery::where('ds_num', $deliveryStatus->ref_ds_num)
-                    ->where('ds_line', $deliveryStatus->ref_ds_line)
+        $deliveryFromRef = Delivery::where('ds_num', $delivery->ref_ds_num)
+                    ->where('ds_line', $delivery->ref_ds_line)
                     ->first();
         $htmlRefDsNum = '-';
         if (isset($deliveryFromRef)) {
             $url = url('admin/delivery-detail').'/'.$deliveryFromRef->ds_num.'/'.$deliveryFromRef->ds_line;
-            $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$deliveryStatus->ref_ds_num."-".$deliveryStatus->ref_ds_line."</a>";
+            $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$delivery->ref_ds_num."-".$delivery->ref_ds_line."</a>";
         }
 
         $data['delivery'] = $delivery;
