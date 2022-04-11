@@ -190,7 +190,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('admin/delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
                                     @if($constant::checkPermission('Print Label Delivery Sheet'))
                                     <button type="button" id="btn-for-form-print-label-{{$delivery->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery->id}}')" ><i class="la la-print"></i></button>
                                     @endif

@@ -112,10 +112,12 @@ class DeliveryStatusCrudController extends CrudController
             'label'    => 'Ref DS Num',
             'type'     => 'closure',
             'function' => function($entry) {
-                $delivery = Delivery::where('ds_num', $entry->ref_ds_num)->first();
+                $delivery = Delivery::where('ds_num', $entry->ref_ds_num)
+                    ->where('ds_line', $entry->ref_ds_line)
+                    ->first();
                 $html = '';
                 if (isset($delivery)) {
-                    $url = url('admin/delivery').'/'.$delivery->id.'/show';
+                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
                 }
                 

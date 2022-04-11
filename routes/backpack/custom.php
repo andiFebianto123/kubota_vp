@@ -13,6 +13,7 @@ Route::group([
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');
+    Route::get('delivery-detail/{ds_num}/{ds_line}', 'DeliveryCrudController@deliveryDetail');
     Route::get('delivery-export-pdf-single-ds', 'DeliveryCrudController@exportPdfSingleDs');
     Route::post('delivery-export-pdf-mass-label-post', 'DeliveryCrudController@exportPdfMassLabelPost');
     Route::post('delivery-export-pdf-mass-ds-post', 'DeliveryCrudController@exportPdfMassDsPost');

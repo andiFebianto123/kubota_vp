@@ -16,7 +16,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize">{{$entry->ds_num}}</span>
+        <span class="text-capitalize">{{$delivery->ds_num}}</span>
         <small>Preview</small>
         @if ($crud->hasAccess('list'))
         <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> {{ trans('backpack::crud.back_to_all') }} <span>{{ $crud->entity_name_plural }}</span></a></small>
@@ -40,7 +40,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </button>
                         <ul class="dropdown-menu">
                             @foreach ($crud->model->getAvailableLocales() as $key => $locale)
-                            <a class="dropdown-item" href="{{ url($crud->route.'/'.$entry->getKey().'/show') }}?locale={{ $key }}">{{ $locale }}</a>
+                            <a class="dropdown-item" href="{{ url('delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line) }}?locale={{ $key }}">{{ $locale }}</a>
                             @endforeach
                         </ul>
                     </div>
@@ -137,7 +137,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="mt-4 text-center">
-                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
+                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$delivery->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
             </div>
         </div>
     
@@ -147,7 +147,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-secondary">
-                Delivery Status
+                <label class="font-weight-bold mb-0">Delivery Status</label>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -231,7 +231,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         @if(backpack_user()->roles->first()->hasPermissionTo('Show Payment Status DS'))
             <div class="card">
                 <div class="card-header bg-secondary">
-                    Payment Status
+                    <label class="font-weight-bold mb-0">Payment Status</label>
                 </div>
                 <div class="card-body">
                     <div class="row">

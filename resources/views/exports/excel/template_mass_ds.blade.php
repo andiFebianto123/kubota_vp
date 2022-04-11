@@ -19,8 +19,8 @@
                 @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                 <th>Unit Price</th>
                 @endif
-                <th>Available Qty</th>
                 <th>Order Qty</th>
+                <th>Available Qty</th>
                 <th>Change</th>
                 <th>Qty</th>
                 <th>DS Delivery Date (ex. 2021-12-30)</th>
@@ -40,8 +40,8 @@
                     @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                     <td>{{ $po_line['unit_price'] }}</td>
                     @endif
-                    <td>{{ $po_line['available_qty'] }}</td>
                     <td>{{ $po_line['order_qty'] }}</td>
+                    <td>{{ $po_line['available_qty'] }}</td>
                     <td>{{ $po_line['po_change'] }}</td>
                     <td></td>
                     <td></td>
