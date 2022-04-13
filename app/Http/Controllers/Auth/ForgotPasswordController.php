@@ -60,7 +60,7 @@ class ForgotPasswordController extends Controller
         $insert_otp->save();
 
         $details = [
-            'title' => 'Mail from Kubota.com',
+            'title' => 'Mail from '.env('APP_EMAIL', 'ptkubota.co.id'),
             'message' => 'Gunakan Link di bawah ini untuk mereset password',
             'type' => 'forgot_password',
             'fp_url' => route("reset-password")."?t=".$token

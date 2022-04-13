@@ -29,6 +29,7 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::setModel(DeliveryStatus::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery-status');
         CRUD::setEntityNameStrings('delivery status', 'delivery statuses');
+
         if(Constant::checkPermission('Read Delivery Status in Table')){
             $this->crud->allowAccess('list');
         }else{

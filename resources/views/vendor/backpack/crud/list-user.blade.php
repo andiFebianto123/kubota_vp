@@ -176,20 +176,24 @@
           </button>
         </div>
         <div class="modal-body">
-          <p>Silahkan menggunakan template di bawah ini untuk mengimport 
-            <br><a href="{{url('admin/template-users')}}">template-users-sheet.xlsx</a>
-          </p>
-          <form id="form-upload-user" action="{{ backpack_url('user-import') }}" method="POST" enctype="multipart/form-data">
-          <div class="form-group" style="border: 1px solid gray; padding: 6px;">
-            <input type="file" name="file"/>
-          </div>
-          </form>
+          <p>Silahkan menggunakan template di bawah ini untuk mengimport </p>
+            <div class="" style="border: 1px solid #9e9e9e; padding: 0px 12px;">
+                Template : 
+                <a href="{{url('admin/template-users')}}" class="btn btn-link">template-users-sheet.xlsx</a>
+            </div>
+            <div class ="mt-3" style="border-top: 1px solid gray;">&nbsp</div>
+            <p>Silahkan upload file untuk diimport melalui button dibawah ini </p>
+            <form id="form-upload-user" action="{{ backpack_url('user-import') }}" method="POST" enctype="multipart/form-data">
+              <div class="form-group" style="border: 1px solid gray; padding: 6px;">
+                <input type="file" name="file"/>
+              </div>
+            </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button> 
-          <button type="button" id="send-file" class="btn btn-primary">
-            Submit
-          </button>
+          <div class="mt-4 text-right">
+            <button id="send-file" type="button" class="btn btn-sm m-1 btn-outline-vp-primary">Import</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+          </div>    
         </div>
       </div>
     </div>

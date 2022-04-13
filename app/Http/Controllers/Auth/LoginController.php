@@ -75,7 +75,7 @@ class LoginController extends Controller
         $insertOtp->save();
 
         $details = [
-            'title' => 'Mail from Kubota.com',
+            'title' => 'Mail from '.env('APP_EMAIL', 'ptkubota.co.id'),
             'message' => 'Gunakan Link di bawah ini untuk mereset password',
             'type' => 'forgot_password',
             'fp_url' => route("reset-password")."?t=".$token
@@ -109,7 +109,7 @@ class LoginController extends Controller
             $two_factor_url = md5($twoFactorCode);
 
             $details = [
-                'title' => 'Mail from Kubota.com',
+                'title' => 'Mail from '.env('APP_EMAIL', 'ptkubota.co.id'),
                 'message' => 'Kode OTP anda adalah',
                 'type' => 'otp',
                 'otp_code' => "<span style='font-size:30px;'>".$twoFactorCode. "</span>",
@@ -136,7 +136,7 @@ class LoginController extends Controller
             }
             catch(Exception $e){
                 DB::beginTransaction();
-                $subject = "Mail from Kubota.com";
+                $subject = "Mail from ".env('APP_EMAIL', 'ptkubota.co.id');
                 (new EmailLogWriter())->create($subject, $user->email, $e->getMessage());
                 DB::commit();
 
