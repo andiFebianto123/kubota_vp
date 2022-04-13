@@ -7,6 +7,7 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use App\Helpers\Constant;
 use Illuminate\Http\Request;
+use App\Models\Delivery;
 use App\Models\DeliveryStatus;
 use Illuminate\Support\Facades\DB;
 use App\Exports\TemplateExportAll;
@@ -86,30 +87,49 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('shipped_qty')->label('Shipped Qty');
         CRUD::column('received_qty')->label('Received Qty');
         CRUD::column('rejected_qty')->label('Rejected Qty');
-        CRUD::addColumn([
-            'label'     => 'Unit Price', // Table column heading
-            'name'      => 'unit_price', // the column that contains the ID of that connected entity;
-            'type'     => 'closure',
-            'function' => function($entry) {
-                $currency = $entry->purchaseOrder->vendor->currency;
-                $val = number_format($entry->unit_price, 0, ',', '.');
-                return $currency." ".$val;
-            }
-        ]);
-        CRUD::addColumn([
-            'name'     => 'total',
-            'label'    => 'Total',
-            'type'     => 'closure',
-            'function' => function($entry) {
-                $currency = $entry->purchaseOrder->vendor->currency;
-                $val = number_format($entry->total, 0, ',', '.');
-                return $currency." ".$val;
-            }
-        ]);
+        if(Constant::checkPermission('Show Price In Delivery Status Menu')){
+            CRUD::addColumn([
+                'label'     => 'Unit Price', // Table column heading
+                'name'      => 'unit_price', // the column that contains the ID of that connected entity;
+                'type'     => 'closure',
+                'function' => function($entry) {
+                    $currency = $entry->purchaseOrder->vendor->currency;
+                    $val = number_format($entry->unit_price, 0, ',', '.');
+                    return $currency." ".$val;
+                }
+            ]);
+            CRUD::addColumn([
+                'name'     => 'total',
+                'label'    => 'Total',
+                'type'     => 'closure',
+                'function' => function($entry) {
+                    $currency = $entry->purchaseOrder->vendor->currency;
+                    $val = number_format($entry->total, 0, ',', '.');
+                    return $currency." ".$val;
+                }
+            ]);
+        }
         CRUD::column('petugas_vendor')->label('Petugas Vendor');
         CRUD::column('no_faktur_pajak')->label('No Faktur Pajak');
         CRUD::column('no_surat_jalan_vendor')->label('No Surat Jalan Vendor');
-        CRUD::column('ref_ds_num')->label('Ref DS Num');
+       // CRUD::column('ref_ds_num')->label('Ref DS Num');
+        CRUD::addColumn([
+            'name'     => 'ref_ds_num',
+            'label'    => 'Ref DS Num',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $delivery = Delivery::where('ds_num', $entry->ref_ds_num)
+                    ->where('ds_line', $entry->ref_ds_line)
+                    ->first();
+                $html = '';
+                if (isset($delivery)) {
+                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
+                }
+                
+                return $html;
+            }
+        ]);
         CRUD::column('ref_ds_line')->label('Ref DS Line');
         CRUD::column('created_at');
         CRUD::column('updated_at');

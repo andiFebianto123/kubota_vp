@@ -122,8 +122,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>UM</th>
                             <th>Due Date</th>
                             <th>Tax (%)</th>
+                            @if($constant::checkPermission('Show Price In PO Menu'))
                             <th>Unit Price ({{$entry->vendor->currency}})</th>
                             <th>Total Price ({{$entry->vendor->currency}})</th>
+                            @endif
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
@@ -154,8 +156,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->u_m}}</td>
                             <td>{!! $po_line->change_due_date !!}</td>
                             <td>{{$po_line->tax}}</td>
+                            @if($constant::checkPermission('Show Price In PO Menu'))
                             <td class="text-nowrap">{!! $po_line->change_unit_price !!}</td>
                             <td class="text-nowrap">{!! $po_line->change_total_price !!}</td>
+                            @endif
                             <td>{!! $po_line->reformat_flag_accept !!}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>

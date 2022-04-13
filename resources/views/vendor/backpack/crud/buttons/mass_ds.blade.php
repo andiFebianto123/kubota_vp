@@ -22,6 +22,15 @@
                 <p></p>
                 <input id="field_file_ds" type="file" name="file_po" class="form-control py-1 rect-validation">
 
+                <div id="field_existing_ds" class="d-none">
+                    <hr>
+                    <p>
+                        Data temporary masih berisi draft DS!
+                    </p>
+                    <input type="radio" name="insert_or_update" value="insert" checked> Clear Data Temporary<br>
+                    <input type="radio" name="insert_or_update" value="update"> Update Existing
+                </div>
+
                 <div class="mt-4 text-right">
                     <button id="btn-for-form-import-ds" type="button" class="btn btn-sm m-1 btn-outline-vp-primary" onclick="submitAfterValid('form-import-ds')">Import</a>
                     <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
@@ -35,11 +44,25 @@
 <script>
     $("#field_file_ds").click(function(){
         $("#field_file_ds").val('');
+        $("#field_existing_ds").addClass("d-none") 
     });
+    $('#field_file_ds').on("change", function(){ 
+        $('button').attr('disabled', 'disabled')
+        var urlCheckExistingTemp = "{{url('admin/purchase-order/check-existing-temp')}}"
+        $.get( urlCheckExistingTemp, function( data ) {
+            if (data.counting > 0) {
+                $("#field_existing_ds").removeClass("d-none") 
+            }
+            $('button').removeAttr('disabled')
+        });
+    });
+
     function downloadTemplateMassDs(){
         var urlTemplateMassDs = "{{url('admin/template-mass-ds')}}"
         submitAjaxValid('form-template-mass-ds', {action:urlTemplateMassDs, data: {}})
     }
+
+    
     
 </script>
 @endpush

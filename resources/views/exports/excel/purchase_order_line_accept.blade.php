@@ -16,8 +16,10 @@
                 <th>Description</th>
                 <th>Qty</th>
                 <th>UM</th>
+                @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                 <th>Unit Price</th>
                 <th>Total Price</th>
+                @endif
             </tr>
             </thead>
             <tbody>
@@ -29,8 +31,10 @@
                     <td>{{ $po->description }}</td>
                     <td>{{ $po->order_qty }}</td>
                     <td>{{ $po->u_m }}</td>
+                    @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                     <td>{{ $po->unit_price }}</td>
                     <td>{{ $po->order_qty*$po->unit_price }}</td>
+                    @endif
                 </tr>
             @endforeach
             </tbody>

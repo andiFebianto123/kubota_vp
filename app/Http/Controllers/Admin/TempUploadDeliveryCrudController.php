@@ -73,6 +73,10 @@ class TempUploadDeliveryCrudController extends CrudController
             'name'      => 'shipped_qty', 
         ]);
         CRUD::addColumn([
+            'label'     => 'Available Qty', // Table column heading
+            'name'      => 'available_qty', 
+        ]);
+        CRUD::addColumn([
             'label'     => 'Petugas Vendor', // Table column heading
             'name'      => 'petugas_vendor', 
         ]);

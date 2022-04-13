@@ -21,6 +21,8 @@ class TemplateMassDsExport implements  FromView, WithEvents
         $this->filter_vend_num = $attrs['filter_vend_num'];
         $this->filter_po_num = $attrs['filter_po_num'];
         $this->filter_item = $attrs['filter_item'];
+        $this->header_range = $attrs['header_range']; // default M
+        $this->style_range = $attrs['style_range']; // default I
     }
 
 
@@ -32,6 +34,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
         if(!in_array(Constant::getRole(),['Admin PTKI'])){
             $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
         }
+       
         if($this->filter_vend_num){
             $filters[] = ['vend_num', '=', $this->filter_vend_num];
         }
@@ -70,18 +73,20 @@ class TemplateMassDsExport implements  FromView, WithEvents
                     $currentMaxQty = $dsValidation->currentMaxQtyOuthouse($args2);       
                 }
 
-                $arrPoLines[] = [
-                    'po_num' => $col->po_num,
-                    'po_line' => $col->po_line,
-                    'item' => $col->item,
-                    'description' => $col->description,
-                    'due_date' => $col->due_date,
-                    'unit_price' => $col->unit_price,
-                    'order_qty' => $col->order_qty,
-                    'po_change' => $col->po_change,
-                    'available_qty' => $currentMaxQty['datas'],
-                ];
-                $manyData++;
+                if ($currentMaxQty['datas'] > 0) {
+                    $arrPoLines[] = [
+                        'po_num' => $col->po_num,
+                        'po_line' => $col->po_line,
+                        'item' => $col->item,
+                        'description' => $col->description,
+                        'due_date' => $col->due_date,
+                        'unit_price' => $col->unit_price,
+                        'order_qty' => $col->order_qty,
+                        'po_change' => $col->po_change,
+                        'available_qty' => $currentMaxQty['datas'],
+                    ];
+                    $manyData++;
+                }
             }
             $this->count_data = $manyData;
         }
@@ -123,16 +128,16 @@ class TemplateMassDsExport implements  FromView, WithEvents
         
                 ];
 
-                $arrColumns = range('A', 'N');
+                $arrColumns = range('A',  $this->header_range);
                 foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
                 
                 $manyData = $this->count_data +1;
-                $event->sheet->getDelegate()->getStyle('A1:N1')->applyFromArray($styleHeader);
-                $event->sheet->getDelegate()->getStyle('B2:J'.$manyData)->applyFromArray($styleGroupProtected);
-                $event->sheet->protectCells('B2:J10', 'PHP');
+                $event->sheet->getDelegate()->getStyle('A1:'.$this->header_range.'1')->applyFromArray($styleHeader);
+                $event->sheet->getDelegate()->getStyle('B2:'.$this->style_range.$manyData)->applyFromArray($styleGroupProtected);
+                $event->sheet->protectCells('B2:'.$this->style_range.'10', 'PHP');
             },
         ];
     }

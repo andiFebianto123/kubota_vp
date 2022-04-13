@@ -16,9 +16,11 @@
                 <th>Item</th>
                 <th>Description</th>
                 <th>Due Date</th>
+                @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                 <th>Unit Price</th>
-                <th>Available Qty</th>
+                @endif
                 <th>Order Qty</th>
+                <th>Available Qty</th>
                 <th>Change</th>
                 <th>Qty</th>
                 <th>DS Delivery Date (ex. 2021-12-30)</th>
@@ -35,9 +37,11 @@
                     <td>{{ $po_line['item'] }}</td>
                     <td>{{ $po_line['description'] }}</td>
                     <td>{{ date('Y-m-d', strtotime($po_line['due_date'])) }}</td>
+                    @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
                     <td>{{ $po_line['unit_price'] }}</td>
-                    <td>{{ $po_line['available_qty'] }}</td>
+                    @endif
                     <td>{{ $po_line['order_qty'] }}</td>
+                    <td>{{ $po_line['available_qty'] }}</td>
                     <td>{{ $po_line['po_change'] }}</td>
                     <td></td>
                     <td></td>

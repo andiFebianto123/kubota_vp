@@ -37,9 +37,11 @@ class DeliveryCrudController extends CrudController
         CRUD::setModel(Delivery::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery');
         CRUD::setEntityNameStrings('delivery sheet', 'delivery sheets');
+        $this->crud->denyAccess('show');
         $this->crud->denyAccess('list');
         if(Constant::checkPermission('Read Delivery Sheet in Table')){
             $this->crud->allowAccess('list');
+            $this->crud->allowAccess('show-detail');
         }
     }
 
@@ -58,6 +60,7 @@ class DeliveryCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->enableBulkActions();
+        $this->crud->addButtonFromView('line', 'show_detail_ds', 'show_detail_ds', 'beginning');
 
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
         $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
@@ -133,6 +136,24 @@ class DeliveryCrudController extends CrudController
             'name'      => 'petugas_vendor',
             'type' => 'text',
         ]);
+        CRUD::addColumn([
+            'name'     => 'ref_ds_num',
+            'label'    => 'Ref DS Num',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $delivery = Delivery::where('ds_num', $entry->ref_ds_num)
+                    ->where('ds_line', $entry->ref_ds_line)
+                    ->first();
+                $html = '';
+                if (isset($delivery)) {
+                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
+                }
+                
+                return $html;
+            }
+        ]);
+        CRUD::column('ref_ds_line')->label('Ref DS Line');
 
         if(Constant::getRole() == 'Admin PTKI'){
             $this->crud->addFilter([
@@ -195,52 +216,77 @@ class DeliveryCrudController extends CrudController
     }
 
 
-    public function show()
-    {
-        $entry = $this->crud->getCurrentEntry();
+    public function deliveryDetail($dsNum, $dsLine){
+        $can_access = false;
 
-        $deliveryStatus = DeliveryStatus::where('ds_num', $entry->ds_num )
-                            ->where('ds_line', $entry->ds_line)
-                            ->first();
-
-        $deliveryRejects = DeliveryReject::where('ds_num', $entry->ds_num )
-                            ->where('ds_line', $entry->ds_line)
-                            ->get();
-
-        $deliveryRepairs = DeliveryRepair::where('ds_num_reject', $entry->ds_num )
-                            ->where('ds_line_reject', $entry->ds_line)
-                            ->get();
-
-        $qtyRejectCount = DeliveryReject::where('ds_num', $entry->ds_num )
-                            ->where('ds_line', $entry->ds_line)
-                            ->sum('rejected_qty');
+        $delivery = Delivery::join('po', 'po.po_num', 'delivery.po_num')
+        ->where('delivery.ds_num', $dsNum)
+        ->where('delivery.ds_line', $dsLine)
+        ->select('delivery.*', 'po.vend_num')
+        ->first();
 
         $data['crud'] = $this->crud;
-        $data['entry'] = $entry;
-        $data['delivery_show'] = $this->detailDS($entry->id)['delivery_show'];
-        $data['delivery_status'] = $deliveryStatus;
-        $data['delivery_rejects'] = $deliveryRejects;
-        $data['delivery_repairs'] = $deliveryRepairs;
-        $data['qty_reject_count'] = $qtyRejectCount;
-        $data['issued_mos'] =$this->detailDS($entry->id)['issued_mos'];
-        $data['qr_code'] = $this->detailDS($entry->id)['qr_code'];
+        $data['ds_num'] = $dsNum;
+        $data['ds_line'] = $dsLine;
 
-        $can_access = false;
+        if (!isset($delivery)) {
+            return view('vendor.backpack.crud.delivery_show_none', $data);
+        }
+
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             $can_access = true;
         }else{
-            $po = Delivery::join('po', 'po.po_num', 'delivery.po_num')
-                    ->where('delivery.id', $entry->id )->first();
-            if (backpack_auth()->user()->vendor->vend_num == $po->vend_num) {
+            if (backpack_auth()->user()->vendor->vend_num == $delivery->vend_num) {
                 $can_access = true;
             }
         }
 
+        $deliveryStatus = DeliveryStatus::where('ds_num', $dsNum )
+                            ->where('ds_line', $dsLine)
+                            ->first();
+
+        $deliveryRejects = DeliveryReject::where('ds_num', $dsNum )
+                            ->where('ds_line', $dsLine)
+                            ->get();
+
+        $deliveryRepairs = DeliveryRepair::where('ds_num_reject', $dsNum)
+                            ->where('ds_line_reject', $dsLine)
+                            ->get();
+
+        $qtyRejectCount = DeliveryReject::where('ds_num', $dsNum)
+                            ->where('ds_line', $dsLine)
+                            ->sum('rejected_qty');
+
+        $deliveryFromRef = Delivery::where('ds_num', $delivery->ref_ds_num)
+                    ->where('ds_line', $delivery->ref_ds_line)
+                    ->first();
+        $htmlRefDsNum = '-';
+        if (isset($deliveryFromRef)) {
+            $url = url('admin/delivery-detail').'/'.$deliveryFromRef->ds_num.'/'.$deliveryFromRef->ds_line;
+            $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$delivery->ref_ds_num."-".$delivery->ref_ds_line."</a>";
+        }
+
+        $data['delivery'] = $delivery;
+        $data['delivery_show'] = $this->detailDS($delivery->id)['delivery_show'];
+        $data['delivery_status'] = $deliveryStatus;
+        $data['delivery_rejects'] = $deliveryRejects;
+        $data['delivery_repairs'] = $deliveryRepairs;
+        $data['qty_reject_count'] = $qtyRejectCount;
+        $data['issued_mos'] =$this->detailDS($delivery->id)['issued_mos'];
+        $data['qr_code'] = $this->detailDS($delivery->id)['qr_code'];
+        $data['html_ref_ds_num'] = $htmlRefDsNum;
+
         if ($can_access) {
             return view('vendor.backpack.crud.delivery_show', $data);
         }else{
-            abort(404);
+            return view('vendor.backpack.crud.delivery_show_none', $data);
         }
+    }
+
+
+    public function show()
+    {
+        abort(404);
     }
 
 

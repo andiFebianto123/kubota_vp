@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use App\Helpers\EmailLogWriter;
 use App\Helpers\Constant;
+use App\Models\TempUploadDelivery;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use Maatwebsite\Excel\Events\AfterSheet;
@@ -305,9 +306,17 @@ class PurchaseOrderCrudController extends CrudController
     public function templateMassDs(Request $request)
     {
         $filename = 'template-mass-ds-'.date('YmdHis').'.xlsx';
+        $headerRange = "M";
+        $styleRange = "I";
+        if(Constant::checkPermission('Show Price In PO Menu')){
+            $headerRange = "N";
+            $styleRange = "J";
+        }
         $attrs['filter_po_num'] = session()->get('filter_po_num') ?? null;
         $attrs['filter_vend_num'] = session()->get('filter_vend_num') ?? null;
         $attrs['filter_item'] = session()->get('filter_item') ?? null;
+        $attrs['header_range'] = $headerRange; // default M
+        $attrs['style_range'] = $styleRange; // default I
 
         Excel::store(new TemplateMassDsExport($attrs),$filename, 'excel_export');
         // public_path('export-excel/'.$filename);
@@ -323,15 +332,28 @@ class PurchaseOrderCrudController extends CrudController
     }
 
 
+    public function checkExistingTemp(){
+        $countTemp = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->count();
+
+        return response()->json([
+            'status' => true,
+            'counting' => $countTemp,
+        ], 200);
+    }
+
+
     public function importDs(Request $request)
     {
         $rules = [
             'file_po' => 'required|mimes:xlsx,xls',
         ];
 
+        $insertOrUpdate = $request->input('insert_or_update');
         $file = $request->file('file_po');
+
+        DB::beginTransaction();
         
-        $attrs['filename'] = $file;
+        $attrs['insert_or_update'] = $insertOrUpdate;
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -345,8 +367,12 @@ class PurchaseOrderCrudController extends CrudController
         }
 
         try {
+            if ($insertOrUpdate == 'insert') {
+                TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+            }
             $import = new DeliverySheetImport($attrs);
             $import->import($file);
+            DB::commit();
 
             session()->flash('message', 'Data has been successfully import');
             session()->flash('status', 'success');
@@ -363,6 +389,8 @@ class PurchaseOrderCrudController extends CrudController
             //     ];
             // }
             // $errorMultiples = collect($arrErrors)->unique('row');
+
+            DB::rollback();
 
             return response()->json([
                 'status' => false,

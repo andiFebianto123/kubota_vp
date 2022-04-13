@@ -16,7 +16,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 <section class="container-fluid d-print-none">
     <a href="javascript: window.print();" class="btn float-right"><i class="la la-print"></i></a>
     <h2>
-        <span class="text-capitalize">{{$entry->ds_num}}</span>
+        <span class="text-capitalize">{{$delivery->ds_num}}</span>
         <small>Preview</small>
         @if ($crud->hasAccess('list'))
         <small class=""><a href="javascript:history.back()" class="font-sm"><i class="la la-angle-double-left"></i> {{ trans('backpack::crud.back_to_all') }} <span>{{ $crud->entity_name_plural }}</span></a></small>
@@ -40,7 +40,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         </button>
                         <ul class="dropdown-menu">
                             @foreach ($crud->model->getAvailableLocales() as $key => $locale)
-                            <a class="dropdown-item" href="{{ url($crud->route.'/'.$entry->getKey().'/show') }}?locale={{ $key }}">{{ $locale }}</a>
+                            <a class="dropdown-item" href="{{ url('delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line) }}?locale={{ $key }}">{{ $locale }}</a>
                             @endforeach
                         </ul>
                     </div>
@@ -82,15 +82,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">
                                     Unit Price<br>
                                     <strong>TBA</strong>
-                                    {{--
-                                    @if($constant::checkPermission('Print DS with Price'))
-                                        <strong class="right">
-                                            {{$delivery_show->vendor_currency." " . number_format($delivery_show->unit_price,0,',','.')}}
-                                        </strong>
-                                    @else
-                                        <strong> - </strong>
-                                    @endif
-                                    --}}
                                 </td>
                             </tr>
 
@@ -101,15 +92,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="25%">
                                     Amount<br/>
                                     <strong>TBA</strong>
-                                    {{--
-                                    @if($constant::checkPermission('Print DS with Price'))
-                                        <strong class="right">
-                                            {{$delivery_show->vendor_currency." " . number_format($delivery_show->shipped_qty*$delivery_show->unit_price,0,',','.')}}
-                                        </strong>
-                                    @else
-                                        <strong> - </strong>
-                                    @endif
-                                    --}}
                                 </td>
                             </tr>
                             <tr>
@@ -155,23 +137,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="mt-4 text-center">
-                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
-                {{--
-
-                @if($constant::getRole() == 'Admin PTKI')
-                    <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                    <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
-                @else
-                    @if($constant::checkPermission('Print DS with Price'))
-                        <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id.'&wh=yes')}}" class="btn btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                    @endif
-                    @if($constant::checkPermission('Print DS without Price'))
-                        <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$entry->id)}}" class="btn btn-secondary"><i class="la la-file-pdf"></i> - Harga</a>
-                    @endif
-                @endif
-
-                    --}}
-                
+                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$delivery->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
             </div>
         </div>
     
@@ -181,7 +147,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-secondary">
-                Delivery Status
+                <label class="font-weight-bold mb-0">Delivery Status</label>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -203,6 +169,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <tr>
                                 <td>Description</td>
                                 <td>: {{$delivery_status->description}}</td>
+                            </tr>
+                            <tr>
+                                <td>Ref DS Num</td>
+                                <td>: {!! $html_ref_ds_num !!}</td>
                             </tr>
                         </table>
 
@@ -261,17 +231,19 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         @if(backpack_user()->roles->first()->hasPermissionTo('Show Payment Status DS'))
             <div class="card">
                 <div class="card-header bg-secondary">
-                    Payment Status
+                    <label class="font-weight-bold mb-0">Payment Status</label>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <table class="table table-striped table-hover">
+                                @if($constant::checkPermission('Show Price In Delivery Sheet Menu'))
                                 <tr>
                                     <td>Unit Price</td>
                                     <td>:</td>
                                     <td> {{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price,0,',','.')}}</td>
                                 </tr>
+                                @endif
                                 <tr>
                                     <td>Vend. Dlv No</td>
                                     <td>:</td>
@@ -297,11 +269,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     <td>:</td>
                                     <td> {{$delivery_status->payment_ref_num}}</td>
                                 </tr>
+                                @if($constant::checkPermission('Show Price In Delivery Sheet Menu'))
                                 <tr>
                                     <td>Total</td>
                                     <td>:</td>
                                     <td>{{$delivery_show->vendor_currency}} {{number_format($delivery_status->unit_price*$delivery_status->received_qty,0,',','.')}}</td>
                                 </tr>
+                                @endif
                             </table>
                         </div>
                         <div class="col-md-6">
