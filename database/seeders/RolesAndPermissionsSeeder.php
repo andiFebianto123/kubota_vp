@@ -470,6 +470,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses melihat harga di menu list payment'
               ],
               ['name' => 'Show Price In List Payment Menu']
+            ],
+            [
+              [
+                "name" => 'Access Reset Password',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk melakukan reset password'
+              ],
+              ['name' => 'Access Reset Password']
             ]
         ];
         foreach($arrPermission as $key => $seed) {

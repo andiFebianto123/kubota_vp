@@ -67,7 +67,9 @@ class UserCrudController extends CrudController
         if(!Constant::checkPermission('Delete User')){
             $this->crud->removeButton('delete');
         }
-        $this->crud->addButtonFromView('line', 'mail_reset_password', 'mail_reset_password', 'beginning');
+        if(Constant::checkPermission('Access Reset Password')){
+            $this->crud->addButtonFromView('line', 'mail_reset_password', 'mail_reset_password', 'beginning');
+        }
 
         CRUD::column('name');
         CRUD::column('username');

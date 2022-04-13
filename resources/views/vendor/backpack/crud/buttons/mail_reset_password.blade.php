@@ -24,7 +24,7 @@
 		  dangerMode: true,
 		}).then((value) => {
 			if (value) {
-                submitAsyncPost(id.replace('btn-for-', ''), {action:route, data: {email: email}})
+                submitAsyncPost(id.replace('btn-for-', ''), {action:route, preventReload:true, data: {email: email}})
 			}
 		});
       }

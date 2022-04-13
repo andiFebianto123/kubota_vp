@@ -14,7 +14,7 @@
 Route::get('admin/logout', 'Auth\LoginController@logout')->name("logout");
 Route::get('admin/login', 'Auth\LoginController@index')->name("rectmedia.auth.login");
 Route::post('admin/update-account', 'Auth\MyAccountController@postAccountInfoForm')->name("rectmedia.account.info.update");
-Route::get('admin/forgot-password', 'Auth\ForgotPasswordController@forgotPassword')->name("rectmedia.auth.forgotpassword");
+// Route::get('admin/forgot-password', 'Auth\ForgotPasswordController@forgotPassword')->name("rectmedia.auth.forgotpassword");
 Route::post('admin/forgot-password', 'Auth\ForgotPasswordController@sendLink')->name('forgotpassword.sendlink');
 Route::get('admin/reset-password', 'Auth\ForgotPasswordController@resetPassword')->name("reset-password");
 Route::post('admin/reset-password', 'Auth\ForgotPasswordController@update')->name('forgotpassword.update');
