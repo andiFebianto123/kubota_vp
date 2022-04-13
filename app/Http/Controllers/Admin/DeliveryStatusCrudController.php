@@ -25,7 +25,7 @@ class DeliveryStatusCrudController extends CrudController
 
 
     public function setup()
-    {
+    { 
         CRUD::setModel(DeliveryStatus::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/delivery-status');
         CRUD::setEntityNameStrings('delivery status', 'delivery statuses');
@@ -253,7 +253,7 @@ class DeliveryStatusCrudController extends CrudController
             $query = preg_replace($pattern, "", $sqlQuery);
             $data = DB::select($query);
 
-            $filename = 'DST-'.date('YmdHis').'.xlsx';
+            $filename = 'DST-'.date('YmdHis').'.csv';
 
             $title = "Report Delivery Status";
 
@@ -307,33 +307,41 @@ class DeliveryStatusCrudController extends CrudController
                     'grn_line' => $result->grn_line,
                     'received_flag' => function($result){
                         if($result->received_flag == 1){
-                            return "✓";
+                            return 1;
+                            // return "✓";
                         } else {
-                            return "x";
-                        }                        
+                            // return "x";
+                        }            
+                        return 0;            
                     },
                     'received_date' => $result->received_date,
                     'due_date' => $result->payment_plan_date,
                     'validated_flag' => function($result){
                         if($result->validate_by_fa_flag == 1){
-                            return "✓";
+                            return 1;
+                            // return "✓";
                         } else {
-                            return "x";
-                        }                        
+                            // return "x";
+                        }  
+                        return 0;                      
                     },
                     'payment_in_process_flag' => function($result){
                         if($result->payment_in_process_flag == 1){
-                            return "✓";
+                            return 1;
+                            // return "✓";
                         } else {
-                            return "x";
-                        }                        
+                            // return "x";
+                        }            
+                        return 0;            
                     },
                     'executed_flag' => function($result){
                         if($result->executed_flag == 1){
-                            return "✓";
+                            return 1;
+                            // return "✓";
                         } else {
-                            return "x";
-                        }                        
+                            // return "x";
+                        }  
+                        return 0;                      
                     },
                     'payment_date' => $result->payment_date,
                     'tax_status' => $result->tax_status,
@@ -416,7 +424,11 @@ class DeliveryStatusCrudController extends CrudController
 
             $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
 
-            return Excel::download($export, $filename);
+            // return Excel::download($export, $filename);
+            return ($export)->download($filename, \Maatwebsite\Excel\Excel::CSV, [
+                'Content-Type' => 'text/csv',
+            ]);
+
         }
         return 0;
     }
