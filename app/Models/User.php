@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         $this->attributes['updated_at'] = date("Y/m/d H:i:s", strtotime($value));
     }
+
+    public function excelExportAdvance(){
+        $url = url('admin/user-export');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
+    }
 }

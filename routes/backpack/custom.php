@@ -9,6 +9,7 @@ Route::group([
 ], function () { // custom admin routes
     Route::crud('purchase-order', 'PurchaseOrderCrudController');
     Route::crud('vendor', 'VendorCrudController');
+    Route::get('vendor-export', 'VendorCrudController@exportAdvance');
     Route::crud('user', 'UserCrudController');
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
@@ -16,6 +17,8 @@ Route::group([
     Route::get('delivery-export-pdf-single-ds', 'DeliveryCrudController@exportPdfSingleDs');
     Route::post('delivery-export-pdf-mass-label-post', 'DeliveryCrudController@exportPdfMassLabelPost');
     Route::post('delivery-export-pdf-mass-ds-post', 'DeliveryCrudController@exportPdfMassDsPost');
+    Route::get('delivery-sheet-export', 'DeliveryCrudController@exportAdvance');
+
     Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
     Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
     Route::get('template-serial-numbers', 'DeliveryCrudController@exportTemplateSerialNumber');
@@ -30,6 +33,8 @@ Route::group([
     Route::post('purchase-order-accept-po-line', 'PurchaseOrderCrudController@acceptPoLine');
     Route::post('purchase-order-reject-po-line', 'PurchaseOrderCrudController@rejectPoLine');
     Route::get('purchase-order-export-excel', 'PurchaseOrderCrudController@exportExcel');
+    Route::get('purchase-order-export', 'PurchaseOrderCrudController@exportAdvance');
+
     Route::get('purchase-order-line-export-excel-accept', 'PurchaseOrderLineCrudController@exportExcelAccept');
     Route::get('purchase-order-line-export-pdf-accept', 'PurchaseOrderLineCrudController@exportPdfAccept');
     Route::get('purchase-order-line/{id}/unread', 'PurchaseOrderLineCrudController@unread');
@@ -42,6 +47,7 @@ Route::group([
     Route::post('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
+    Route::get('delivery-statuses-export', 'DeliveryStatusCrudController@exportAdvance');
     Route::crud('delivery-serial', 'DeliverySerialCrudController');
     Route::get('validate-ds-po', 'DeliveryCrudController@addOnValidatePo');
     // route untuk accept all PO
@@ -58,8 +64,12 @@ Route::group([
 
     Route::crud('material-outhouse', 'MaterialOuthouseCrudController');
     Route::crud('material-outhouse-summary-per-item', 'MaterialOuthouseSummaryPerItemCrudController');
+    Route::get('mo-item-export', 'MaterialOuthouseSummaryPerItemCrudController@exportAdvance');
+
     Route::crud('material-outhouse-summary-per-po', 'MaterialOuthouseSummaryPerPoCrudController');
     Route::get('material-outhouse-summary-per-po/{id}/details', 'MaterialOuthouseSummaryPerPoCrudController@showDetailsRow');
+    Route::get('mo-po-export', 'MaterialOuthouseSummaryPerPoCrudController@exportAdvance');
+
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
 
@@ -67,6 +77,8 @@ Route::group([
     Route::post('role/change-role-permission', 'RoleCrudController@changeRolePermission');
     Route::get('role/show-role-permission', 'RoleCrudController@showPermission');
     Route::crud('tax-invoice', 'TaxInvoiceCrudController');
+    Route::get('export-tax-invoice', 'TaxInvoiceCrudController@exportAdvanceTop');
+    Route::get('export-tax-history-invoice', 'TaxInvoiceCrudController@exportAdvanceBottom');
     
     Route::get('export-db', 'ConfigurationCrudController@exportDb');
     Route::get('confirm-faktur-pajak/{id}', 'TaxInvoiceCrudController@confirmFakturPajak');
@@ -82,10 +94,14 @@ Route::group([
         'uses'      => 'TaxInvoiceCrudController@search2',
         'operation' => 'list',
     ]);
+    
     Route::crud('history-mo-summary-per-po', 'HistoryMoSummaryPerPoCrudController');
     Route::get('history-mo-summary-per-po/{id}/details', 'HistoryMoSummaryPerPoCrudController@showDetailsRow');
+    Route::get('history-mo-po-export', 'HistoryMoSummaryPerPoCrudController@exportAdvance');
     Route::crud('history-mo-summary-per-item', 'HistoryMoSummaryPerItemCrudController');
+    Route::get('history-mo-item-export', 'HistoryMoSummaryPerItemCrudController@exportAdvance');
     Route::get('template-users', 'UserCrudController@templateUsers');
     Route::post('user-import', 'UserCrudController@import');
+    Route::get('user-export', 'UserCrudController@exportAdvance');
 
 });

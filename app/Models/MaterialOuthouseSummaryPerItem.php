@@ -47,4 +47,9 @@ class MaterialOuthouseSummaryPerItem extends Model
         
         return $qty;
     }
+
+    public function excelExportAdvance($crud = null){
+        $url = url('admin/mo-item-export');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export</a>';
+    }
 }

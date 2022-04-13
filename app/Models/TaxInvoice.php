@@ -65,4 +65,15 @@ class TaxInvoice extends Model
             </div>
         ';        
     }
+
+    public function excelExportAdvanceTop($crud = null){
+        $url = url('admin/export-tax-invoice');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export History Tax Payment</a>';
+    }
+
+    public function excelExportAdvanceBottom($crud = null){
+        $url = url('admin/export-tax-history-invoice');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export History Tax Payment</a>';
+    }
+
 }

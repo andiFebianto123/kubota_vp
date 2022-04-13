@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\OrderSheetExport;
+use App\Exports\TemplateExportAll;
 use App\Exports\PurchaseOrderExport;
 use App\Exports\TemplateMassDsExport;
 use App\Http\Requests\PurchaseOrderRequest;
@@ -23,6 +24,8 @@ use App\Helpers\EmailLogWriter;
 use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use Maatwebsite\Excel\Events\AfterSheet;
+
 
 class PurchaseOrderCrudController extends CrudController
 {
@@ -68,6 +71,8 @@ class PurchaseOrderCrudController extends CrudController
         if(Constant::checkPermission('Import Purchase Order')){
             $this->crud->addButtonFromView('top', 'mass_ds', 'mass_ds', 'end');
         }
+        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+
         if(!in_array(Constant::getRole(), ['Admin PTKI'])){
             $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
@@ -592,6 +597,155 @@ class PurchaseOrderCrudController extends CrudController
             });
         }
        
+    }
+
+    public function search()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->crud->applyUnappliedFilters();
+
+        $totalRows = $this->crud->model->count();
+        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $startIndex = request()->input('start') ?: 0;
+        // if a search term was present
+        if (request()->input('search') && request()->input('search')['value']) {
+            // filter the results accordingly
+            $this->crud->applySearchTerm(request()->input('search')['value']);
+            // recalculate the number of filtered rows
+            $filteredRows = $this->crud->count();
+        }
+        // start the results according to the datatables pagination
+        if (request()->input('start')) {
+            $this->crud->skip((int) request()->input('start'));
+        }
+        // limit the number of results according to the datatables pagination
+        if (request()->input('length')) {
+            $this->crud->take((int) request()->input('length'));
+        }
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            $this->crud->query->getQuery()->orders = null;
+            foreach ((array) request()->input('order') as $order) {
+                $column_number = (int) $order['column'];
+                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($column_number);
+                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+                    // apply the current orderBy rules
+                    $this->crud->orderByWithPrefix($column['name'], $column_direction);
+                }
+
+                // check for custom order logic in the column definition
+                if (isset($column['orderLogic'])) {
+                    $this->crud->customOrderBy($column, $column_direction);
+                }
+            }
+        }
+
+        // show newest items first, by default (if no order has been set for the primary column)
+        // if there was no order set, this will be the only one
+        // if there was an order set, this will be the last one (after all others were applied)
+        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+        $orderBy = $this->crud->query->toBase()->orders;
+        $table = $this->crud->model->getTable();
+        $key = $this->crud->model->getKeyName();
+
+        $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+            return (isset($item['column']) && $item['column'] === $key)
+                || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+        });
+
+        if (! $hasOrderByPrimaryKey) {
+            $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
+        }
+
+        $entries = $this->crud->getEntries();
+
+        $dbStatement = getSQL($this->crud->query);
+
+        session(["sqlSyntax" => $dbStatement]);
+
+        return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
+    }
+
+    public function exportAdvance(Request $request){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $data = DB::select($query);
+
+            $filename = 'po-'.date('YmdHis').'.xlsx';
+
+
+            $title = "Report PO";
+
+            $header = [
+                'no' => 'No',
+                'id' => 'ID',
+                'vend_num' => 'Kode Vendor',
+                'po_num' => 'PO Number',
+                'po_date' => 'PO Date',
+                'email_flag' => 'Email Flag',
+                'po_change' => 'PO Change'
+            ];
+
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'id' => $result->id,
+                    'vend_num' => $result->vend_num,
+                    'po_num' => $result->po_num,
+                    'po_date' => $result->po_date,
+                    'po_change' => $result->po_change,
+                    'email_flag' => function($result) {
+                        return ($result->email_flag) ? "✓":"-";
+                    }
+                ];
+            };
+
+            $styleHeader = function(AfterSheet $event){
+                $styleHeader = [
+                    //Set font style
+                    'font' => [
+                        'bold'      =>  true,
+                        'color' => ['argb' => 'ffffff'],
+                    ],
+        
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => '66aba3',
+                         ]           
+                    ],
+        
+                ];
+
+                $styleGroupProtected = [
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'ededed',
+                         ]           
+                    ],
+        
+                ];
+
+                $arrColumns = range('A', 'G');
+                foreach ($arrColumns as $key => $col) {
+                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                }
+                
+                $event->sheet->getDelegate()->getStyle('A1:G1')->applyFromArray($styleHeader);
+            };
+
+            return Excel::download(new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title), $filename);
+        }
+        return 0;
     }
 
 }
