@@ -21,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 class TemplateExportAll extends DefaultValueBinder implements FromView, WithCustomValueBinder, WithEvents
 {
+    use Exportable;
     public $data;
     public $header;
     public $resultCallback;
