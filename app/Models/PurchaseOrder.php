@@ -40,6 +40,11 @@ class PurchaseOrder extends Model
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export All</a>';
     }
 
+    public function excelExportAdvance(){
+        $url = url('admin/purchase-order-export');
+        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export Advance</a>';
+    }
+
     public function getPoDateAttribute($value)
     {
         return date("Y-m-d", strtotime($value));

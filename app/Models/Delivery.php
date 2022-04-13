@@ -45,6 +45,11 @@ class Delivery extends Model
         return "<div class='group-price-check'><input type='checkbox'> Dengan Harga</div>";
     }
 
+    public function excelExportAdvance(){
+        $url = url('admin/delivery-sheet-export');
+        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
+    }
+
 
     public function getPoPoLineAttribute()
     {

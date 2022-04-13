@@ -6,8 +6,13 @@ use App\Http\Requests\DeliveryStatusRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use App\Helpers\Constant;
+use Illuminate\Http\Request;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use Illuminate\Support\Facades\DB;
+use App\Exports\TemplateExportAll;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 
 class DeliveryStatusCrudController extends CrudController
@@ -44,6 +49,7 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
+        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         CRUD::column('id')->label('ID');
         CRUD::column('ds_num')->label('DS Num');
@@ -171,4 +177,249 @@ class DeliveryStatusCrudController extends CrudController
 
         $this->setupCreateOperation();
     }
+    public function search()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->crud->applyUnappliedFilters();
+
+        $totalRows = $this->crud->model->count();
+        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $startIndex = request()->input('start') ?: 0;
+        // if a search term was present
+        if (request()->input('search') && request()->input('search')['value']) {
+            // filter the results accordingly
+            $this->crud->applySearchTerm(request()->input('search')['value']);
+            // recalculate the number of filtered rows
+            $filteredRows = $this->crud->count();
+        }
+        // start the results according to the datatables pagination
+        if (request()->input('start')) {
+            $this->crud->skip((int) request()->input('start'));
+        }
+        // limit the number of results according to the datatables pagination
+        if (request()->input('length')) {
+            $this->crud->take((int) request()->input('length'));
+        }
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            $this->crud->query->getQuery()->orders = null;
+            foreach ((array) request()->input('order') as $order) {
+                $column_number = (int) $order['column'];
+                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($column_number);
+                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+                    // apply the current orderBy rules
+                    $this->crud->orderByWithPrefix($column['name'], $column_direction);
+                }
+
+                // check for custom order logic in the column definition
+                if (isset($column['orderLogic'])) {
+                    $this->crud->customOrderBy($column, $column_direction);
+                }
+            }
+        }
+
+        // show newest items first, by default (if no order has been set for the primary column)
+        // if there was no order set, this will be the only one
+        // if there was an order set, this will be the last one (after all others were applied)
+        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+        $orderBy = $this->crud->query->toBase()->orders;
+        $table = $this->crud->model->getTable();
+        $key = $this->crud->model->getKeyName();
+
+        $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+            return (isset($item['column']) && $item['column'] === $key)
+                || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+        });
+
+        if (! $hasOrderByPrimaryKey) {
+            $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
+        }
+
+        $entries = $this->crud->getEntries();
+
+        $dbStatement = getSQL($this->crud->query);
+
+        session(["sqlSyntax" => $dbStatement]);
+
+        return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
+    }
+
+    public function exportAdvance(Request $request){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $data = DB::select($query);
+
+            $filename = 'DST-'.date('YmdHis').'.xlsx';
+
+            $title = "Report Delivery Status";
+
+            $header = [
+                'no' => 'No',
+                'id' => 'ID',
+                'ds_num' => 'DS Num',
+                'ds_line' => 'DS Line',
+                'ds_type' => 'DS Type',
+                'po_relase' => 'PO Relase',
+                'desc' => 'Desc',
+                'grn_num' => 'GRN Num',
+                'grn_line' => 'GRN Line',
+                'received_flag' => 'Received Flag',
+                'received_date' => 'Received Date',
+                'due_date' => 'Due Date',
+                'validated_flag' => 'Validated Flag',
+                'payment_in_process_flag' => 'Payment In Process Flag',
+                'executed_flag' => 'Executed Flag',
+                'payment_date' => 'Payment Date',
+                'tax_status' => 'Tax Status',
+                'payment_ref_num' => 'Payment Ref Num',
+                'bank' => 'Bank',
+                'shipped_qty' => 'Shipped Qty',
+                'received_qty' => 'Received Qty',
+                'rejected_qty' => 'Rejected Qty',
+                'unit_price' => 'Unit Price',
+                'total' => 'Total',
+                'petugas_vendor' => 'Petugas Vendor',
+                'no_faktur_pajak' => 'No Faktur Pajak',
+                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
+                'ref_ds_num' => 'Ref DS Num',
+                'ref_ds_line' => 'Ref DS Line',
+                'created' => 'Created',
+                'updated' => 'Updated'
+            ];
+
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'id' => $result->id,
+                    'ds_num' => $result->ds_num,
+                    'ds_line' => $result->ds_line,
+                    'ds_type' => $result->ds_type,
+                    'po_relase' => $result->po_release,
+                    'desc' => $result->description,
+                    'grn_num' => function($result){
+                        $string = sprintf('%d', $result->grn_num);
+                        return "{$string}";
+                    },
+                    'grn_line' => $result->grn_line,
+                    'received_flag' => function($result){
+                        if($result->received_flag == 1){
+                            return "✓";
+                        } else {
+                            return "x";
+                        }                        
+                    },
+                    'received_date' => $result->received_date,
+                    'due_date' => $result->payment_plan_date,
+                    'validated_flag' => function($result){
+                        if($result->validate_by_fa_flag == 1){
+                            return "✓";
+                        } else {
+                            return "x";
+                        }                        
+                    },
+                    'payment_in_process_flag' => function($result){
+                        if($result->payment_in_process_flag == 1){
+                            return "✓";
+                        } else {
+                            return "x";
+                        }                        
+                    },
+                    'executed_flag' => function($result){
+                        if($result->executed_flag == 1){
+                            return "✓";
+                        } else {
+                            return "x";
+                        }                        
+                    },
+                    'payment_date' => $result->payment_date,
+                    'tax_status' => $result->tax_status,
+                    'payment_ref_num' => $result->payment_ref_num,
+                    'bank' => $result->bank,
+                    'shipped_qty' => $result->shipped_qty,
+                    'received_qty' => $result->received_qty,
+                    'rejected_qty' => $result->rejected_qty,
+                    'unit_price' => function($entry){
+                        $ds = DeliveryStatus::where('id', $entry->id)->first();
+                        if($ds !== null){
+                            $currency = $ds->purchaseOrder->vendor->currency;
+                            $val = number_format($entry->unit_price, 0, ',', '.');
+                            return $currency." ".$val;
+                        }
+                        return '-';
+                    },
+                    'total' => function($entry){
+                        $ds = DeliveryStatus::where('id', $entry->id)->first();
+                        if($ds !== null){
+                            $currency = $ds->purchaseOrder->vendor->currency;
+                            $val = number_format($entry->total, 0, ',', '.');
+                            return $currency." ".$val;
+                        }
+                        return '-';
+                    },
+                    'petugas_vendor' => $result->petugas_vendor,
+                    'no_faktur_pajak' => $result->no_faktur_pajak,
+                    'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
+                    'ref_ds_num' => $result->ref_ds_num,
+                    'ref_ds_line' => $result->ref_ds_line,
+                    'created' => $result->created_at,
+                    'updated' => $result->updated_at
+                ];
+            };
+
+            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
+                $styleHeader = [
+                    //Set font style
+                    'font' => [
+                        'bold'      =>  true,
+                        'color' => ['argb' => 'ffffff'],
+                    ],
+        
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => '66aba3',
+                         ]           
+                    ],
+        
+                ];
+
+                $styleGroupProtected = [
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'ededed',
+                         ]           
+                    ],
+        
+                ];
+
+                // $arrColumns = range('A', 'AE');
+                $totalColom = 31;
+                for($i = 1; $i<=$totalColom; $i++){
+                    $col = getNameFromNumber($i);
+                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                }
+                // foreach ($arrColumns as $key => $col) {
+                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                // }
+                
+                $event->sheet->getDelegate()->getStyle('A1:AE1')->applyFromArray($styleHeader);
+            };
+
+            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
+
+            return Excel::download($export, $filename);
+        }
+        return 0;
+    }
+
 }

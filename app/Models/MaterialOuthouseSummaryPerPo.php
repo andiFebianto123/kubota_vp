@@ -82,4 +82,10 @@ class MaterialOuthouseSummaryPerPo extends Model
         ), 0)) as availabel_qty from `material_outhouse` inner join `po_line` as `pl` on `material_outhouse`.`po_num` = `pl`.`po_num` and `material_outhouse`.`po_line` = `pl`.`po_line` and `pl`.`status` = '{$status}' inner join `po` on `material_outhouse`.`po_num` = `po`.`po_num` where `material_outhouse`.`po_num` = '{$po}' and `material_outhouse`.`po_line` = {$po_line} group by `material_outhouse`.`matl_item`) as table_available_qty");
         return $query[0]->available_qty;
     }
+
+    public function excelExportAdvance($crud = null){
+        $url = url('admin/mo-po-export');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export</a>';
+    }
+
 }

@@ -28,4 +28,9 @@ class Vendor extends Model
     {
         $this->attributes['buyer_email'] = str_replace(" ", "", $value);
     }
+
+    public function excelExportAdvance(){
+        $url = url('admin/vendor-export');
+        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
+    }
 }

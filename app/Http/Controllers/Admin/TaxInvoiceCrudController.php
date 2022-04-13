@@ -18,9 +18,12 @@ use App\Models\Comment;
 use App\Models\PurchaseOrder;
 use App\Models\Vendor;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\TemplateExportAll;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Session;
 
 
-class TaxInvoiceCrudController extends CrudController
+class TaxInvoiceCrudController extends CrudController 
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -58,7 +61,7 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud->denyAccess('list');
         }
 
-        $this->crud->setListView('vendor.backpack.crud.list_payment');
+        $this->crud->setListView('vendor.backpack.crud.list_payment'); 
     }
 
     
@@ -81,6 +84,9 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->crud->addClause('where', 'executed_flag', '=', 0);
         $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
+
+        $this->crud->addButtonFromModelFunction('top-history', 'excel_export_advance_bottom', 'excelExportAdvanceBottom', 'end');
+        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance_top', 'excelExportAdvanceTop', 'end');
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -923,6 +929,11 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud2->orderBy('id', 'DESC');
         }
 
+        $dbStatement = getSQL($this->crud2);
+
+        Session::forget("sqlSyntax2");
+        Session::put("sqlSyntax2", $dbStatement);
+
         $entries = $this->crud2->get();
 
         return $this->getEntriesAsJsonForDatatables2($entries, $totalRows, $filteredRows, $startIndex, 'line_2');
@@ -1021,5 +1032,333 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         return $allowAccess;
+    }
+
+    public function search()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->crud->applyUnappliedFilters();
+
+        $totalRows = $this->crud->model->count();
+        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $startIndex = request()->input('start') ?: 0;
+        // if a search term was present
+        if (request()->input('search') && request()->input('search')['value']) {
+            // filter the results accordingly
+            $this->crud->applySearchTerm(request()->input('search')['value']);
+            // recalculate the number of filtered rows
+            $filteredRows = $this->crud->count();
+        }
+        // start the results according to the datatables pagination
+        if (request()->input('start')) {
+            $this->crud->skip((int) request()->input('start'));
+        }
+        // limit the number of results according to the datatables pagination
+        if (request()->input('length')) {
+            $this->crud->take((int) request()->input('length'));
+        }
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            $this->crud->query->getQuery()->orders = null;
+            foreach ((array) request()->input('order') as $order) {
+                $column_number = (int) $order['column'];
+                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($column_number);
+                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+                    // apply the current orderBy rules
+                    $this->crud->orderByWithPrefix($column['name'], $column_direction);
+                }
+
+                // check for custom order logic in the column definition
+                if (isset($column['orderLogic'])) {
+                    $this->crud->customOrderBy($column, $column_direction);
+                }
+            }
+        }
+
+        // show newest items first, by default (if no order has been set for the primary column)
+        // if there was no order set, this will be the only one
+        // if there was an order set, this will be the last one (after all others were applied)
+        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+        $orderBy = $this->crud->query->toBase()->orders;
+        $table = $this->crud->model->getTable();
+        $key = $this->crud->model->getKeyName();
+
+        $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+            return (isset($item['column']) && $item['column'] === $key)
+                || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+        });
+
+        if (! $hasOrderByPrimaryKey) {
+            $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
+        }
+
+        $entries = $this->crud->getEntries();
+
+        $dbStatement2 = getSQL($this->crud->query);
+
+        sleep(1);
+        Session::forget("sqlSyntax");
+        Session::put("sqlSyntax", $dbStatement2);
+
+        return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
+    }
+
+    public function exportAdvanceTop(Request $request){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $data = DB::select($query);
+            
+            $filename = 'Tax-payment'.date('YmdHis').'.xlsx';
+
+            $title = "Report Tax Payment";
+
+            $header = [
+                'no' => 'No',
+                'po' => 'PO',
+                'ds_num' => 'DS Num',
+                'ds_line' => 'DS Line',
+                'item' => 'Item',
+                'description' => 'Description',
+                'payment_plan_date' => 'Payment Plan Date',
+                'unit_price' => 'Unit Price',
+                'qty_received' => 'Qty Received',
+                'qty_rejected' => 'Qty Rejected',
+                'no_faktur' => 'No Faktur',
+                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
+                'harga_sebelum_pajak' => 'Harga Sebelum Pajak',
+                'ppn' => 'PPN',
+                'pph' => 'PPH',
+                'total' => 'Total',
+                'comments' => 'Comments',
+                'confirm' => 'Confirm',
+                'updated' => 'Updated'
+            ];
+
+            $resultCallback = function($result){
+               return [
+                    'no' => '<number>',
+                    'po' => function($entry){
+                        return $entry->po_num.'-'.$entry->po_line;
+                    },
+                    'ds_num' => $result->ds_num,
+                    'ds_line' => $result->ds_line,
+                    'item' => $result->item,
+                    'description' => $result->description,
+                    'payment_plan_date' => $result->payment_plan_date,
+                    'unit_price' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                    },
+                    'qty_received' => $result->received_qty,
+                    'qty_rejected' => $result->rejected_qty,
+                    'no_faktur' => $result->no_faktur_pajak,
+                    'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
+                    'harga_sebelum_pajak' => function($entry){
+                        return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
+                    },
+                    'ppn' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    },
+                    'pph' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    },
+                    'total' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+                    },
+                    'comments' => $result->comment,
+                    'confirm' => function($entry){
+                        if($entry->confirm_flag == 0){
+                            return 'Waiting';
+                        }else if($entry->confirm_flag == 1){
+                            return 'Accept';
+                        }else {
+                            return 'Reject';
+                        }
+                    },
+                    'updated' => $result->updated_at
+                ];
+            };
+
+            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
+                $styleHeader = [
+                    //Set font style
+                    'font' => [
+                        'bold'      =>  true,
+                        'color' => ['argb' => 'ffffff'],
+                    ],
+        
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => '66aba3',
+                         ]           
+                    ],
+        
+                ];
+
+                $styleGroupProtected = [
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'ededed',
+                         ]           
+                    ],
+        
+                ];
+
+                $arrColumns = range('A', 'S');
+                // $totalColom = 31;
+                // for($i = 1; $i<=$totalColom; $i++){
+                //     $col = getNameFromNumber($i);
+                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                // }
+                foreach ($arrColumns as $key => $col) {
+                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                }
+                
+                $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
+            };
+
+            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
+
+            return Excel::download($export, $filename);
+        }
+        return 0;
+    }
+
+    public function exportAdvanceBottom(Request $request){
+        if(session()->has('sqlSyntax2')){
+            $sqlQuery = session('sqlSyntax2');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $data = DB::select($query);
+
+            $filename = 'HTax-payment'.date('YmdHis').'.xlsx';
+
+            $title = "Report History Tax Payment";
+
+            $header = [
+                'no' => 'No',
+                'po' => 'PO',
+                'ds_num' => 'DS Num',
+                'ds_line' => 'DS Line',
+                'item' => 'Item',
+                'description' => 'Description',
+                'payment_plan_date' => 'Payment Plan Date',
+                'unit_price' => 'Unit Price',
+                'qty_received' => 'Qty Received',
+                'qty_rejected' => 'Qty Rejected',
+                'no_faktur' => 'No Faktur',
+                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
+                'harga_sebelum_pajak' => 'Harga Sebelum Pajak',
+                'ppn' => 'PPN',
+                'pph' => 'PPH',
+                'total' => 'Total',
+                'comments' => 'Comments',
+                'confirm' => 'Confirm',
+                'updated' => 'Updated'
+            ];
+
+            $resultCallback = function($result){
+               return [
+                    'no' => '<number>',
+                    'po' => function($entry){
+                        return $entry->po_num.'-'.$entry->po_line;
+                    },
+                    'ds_num' => $result->ds_num,
+                    'ds_line' => $result->ds_line,
+                    'item' => $result->item,
+                    'description' => $result->description,
+                    'payment_plan_date' => $result->payment_plan_date,
+                    'unit_price' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                    },
+                    'qty_received' => $result->received_qty,
+                    'qty_rejected' => $result->rejected_qty,
+                    'no_faktur' => $result->no_faktur_pajak,
+                    'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
+                    'harga_sebelum_pajak' => function($entry){
+                        return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
+                    },
+                    'ppn' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    },
+                    'pph' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    },
+                    'total' => function($entry){
+                        return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+                    },
+                    'comments' => $result->comment,
+                    'confirm' => function($entry){
+                        if($entry->confirm_flag == 0){
+                            return 'Waiting';
+                        }else if($entry->confirm_flag == 1){
+                            return 'Accept';
+                        }else {
+                            return 'Reject';
+                        }
+                    },
+                    'updated' => $result->updated_at
+                ];
+            };
+
+            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
+                $styleHeader = [
+                    //Set font style
+                    'font' => [
+                        'bold'      =>  true,
+                        'color' => ['argb' => 'ffffff'],
+                    ],
+        
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => '66aba3',
+                         ]           
+                    ],
+        
+                ];
+
+                $styleGroupProtected = [
+                    //Set background style
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'ededed',
+                         ]           
+                    ],
+        
+                ];
+
+                $arrColumns = range('A', 'S');
+                // $totalColom = 31;
+                // for($i = 1; $i<=$totalColom; $i++){
+                //     $col = getNameFromNumber($i);
+                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                // }
+                foreach ($arrColumns as $key => $col) {
+                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
+                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+                }
+                
+                $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
+            };
+
+            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
+
+            return Excel::download($export, $filename);
+        }
+        return 0;
     }
 }
