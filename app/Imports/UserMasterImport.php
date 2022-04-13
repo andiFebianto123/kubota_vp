@@ -123,9 +123,9 @@ class UserMasterImport implements OnEachRow, WithHeadingRow //WithValidation //S
             ],
             'email' => 'required|max:255',
             'vendor_number' => [
-                'required',
+                'required_unless:role,Admin PTKI',
                 function($attribute, $value, $onFailure){
-                    if(!Vendor::where('vend_num', $value)->exists()){
+                    if(!Vendor::where('vend_num', $value)->exists() && $value != null){
                         $onFailure("{$attribute} is not exists in vendor master");
                     }
                 }
