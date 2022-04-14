@@ -405,6 +405,7 @@ class DeliveryStatusCrudController extends CrudController
                 $increment++;
                 $export->addRow($rowT, $styleForBody);
             }
+
             $export->close();
         }
     

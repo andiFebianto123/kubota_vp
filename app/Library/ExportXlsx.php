@@ -41,6 +41,14 @@ class ExportXlsx {
         return $this->writer->getCurrentSheet();
     }
 
+    public function newSheetAndMakeCurrent(){
+        return $this->writer->addNewSheetAndMakeItCurrent();
+    }
+
+    public function setCurrentSheet($sheet){
+        $this->writer->setCurrentSheet($sheet);
+    }
+
     public function close(){
         $this->writer->close();
         if(isset($GLOBALS['col'])){
