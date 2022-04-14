@@ -28,9 +28,12 @@
                                     Login
                                 </button>
                             </div>
+                            {{--
                             <div class="mt-2">
                                 <a href="{{route('rectmedia.auth.forgotpassword')}}">Forgot Your Password?</a> 
-                            </div>
+                            </div> 
+                                --}}
+                            
                         </div>
                     </form>
                 </div>

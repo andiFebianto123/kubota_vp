@@ -134,7 +134,6 @@ function submitAjaxValid(formId, attrs) {
                     messageErr = xhr.responseJSON.message
                     $.each(xhr.responseJSON.errors,function(field_name,error){
                         messageErr += "<li>"+error+"</li>"
-                        //$("#"+formId+' [name='+field_name+']').append('<span class="text-strong textdanger">' +error+ '</span>')
                     })
                 }
             }
@@ -149,6 +148,8 @@ function submitAsyncPost(formId, attrs) {
     var initText = $('#btn-for-'+formId).html()
 
     var imgLoading = "<img src='"+baseUrl+"/img/loading-buffering.gif' width='20px'>"
+    var preventReload = (attrs.preventReload)? attrs.preventReload : false;
+
     $('#btn-for-'+formId).html(imgLoading+' Processing...')
     $('#btn-for-'+formId).attr('disabled', 'disabled')
     
@@ -170,9 +171,11 @@ function submitAsyncPost(formId, attrs) {
                     type: "success",
                     text: response.message
                   }).show();
-                setTimeout(function() { 
-                    location.reload(true)
-                }, 3000);
+                  if (preventReload == false) {
+                    setTimeout(function() { 
+                        location.reload(true)
+                    }, 3000);
+                  }
             } else {
                 new Noty({
                     type: "danger",
