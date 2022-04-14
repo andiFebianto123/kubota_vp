@@ -83,6 +83,65 @@ function submitAfterValid(formId, massError = false) {
 }
 
 
+function ajaxDownloadFile(formId, attrs) {
+    var initText = $('#btn-for-'+formId).html()
+
+    var imgLoading = "<img src='"+baseUrl+"/img/loading-buffering.gif' width='20px'>"
+    
+    $('.rect-validation').css({ "border": "1px solid #428fc7" })
+    $('.error-message').remove()
+    $(".progress-loading").remove()
+    blinkElement('.btn')
+    setInterval(blinkElement, 1000);
+    $('.nav-link').attr('onclick', 'alertAnyProcess()')
+    $('#btn-for-'+formId).html(imgLoading+' Processing...')
+    $('#btn-for-'+formId).attr('disabled', 'disabled')
+
+
+    fetch(attrs.action)
+    .then(response => {
+        return response.blob().then((data) => {
+            var conDis = response.headers.get('Content-Disposition');
+            
+            var name = attrs.filename
+            if(conDis.includes("filename*=UTF-8''")){
+                name = response.headers.get('Content-Disposition').split("filename*=UTF-8''")[1];
+            }
+
+           return {
+             data: data,
+             filename: name,
+             contentType: response.headers.get('Content-Type'),
+           };
+        });
+     })
+     .then(({ data, filename , contentType}) => {
+        const blob = new Blob([data], { type: contentType });
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        $('#btn-for-'+formId).removeAttr('disabled')
+        $(".progress-loading").remove()
+        $('#btn-for-'+formId).html(initText)
+        new Noty({
+            type: "success",
+            text: "File is downloaded successfully"
+          }).show();
+    })
+    .catch(() => {
+        $('#btn-for-'+formId).removeAttr('disabled')
+        $(".progress-loading").remove()
+        $('#btn-for-'+formId).html(initText)
+        new Noty({
+            type: "danger",
+            text: "There is an error"
+          }).show();
+    });
+}
+
 function submitAjaxValid(formId, attrs) {
     var initText = $('#btn-for-'+formId).html()
 

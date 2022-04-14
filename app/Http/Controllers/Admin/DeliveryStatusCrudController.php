@@ -43,6 +43,8 @@ class DeliveryStatusCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
+        $this->crud->allowAccess('advanced_export_excel');
+
         $this->crud->query->leftJoin('po', 'po.po_num', '=', 'delivery_status.po_num')
         ->leftJoin('vendor', 'vendor.vend_num', '=', 'po.vend_num')
         ->select(DB::raw("delivery_status.*, vendor.currency"));
@@ -60,7 +62,9 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
-        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        $this->crud->exportRoute = url('admin/delivery-statuses-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
         CRUD::column('id')->label('ID');
         CRUD::column('ds_num')->label('DS Num');
