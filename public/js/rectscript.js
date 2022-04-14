@@ -126,6 +126,7 @@ function ajaxDownloadFile(formId, attrs) {
         $('#btn-for-'+formId).removeAttr('disabled')
         $(".progress-loading").remove()
         $('#btn-for-'+formId).html(initText)
+        $('.nav-link').removeAttr('onclick')
         new Noty({
             type: "success",
             text: "File is downloaded successfully"
@@ -135,6 +136,7 @@ function ajaxDownloadFile(formId, attrs) {
         $('#btn-for-'+formId).removeAttr('disabled')
         $(".progress-loading").remove()
         $('#btn-for-'+formId).html(initText)
+        $('.nav-link').removeAttr('onclick')
         new Noty({
             type: "danger",
             text: "There is an error"
@@ -292,5 +294,5 @@ function blockTempValidation() {
 }
 
 function alertAnyProcess() {
-    confirm("Download is still processing... Are you sure want to leave this page")
+    alert("Masih ada proses download, aksi anda akan terpending")
 }
