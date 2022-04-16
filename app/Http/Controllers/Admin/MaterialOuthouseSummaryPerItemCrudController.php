@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exports\TemplateExportAll;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Library\ExportXlsx;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Box\Spout\Common\Entity\Style\Color;
 
 
 class MaterialOuthouseSummaryPerItemCrudController extends CrudController
@@ -62,6 +66,8 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list'); 
         }
+        $this->crud->allowAccess('advanced_export_excel');
+
     }
 
    
@@ -104,7 +110,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
         CRUD::column('mavailable_material')->label('Available Material');
-        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        $this->crud->exportRoute = url('admin/mo-item-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
+        // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
     }
 
 
@@ -195,7 +203,76 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
-    public function exportAdvance(Request $request){
+    public function exportAdvance(){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $datas = DB::select($query);
+          
+            $resultCallback = function($result){
+                return [
+                     'no' => '<number>',
+                     'vend_num' => $result->vend_num,
+                     'matl_item' => $result->matl_item,
+                     'description' => $result->description,
+                     'available_material' => $result->mavailable_material
+                 ];
+             };
+
+            $filename = 'MO-item'.date('YmdHis').'.xlsx';
+
+            // $GLOBALS['col'] = '<cols>';
+            // $GLOBALS['col'] .= '<col min="1" max="1" width="10" customWidth="1"/>';
+            // $GLOBALS['col'] .= '<col min="2" max="2" width="15" customWidth="1"/>';
+            // $GLOBALS['col'] .= "</cols>";
+    
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow([
+                'No',
+                'Vend Num',
+                'Matl Item',
+                'Description',
+                'Available Material'
+            ], $styleForHeader);
+
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
+
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
+                }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+        }
+    }
+
+    public function exportAdvance2(Request $request){
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';

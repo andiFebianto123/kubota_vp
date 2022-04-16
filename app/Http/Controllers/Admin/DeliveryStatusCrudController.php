@@ -369,7 +369,7 @@ class DeliveryStatusCrudController extends CrudController
     
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
-                            ->setFontColor(Color::BLACK)
+                            ->setFontColor(Color::WHITE)
                             ->setCellAlignment(CellAlignment::LEFT)
                             ->setBackgroundColor(Color::rgb(102, 171, 163))
                             ->build();

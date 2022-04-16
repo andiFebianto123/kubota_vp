@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 use App\Exports\TemplateExportAll;
 use Maatwebsite\Excel\Facades\Excel;
 
+use App\Library\ExportXlsx;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Box\Spout\Common\Entity\Style\Color;
 
 class HistoryMoSummaryPerPoCrudController extends CrudController
 {
@@ -82,6 +86,8 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             'visibleInModal' => false,
         ]);
         $this->crud->query->groupBy('delivery.po_num');
+        $this->crud->allowAccess('advanced_export_excel');
+
         $this->crud->enableDetailsRow();
     }
     
@@ -146,8 +152,10 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
           });
+          $this->crud->exportRoute = url('admin/history-mo-po-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
-          $this->crud->addButtonFromModelFunction('top', 'excel_export_advance2', 'excelExportAdvance2', 'end');
+        //   $this->crud->addButtonFromModelFunction('top', 'excel_export_advance2', 'excelExportAdvance2', 'end');
     }
 
     protected function setupCreateOperation()
@@ -297,7 +305,81 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
-    public function exportAdvance(Request $request){
+    public function exportAdvance(){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $datas = DB::select($query);
+
+          
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'po_number' => $result->po_num,
+                    'po_line' => $result->po_line,
+                    'description' => $result->description,
+                    'qty_order' => $result->sum_qty_order,
+                    'um' => $result->u_m,
+                    'due_date' => $result->due_date
+                ];
+            };
+
+            $filename = 'HMO-po'.date('YmdHis').'.xlsx';
+
+            // $GLOBALS['col'] = '<cols>';
+            // $GLOBALS['col'] .= '<col min="1" max="1" width="10" customWidth="1"/>';
+            // $GLOBALS['col'] .= '<col min="2" max="2" width="15" customWidth="1"/>';
+            // $GLOBALS['col'] .= "</cols>";
+    
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow([
+                'No',
+                'PO Number',
+                'PO Line',
+                'Description',
+                'Qty Order',
+                'UM',
+                'Due Date'
+            ], $styleForHeader);
+
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
+
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
+                }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+        }
+    }
+
+    public function exportAdvance2(Request $request){
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';

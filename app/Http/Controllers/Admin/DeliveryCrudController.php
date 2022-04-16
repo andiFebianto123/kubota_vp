@@ -24,6 +24,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+use App\Library\ExportXlsx;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Box\Spout\Common\Entity\Style\Color;
+
 class DeliveryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -43,6 +48,7 @@ class DeliveryCrudController extends CrudController
             $this->crud->allowAccess('list');
             $this->crud->allowAccess('show-detail');
         }
+        $this->crud->allowAccess('advanced_export_excel');
     }
 
     public function create(){
@@ -63,7 +69,9 @@ class DeliveryCrudController extends CrudController
         $this->crud->addButtonFromView('line', 'show_detail_ds', 'show_detail_ds', 'beginning');
 
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
-        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        $this->crud->exportRoute = url('admin/delivery-sheet-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
+        // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         if(in_array(Constant::getRole(),['Admin PTKI'])){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
@@ -788,7 +796,95 @@ class DeliveryCrudController extends CrudController
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
-    public function exportAdvance(Request $request){
+    public function exportAdvance(){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $datas = DB::select($query);
+
+            $filename = 'DS-'.date('YmdHis').'.xlsx';
+
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'ds_number' => $result->ds_num,
+                    'ds_line' => $result->ds_line,
+                    'shipped_date' => $result->shipped_date,
+                    'po' => function($result){
+                        return $result->po_num.'-'.$result->po_line;
+                    },
+                    'order_qty' => $result->order_qty,
+                    'shipped_qty' => $result->shipped_qty,
+                    'do_number' => $result->no_surat_jalan_vendor,
+                    'operator' => $result->petugas_vendor,
+                    'ref_ds_num' => function($entry){
+                        $delivery = Delivery::where('ds_num', $entry->ref_ds_num)
+                        ->where('ds_line', $entry->ref_ds_line)
+                        ->first();
+                        $url = '';
+                        if (isset($delivery)) {
+                            $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                        }
+                        return $url;
+                    },
+                    'ref_ds_line' => $result->ref_ds_line
+                ];
+            };
+
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow(['No', 
+                'DS Number',
+                'DS Line',
+                'Shipped Date',
+                'PO',
+                'Order Qty',
+                'Shipped Qty',
+                'DO Number',
+                'Operator',
+                'Ref DS Num',
+                'Ref DS Line'
+            ], $styleForHeader);
+
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
+
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
+                }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+
+        }
+        return 0;
+    }
+
+    public function exportAdvance2(Request $request){
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';

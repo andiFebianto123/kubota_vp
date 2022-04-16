@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Validator;
 use App\Exports\TemplateExportAll;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use File;
+
+use App\Library\ExportXlsx;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Box\Spout\Common\Entity\Style\Color;
 
 
 class TaxInvoiceCrudController extends CrudController 
@@ -60,6 +67,7 @@ class TaxInvoiceCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }
+        $this->crud->allowAccess('advanced_export_excel');
 
         $this->crud->setListView('vendor.backpack.crud.list_payment'); 
     }
@@ -85,8 +93,13 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->addClause('where', 'executed_flag', '=', 0);
         $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
 
+        $this->crud->exportRoute = url('admin/export-tax-invoice');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
+
+        // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance_top', 'excelExportAdvanceTop', 'end');
+
         $this->crud->addButtonFromModelFunction('top-history', 'excel_export_advance_bottom', 'excelExportAdvanceBottom', 'end');
-        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance_top', 'excelExportAdvanceTop', 'end');
+
 
         CRUD::addColumn([
             'name'     => 'po_po_line',
@@ -893,6 +906,7 @@ class TaxInvoiceCrudController extends CrudController
 
     public function search2()
     {
+        sleep(2);
         $this->crud->hasAccessOrFail('list');
 
         $this->crud->applyUnappliedFilters();
@@ -1097,47 +1111,27 @@ class TaxInvoiceCrudController extends CrudController
 
         $entries = $this->crud->getEntries();
 
-        $dbStatement2 = getSQL($this->crud->query);
+        $dbStatement = getSQL($this->crud->query);
 
         sleep(1);
+        Storage::disk('local')->put('taxInvoice.txt', $dbStatement);
         Session::forget("sqlSyntax");
-        Session::put("sqlSyntax", $dbStatement2);
+        Session::put("sqlSyntax", $dbStatement);
 
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
     public function exportAdvanceTop(Request $request){
-        if(session()->has('sqlSyntax')){
-            $sqlQuery = session('sqlSyntax');
+        if(file_exists(storage_path('app/taxInvoice.txt'))){
+        // if(session()->has('sqlSyntax')){
+            // $sqlQuery = session('sqlSyntax');
+            $sqlQuery = File::get(storage_path('app/taxInvoice.txt'));
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
             $query = preg_replace($pattern, "", $sqlQuery);
-            $data = DB::select($query);
-            
+            $datas = DB::select($query);            
             $filename = 'Tax-payment'.date('YmdHis').'.xlsx';
 
-            $title = "Report Tax Payment";
-
-            $header = [
-                'no' => 'No',
-                'po' => 'PO',
-                'ds_num' => 'DS Num',
-                'ds_line' => 'DS Line',
-                'item' => 'Item',
-                'description' => 'Description',
-                'payment_plan_date' => 'Payment Plan Date',
-                'unit_price' => 'Unit Price',
-                'qty_received' => 'Qty Received',
-                'qty_rejected' => 'Qty Rejected',
-                'no_faktur' => 'No Faktur',
-                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
-                'harga_sebelum_pajak' => 'Harga Sebelum Pajak',
-                'ppn' => 'PPN',
-                'pph' => 'PPH',
-                'total' => 'Total',
-                'comments' => 'Comments',
-                'confirm' => 'Confirm',
-                'updated' => 'Updated'
-            ];
+            // $title = "Report Tax Payment";
 
             $resultCallback = function($result){
                return [
@@ -1183,55 +1177,111 @@ class TaxInvoiceCrudController extends CrudController
                 ];
             };
 
-            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
-                $styleHeader = [
-                    //Set font style
-                    'font' => [
-                        'bold'      =>  true,
-                        'color' => ['argb' => 'ffffff'],
-                    ],
-        
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => '66aba3',
-                         ]           
-                    ],
-        
-                ];
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow([
+                'No',
+                'PO',
+                'DS Num',
+                'DS Line',
+                'Item',
+                'Description',
+                'Payment Plan Date',
+                'Unit Price',
+                'Qty Received',
+                'Qty Rejected',
+                'No Faktur',
+                'No Surat Jalan Vendor',
+                'Harga Sebelum Pajak',
+                'PPN',
+                'PPH',
+                'Total',
+                'Comments',
+                'Confirm',
+                'Updated'
+            ], $styleForHeader);
 
-                $styleGroupProtected = [
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'ededed',
-                         ]           
-                    ],
-        
-                ];
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
 
-                $arrColumns = range('A', 'S');
-                // $totalColom = 31;
-                // for($i = 1; $i<=$totalColom; $i++){
-                //     $col = getNameFromNumber($i);
-                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-                // }
-                foreach ($arrColumns as $key => $col) {
-                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
                 }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();   
+
+            // $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
+            //     $styleHeader = [
+            //         //Set font style
+            //         'font' => [
+            //             'bold'      =>  true,
+            //             'color' => ['argb' => 'ffffff'],
+            //         ],
+        
+            //         //Set background style
+            //         'fill' => [
+            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            //             'startColor' => [
+            //                 'rgb' => '66aba3',
+            //              ]           
+            //         ],
+        
+            //     ];
+
+            //     $styleGroupProtected = [
+            //         //Set background style
+            //         'fill' => [
+            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            //             'startColor' => [
+            //                 'rgb' => 'ededed',
+            //              ]           
+            //         ],
+        
+            //     ];
+
+            //     $arrColumns = range('A', 'S');
+            //     // $totalColom = 31;
+            //     // for($i = 1; $i<=$totalColom; $i++){
+            //     //     $col = getNameFromNumber($i);
+            //     //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
+            //     //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            //     // }
+            //     foreach ($arrColumns as $key => $col) {
+            //         $event->sheet->getColumnDimension($col)->setAutoSize(true);
+            //         $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            //     }
                 
-                $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
-            };
+            //     $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
+            // };
 
-            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
+            // $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
 
-            return Excel::download($export, $filename);
+            // return Excel::download($export, $filename);
         }
-        return 0;
     }
 
     public function exportAdvanceBottom(Request $request){

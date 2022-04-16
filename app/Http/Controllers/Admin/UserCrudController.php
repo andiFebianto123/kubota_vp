@@ -29,6 +29,11 @@ use App\Models\Role;
 use Illuminate\Routing\Route;
 use App\Rules\IsValidPassword;
 use App\Exports\TemplateExportAll;
+// export with spout
+use App\Library\ExportXlsx;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Box\Spout\Common\Entity\Style\Color;
 
 class UserCrudController extends CrudController
 {
@@ -52,6 +57,7 @@ class UserCrudController extends CrudController
         }else{
             $this->crud->denyAccess('list');
         }        
+        $this->crud->allowAccess('advanced_export_excel');
     }
 
 
@@ -96,7 +102,10 @@ class UserCrudController extends CrudController
             $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
         }
 
-        $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        $this->crud->exportRoute = url('admin/user-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
+
+        // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         $this->crud->setListView('crud::list-user');
     }
@@ -449,7 +458,83 @@ class UserCrudController extends CrudController
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
-    public function exportAdvance(Request $request){
+    public function exportAdvance(){
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $datas = DB::select($query);
+
+            $filename = 'USER-'.date('YmdHis').'.xlsx';
+
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'name' => $result->name,
+                    'username' => $result->username,
+                    'email' => $result->email,
+                    'vendor' => function($result){
+                        $vendor = Vendor::where('id', $result->vendor_id)->first();
+                        if($vendor == null){
+                            return '-';
+                        }
+                        return $vendor->vend_num;
+                    },
+                    'role' => $result->nama_role,
+                ];
+            };
+
+            // $GLOBALS['col'] = '<cols>';
+            // $GLOBALS['col'] .= '<col min="1" max="1" width="10" customWidth="1"/>';
+            // $GLOBALS['col'] .= '<col min="2" max="2" width="15" customWidth="1"/>';
+            // $GLOBALS['col'] .= "</cols>";
+    
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow(['No', 
+                'Name',
+                'Username',
+                'Email',
+                'Vendor',
+                'Role',
+            ], $styleForHeader);
+
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
+
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
+                }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+        }
+    }
+
+    public function exportAdvance2(Request $request){
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
