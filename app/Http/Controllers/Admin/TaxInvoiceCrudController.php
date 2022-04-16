@@ -96,9 +96,11 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->exportRoute = url('admin/export-tax-invoice');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
+        $this->crud->exportRoute2 = url('admin/export-tax-history-invoice');
+        $this->crud->addButtonFromView('top-history', 'advanced_export_excel2', 'advanced_export_excel2', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance_top', 'excelExportAdvanceTop', 'end');
 
-        $this->crud->addButtonFromModelFunction('top-history', 'excel_export_advance_bottom', 'excelExportAdvanceBottom', 'end');
+        // $this->crud->addButtonFromModelFunction('top-history', 'excel_export_advance_bottom', 'excelExportAdvanceBottom', 'end');
 
 
         CRUD::addColumn([
@@ -1173,6 +1175,8 @@ class TaxInvoiceCrudController extends CrudController
                             return 'Reject';
                         }
                     },
+                    'ref_ds_num' => $result->ref_ds_num,
+                    'ref_ds_line' => $result->ref_ds_line,
                     'updated' => $result->updated_at
                 ];
             };
@@ -1207,6 +1211,8 @@ class TaxInvoiceCrudController extends CrudController
                 'Total',
                 'Comments',
                 'Confirm',
+                'Ref DS Num',
+                'Ref DS Line',
                 'Updated'
             ], $styleForHeader);
 
@@ -1289,33 +1295,9 @@ class TaxInvoiceCrudController extends CrudController
             $sqlQuery = session('sqlSyntax2');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
             $query = preg_replace($pattern, "", $sqlQuery);
-            $data = DB::select($query);
+            $datas = DB::select($query);
 
             $filename = 'HTax-payment'.date('YmdHis').'.xlsx';
-
-            $title = "Report History Tax Payment";
-
-            $header = [
-                'no' => 'No',
-                'po' => 'PO',
-                'ds_num' => 'DS Num',
-                'ds_line' => 'DS Line',
-                'item' => 'Item',
-                'description' => 'Description',
-                'payment_plan_date' => 'Payment Plan Date',
-                'unit_price' => 'Unit Price',
-                'qty_received' => 'Qty Received',
-                'qty_rejected' => 'Qty Rejected',
-                'no_faktur' => 'No Faktur',
-                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
-                'harga_sebelum_pajak' => 'Harga Sebelum Pajak',
-                'ppn' => 'PPN',
-                'pph' => 'PPH',
-                'total' => 'Total',
-                'comments' => 'Comments',
-                'confirm' => 'Confirm',
-                'updated' => 'Updated'
-            ];
 
             $resultCallback = function($result){
                return [
@@ -1357,57 +1339,118 @@ class TaxInvoiceCrudController extends CrudController
                             return 'Reject';
                         }
                     },
+                    'ref_ds_num' => $result->ref_ds_num,
+                    'ref_ds_line' => $result->ref_ds_line,
                     'updated' => $result->updated_at
                 ];
             };
 
-            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
-                $styleHeader = [
-                    //Set font style
-                    'font' => [
-                        'bold'      =>  true,
-                        'color' => ['argb' => 'ffffff'],
-                    ],
-        
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => '66aba3',
-                         ]           
-                    ],
-        
-                ];
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow([
+                'No',
+                'PO',
+                'DS Num',
+                'DS Line',
+                'Item',
+                'Description',
+                'Payment Plan Date',
+                'Unit Price',
+                'Qty Received',
+                'Qty Rejected',
+                'No Faktur',
+                'No Surat Jalan Vendor',
+                'Harga Sebelum Pajak',
+                'PPN',
+                'PPH',
+                'Total',
+                'Comments',
+                'Confirm',
+                'Ref DS Num',
+                'Ref DS Line',
+                'Updated'
+            ], $styleForHeader);
 
-                $styleGroupProtected = [
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'ededed',
-                         ]           
-                    ],
-        
-                ];
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
 
-                $arrColumns = range('A', 'S');
-                // $totalColom = 31;
-                // for($i = 1; $i<=$totalColom; $i++){
-                //     $col = getNameFromNumber($i);
-                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-                // }
-                foreach ($arrColumns as $key => $col) {
-                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
                 }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+
+            // $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
+            //     $styleHeader = [
+            //         //Set font style
+            //         'font' => [
+            //             'bold'      =>  true,
+            //             'color' => ['argb' => 'ffffff'],
+            //         ],
+        
+            //         //Set background style
+            //         'fill' => [
+            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            //             'startColor' => [
+            //                 'rgb' => '66aba3',
+            //              ]           
+            //         ],
+        
+            //     ];
+
+            //     $styleGroupProtected = [
+            //         //Set background style
+            //         'fill' => [
+            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            //             'startColor' => [
+            //                 'rgb' => 'ededed',
+            //              ]           
+            //         ],
+        
+            //     ];
+
+            //     $arrColumns = range('A', 'S');
+            //     // $totalColom = 31;
+            //     // for($i = 1; $i<=$totalColom; $i++){
+            //     //     $col = getNameFromNumber($i);
+            //     //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
+            //     //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            //     // }
+            //     foreach ($arrColumns as $key => $col) {
+            //         $event->sheet->getColumnDimension($col)->setAutoSize(true);
+            //         $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
+            //     }
                 
-                $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
-            };
+            //     $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
+            // };
 
-            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
+            // $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
 
-            return Excel::download($export, $filename);
+            // return Excel::download($export, $filename);
         }
         return 0;
     }
