@@ -1,5 +1,5 @@
 <a href="javascript:void(0)" 
-    class="btn btn-primary btn-primary-vp" 
+    class="btn btn-sm btn-primary-vp" 
     data-button-type="updateRole"
     data-toggle="modal" data-target="#updateRoleModal">
     <i class="la la-universal-access"></i> Add Permission to Role
