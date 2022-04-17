@@ -1,5 +1,5 @@
 <a href="javascript:void(0)" 
-    class="btn btn-light-vp" 
+    class="btn btn-sm btn-light-vp" 
     data-button-type="updateRole"
     data-toggle="modal" data-target="#upload-modal">
     <i class="la la-upload"></i> Import User
@@ -23,9 +23,4 @@
         
     }
 </script>
-<script>
-      $(function(){
-
-      });
-  </script>
 @endpush
