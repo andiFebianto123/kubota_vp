@@ -117,9 +117,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @include('crud::inc.show_fields', ['fields' => $crud->fields()])
                     </div>
                     @if(sizeof($unfinished_po_line['datas']) > 0)
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp ml-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
+                    <button id="btn-for-form-delivery" class="btn btn-sm btn-primary-vp ml-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
                     @else
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp ml-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
+                    <button id="btn-for-form-delivery" class="btn btn-sm btn-primary-vp ml-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
                     @endif
                     <button class="btn btn-danger mb-4 mt-0"  type="button" onclick="window.history.go(-1); return false;">Cancel</button>
 
