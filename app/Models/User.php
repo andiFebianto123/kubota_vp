@@ -63,6 +63,6 @@ class User extends Authenticatable
 
     public function excelExportAdvance(){
         $url = url('admin/user-export');
-        return '<a class="btn btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
+        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
     }
 }

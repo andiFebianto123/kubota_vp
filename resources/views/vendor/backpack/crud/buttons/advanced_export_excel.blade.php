@@ -1,5 +1,5 @@
 @if ($crud->hasAccess('advanced_export_excel'))
-    <button id="btn-for-form-adv-export-excel" class="btn btn-primary-vp" data-route="{{$crud->exportRoute}}" type="button" onclick="exportExcel(this)" ><i class="la la-file-excel"></i> Export</button>
+    <button id="btn-for-form-adv-export-excel" class="btn btn-sm btn-primary-vp" data-route="{{$crud->exportRoute}}" type="button" onclick="exportExcel(this)" ><i class="la la-file-excel"></i> Export</button>
 @endif
 
 @push('after_scripts')
