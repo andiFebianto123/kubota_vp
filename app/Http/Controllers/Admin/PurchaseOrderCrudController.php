@@ -74,9 +74,9 @@ class PurchaseOrderCrudController extends CrudController
             $this->crud->enableBulkActions();
             $this->crud->addButtonFromView('top', 'bulk_send_mail_new_po', 'bulk_send_mail_new_po', 'beginning');
         }
-        if(Constant::checkPermission('Export Purchase Order')){
-            $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'end');
-        }
+        // if(Constant::checkPermission('Export Purchase Order')){
+        //     $this->crud->addButtonFromModelFunction('top', 'excel_export', 'excelExport', 'end');
+        // }
         if(Constant::checkPermission('Import Purchase Order')){
             $this->crud->addButtonFromView('top', 'mass_ds', 'mass_ds', 'end');
         }

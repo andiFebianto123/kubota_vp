@@ -34,11 +34,11 @@ class PurchaseOrder extends Model
         return '<a class="btn btn-sm btn-link" href="'.$url.'"><i class="la la la-eye"></i> View</a>';
     }
 
-    public function excelExport($crud = false)
-    {
-        $url = url('admin/purchase-order-export-excel');
-        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export All</a>';
-    }
+    // public function excelExport($crud = false)
+    // {
+    //     $url = url('admin/purchase-order-export-excel');
+    //     return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export All</a>';
+    // }
 
     public function excelExportAdvance(){
         $url = url('admin/purchase-order-export');
