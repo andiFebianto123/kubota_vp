@@ -128,9 +128,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     </div>
 
                     @if(sizeof($unfinished_po_line['datas']) > 0)
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
+                    <button id="btn-for-form-delivery" class="btn btn-sm btn-primary-vp mx-4 mb-4 mt-0" data-toggle="modal" data-target="#modalAlertDueDate" type="button">Submit</button>
                     @else
-                    <button id="btn-for-form-delivery" class="btn btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
+                    <button id="btn-for-form-delivery" class="btn btn-sm btn-primary-vp mx-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
                     @endif
                 </form>
         </div>

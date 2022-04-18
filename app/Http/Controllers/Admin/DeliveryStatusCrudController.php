@@ -14,6 +14,7 @@ use App\Exports\TemplateExportAll;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use App\Library\ExportXlsx;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 // untuk box spout
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
@@ -109,10 +110,10 @@ class DeliveryStatusCrudController extends CrudController
                 'name'      => 'unit_price', // the column that contains the ID of that connected entity;
                 'type'     => 'closure',
                 'function' => function($entry) {
-                    // $currency = $entry->purchaseOrder->vendor->currency;
-                    // $val = number_format($entry->unit_price, 0, ',', '.');
-                    // return $currency." ".$val;
-                    $currency = $entry->currency;
+                    $currency = "";
+                    if (isset($entry->purchaseOrder->vendor)) {
+                        $currency = $entry->purchaseOrder->vendor->currency;
+                    }
                     $val = number_format($entry->unit_price, 0, ',', '.');
                     return $currency." ".$val;
                 }
@@ -122,10 +123,10 @@ class DeliveryStatusCrudController extends CrudController
                 'label'    => 'Total',
                 'type'     => 'closure',
                 'function' => function($entry) {
-                    // $currency = $entry->purchaseOrder->vendor->currency;
-                    // $val = number_format($entry->total, 0, ',', '.');
-                    // return $currency." ".$val;
-                    $currency = $entry->currency;
+                    $currency = "";
+                    if (isset($entry->purchaseOrder->vendor)) {
+                        $currency = $entry->purchaseOrder->vendor->currency;
+                    }
                     $val = number_format($entry->total, 0, ',', '.');
                     return $currency." ".$val;
                 }
@@ -268,13 +269,155 @@ class DeliveryStatusCrudController extends CrudController
         return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
-    public function exportAdvance(){
+    public function exportAdvanceOld(){
+        ini_set('memory_limit', '-1');
+
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
             $query = preg_replace($pattern, "", $sqlQuery);
             $datas = DB::select($sqlQuery);
 
+            $resultCallback = function($result){
+                return [
+                    'no' => '<number>',
+                    'id' => $result->id,
+                    'ds_num' => $result->ds_num,
+                    'ds_line' => $result->ds_line,
+                    'ds_type' => $result->ds_type,
+                    'po_relase' => $result->po_release,
+                    // 'desc' => $result->description,
+                    'grn_num' => $result->grn_num ?? '',
+                    'grn_line' => $result->grn_line ?? '',
+                    'received_flag' => $result->received_flag ?? '0',
+                    'received_date' => $result->received_date ?? '',
+                    'due_date' => $result->payment_plan_date ?? '',
+                    'validated_flag' => $result->validate_by_fa_flag ?? '0',
+                    'payment_in_process_flag' => $result->payment_in_process_flag ?? '0',
+                    'executed_flag' => $result->executed_flag ?? '0',
+                    'payment_date' => $result->payment_date ?? '',
+                    'tax_status' => $result->tax_status ?? '',
+                    'payment_ref_num' => $result->payment_ref_num ?? '',
+                    'bank' => $result->bank ?? '',
+                    'shipped_qty' => $result->shipped_qty ?? '',
+                    'received_qty' => $result->received_qty ?? '',
+                    'rejected_qty' => $result->rejected_qty ?? '',
+                    'unit_price' => function($entry){
+                        // $ds = DeliveryStatus::where('id', $entry->id)->first();
+                        // if($ds !== null){
+                        //     $currency = $ds->purchaseOrder->vendor->currency;
+                        //     $val = number_format($entry->unit_price, 0, ',', '.');
+                        //     return $currency." ".$val;
+                        // }
+                        $currency = $entry->currency;
+                        $val = number_format($entry->unit_price, 0, ',', '.');
+                        return $currency." ".$val;
+                    },
+                    'total' => function($entry){
+                        // $ds = DeliveryStatus::where('id', $entry->id)->first();
+                        // if($ds !== null){
+                        //     $currency = $ds->purchaseOrder->vendor->currency;
+                        //     $val = number_format($entry->total, 0, ',', '.');
+                        //     return $currency." ".$val;
+                        // }
+                        $currency = $entry->currency;
+                        $val = number_format($entry->total, 0, ',', '.');
+                        return $currency." ".$val;
+                    },
+                    // 'petugas_vendor' => is_string($result->petugas_vendor) ?$result->petugas_vendor:'-',
+                    'no_faktur_pajak' => $result->no_faktur_pajak ?? '',
+                    // 'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor ?? '',
+                    'ref_ds_num' => $result->ref_ds_num ?? '',
+                    'ref_ds_line' => $result->ref_ds_line ?? '',
+                    'created' => $result->created_at ?? '',
+                    'updated' => $result->updated_at ?? '',
+                ];
+            };
+
+
+            $filename = 'DST-'.date('YmdHis').'.xlsx';
+
+            // $GLOBALS['col'] = '<cols>';
+            // $GLOBALS['col'] .= '<col min="1" max="1" width="10" customWidth="1"/>';
+            // $GLOBALS['col'] .= '<col min="2" max="2" width="15" customWidth="1"/>';
+            // $GLOBALS['col'] .= "</cols>";
+    
+            $export = new ExportXlsx($filename);
+    
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+    
+            $firstSheet = $export->currentSheet();
+    
+            $export->addRow(['No', 
+                'ID', 'DS Num', 'DS Line', 'DS Type', 'PO Relase', 
+                'Desc', 'GRN Num', 'GRN Line', 'Received Flag', 'Received Date', 'Due Date', 'Validate Flag',
+                'Payment In Process Flag', 'Executed Flag', 'Payment Date', 'Tax Status', 'Payment Ref Num',
+                'Bank', 'Shipped Qty', 'Received Qty', 'Rejected Qty', 'Unit Price', 'Total', 'Petugas Vendor',
+                'No Faktur Pajak', 'No Surat Jalan Vendor', 'Ref DS Num', 'Ref DS Line', 'Created', 'Updated'
+            ], $styleForHeader);
+
+            $styleForBody = (new StyleBuilder())
+                            ->setFontColor(Color::BLACK)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->build();
+
+            $increment = 1;
+            foreach($datas as $data){
+                $row = $resultCallback($data);
+                $rowT = [];
+                foreach($row as $key => $value){
+                    if($value == "<number>"){
+                        $rowT[] = $increment;
+                    }else if(is_callable($value)){
+                        $rowT[] = $value($data);
+                    }else{
+                        $rowT[] = $value;
+                    }
+                }
+                $increment++;
+                $export->addRow($rowT, $styleForBody);
+            }
+
+            $export->close();
+        }
+    
+    }
+
+
+    private function dataChunks($datas) {
+        foreach ($datas as $data) {
+            yield $data;
+        }
+    }
+
+
+    public function exportAdvance(){
+        ini_set('memory_limit', '-1');
+
+        if(session()->has('sqlSyntax')){
+            $sqlQuery = session('sqlSyntax');
+            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
+            $query = preg_replace($pattern, "", $sqlQuery);
+            $datas = DB::select($query);
+
+            $filename = 'DST-'.date('YmdHis').'.xlsx';
+
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
+
+            return (new FastExcel($this->dataChunks($datas)))
+                ->headerStyle($styleForHeader)
+                ->download($filename);
+            /*
             $resultCallback = function($result){
                 return [
                     'no' => '<number>',
@@ -361,17 +504,15 @@ class DeliveryStatusCrudController extends CrudController
                     'created' => $result->created_at,
                     'updated' => $result->updated_at
                 ];
-            };
+            };*/
 
-
-            $filename = 'DST-'.date('YmdHis').'.xlsx';
 
             // $GLOBALS['col'] = '<cols>';
             // $GLOBALS['col'] .= '<col min="1" max="1" width="10" customWidth="1"/>';
             // $GLOBALS['col'] .= '<col min="2" max="2" width="15" customWidth="1"/>';
             // $GLOBALS['col'] .= "</cols>";
     
-            $export = new ExportXlsx($filename);
+            // $export = new ExportXlsx($filename);
     
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
@@ -380,15 +521,15 @@ class DeliveryStatusCrudController extends CrudController
                             ->setBackgroundColor(Color::rgb(102, 171, 163))
                             ->build();
     
-            $firstSheet = $export->currentSheet();
+            // $firstSheet = $export->currentSheet();
     
-            $export->addRow(['No', 
-                'ID', 'DS Num', 'DS Line', 'DS Type', 'PO Relase', 
-                'Desc', 'GRN Num', 'GRN Line', 'Received Flag', 'Received Date', 'Due Date', 'Validate Flag',
-                'Payment In Process Flag', 'Executed Flag', 'Payment Date', 'Tax Status', 'Payment Ref Num',
-                'Bank', 'Shipped Qty', 'Received Qty', 'Rejected Qty', 'Unit Price', 'Total', 'Petugas Vendor',
-                'No Faktur Pajak', 'No Surat Jalan Vendor', 'Ref DS Num', 'Ref DS Line', 'Created', 'Updated'
-            ], $styleForHeader);
+            // $export->addRow(['No', 
+            //     'ID', 'DS Num', 'DS Line', 'DS Type', 'PO Relase', 
+            //     'Desc', 'GRN Num', 'GRN Line', 'Received Flag', 'Received Date', 'Due Date', 'Validate Flag',
+            //     'Payment In Process Flag', 'Executed Flag', 'Payment Date', 'Tax Status', 'Payment Ref Num',
+            //     'Bank', 'Shipped Qty', 'Received Qty', 'Rejected Qty', 'Unit Price', 'Total', 'Petugas Vendor',
+            //     'No Faktur Pajak', 'No Surat Jalan Vendor', 'Ref DS Num', 'Ref DS Line', 'Created', 'Updated'
+            // ], $styleForHeader);
 
             $styleForBody = (new StyleBuilder())
                             ->setFontColor(Color::BLACK)
@@ -396,6 +537,89 @@ class DeliveryStatusCrudController extends CrudController
                             ->build();
 
             $increment = 1;
+
+
+
+            // (new FastExcel($datas))->export('invoices.csv');
+
+            // (new FastExcel($datas))->export($filename, function ($result) {
+            //     return [
+            //         'no' => '<number>',
+            //         'id' => $result->id,
+            //         'ds_num' => $result->ds_num,
+            //         'ds_line' => $result->ds_line,
+            //         'ds_type' => $result->ds_type,
+            //         'po_relase' => $result->po_release,
+            //         'desc' => $result->description,
+            //         'grn_num' => $result->grn_num,
+            //         'grn_line' => $result->grn_line,
+            //         'received_flag' => function($result){
+            //             if($result->received_flag == 1){
+            //                 return 1;
+            //                 // return "✓";
+            //             } else {
+            //                 // return "x";
+            //             }            
+            //             return 0;            
+            //         },
+            //         'received_date' => $result->received_date,
+            //         'due_date' => $result->payment_plan_date,
+            //         'validated_flag' => function($result){
+            //             if($result->validate_by_fa_flag == 1){
+            //                 return 1;
+            //                 // return "✓";
+            //             } else {
+            //                 // return "x";
+            //             }  
+            //             return 0;                      
+            //         },
+            //         'payment_in_process_flag' => function($result){
+            //             if($result->payment_in_process_flag == 1){
+            //                 return 1;
+            //                 // return "✓";
+            //             } else {
+            //                 // return "x";
+            //             }            
+            //             return 0;            
+            //         },
+            //         'executed_flag' => function($result){
+            //             if($result->executed_flag == 1){
+            //                 return 1;
+            //                 // return "✓";
+            //             } else {
+            //                 // return "x";
+            //             }  
+            //             return 0;                      
+            //         },
+            //         'payment_date' => $result->payment_date,
+            //         'tax_status' => $result->tax_status,
+            //         'payment_ref_num' => $result->payment_ref_num,
+            //         'bank' => $result->bank,
+            //         'shipped_qty' => $result->shipped_qty,
+            //         'received_qty' => $result->received_qty,
+            //         'rejected_qty' => $result->rejected_qty,
+            //         // 'unit_price' => function($entry){
+            //         //     $currency = $entry->currency;
+            //         //     $val = number_format($entry->unit_price, 0, ',', '.');
+            //         //     return $currency." ".$val;
+            //         // },
+            //         // 'total' => function($entry){
+            //         //     $currency = $entry->currency;
+            //         //     $val = number_format($entry->total, 0, ',', '.');
+            //         //     return $currency." ".$val;
+            //         // },
+            //         'petugas_vendor' => $result->petugas_vendor,
+            //         'no_faktur_pajak' => $result->no_faktur_pajak,
+            //         'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
+            //         'ref_ds_num' => $result->ref_ds_num,
+            //         'ref_ds_line' => $result->ref_ds_line,
+            //         'created' => $result->created_at,
+            //         'updated' => $result->updated_at
+            //     ];
+            // });
+            
+
+            /*
             foreach($datas as $data){
                 $row = $resultCallback($data);
                 $rowT = [];
@@ -413,196 +637,8 @@ class DeliveryStatusCrudController extends CrudController
             }
 
             $export->close();
+            */
         }
     
     }
-
-
-    public function exportAdvance1(Request $request){
-        if(session()->has('sqlSyntax')){
-            $sqlQuery = session('sqlSyntax');
-            $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
-            $query = preg_replace($pattern, "", $sqlQuery);
-            $data = DB::select($query);
-
-            $filename = 'DST-'.date('YmdHis').'.csv';
-
-            $title = "Report Delivery Status";
-
-            $header = [
-                'no' => 'No',
-                'id' => 'ID',
-                'ds_num' => 'DS Num',
-                'ds_line' => 'DS Line',
-                'ds_type' => 'DS Type',
-                'po_relase' => 'PO Relase',
-                'desc' => 'Desc',
-                'grn_num' => 'GRN Num',
-                'grn_line' => 'GRN Line',
-                'received_flag' => 'Received Flag',
-                'received_date' => 'Received Date',
-                'due_date' => 'Due Date',
-                'validated_flag' => 'Validated Flag',
-                'payment_in_process_flag' => 'Payment In Process Flag',
-                'executed_flag' => 'Executed Flag',
-                'payment_date' => 'Payment Date',
-                'tax_status' => 'Tax Status',
-                'payment_ref_num' => 'Payment Ref Num',
-                'bank' => 'Bank',
-                'shipped_qty' => 'Shipped Qty',
-                'received_qty' => 'Received Qty',
-                'rejected_qty' => 'Rejected Qty',
-                'unit_price' => 'Unit Price',
-                'total' => 'Total',
-                'petugas_vendor' => 'Petugas Vendor',
-                'no_faktur_pajak' => 'No Faktur Pajak',
-                'no_surat_jalan_vendor' => 'No Surat Jalan Vendor',
-                'ref_ds_num' => 'Ref DS Num',
-                'ref_ds_line' => 'Ref DS Line',
-                'created' => 'Created',
-                'updated' => 'Updated'
-            ];
-
-            $resultCallback = function($result){
-                return [
-                    'no' => '<number>',
-                    'id' => $result->id,
-                    'ds_num' => $result->ds_num,
-                    'ds_line' => $result->ds_line,
-                    'ds_type' => $result->ds_type,
-                    'po_relase' => $result->po_release,
-                    'desc' => $result->description,
-                    'grn_num' => function($result){
-                        $string = sprintf('%d', $result->grn_num);
-                        return "{$string}";
-                    },
-                    'grn_line' => $result->grn_line,
-                    'received_flag' => function($result){
-                        if($result->received_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }            
-                        return 0;            
-                    },
-                    'received_date' => $result->received_date,
-                    'due_date' => $result->payment_plan_date,
-                    'validated_flag' => function($result){
-                        if($result->validate_by_fa_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }  
-                        return 0;                      
-                    },
-                    'payment_in_process_flag' => function($result){
-                        if($result->payment_in_process_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }            
-                        return 0;            
-                    },
-                    'executed_flag' => function($result){
-                        if($result->executed_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }  
-                        return 0;                      
-                    },
-                    'payment_date' => $result->payment_date,
-                    'tax_status' => $result->tax_status,
-                    'payment_ref_num' => $result->payment_ref_num,
-                    'bank' => $result->bank,
-                    'shipped_qty' => $result->shipped_qty,
-                    'received_qty' => $result->received_qty,
-                    'rejected_qty' => $result->rejected_qty,
-                    'unit_price' => function($entry){
-                        $ds = DeliveryStatus::where('id', $entry->id)->first();
-                        if($ds !== null){
-                            $currency = $ds->purchaseOrder->vendor->currency;
-                            $val = number_format($entry->unit_price, 0, ',', '.');
-                            return $currency." ".$val;
-                        }
-                        return '-';
-                    },
-                    'total' => function($entry){
-                        $ds = DeliveryStatus::where('id', $entry->id)->first();
-                        if($ds !== null){
-                            $currency = $ds->purchaseOrder->vendor->currency;
-                            $val = number_format($entry->total, 0, ',', '.');
-                            return $currency." ".$val;
-                        }
-                        return '-';
-                    },
-                    'petugas_vendor' => $result->petugas_vendor,
-                    'no_faktur_pajak' => $result->no_faktur_pajak,
-                    'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
-                    'ref_ds_num' => $result->ref_ds_num,
-                    'ref_ds_line' => $result->ref_ds_line,
-                    'created' => $result->created_at,
-                    'updated' => $result->updated_at
-                ];
-            };
-
-            $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
-                $styleHeader = [
-                    //Set font style
-                    'font' => [
-                        'bold'      =>  true,
-                        'color' => ['argb' => 'ffffff'],
-                    ],
-        
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => '66aba3',
-                         ]           
-                    ],
-        
-                ];
-
-                $styleGroupProtected = [
-                    //Set background style
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'ededed',
-                         ]           
-                    ],
-        
-                ];
-
-                // $arrColumns = range('A', 'AE');
-                $totalColom = 31;
-                for($i = 1; $i<=$totalColom; $i++){
-                    $col = getNameFromNumber($i);
-                    $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                    $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-                }
-                // foreach ($arrColumns as $key => $col) {
-                //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
-                //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-                // }
-                
-                $event->sheet->getDelegate()->getStyle('A1:AE1')->applyFromArray($styleHeader);
-            };
-
-            $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
-
-            // return Excel::download($export, $filename);
-            return ($export)->download($filename, \Maatwebsite\Excel\Excel::CSV, [
-                'Content-Type' => 'text/csv',
-            ]);
-
-        }
-        return 0;
-    }
-
 }
