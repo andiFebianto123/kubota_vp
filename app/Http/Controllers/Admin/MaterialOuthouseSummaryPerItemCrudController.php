@@ -22,7 +22,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation; 
 
 
     public function setup()
@@ -31,22 +31,34 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/material-outhouse-summary-per-item');
         CRUD::setEntityNameStrings('material outhouse summary', 'mo per item');
         
-        $sql = "(
-            (SELECT sum(lot_qty) FROM material_outhouse mo 
-            JOIN po as po1 ON (po1.po_num = mo.po_num) 
-            JOIN po_line ON (po_line.po_num = mo.po_num AND po_line.po_line = mo.po_line) 
-            WHERE mo.matl_item = material_outhouse.matl_item 
-            AND po.vend_num = po1.vend_num
-            AND po_line.status = 'O'
-            ) -
+        $sql = "( 
+            (SELECT sum(lot_qty) FROM material_outhouse mo
+             WHERE mo.matl_item = material_outhouse.matl_item
+             AND EXISTS(
+                 SELECT 1 FROM po po1 
+                 WHERE po1.po_num = mo.po_num 
+                 AND po1.vend_num = po.vend_num
+             )
+             AND EXISTS(
+               	SELECT 1 FROM po_line 
+                 WHERE po_line.po_num = mo.po_num 
+                 AND po_line.po_line = mo.po_line
+                 AND po_line.status = 'O'
+            )) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
-            JOIN po as po1 ON (po1.po_num = delivery.po_num) 
-            JOIN po_line ON (po_line.po_num = delivery.po_num AND po_line.po_line = delivery.po_line) 
-            WHERE imo.matl_item = material_outhouse.matl_item 
-            AND po.vend_num = po1.vend_num
-            AND po_line.status = 'O'
-            AND delivery.ds_type IN ('00','01')
+            WHERE (delivery.ds_type = '00' OR delivery.ds_type = '01')
+            AND EXISTS(
+            	SELECT 1 FROM po as po1 
+                WHERE po1.po_num = delivery.po_num
+                AND po.vend_num = po1.vend_num
+            ) 
+            AND EXISTS(
+            	SELECT 1 FROM po_line 
+                WHERE po_line.po_num = delivery.po_num
+                AND po_line.po_line = delivery.po_line
+                AND po_line.status = 'O'
+            )
             ), 0))
             ) AS mavailable_material";
 

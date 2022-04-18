@@ -109,7 +109,10 @@ class DeliveryStatusCrudController extends CrudController
                 'name'      => 'unit_price', // the column that contains the ID of that connected entity;
                 'type'     => 'closure',
                 'function' => function($entry) {
-                    $currency = $entry->purchaseOrder->vendor->currency;
+                    // $currency = $entry->purchaseOrder->vendor->currency;
+                    // $val = number_format($entry->unit_price, 0, ',', '.');
+                    // return $currency." ".$val;
+                    $currency = $entry->currency;
                     $val = number_format($entry->unit_price, 0, ',', '.');
                     return $currency." ".$val;
                 }
@@ -119,7 +122,10 @@ class DeliveryStatusCrudController extends CrudController
                 'label'    => 'Total',
                 'type'     => 'closure',
                 'function' => function($entry) {
-                    $currency = $entry->purchaseOrder->vendor->currency;
+                    // $currency = $entry->purchaseOrder->vendor->currency;
+                    // $val = number_format($entry->total, 0, ',', '.');
+                    // return $currency." ".$val;
+                    $currency = $entry->currency;
                     $val = number_format($entry->total, 0, ',', '.');
                     return $currency." ".$val;
                 }
@@ -267,7 +273,7 @@ class DeliveryStatusCrudController extends CrudController
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
             $query = preg_replace($pattern, "", $sqlQuery);
-            $datas = DB::select($query);
+            $datas = DB::select($sqlQuery);
 
             $resultCallback = function($result){
                 return [
