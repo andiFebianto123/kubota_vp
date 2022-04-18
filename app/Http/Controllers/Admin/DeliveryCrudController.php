@@ -15,6 +15,7 @@ use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
+use App\Models\PurchaseOrder;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -357,6 +358,7 @@ class DeliveryCrudController extends CrudController
                 ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                 ->first();
 
+
         // ds num generator from global function
         $dsNum =  (new Constant())->codeDs($poLine->po_num, $poLine->po_line, $shippedDate);
 
@@ -479,6 +481,10 @@ class DeliveryCrudController extends CrudController
                     $insertImo->description = $mo->description;
                     $insertImo->lot =  $mo->lot;
                     $insertImo->issue_qty = $moIssueQty;
+                    $insertImo->po_num = $poLine->po_num;
+                    $insertImo->po_line = $poLine->po_line;
+                    $insertImo->ds_type = $dsNum['type'];
+                    $insertImo->vend_num = $poLine->vend_num;
                     $insertImo->created_by = backpack_auth()->user()->id;
                     $insertImo->updated_by = backpack_auth()->user()->id;
                     $insertImo->save();

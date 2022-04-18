@@ -45,20 +45,18 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
                  AND po_line.po_line = mo.po_line
                  AND po_line.status = 'O'
             )) -
-            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
-            JOIN delivery ON (delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line)
-            WHERE (delivery.ds_type = '00' OR delivery.ds_type = '01')
-            AND EXISTS(
-            	SELECT 1 FROM po as po1 
-                WHERE po1.po_num = delivery.po_num
-                AND po.vend_num = po1.vend_num
-            ) 
-            AND EXISTS(
-            	SELECT 1 FROM po_line 
-                WHERE po_line.po_num = delivery.po_num
-                AND po_line.po_line = delivery.po_line
-                AND po_line.status = 'O'
+            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo
+            WHERE imo.matl_item = material_outhouse.matl_item
+            AND EXISTS(SELECT 1 FROM delivery WHERE delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line AND (delivery.ds_type = '00' OR delivery.ds_type = '01') AND EXISTS(
+            SELECT 1 FROM po as po1
+            WHERE po1.po_num = delivery.po_num
             )
+            AND EXISTS(
+            SELECT 1 FROM po_line
+            WHERE po_line.po_num = delivery.po_num
+            AND po_line.po_line = delivery.po_line
+            AND po_line.status = 'O'
+            ))
             ), 0))
             ) AS mavailable_material";
 
@@ -152,14 +150,18 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $this->crud->applyUnappliedFilters();
 
         $totalRows = $this->crud->model->count();
-        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $cloneQuery = clone $this->crud->query;
+        $queryWithSelect = $cloneQuery->select('matl_item');
+        $filteredRows = $queryWithSelect->toBase()->getCountForPagination();
+        // $filteredRows = $this->crud->query->toBase()->getCountForPagination();
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
         if (request()->input('search') && request()->input('search')['value']) {
             // filter the results accordingly
             $this->crud->applySearchTerm(request()->input('search')['value']);
             // recalculate the number of filtered rows
-            $filteredRows = $this->crud->count();
+            // $filteredRows = $this->crud->count();
+            $filteredRows = $queryWithSelect->count();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {

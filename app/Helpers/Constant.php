@@ -34,20 +34,30 @@ class Constant
 
   public function codeDs($poNum, $poLine, $delivery_date){
     $code = "";
-    switch (backpack_auth()->user()->roles->pluck('name')->first()) {
-        case 'Admin PTKI':
-            $code = "02";
-            break;
-        default:
-            $code = "00";
-            break;
+    $user = backpack_auth()->user()->roles->pluck('name')->first();
+    if(strpos(strtoupper($user), 'PTKI')){
+      $code = '02';
+    }else{
+      $code = '00';
     }
+    // switch (backpack_auth()->user()->roles->pluck('name')->first()) {
+    //     case 'Admin PTKI':
+    //         $code = "02";
+    //         break;
+    //     case 'User PTKI':
+    //         $code = "02";
+    //         break;
+    //     default:
+    //         $code = "00";
+    //         break;
+    // }
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
     $dsNumMid = $po->vend_num.date('ymd', strtotime($delivery_date));
     $ds = Delivery::where('ds_num', $dsNumMid.$code)->orderBy('ds_line', 'desc')->first();
     $dsLine = (isset($ds))?$ds->ds_line+1:1;
 
+    $dsNum['type'] = $code;
     $dsNum['single'] = $dsNumMid.$code;
     $dsNum['group'] = 'GD'.$dsNumMid;
     $dsNum['line'] = $dsLine;
