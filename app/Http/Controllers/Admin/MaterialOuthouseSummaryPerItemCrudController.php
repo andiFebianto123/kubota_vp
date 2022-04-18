@@ -45,19 +45,13 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
                  AND po_line.po_line = mo.po_line
                  AND po_line.status = 'O'
             )) -
-            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo
+            (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             WHERE imo.matl_item = material_outhouse.matl_item
-            AND EXISTS(SELECT 1 FROM delivery WHERE delivery.ds_num = imo.ds_num AND delivery.ds_line = imo.ds_line AND (delivery.ds_type = '00' OR delivery.ds_type = '01') AND EXISTS(
-            SELECT 1 FROM po as po1
-            WHERE po1.po_num = delivery.po_num
-            )
+            AND imo.vend_num = po.vend_num
+            AND (imo.ds_type = '00' OR imo.ds_type = '01')
             AND EXISTS(
-            SELECT 1 FROM po_line
-            WHERE po_line.po_num = delivery.po_num
-            AND po_line.po_line = delivery.po_line
-            AND po_line.status = 'O'
-            ))
-            ), 0))
+                SELECT 1 FROM po_line WHERE po_line.po_num = imo.po_num AND po_line.po_line = imo.po_line
+            )), 0))
             ) AS mavailable_material";
 
         $this->crud->query = $this->crud->query->select(
@@ -77,7 +71,6 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             $this->crud->denyAccess('list'); 
         }
         $this->crud->allowAccess('advanced_export_excel');
-
     }
 
    
