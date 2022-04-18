@@ -270,6 +270,8 @@ class DeliveryStatusCrudController extends CrudController
     }
 
     public function exportAdvanceOld(){
+        ini_set('memory_limit', '-1');
+
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
@@ -284,54 +286,22 @@ class DeliveryStatusCrudController extends CrudController
                     'ds_line' => $result->ds_line,
                     'ds_type' => $result->ds_type,
                     'po_relase' => $result->po_release,
-                    'desc' => $result->description,
-                    'grn_num' => $result->grn_num,
-                    'grn_line' => $result->grn_line,
-                    'received_flag' => function($result){
-                        if($result->received_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }            
-                        return 0;            
-                    },
-                    'received_date' => $result->received_date,
-                    'due_date' => $result->payment_plan_date,
-                    'validated_flag' => function($result){
-                        if($result->validate_by_fa_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }  
-                        return 0;                      
-                    },
-                    'payment_in_process_flag' => function($result){
-                        if($result->payment_in_process_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }            
-                        return 0;            
-                    },
-                    'executed_flag' => function($result){
-                        if($result->executed_flag == 1){
-                            return 1;
-                            // return "✓";
-                        } else {
-                            // return "x";
-                        }  
-                        return 0;                      
-                    },
-                    'payment_date' => $result->payment_date,
-                    'tax_status' => $result->tax_status,
-                    'payment_ref_num' => $result->payment_ref_num,
-                    'bank' => $result->bank,
-                    'shipped_qty' => $result->shipped_qty,
-                    'received_qty' => $result->received_qty,
-                    'rejected_qty' => $result->rejected_qty,
+                    // 'desc' => $result->description,
+                    'grn_num' => $result->grn_num ?? '',
+                    'grn_line' => $result->grn_line ?? '',
+                    'received_flag' => $result->received_flag ?? '0',
+                    'received_date' => $result->received_date ?? '',
+                    'due_date' => $result->payment_plan_date ?? '',
+                    'validated_flag' => $result->validate_by_fa_flag ?? '0',
+                    'payment_in_process_flag' => $result->payment_in_process_flag ?? '0',
+                    'executed_flag' => $result->executed_flag ?? '0',
+                    'payment_date' => $result->payment_date ?? '',
+                    'tax_status' => $result->tax_status ?? '',
+                    'payment_ref_num' => $result->payment_ref_num ?? '',
+                    'bank' => $result->bank ?? '',
+                    'shipped_qty' => $result->shipped_qty ?? '',
+                    'received_qty' => $result->received_qty ?? '',
+                    'rejected_qty' => $result->rejected_qty ?? '',
                     'unit_price' => function($entry){
                         // $ds = DeliveryStatus::where('id', $entry->id)->first();
                         // if($ds !== null){
@@ -354,13 +324,13 @@ class DeliveryStatusCrudController extends CrudController
                         $val = number_format($entry->total, 0, ',', '.');
                         return $currency." ".$val;
                     },
-                    'petugas_vendor' => $result->petugas_vendor,
-                    'no_faktur_pajak' => $result->no_faktur_pajak,
-                    'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
-                    'ref_ds_num' => $result->ref_ds_num,
-                    'ref_ds_line' => $result->ref_ds_line,
-                    'created' => $result->created_at,
-                    'updated' => $result->updated_at
+                    // 'petugas_vendor' => is_string($result->petugas_vendor) ?$result->petugas_vendor:'-',
+                    'no_faktur_pajak' => $result->no_faktur_pajak ?? '',
+                    // 'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor ?? '',
+                    'ref_ds_num' => $result->ref_ds_num ?? '',
+                    'ref_ds_line' => $result->ref_ds_line ?? '',
+                    'created' => $result->created_at ?? '',
+                    'updated' => $result->updated_at ?? '',
                 ];
             };
 
@@ -427,6 +397,8 @@ class DeliveryStatusCrudController extends CrudController
 
 
     public function exportAdvance(){
+        ini_set('memory_limit', '-1');
+
         if(session()->has('sqlSyntax')){
             $sqlQuery = session('sqlSyntax');
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
@@ -435,15 +407,15 @@ class DeliveryStatusCrudController extends CrudController
 
             $filename = 'DST-'.date('YmdHis').'.xlsx';
 
-            // $styleForHeader = (new StyleBuilder())
-            //                 ->setFontBold()
-            //                 ->setFontColor(Color::WHITE)
-            //                 ->setCellAlignment(CellAlignment::LEFT)
-            //                 ->setBackgroundColor(Color::rgb(102, 171, 163))
-            //                 ->build();
+            $styleForHeader = (new StyleBuilder())
+                            ->setFontBold()
+                            ->setFontColor(Color::WHITE)
+                            ->setCellAlignment(CellAlignment::LEFT)
+                            ->setBackgroundColor(Color::rgb(102, 171, 163))
+                            ->build();
 
             return (new FastExcel($this->dataChunks($datas)))
-                // ->headerStyle($styleForHeader)
+                ->headerStyle($styleForHeader)
                 ->download($filename);
             /*
             $resultCallback = function($result){
