@@ -22,6 +22,7 @@ class CreateDeliveriesTable extends Migration
             $table->integer('po_line');
             $table->string('item')->nullable();
             $table->integer('po_release')->nullable();
+            $table->integer('po_change')->default(0);
             $table->string('description')->nullable();
             $table->double('order_qty')->nullable();
             $table->integer('w_serial')->default(0);
