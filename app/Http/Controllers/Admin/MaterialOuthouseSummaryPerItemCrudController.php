@@ -156,8 +156,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             // filter the results accordingly
             $this->crud->applySearchTerm(request()->input('search')['value']);
             // recalculate the number of filtered rows
-            // $filteredRows = $this->crud->count();
-            $filteredRows = $queryWithSelect->count();
+            $filteredRows = $this->crud->count();
+        }else{
+            $filteredRows = $queryWithSelect->get()->count();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {
