@@ -197,7 +197,10 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->applyUnappliedFilters();
 
         $totalRows = $this->crud->model->count();
-        $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $cloneQuery = clone $this->crud->query;
+        $queryWithSelect = $cloneQuery->select('matl_item');
+        $filteredRows = $queryWithSelect->toBase()->getCountForPagination();
+        // $filteredRows = $this->crud->query->toBase()->getCountForPagination();
         $startIndex = request()->input('start') ?: 0;
         // if a search term was present
         if (request()->input('search') && request()->input('search')['value']) {
@@ -205,6 +208,8 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
             $this->crud->applySearchTerm(request()->input('search')['value']);
             // recalculate the number of filtered rows
             $filteredRows = $this->crud->count();
+        }else{
+            $filteredRows = $queryWithSelect->get()->count();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {
