@@ -41,6 +41,12 @@
             font-weight: bold;
             font-size: 20px;
         }
+        .title_demo {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 27px;
+            margin-left: 12px;
+        }
         .title small{
             font-size: 12px;
             font-weight: normal;

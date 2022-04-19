@@ -48,7 +48,7 @@
         .title_demo {
             font-family: Arial, Helvetica, sans-serif;
             font-weight: bold;
-            font-size: 30px;
+            font-size: 27px;
             margin-left: 12px;
         }
         .page_break { page-break-after: always; }
