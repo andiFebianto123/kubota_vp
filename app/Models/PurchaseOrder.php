@@ -45,6 +45,11 @@ class PurchaseOrder extends Model
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export Advance</a>';
     }
 
+    public function linkTempDs(){
+        $url = url('admin/purchase-order/temp-upload-delivery');
+        return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-upload"></i> Temp DS</a>';
+    }
+
     public function getPoDateAttribute($value)
     {
         return date("Y-m-d", strtotime($value));

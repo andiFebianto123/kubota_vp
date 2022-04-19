@@ -47,10 +47,13 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             )) -
             (IFNULL((SELECT SUM(issue_qty) FROM issued_material_outhouse imo 
             WHERE imo.matl_item = material_outhouse.matl_item
+            AND imo.po_num = po.po_num
             AND imo.vend_num = po.vend_num
             AND (imo.ds_type = '00' OR imo.ds_type = '01')
             AND EXISTS(
-                SELECT 1 FROM po_line WHERE po_line.po_num = imo.po_num AND po_line.po_line = imo.po_line
+                SELECT 1 FROM po_line WHERE po_line.po_num = imo.po_num 
+                AND po_line.po_line = imo.po_line
+                AND po_line.status = 'O'
             )), 0))
             ) AS mavailable_material";
 
@@ -153,8 +156,9 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             // filter the results accordingly
             $this->crud->applySearchTerm(request()->input('search')['value']);
             // recalculate the number of filtered rows
-            // $filteredRows = $this->crud->count();
-            $filteredRows = $queryWithSelect->count();
+            $filteredRows = $this->crud->count();
+        }else{
+            $filteredRows = $queryWithSelect->get()->count();
         }
         // start the results according to the datatables pagination
         if (request()->input('start')) {

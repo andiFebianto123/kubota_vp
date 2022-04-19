@@ -30,7 +30,7 @@ class TempUploadDeliveryCrudController extends CrudController
     public function setup()
     {
         CRUD::setModel(\App\Models\TempUploadDelivery::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/temp-upload-delivery');
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/purchase-order/temp-upload-delivery');
         CRUD::setEntityNameStrings('temp upload delivery', 'temp upload deliveries');
     }
 
@@ -97,6 +97,77 @@ class TempUploadDeliveryCrudController extends CrudController
     protected function setupCreateOperation()
     {
         $this->crud->denyAccess('create');
+    }
+
+    public function search()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->crud->applyUnappliedFilters();
+
+        $totalRows = $this->crud->model->count();
+        $cloneQuery = clone $this->crud->query;
+        $queryWithSelect = $cloneQuery->select('po_num');
+        $filteredRows = $queryWithSelect->toBase()->getCountForPagination();
+        // $filteredRows = $this->crud->query->toBase()->getCountForPagination();
+        $startIndex = request()->input('start') ?: 0;
+        // if a search term was present
+        if (request()->input('search') && request()->input('search')['value']) {
+            // filter the results accordingly
+            $this->crud->applySearchTerm(request()->input('search')['value']);
+            // recalculate the number of filtered rows
+            $filteredRows = $this->crud->count();
+        }else{
+            $filteredRows = $queryWithSelect->get()->count();
+        }
+        // start the results according to the datatables pagination
+        if (request()->input('start')) {
+            $this->crud->skip((int) request()->input('start'));
+        }
+        // limit the number of results according to the datatables pagination
+        if (request()->input('length')) {
+            $this->crud->take((int) request()->input('length'));
+        }
+        // overwrite any order set in the setup() method with the datatables order
+        if (request()->input('order')) {
+            // clear any past orderBy rules
+            $this->crud->query->getQuery()->orders = null;
+            foreach ((array) request()->input('order') as $order) {
+                $column_number = (int) $order['column'];
+                $column_direction = (strtolower((string) $order['dir']) == 'asc' ? 'ASC' : 'DESC');
+                $column = $this->crud->findColumnById($column_number);
+                if ($column['tableColumn'] && ! isset($column['orderLogic'])) {
+                    // apply the current orderBy rules
+                    $this->crud->orderByWithPrefix($column['name'], $column_direction);
+                }
+
+                // check for custom order logic in the column definition
+                if (isset($column['orderLogic'])) {
+                    $this->crud->customOrderBy($column, $column_direction);
+                }
+            }
+        }
+
+        // show newest items first, by default (if no order has been set for the primary column)
+        // if there was no order set, this will be the only one
+        // if there was an order set, this will be the last one (after all others were applied)
+        // Note to self: `toBase()` returns also the orders contained in global scopes, while `getQuery()` don't.
+        $orderBy = $this->crud->query->toBase()->orders;
+        $table = $this->crud->model->getTable();
+        $key = $this->crud->model->getKeyName();
+
+        $hasOrderByPrimaryKey = collect($orderBy)->some(function ($item) use ($key, $table) {
+            return (isset($item['column']) && $item['column'] === $key)
+                || (isset($item['sql']) && str_contains($item['sql'], "$table.$key"));
+        });
+
+        if (! $hasOrderByPrimaryKey) {
+            $this->crud->orderByWithPrefix($this->crud->model->getKeyName(), 'DESC');
+        }
+
+        $entries = $this->crud->getEntries();
+
+        return $this->crud->getEntriesAsJsonForDatatables($entries, $totalRows, $filteredRows, $startIndex);
     }
 
 

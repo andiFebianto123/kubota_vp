@@ -28,7 +28,12 @@ Route::group([
     Route::crud('forecast', 'ForecastCrudController');
     Route::crud('purchase-order-line', 'PurchaseOrderLineCrudController');
     Route::crud('configuration', 'ConfigurationCrudController');
-    Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
+
+    Route::group(['prefix' => 'purchase-order'], function(){
+        Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
+    });
+
+
     Route::post('purchase-order-mass-read', 'PurchaseOrderCrudController@massRead');
     Route::post('purchase-order-import-ds', 'PurchaseOrderCrudController@importDs');
     Route::post('purchase-order-accept-po-line', 'PurchaseOrderCrudController@acceptPoLine');
