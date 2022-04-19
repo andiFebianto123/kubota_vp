@@ -57,7 +57,7 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->setup2();
 
-        if(Constant::getRole() != 'Admin PTKI'){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             // $this->crud->query = $this->crud->query->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
             $this->crud->query = $this->crud->query->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
         }
@@ -276,7 +276,7 @@ class TaxInvoiceCrudController extends CrudController
         CRUD::column('ref_ds_line')->label('Ref DS Line');
         CRUD::column('updated_at');
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
@@ -311,7 +311,7 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->button_create = 'Invoice and Tax';
 
         // for secondary table
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor2',
                 'type'        => 'select2_ajax_custom',
@@ -450,7 +450,7 @@ class TaxInvoiceCrudController extends CrudController
             ->skip($start)
             ->take($rowperpage);
 
-        if(Constant::getRole() != 'Admin PTKI'){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $deliveryStatuses = $deliveryStatuses->where('po.vend_num', backpack_user()->vendor->vend_num)
             ->get();
         }else{
@@ -698,7 +698,7 @@ class TaxInvoiceCrudController extends CrudController
                     'message' => $messageErrors
                 ], 200);
             }
-            if(Constant::getRole() != 'Admin PTKI'){
+            if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
                 $vendor = backpack_user()->vendor->vend_num;
                 $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
                 ->where('delivery_status.id', request()->input('id_payment'));
@@ -801,7 +801,7 @@ class TaxInvoiceCrudController extends CrudController
             ], 504);
         }
 
-        if(Constant::getRole() != 'Admin PTKI'){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $vendor = backpack_user()->vendor->vend_num;
             $cekVendor = DeliveryStatus::join('po', 'po.po_num', '=', 'delivery_status.po_num')
             ->where('delivery_status.id', $paymentId);
@@ -896,7 +896,7 @@ class TaxInvoiceCrudController extends CrudController
             // DB::raw("(SELECT id FROM `comments` WHERE id = (SELECT MAX(id) FROM `comments` WHERE delivery_status.id = comments.tax_invoice_id AND comments.deleted_at IS NULL)) as id_comment"),
             // DB::raw("(SELECT currency FROM vendor WHERE vend_num = (SELECT vend_num FROM po WHERE po.po_num = delivery_status.po_num)) as currency")
         );
-        if(Constant::getRole() != 'Admin PTKI'){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             // jika user bukan admin ptki
             // $this->crud2 = $this->crud2->whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num]);
             $this->crud2 = $this->crud2->whereRaw('po.vend_num = ?', [backpack_user()->vendor->vend_num]);
@@ -1038,7 +1038,7 @@ class TaxInvoiceCrudController extends CrudController
     private function handlePermissionNonAdmin($poNum){
         $allowAccess = false;
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $allowAccess = true;
         }else{
             $vendNum = PurchaseOrder::where('po_num', $poNum)->first()->vend_num;

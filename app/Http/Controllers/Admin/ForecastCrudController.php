@@ -47,7 +47,7 @@ class ForecastCrudController extends CrudController
     }
 
     protected function getFieldAccess(){
-        if(backpack_user()->hasRole('Admin PTKI')){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             if(request('vendor_submit')){
                 if(request('filter_vendor') && request('filter_vendor') != 'hallo'){
                     Session::put("vendor_name", request('filter_vendor'));
@@ -62,7 +62,7 @@ class ForecastCrudController extends CrudController
     }
 
     protected function setQuery(){
-        if(backpack_user()->hasRole('Admin PTKI')){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             if(Session::get('vendor_name')){
                 $this->crud->query = $this->crud->query
                 ->select('id', 'forecast_num', 'item', 'forecast_date' ,'qty')
@@ -140,7 +140,7 @@ class ForecastCrudController extends CrudController
         $this->crud->urlAjaxFilterVendor = url('admin/filter-vendor/ajax-itempo-options2');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->data['type_forecast'] = $start->type;
-        if(backpack_user()->hasRole('Admin PTKI')){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->setListView('vendor.backpack.crud.list-forecast', $this->data);
         }else{
             $this->crud->setListView('vendor.backpack.crud.forecast-underconstruction', $this->data);

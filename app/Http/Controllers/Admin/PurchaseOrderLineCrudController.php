@@ -154,7 +154,7 @@ class PurchaseOrderLineCrudController extends CrudController
         $data['delivery_statuses'] = $deliveryStatuses;
 
         $canAccess = false;
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $canAccess = true;
         }else{
             $po = PurchaseOrderLine::where('id', $entry->id )->first();

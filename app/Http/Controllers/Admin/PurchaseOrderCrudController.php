@@ -87,12 +87,12 @@ class PurchaseOrderCrudController extends CrudController
 
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
         CRUD::column('id')->label('ID');
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor',
                 'name'      => 'vend_num',
@@ -147,7 +147,7 @@ class PurchaseOrderCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'po_num', $keysValue->unique()->toArray());
           });
 
-        if(in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             if (!request('vendor')) {
                 session()->put("filter_vend_num", null);
             }
@@ -198,7 +198,7 @@ class PurchaseOrderCrudController extends CrudController
         $data['arr_status'] = $arrStatus;
 
         $canAccess = false;
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $canAccess = true;
         }else{
             $po = PurchaseOrder::where('id', $entry->id )->first();
@@ -614,7 +614,7 @@ class PurchaseOrderCrudController extends CrudController
 
     public function itemPoOptions(Request $request){
         $term = $request->input('term');
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             return PurchaseOrderLine::where('item', 'like', '%'.$term.'%')
                     ->orWhere('description', 'like', '%'.$term.'%')
                     ->groupBy('item')

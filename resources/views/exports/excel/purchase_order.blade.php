@@ -11,7 +11,7 @@
             <thead>
             <tr>
                 <th>No</th>
-                @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                @if(strpos(strtoupper(App\Helpers\Constant::getRole()), 'PTKI'))
                 <th>Vendor Number</th>
                 @endif
                 <th>PO Number</th>
@@ -24,7 +24,7 @@
             @foreach($purchase_orders as $key => $po)
                 <tr>
                     <td>{{ $key+1 }}</td>
-                    @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                    @if(strpos(strtoupper(App\Helpers\Constant::getRole()), 'PTKI'))
                         <td>{{ $po->vendor_number }}</td>
                     @endif
                     <td>{{ $po->number }}</td>

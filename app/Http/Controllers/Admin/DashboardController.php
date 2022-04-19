@@ -38,7 +38,7 @@ class DashboardController extends Controller
 
         $listDsUnRead = [];
         $dataVendor = null;
-        if(Constant::getRole() == "Admin PTKI"){   
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $unReadComments = Comment::where('status',1)->where('user_id', '!=', backpack_user()->id)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
         }
         else{
@@ -54,7 +54,7 @@ class DashboardController extends Controller
         }
         // $unReadComments = Comment::where('status',1)->groupBy('tax_invoice_id')->orderBy('created_at','Desc')->get();
         foreach($unReadComments as $comment){
-            if(Constant::getRole() != 'Admin PTKI'){
+            if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
                 if($dataVendor != null && $dataVendor->vend_num == $comment->vendNumber){
                     $deliveryStatusData =  DeliveryStatus::where('id',$comment->tax_invoice_id)->select('ds_num', 'ds_line')->first();
                     if($deliveryStatusData != null){
@@ -101,7 +101,7 @@ class DashboardController extends Controller
 
 
     private function countPurchaseOrder(){
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             return PurchaseOrder::count();
         }else{
             return PurchaseOrder::where('vend_num', backpack_user()->vendor->vend_num)->count();
@@ -110,7 +110,7 @@ class DashboardController extends Controller
 
 
     private function countPurchaseOrderLineUnread(){
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             return PurchaseOrderLine::where('read_at', null)
             ->where('accept_flag', 0)
             ->count();
@@ -124,7 +124,7 @@ class DashboardController extends Controller
 
 
     private function countDelivery(){
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             return Delivery::count();
         }else{
             return Delivery::whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])
@@ -134,7 +134,7 @@ class DashboardController extends Controller
 
 
     private function countDeliveryStatus(){
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             return DeliveryStatus::count();
         }else{
             return DeliveryStatus::whereRaw('po_num in(SELECT po_num FROM po WHERE vend_num = ?)', [backpack_user()->vendor->vend_num])

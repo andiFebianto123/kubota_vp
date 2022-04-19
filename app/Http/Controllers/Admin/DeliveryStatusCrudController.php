@@ -157,7 +157,7 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
