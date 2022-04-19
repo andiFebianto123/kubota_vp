@@ -368,7 +368,7 @@ class UserCrudController extends CrudController
                         ->send(new MailNewUser($user));
                     }
                     catch(Exception $e){
-                        $subject = "Data Error User Import"
+                        $subject = "Data Error User Import";
                         (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage());
                         DB::commit();
                     }
