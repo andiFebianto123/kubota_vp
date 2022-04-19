@@ -157,7 +157,7 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
@@ -179,10 +179,12 @@ class DeliveryStatusCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'delivery_status.id', $dbGet->unique()->toArray());
             });
         }else{
-            $this->crud->query->join('po as po', function($join){
-                $join->on('delivery_status.po_num', '=', 'po.po_num')
-                ->where('po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
-            });
+            $this->crud->addClause('where', 'po.vend_num', backpack_auth()->user()->vendor->vend_num);
+
+            // $this->crud->query->join('po as pofilter', function($join){
+            //     $join->on('delivery_status.po_num', '=', 'pofilter.po_num')
+            //     ->where('pofilter.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            // });
         }
     }
 

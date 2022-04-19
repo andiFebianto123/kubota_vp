@@ -69,7 +69,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             $join->on('delivery.po_num', '=', 'po.po_num');
         });
 
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         if(Constant::checkPermission('Read History Summary MO')){

@@ -91,7 +91,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
         $this->crud->query->join('po', function($join){
             $join->on('delivery.po_num', '=', 'po.po_num');
         });
-        if(in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
@@ -103,9 +103,9 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
                 $this->crud->addClause('where', 'vend_num', $value);
             });
         }else{
-            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             CRUD::column('vend_num')->label('Vend Num');
         }
 
@@ -235,7 +235,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
 
           
             $is_admin = null;
-            if(Constant::getRole() == 'Admin PTKI'){
+            if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
                 $is_admin = true;
             }
 
@@ -333,7 +333,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
 
             $title = "Report History MO per Item";
 
-            if(Constant::getRole() == 'Admin PTKI'){
+            if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
                 $header = [
                     'no' => 'No',
                     'vend_num' => 'Vend Num',

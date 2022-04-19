@@ -129,7 +129,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Status Accept</th>
                             <th>Read By</th>
                             <th>Read At</th>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                            @if(strpos(strtoupper(App\Helpers\Constant::getRole()), 'PTKI'))
                                 <th>Created At</th>
                             @endif
                             <th>Action</th>
@@ -163,7 +163,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{!! $po_line->reformat_flag_accept !!}</td>
                             <td>{{$po_line->read_by_user}}</td>
                             <td>{{$po_line->read_at}}</td>
-                            @if(backpack_auth()->user()->hasRole('Admin PTKI'))
+                            @if(strpos(strtoupper(App\Helpers\Constant::getRole()), 'PTKI'))
                                 <td>{{$po_line->created_at}}</td>
                             @endif
                             <td class="text-nowrap"><!-- Single edit button -->

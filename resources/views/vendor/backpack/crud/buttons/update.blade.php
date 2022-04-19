@@ -5,7 +5,7 @@
 		@if ($entry->getTable() != 'roles') 
 			<a href="{{ url($crud->route.'/'.$entry->getKey().'/edit') }}" class="btn btn-sm btn-link"><i class="la la-edit"></i> {{ trans('backpack::crud.edit') }}</a>
 		@else
-			@if ($entry->name != 'Admin PTKI')
+			@if(!strpos(strtoupper($entry->name), 'PTKI'))
 				<a href="{{ url($crud->route.'/'.$entry->getKey().'/edit') }}" class="btn btn-sm btn-link"><i class="la la-edit"></i> {{ trans('backpack::crud.edit') }}</a>
 			@endif
 		@endif

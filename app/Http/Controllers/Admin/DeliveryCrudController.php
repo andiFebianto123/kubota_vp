@@ -74,7 +74,7 @@ class DeliveryCrudController extends CrudController
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
         }else{
             if(!Constant::checkPermission('Delete Delivery Sheet in Table')){
@@ -164,7 +164,7 @@ class DeliveryCrudController extends CrudController
         ]);
         CRUD::column('ref_ds_line')->label('Ref DS Line');
 
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
@@ -242,7 +242,7 @@ class DeliveryCrudController extends CrudController
             return view('vendor.backpack.crud.delivery_show_none', $data);
         }
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $can_access = true;
         }else{
             if (backpack_auth()->user()->vendor->vend_num == $delivery->vend_num) {

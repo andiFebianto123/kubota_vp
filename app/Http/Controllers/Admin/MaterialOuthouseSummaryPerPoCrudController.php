@@ -80,7 +80,7 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
         $this->crud->groupBy('material_outhouse.po_num');
         $this->crud->groupBy('material_outhouse.po_line');
 
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 

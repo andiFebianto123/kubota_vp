@@ -96,7 +96,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         $this->crud->groupBy('pl.status');
         $this->crud->addClause("where", "pl.status", "O");
         
-        if(Constant::getRole() == 'Admin PTKI'){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             CRUD::column('vend_num')->label('Vend Num');
             $this->crud->addFilter([
                 'name'        => 'vendor',
@@ -109,7 +109,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
                 $this->crud->addClause('where', 'vend_num', $value);
             });
         }
-        if(!in_array(Constant::getRole(), ['Admin PTKI'])){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 

@@ -30,8 +30,7 @@ class TemplateMassDsExport implements  FromView, WithEvents
     {
         $filters = [];
         $manyData = 0;
-
-        if(!in_array(Constant::getRole(),['Admin PTKI'])){
+        if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $filters[] = ['vend_num', '=', backpack_auth()->user()->vendor->vend_num  ];
         }
        

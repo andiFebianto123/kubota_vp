@@ -96,7 +96,7 @@ class UserCrudController extends CrudController
                 $query->orWhere('roles.name', 'like', "%{$searchTerm}%");
             }
         ]);
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addButtonFromView('top', 'upload_user', 'upload_user', 'end');
         }else{
             $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
@@ -117,7 +117,7 @@ class UserCrudController extends CrudController
             $this->crud->denyAccess('create');
         }
         $allowNullVendor = false;
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $allowNullVendor = true;
         }
         CRUD::setValidation(UserRequest::class); 
@@ -148,7 +148,7 @@ class UserCrudController extends CrudController
 
     private function optVendors()
     {
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $vendors = Vendor::get();
         }else{
             $vendors = Vendor::where('id', backpack_auth()->user()->vendor->id)->get();
@@ -164,7 +164,7 @@ class UserCrudController extends CrudController
 
     private function optRoles()
     {
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $roles = Role::get();
         }else{
             $roles = Role::where('name', '!=', 'Admin PTKI')->get();
@@ -181,7 +181,7 @@ class UserCrudController extends CrudController
     private function handlePermissionNonAdmin($vendorId){
         $allowAccess = false;
 
-        if(in_array(Constant::getRole(),['Admin PTKI'])){
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $allowAccess = true;
         }else{
             if (backpack_auth()->user()->vendor->id == $vendorId) {
@@ -364,11 +364,11 @@ class UserCrudController extends CrudController
             if(count($import->dataUsers) > 0){
                 foreach($import->dataUsers as $user){
                     try{
-                        Mail::to($user['email'])
+                        Mail::to(str_replace(" ", "", $user['email']))
                         ->send(new MailNewUser($user));
                     }
                     catch(Exception $e){
-                        $subject = "Data Error User Import"
+                        $subject = "Data Error User Import";
                         (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage());
                         DB::commit();
                     }
