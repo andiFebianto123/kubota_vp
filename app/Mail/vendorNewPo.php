@@ -29,7 +29,7 @@ class vendorNewPo extends Mailable
      */
     public function build()
     {
-        $mailBccs = env('MAIL_PO_BBC',"");
+        $mailBccs = env('MAIL_PO_BCC',"");
         $arrMailBcc = [];
         if (str_contains($mailBccs, ";")) {
             foreach (explode(";",$mailBccs) as $key => $mailBcc) {

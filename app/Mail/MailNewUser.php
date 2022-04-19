@@ -30,7 +30,7 @@ class MailNewUser extends Mailable
     public function build()
     {
         // return $this->markdown('emails.sample-mail');
-        $mailBccs = env('MAIL_USER_BBC',"");
+        $mailBccs = env('MAIL_USER_BCC',"");
         $arrMailBcc = [];
         foreach (explode(";",$mailBccs) as $key => $mailBcc) {
             $arrMailBcc[] = $mailBcc;
