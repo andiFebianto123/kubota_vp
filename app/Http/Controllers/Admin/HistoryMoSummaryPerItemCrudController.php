@@ -103,7 +103,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
                 $this->crud->addClause('where', 'vend_num', $value);
             });
         }else{
-            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             CRUD::column('vend_num')->label('Vend Num');
