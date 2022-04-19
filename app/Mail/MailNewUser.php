@@ -30,8 +30,14 @@ class MailNewUser extends Mailable
     public function build()
     {
         // return $this->markdown('emails.sample-mail');
+        $mailBccs = env('EMAIL_USER_BBC',"");
+        $arrMailBcc = [];
+        foreach (explode(";",$mailBccs) as $key => $mailBcc) {
+            $arrMailBcc[] = $mailBcc;
+        }
         return $this->subject('New Account')
         ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+        ->bcc($arrMailBcc, 'Admin Kubota')
         ->markdown('emails.mail-user');
     }
 }

@@ -29,9 +29,20 @@ class vendorNewPo extends Mailable
      */
     public function build()
     {
+        $mailBccs = env('EMAIL_PO_BBC',"");
+        $arrMailBcc = [];
+        if (str_contains($mailBccs, ";")) {
+            foreach (explode(";",$mailBccs) as $key => $mailBcc) {
+                $arrMailBcc[] = $mailBcc;
+            }
+        }else{
+            $arrMailBcc = [$mailBccs];
+        }
+
         // return $this->markdown('emails.sample-mail');
         return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
         ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+        ->bcc($arrMailBcc, 'Admin Kubota')
         ->markdown('emails.sample-mail');
     }
 }
