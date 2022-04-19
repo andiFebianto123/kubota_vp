@@ -364,7 +364,7 @@ class UserCrudController extends CrudController
             if(count($import->dataUsers) > 0){
                 foreach($import->dataUsers as $user){
                     try{
-                        Mail::to($user['email'])
+                        Mail::to(str_replace(" ", "", $user['email']))
                         ->send(new MailNewUser($user));
                     }
                     catch(Exception $e){

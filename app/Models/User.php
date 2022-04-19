@@ -48,8 +48,12 @@ class User extends Authenticatable
         }
         return '-';
     }
-    
 
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = str_replace(" ", "", $value);
+    }
+    
     public function setCreatedAtAttribute($value)
     {
         $this->attributes['created_at'] = date("Y/m/d H:i:s", strtotime($value));
