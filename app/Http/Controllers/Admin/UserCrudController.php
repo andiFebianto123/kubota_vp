@@ -113,7 +113,7 @@ class UserCrudController extends CrudController
         }
 
         CRUD::addColumn([
-            'label' => 'Is Active',
+            'label' => 'Status',
             'name' => 'is_active',
             'type' => 'closure',
             'orderable' => false,
@@ -168,7 +168,7 @@ class UserCrudController extends CrudController
         CRUD::field('password');
         CRUD::addField([   // select_from_array
             'name'        => 'is_active',
-            'label'       => "Active",
+            'label'       => "Status",
             'type'        => 'select2_from_array',
             'options'     => ['1' => 'Yes', '0' => 'No'],
             'allows_null' => true, 
