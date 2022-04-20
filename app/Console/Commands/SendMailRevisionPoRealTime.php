@@ -67,6 +67,7 @@ class SendMailRevisionPoRealTime extends Command
                     $buyerEmails = str_replace(",", ";", $po->buyers);
                     $pecahEmailVendor = explode(';', $vendEmails);
                     $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                    
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));
@@ -74,9 +75,10 @@ class SendMailRevisionPoRealTime extends Command
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
                     $thePo->last_po_change_email = $po->po_change;
                     $thePo->save();
+
+                    $this->info("Sent ".$po->poNumber."::".$po->emails); 
                 }
             }
         }
-        $this->info("Cron is working fine!"); 
     }
 }
