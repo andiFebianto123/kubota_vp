@@ -58,7 +58,7 @@ class ReminderPo extends Command
             'vendor.buyer_email as buyers',
             DB::raw('datediff(current_date(), po_line.created_at) as selisih'
         ))
-        ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
+        ->whereRaw('datediff(current_date(), po_line.created_at) <= ?', [$reminderDay->first()['value']])
         ->where('po_line.accept_flag', 0)
         ->where('po_line.status', 'O')
         ->get();
@@ -104,7 +104,7 @@ class ReminderPo extends Command
                 }
 
                 \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
-                ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
+                ->whereRaw('datediff(current_date(), po_line.created_at) > ?', [$reminderDay->first()['value']])
                 ->where('accept_flag', 0)
                 ->update([
                     'accept_flag' => 1,
