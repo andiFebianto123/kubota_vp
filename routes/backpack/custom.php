@@ -111,4 +111,6 @@ Route::group([
     Route::post('user-import', 'UserCrudController@import');
     Route::get('user-export', 'UserCrudController@exportAdvance');
 
+    Route::get('active-inactive/{id}', 'UserCrudController@activeInactive');
+
 });

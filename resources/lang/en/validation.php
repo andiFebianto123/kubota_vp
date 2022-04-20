@@ -124,6 +124,11 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'failed' => 'Failed',
+    'if_inactive' => 'Are you sure want to Inactive acount',
+    'error_message_active' => "There's been an error. Your item might not have been change active or inactive.",
+    'if_active' => 'Are you sure want to Active acount',
+    'change_status_success' => 'Change status acount success',
 
     /*
     |--------------------------------------------------------------------------

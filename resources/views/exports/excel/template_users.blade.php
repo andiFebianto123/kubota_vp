@@ -16,6 +16,7 @@
             <th>Email</th>
             <th>Vendor Number</th>
             <th>Role</th>
+            <th>Active</th>
         </tr>
         </thead>
         <tbody>
@@ -27,6 +28,13 @@
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->vend_num }}</td>
                 <td>{{ $user->nama_role }}</td>
+                <td>
+                    @if($user->is_active)
+                        <span>A</span>
+                    @else
+                        <span>I</span>
+                    @endif
+                </td>
             </tr>
         @endforeach
         </tbody>

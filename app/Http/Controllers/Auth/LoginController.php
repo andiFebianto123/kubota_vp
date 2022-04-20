@@ -102,6 +102,16 @@ class LoginController extends Controller
             ], 200);
         }
 
+        $user = User::where($fieldType, $input['username'])->first();
+
+        if($user != null){
+            if($user->is_active == 0){
+                return response()->json([
+                    'status' => false,
+                    'message' => "User acount is not active",
+                ], 200);
+            }
+        }
 
         if(Auth::guard(backpack_guard_name())->attempt(array($fieldType => $input['username'], 'password' => $input['password']))) 
         {
