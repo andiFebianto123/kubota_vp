@@ -18,7 +18,7 @@ class TemplateUserExport implements FromView, WithEvents
         $dataUser = User::join('vendor', 'vendor.id', 'users.vendor_id')
                     ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
                     ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                    ->select('users.name', 'username', 'email', 'vendor.vend_num', 'roles.name as nama_role');
+                    ->select('users.name', 'username', 'email', 'vendor.vend_num', 'roles.name as nama_role', 'users.is_active');
 
         $data['users'] = $dataUser->get();
         $this->count_data = $dataUser->count();
@@ -56,15 +56,15 @@ class TemplateUserExport implements FromView, WithEvents
                     ],
                 ];
 
-                $arrColumns = range('A', 'F');
+                $arrColumns = range('A', 'G');
                 foreach ($arrColumns as $key => $col) {
                     $event->sheet->getColumnDimension($col)->setAutoSize(true);
                     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
                 }
                 
                 $manyData = $this->count_data +1;
-                $event->sheet->getDelegate()->getStyle('A1:F1')->applyFromArray($styleHeader);
-                $event->sheet->getDelegate()->getStyle('B2:F'.$manyData)->applyFromArray($styleGroupProtected);
+                $event->sheet->getDelegate()->getStyle('A1:G1')->applyFromArray($styleHeader);
+                $event->sheet->getDelegate()->getStyle('B2:G'.$manyData)->applyFromArray($styleGroupProtected);
             },
         ];
     }

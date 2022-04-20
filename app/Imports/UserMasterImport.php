@@ -69,7 +69,7 @@ class UserMasterImport implements OnEachRow, WithHeadingRow //WithValidation //S
                 'vendor_id' => $row['vendor_number'],
                 'password' => $password,
                 'role' => $row['role'],
-                'is_active' => 1,
+                // 'is_active' => 1,
                 'send_email_by_password' => $strPasswordRandom,
                 'title' => 'New User Account',
             ];
@@ -79,7 +79,13 @@ class UserMasterImport implements OnEachRow, WithHeadingRow //WithValidation //S
             $user->email = $row['email'];
             $user->vendor_id = $row['vendor_number'];
             $user->password = $password;
-            $user->is_active = 1;
+            if(strtolower($row['active']) == 'a'){
+                $user->is_active = 1;
+            }else if(strtolower($row['active']) == 'i'){
+                $user->is_active = 0;
+            }else{
+                $user->is_active = 0;
+            }
             $user->save();
             $user->assignRole([$row['role']]);
         }
@@ -137,6 +143,9 @@ class UserMasterImport implements OnEachRow, WithHeadingRow //WithValidation //S
                         $onFailure("{$attribute} is not exists in role master");
                     }
                 }
+            ],
+            'active' => [
+                'nullable'
             ]
         ];
     }

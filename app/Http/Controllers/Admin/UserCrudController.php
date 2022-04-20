@@ -53,6 +53,7 @@ class UserCrudController extends CrudController
                             ->select('users.*', 'roles.name as nama_role');
 
         if(Constant::checkPermission('Read User')){
+            $this->crud->allowAccess('active');
             $this->crud->allowAccess('list');
         }else{
             $this->crud->denyAccess('list');
@@ -73,9 +74,13 @@ class UserCrudController extends CrudController
         if(!Constant::checkPermission('Delete User')){
             $this->crud->removeButton('delete');
         }
+
+        $this->crud->addButtonFromView('line', 'active_inactive', 'active_inactive', 'beginning');
+
         if(Constant::checkPermission('Access Reset Password')){
             $this->crud->addButtonFromView('line', 'mail_reset_password', 'mail_reset_password', 'beginning');
         }
+
 
         CRUD::column('name');
         CRUD::column('username');
@@ -86,6 +91,11 @@ class UserCrudController extends CrudController
             'entity'    => 'vendor', 
             'type' => 'relationship',
             'attribute' => 'vend_num',
+            'searchLogic' => function($query, $column, $searchTerm){
+                $query->orWhereHas('vendor', function($q) use ($searchTerm){
+                    $q->where('vend_num', 'like', "%{$searchTerm}%");
+                });
+            }
         ]);
         CRUD::addColumn([
             'label' => 'Role',
@@ -101,6 +111,19 @@ class UserCrudController extends CrudController
         }else{
             $this->crud->addClause('where', 'vendor_id', '=', backpack_auth()->user()->vendor->id);
         }
+
+        CRUD::addColumn([
+            'label' => 'Status',
+            'name' => 'is_active',
+            'type' => 'closure',
+            'orderable' => false,
+            'function' => function($entry){
+                if($entry->is_active){
+                    return '<span class="text">Active</span>';
+                }
+                return '<span class="text">Inactive</span>';
+            },
+        ]);
 
         $this->crud->exportRoute = url('admin/user-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
@@ -143,6 +166,14 @@ class UserCrudController extends CrudController
         CRUD::field('username');
         CRUD::field('email');
         CRUD::field('password');
+        CRUD::addField([   // select_from_array
+            'name'        => 'is_active',
+            'label'       => "Status",
+            'type'        => 'select2_from_array',
+            'options'     => ['1' => 'Yes', '0' => 'No'],
+            'allows_null' => true, 
+            // 'allows_multiple' => true, // OPTIONAL; needs you to cast this to array in your model;
+        ]);
     }
 
 
@@ -386,6 +417,27 @@ class UserCrudController extends CrudController
             DB::rollback();
             Alert::add('error', $e->getMessage())->flash();
         }
+    }
+
+    function activeInactive($id){
+        $this->crud->hasAccessOrFail('active');
+        $user = User::where('id', $id)->first();
+        if($user != null){
+            if($user->is_active){
+                $user->is_active = 0;
+            }else{
+                $user->is_active = 1;
+            }
+            $user->save();
+            return response()->json([
+                'status' => true,
+                'message' => 'Success to change status acount',
+            ]);
+        }
+        return response()->json([
+            'status' => false,
+            'message' => 'Is acount is not found',
+        ], 403);
     }
 
     public function search()
