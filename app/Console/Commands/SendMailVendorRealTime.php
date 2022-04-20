@@ -60,8 +60,6 @@ class SendMailVendorRealTime extends Command
             }
             $getPo = $pos->get();
 
-
-
             foreach($getPo as $poo){
                 $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
                 $updatePo->session_batch_process = $batchSession;
@@ -90,8 +88,8 @@ class SendMailVendorRealTime extends Command
                 // }
 
                 if($po->emails != null && $existOrderedPoLine){
-                    $vendEmails = str_replace(",", ";", $po->emails);
-                    $buyerEmails = str_replace(",", ";", $po->buyers);
+                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
+                    $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
                     $pecahEmailVendor = explode(';', $vendEmails);
                     $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
                     Mail::to($pecahEmailVendor)

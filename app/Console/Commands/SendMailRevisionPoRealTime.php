@@ -45,10 +45,25 @@ class SendMailRevisionPoRealTime extends Command
     {
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
         ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
-        ->whereColumn('last_po_change_email', '<','po_change');
+        ->whereColumn('last_po_change_email', '<','po_change')
+        ->where(function($query){
+            return $query->where('session_batch_process_revision', 0)
+            ->orWhereNull('session_batch_process_revision');
+        });
 
         if($pos->count() > 0){
+            $sessionIncrement = PurchaseOrder::max('session_batch_process_revision');
+            $batchSession = 1;
+            if($sessionIncrement != null){
+                $batchSession = $sessionIncrement + 1;
+            }
             $getPo = $pos->get();
+
+            foreach($getPo as $poo){
+                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
+                $updatePo->session_batch_process_revision = $batchSession;
+                $updatePo->save();
+            }
 
             foreach($getPo as $po){
 
@@ -63,8 +78,8 @@ class SendMailRevisionPoRealTime extends Command
                 ];
 
                 if($po->emails != null && ($po->last_po_change_email < $po->po_change)){
-                    $vendEmails = str_replace(",", ";", $po->emails);
-                    $buyerEmails = str_replace(",", ";", $po->buyers);
+                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
+                    $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
                     $pecahEmailVendor = explode(';', $vendEmails);
                     $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
                     
