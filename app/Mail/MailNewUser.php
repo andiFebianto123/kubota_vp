@@ -32,12 +32,25 @@ class MailNewUser extends Mailable
         // return $this->markdown('emails.sample-mail');
         $mailBccs = env('MAIL_USER_BCC',"");
         $arrMailBcc = [];
-        foreach (explode(";",$mailBccs) as $key => $mailBcc) {
-            $arrMailBcc[] = $mailBcc;
+        if (str_contains($mailBccs, ";")) {
+            foreach (explode(";",$mailBccs) as $key => $mailBcc) {
+                $arrMailBcc[] = $mailBcc;
+            }
+        }else{
+            $arrMailBcc = [$mailBccs];
         }
-        return $this->subject('New Account')
-        ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
-        ->bcc($arrMailBcc, 'Admin Kubota')
-        ->markdown('emails.mail-user');
+
+        if ($mailBccs == "") {
+            return $this->subject('New Account')
+                ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                ->markdown('emails.mail-user');
+        }else{
+            return $this->subject('New Account')
+                ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                ->bcc($arrMailBcc, 'Admin Kubota')
+                ->markdown('emails.mail-user');
+        }     
+
+        
     }
 }
