@@ -45,6 +45,12 @@
             font-size: 12px;
             font-weight: normal;
         }
+        .title_demo {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 27px;
+            margin-left: 12px;
+        }
         .page_break { page-break-after: always; }
     </style>
     <body>
@@ -61,12 +67,16 @@
                     @php $use_page_break = "page_break"; @endphp
 
                 @endif
-
             <div @if($key % 2 != 0) class="{{ $use_page_break}}" @endif style="margin-bottom: 20px;"> 
                 <div>
                     <div style="float: left;  position:relative;">
                         <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
                     </div>
+                    @if(env('APP_ENV') === 'local')
+                        <div style="float: left; position:relative;">
+                            <span class="title_demo">DEMO</span>
+                        </div>
+                    @endif
                     <div style="float: right;  position:relative;  padding-top:10px;">
                         <small style="font-size: 12px;">KIS - 404.0006</small>
                     </div>

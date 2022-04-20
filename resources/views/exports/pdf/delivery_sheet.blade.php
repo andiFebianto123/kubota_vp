@@ -41,6 +41,12 @@
             font-weight: bold;
             font-size: 20px;
         }
+        .title_demo {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 27px;
+            margin-left: 12px;
+        }
         .title small{
             font-size: 12px;
             font-weight: normal;
@@ -52,6 +58,11 @@
                 <div style="float: left;  position:relative;">
                     <span class="title">Delivery Sheet <small> - KUBOTA INDONESIA</small></span>
                 </div>
+                @if(env('APP_ENV') === 'local')
+                <div style="float: left; position:relative;">
+                    <span class="title_demo">DEMO</span>
+                </div>
+                @endif
                 <div style="float: right;  position:relative;  padding-top:10px;">
                     <small style="font-size: 12px;">KIS - 404.0006</small>
                 </div>
