@@ -60,6 +60,7 @@ class ReminderPo extends Command
         ))
         ->whereRaw('datediff(current_date(), po_line.created_at) >= ?', [$reminderDay->first()['value']])
         ->where('po_line.accept_flag', 0)
+        ->where('po_line.status', 'O')
         ->get();
         $poNumberGrouped = collect($dataPo);
         $groupByPoLine = $poNumberGrouped->unique(function ($item) {

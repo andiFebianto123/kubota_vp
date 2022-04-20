@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderLine;
 
 class SendMailVendorRealTime extends Command
 {
@@ -39,6 +40,7 @@ class SendMailVendorRealTime extends Command
      *
      * @return int
      */
+
     public function handle()
     {
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
@@ -58,6 +60,8 @@ class SendMailVendorRealTime extends Command
             }
             $getPo = $pos->get();
 
+
+
             foreach($getPo as $poo){
                 $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
                 $updatePo->session_batch_process = $batchSession;
@@ -65,6 +69,10 @@ class SendMailVendorRealTime extends Command
             }
 
             foreach($getPo as $po){
+                $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
+                        ->where('status', 'O')
+                        ->exists();
+
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                 // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
                 $details = [
@@ -77,11 +85,11 @@ class SendMailVendorRealTime extends Command
 
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
 
-                if($thePo->email_flag != null){
-                    continue;
-                }
+                // if($thePo->email_flag != null){
+                //     continue;
+                // }
 
-                if($po->emails != null){
+                if($po->emails != null && $existOrderedPoLine){
                     $pecahEmailVendor = explode(';', $po->emails); // email nya vendor
                     $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                     Mail::to($pecahEmailVendor)

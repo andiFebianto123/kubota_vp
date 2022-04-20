@@ -20,6 +20,7 @@ class PurchaseOrder extends Model
         'po_date',
         'po_change',
         'email_flag',
+        'last_po_change_email',
         'session_batch_proccess',
     ];
 
