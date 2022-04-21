@@ -80,16 +80,18 @@ class SendMailVendor extends Command
                 }
 
                 if($po->emails != null){
-                    $pecahEmailVendor = explode(';', $po->emails); // email nya vendor
-                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
+                    $buyerEmails = "";
+                    if ($buyerEmails != null) {
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    }
+                    $pecahEmailVendor = explode(';', $vendEmails);
+                    $pecahEmailBuyer = explode(';', $buyerEmails);
+                    
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));
                 }
-                // $updatePo = DB::table('po')->where('id', $po->ID)->update([
-                //     'email_flag' => now(),
-                //     'session_batch_proccess' => $batchSession,
-                // ]);
                 $thePo->email_flag = now();
                 $thePo->save();
             }

@@ -81,8 +81,6 @@
     color: #fff;
 }
 
-
-
 .sidebar-pills .parent:hover, .sidebar-pills .parent:hover {
     color: #439b9c!important;
     border-bottom-left-radius: 20px;
@@ -209,6 +207,12 @@
     background-color: #47a3a5;
     color: #ffffff;
     cursor: pointer;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #48abac;
+    color: #fff;
+    text-decoration: none;
 }
 
 

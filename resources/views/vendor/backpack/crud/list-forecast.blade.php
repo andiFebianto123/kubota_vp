@@ -48,7 +48,7 @@
                     @endif
                   </select>
                 </div>
-                <button type="submit" name="vendor_submit" value='1' class="btn btn-sm btn-primary">Submit</button>
+                <button type="submit" name="vendor_submit" value='1' class="btn btn-sm btn-primary-vp">Submit</button>
               </form>
               </div>
           </div>
@@ -78,7 +78,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-sm btn-primary-vp">Submit</button>
                 </form>
             </div>
         </div>

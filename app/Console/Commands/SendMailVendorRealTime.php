@@ -43,24 +43,24 @@ class SendMailVendorRealTime extends Command
 
     public function handle()
     {
+        $maxBatch = PurchaseOrder::max('session_batch_process');
+        $batchSession = 1;
+        $sessionIncrement = 0;
+        if($maxBatch != null || $maxBatch > 0){
+            $sessionIncrement = $maxBatch;
+            $batchSession = $sessionIncrement + 1;
+        }
+
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
         ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('email_flag')
-        ->where(function($query){
-            return $query->where('session_batch_process', 0)
+        ->where(function($query) use ($batchSession){
+            return $query->where('session_batch_process', '<', $batchSession)
             ->orWhereNull('session_batch_process');
         });
 
         if($pos->count() > 0){
-            # alias terdapat data yang kosong
-            $sessionIncrement = PurchaseOrder::max('session_batch_process');
-            $batchSession = 1;
-            if($sessionIncrement != null){
-                $batchSession = $sessionIncrement + 1;
-            }
-            $getPo = $pos->get();
-
-
+            $getPo = $pos->take(3)->get();
 
             foreach($getPo as $poo){
                 $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
@@ -90,10 +90,13 @@ class SendMailVendorRealTime extends Command
                 // }
 
                 if($po->emails != null && $existOrderedPoLine){
-                    $vendEmails = str_replace(",", ";", $po->emails);
-                    $buyerEmails = str_replace(",", ";", $po->buyers);
+                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
+                    $buyerEmails = "";
+                    if ($buyerEmails != null) {
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    }
                     $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                    $pecahEmailBuyer = explode(';', $buyerEmails);
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));

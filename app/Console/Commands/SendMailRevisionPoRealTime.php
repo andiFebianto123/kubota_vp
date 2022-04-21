@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use App\Mail\vendorRevisionPo;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 
@@ -43,12 +44,31 @@ class SendMailRevisionPoRealTime extends Command
 
     public function handle()
     {
+        $maxBatch = PurchaseOrder::max('session_batch_process_revision');
+        $batchSession = 1;
+        $sessionIncrement = 0;
+        if($maxBatch != null || $maxBatch > 0){
+            $sessionIncrement = $maxBatch;
+            $batchSession = $sessionIncrement + 1;
+        }
+
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
-        ->whereColumn('last_po_change_email', '<','po_change');
+        ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email','session_batch_process_revision',
+             'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+        ->whereColumn('last_po_change_email', '<','po_change')
+        ->where(function($query) use ($batchSession){
+            return $query->where('session_batch_process_revision', '<', $batchSession)
+            ->orWhereNull('session_batch_process_revision');
+        });
 
         if($pos->count() > 0){
-            $getPo = $pos->get();
+            $getPo = $pos->take(3)->get();
+
+            foreach($getPo as $poo){
+                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
+                $updatePo->session_batch_process_revision = $batchSession;
+                $updatePo->save();
+            }
 
             foreach($getPo as $po){
 
@@ -57,20 +77,23 @@ class SendMailRevisionPoRealTime extends Command
                 $details = [
                     'po_num' => $po->poNumber,
                     'type' => 'revision_po',
-                    'title' => 'Revisi PO ' . $po->poNumber,
+                    'title' => 'Revisi PO ' . $po->poNumber. ' Rev.'.$po->po_change,
                     'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
                 ];
 
                 if($po->emails != null && ($po->last_po_change_email < $po->po_change)){
-                    $vendEmails = str_replace(",", ";", $po->emails);
-                    $buyerEmails = str_replace(",", ";", $po->buyers);
+                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
+                    $buyerEmails = "";
+                    if ($buyerEmails != null) {
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    }
                     $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                    $pecahEmailBuyer = explode(';', $buyerEmails);
                     
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
-                    ->send(new vendorNewPo($details));
+                    ->send(new vendorRevisionPo($details));
 
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
                     $thePo->last_po_change_email = $po->po_change;

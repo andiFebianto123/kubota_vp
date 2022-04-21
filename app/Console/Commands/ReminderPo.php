@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\EmailLogWriter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -85,8 +86,11 @@ class ReminderPo extends Command
 
                 if($po_line['emails'] != null){
                     try{
-                        $pecahEmailVendor = explode(';', $po_line['emails']); // email nya vendor
-                        $pecahEmailBuyer = ($po_line['buyers'] != null) ? explode(';', $po_line['buyers']) : '';
+                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $po_line['emails']));
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po_line['buyers']));
+                        $pecahEmailVendor = explode(';', $vendEmails);
+                        $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                        
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
                         ->send(new vendorNewPo($details));
@@ -110,7 +114,7 @@ class ReminderPo extends Command
                     'accept_flag' => 1,
                     'read_at' => now()
                 ]);
-                Log::info("Sukses kirim ke email untuk Reminder PO");
+                $this->info("Cron is working fine!"); 
             }
         }
         return Command::SUCCESS;
