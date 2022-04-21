@@ -16,7 +16,7 @@
             <th>Email</th>
             <th>Vendor Number</th>
             <th>Role</th>
-            <th>Active</th>
+            <th>Status</th>
         </tr>
         </thead>
         <tbody>
@@ -30,9 +30,9 @@
                 <td>{{ $user->nama_role }}</td>
                 <td>
                     @if($user->is_active)
-                        <span>A</span>
+                        <span>Active</span>
                     @else
-                        <span>I</span>
+                        <span>Inactive</span>
                     @endif
                 </td>
             </tr>
