@@ -79,9 +79,9 @@ class UserMasterImport implements OnEachRow, WithHeadingRow //WithValidation //S
             $user->email = $row['email'];
             $user->vendor_id = $row['vendor_number'];
             $user->password = $password;
-            if(strtolower($row['active']) == 'a'){
+            if(strtolower($row['active']) == 'active'){
                 $user->is_active = 1;
-            }else if(strtolower($row['active']) == 'i'){
+            }else if(strtolower($row['active']) == 'inactive'){
                 $user->is_active = 0;
             }else{
                 $user->is_active = 0;
