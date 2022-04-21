@@ -31,6 +31,9 @@ Route::group([
 
     Route::group(['prefix' => 'purchase-order'], function(){
         Route::crud('temp-upload-delivery', 'TempUploadDeliveryCrudController');
+        Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
+        Route::post('temp-upload-delivery/print-insert-to-db', 'TempUploadDeliveryCrudController@printInsertToDb');
+        Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
     });
 
 
@@ -48,9 +51,6 @@ Route::group([
     Route::post('send-mail-new-po', 'PurchaseOrderCrudController@sendMailNewPo');
     Route::get('purchase-order/check-existing-temp', 'PurchaseOrderCrudController@checkExistingTemp');
 
-    Route::post('temp-upload-delivery/insert-to-db', 'TempUploadDeliveryCrudController@insertToDb');
-    Route::post('temp-upload-delivery/print-insert-to-db', 'TempUploadDeliveryCrudController@printInsertToDb');
-    Route::post('temp-upload-delivery/cancel-to-db', 'TempUploadDeliveryCrudController@cancelToDb');
     Route::post('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
     Route::crud('delivery-status', 'DeliveryStatusCrudController');
