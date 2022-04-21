@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\EmailLogWriter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -113,7 +114,7 @@ class ReminderPo extends Command
                     'accept_flag' => 1,
                     'read_at' => now()
                 ]);
-                Log::info("Sukses kirim ke email untuk Reminder PO");
+                $this->info("Cron is working fine!"); 
             }
         }
         return Command::SUCCESS;
