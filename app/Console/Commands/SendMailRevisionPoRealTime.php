@@ -47,7 +47,7 @@ class SendMailRevisionPoRealTime extends Command
         $maxBatch = PurchaseOrder::max('session_batch_process_revision');
         $batchSession = 1;
         $sessionIncrement = 0;
-        if($maxBatch != null){
+        if($maxBatch != null || $maxBatch > 0){
             $sessionIncrement = $maxBatch;
             $batchSession = $sessionIncrement + 1;
         }
@@ -56,13 +56,13 @@ class SendMailRevisionPoRealTime extends Command
         ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email','session_batch_process_revision',
              'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereColumn('last_po_change_email', '<','po_change')
-        ->where(function($query) use ($sessionIncrement){
-            return $query->where('session_batch_process_revision', '>', $sessionIncrement)
+        ->where(function($query) use ($batchSession){
+            return $query->where('session_batch_process_revision', '<', $batchSession)
             ->orWhereNull('session_batch_process_revision');
         });
 
         if($pos->count() > 0){
-            $getPo = $pos->get();
+            $getPo = $pos->take(3)->get();
 
             foreach($getPo as $poo){
                 $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
