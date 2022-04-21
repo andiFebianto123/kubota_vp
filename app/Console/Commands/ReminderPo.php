@@ -85,8 +85,11 @@ class ReminderPo extends Command
 
                 if($po_line['emails'] != null){
                     try{
-                        $pecahEmailVendor = explode(';', $po_line['emails']); // email nya vendor
-                        $pecahEmailBuyer = ($po_line['buyers'] != null) ? explode(';', $po_line['buyers']) : '';
+                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $po_line['emails']));
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po_line['buyers']));
+                        $pecahEmailVendor = explode(';', $vendEmails);
+                        $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                        
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
                         ->send(new vendorNewPo($details));

@@ -84,9 +84,12 @@ class SendMailRevisionPoRealTime extends Command
 
                 if($po->emails != null && ($po->last_po_change_email < $po->po_change)){
                     $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
-                    $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    $buyerEmails = "";
+                    if ($buyerEmails != null) {
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    }
                     $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                    $pecahEmailBuyer = explode(';', $buyerEmails);
                     
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)

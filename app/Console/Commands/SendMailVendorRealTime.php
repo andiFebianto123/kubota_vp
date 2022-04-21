@@ -91,9 +91,12 @@ class SendMailVendorRealTime extends Command
 
                 if($po->emails != null && $existOrderedPoLine){
                     $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
-                    $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    $buyerEmails = "";
+                    if ($buyerEmails != null) {
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    }
                     $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
+                    $pecahEmailBuyer = explode(';', $buyerEmails);
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));
