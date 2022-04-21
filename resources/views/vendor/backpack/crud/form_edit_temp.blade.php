@@ -105,7 +105,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
                 @endif
                 <form id="form-delivery" method="post"
-                        action="{{ url('admin/temp-upload-delivery/'.$entry->id) }}"
+                        action="{{ url('admin/purchase-order/temp-upload-delivery/'.$entry->id) }}"
                         @if ($crud->hasUploadFields('create'))
                         enctype="multipart/form-data"
                         @endif
@@ -121,15 +121,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     @else
                     <button id="btn-for-form-delivery" class="btn btn-sm btn-primary-vp ml-4 mb-4 mt-0"  type="button" onclick="submitNewDs()">Submit</button>
                     @endif
-                    <button class="btn btn-danger mb-4 mt-0"  type="button" onclick="window.history.go(-1); return false;">Cancel</button>
-
+                    <button class="btn btn-sm btn-danger mb-4 mt-0"  type="button" onclick="window.history.go(-1); return false;">Cancel</button>
                 </form>
         </div>
     </div>
 </div>
-
 @endsection
-
 
 @section('after_styles')
 <link rel="stylesheet" type="text/css" href="{{asset('packages/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">

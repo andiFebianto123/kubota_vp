@@ -1,9 +1,11 @@
-<button onclick="insertPrintToDb(this)" type="button" data-redirect="{{url('admin/purchase-order')}}" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertprintfromtemp">
+<button onclick="insertPrintToDb(this)"  id="btn-for-form-print-mass-ds" type="button" data-redirect="{{url('admin/purchase-order')}}" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertprintfromtemp">
     <i class="la la-file-pdf"></i> Insert + PDF
 </button>
 
 @push('after_scripts')
 <script>
+    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
+    
     function insertPrintToDb(button) {
           // ask for confirmation before deleting an item
           // e.preventDefault();
@@ -14,29 +16,17 @@
           $.ajax({
               url: route,
               type: 'POST',
-              success: function(response) {
-                new Noty({
-                      text: response.message,
-                      type: response.alert
-                  }).show();
-                  
+              success: function(response) {                  
                 if (response.status) {
-                    if (response.redirect_to) {
-                        if (response.newtab) {
-                            window.open(response.redirect_to, '_blank');
-                        }else{
-                            window.location.href = response.redirect_to
-                        }
-                    }else{
-                        setTimeout(function() { 
-                            location.reload(true)
-                        }, 3000);
-                    } 
-                    setTimeout(
-                    function() 
-                    {
-                        window.location.replace(redirectTo);
-                    }, 2000); 
+                    submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: response.arr_ids }})
+                    new Noty({
+                        text: response.message,
+                        type: response.alert
+                    }).show();
+                    setTimeout(function() { 
+                        window.location.href = redirectTo
+                    }, 3000);
+
                 }              
               },
               error: function(result) {
