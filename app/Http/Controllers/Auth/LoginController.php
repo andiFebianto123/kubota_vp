@@ -108,7 +108,7 @@ class LoginController extends Controller
             if($user->is_active == 0){
                 return response()->json([
                     'status' => false,
-                    'message' => "User acount is not active",
+                    'message' => "User account is not active",
                 ], 200);
             }
         }
