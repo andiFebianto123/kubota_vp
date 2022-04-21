@@ -77,7 +77,7 @@ class SendMailRevisionPoRealTime extends Command
                 $details = [
                     'po_num' => $po->poNumber,
                     'type' => 'revision_po',
-                    'title' => 'Revisi PO ' . $po->poNumber,
+                    'title' => 'Revisi PO ' . $po->poNumber. ' Rev.'.$po->po_change,
                     'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
                     'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
                 ];
