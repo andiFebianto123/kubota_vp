@@ -179,10 +179,11 @@ class TempUploadDeliveryCrudController extends CrudController
         try{
             $successInsert = 0;
             $totalInsert = sizeof($dataTemps);
-            foreach ($dataTemps as $key => $dataTemp) {
-                $poLine = PurchaseOrderLine::where('po_num', $dataTemp->po_num)
-                            ->where('po_line', $dataTemp->po_line)
-                            ->orderBy('po_change', 'desc')
+            foreach ($dataTemps as $key => $dataTemp) { 
+                $poLine = PurchaseOrderLine::where('po_line.po_num', $dataTemp->po_num)
+                            ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
+                            ->where('po_line.po_line', $dataTemp->po_line)
+                            ->orderBy('po_line.po_change', 'desc')
                             ->first();
                 $ds_num =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->po_line, $dataTemp->delivery_date);
                 $ds_line = $ds_num['line'];
@@ -269,6 +270,10 @@ class TempUploadDeliveryCrudController extends CrudController
                             $insertImo->description = $om->description;
                             $insertImo->lot =  $om->lot;
                             $insertImo->issue_qty = $issuedQty;
+                            $insertImo->po_num = $poLine->po_num;
+                            $insertImo->po_line = $poLine->po_line;
+                            $insertImo->ds_type = $ds_num['type'];
+                            $insertImo->vend_num = $poLine->vend_num;
                             $insertImo->created_by = backpack_auth()->user()->id;
                             $insertImo->updated_by = backpack_auth()->user()->id;
                             $insertImo->save();
@@ -557,7 +562,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => $message,
-            'redirect_to' => url('admin/temp-upload-delivery'),
+            'redirect_to' => url('admin/purchase-order/temp-upload-delivery'),
             'validation_errors' => []
         ], 200);
     }

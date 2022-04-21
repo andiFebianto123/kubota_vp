@@ -418,7 +418,7 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Data has been successfully import',
-            'redirect_to' => url('admin/temp-upload-delivery'),
+            'redirect_to' => url('admin/purchase-order/temp-upload-delivery'),
             'validation_errors' => [],
         ], 200);
     }
