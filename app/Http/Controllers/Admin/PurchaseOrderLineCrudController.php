@@ -168,6 +168,7 @@ class PurchaseOrderLineCrudController extends CrudController
         if ($entry->accept_flag == 0 &&  $entry->status == 'O') {
             $canAccess = false;
         }
+      
         if ($canAccess) {
             $layout = 'vendor.backpack.crud.purchase_order_line_show';
             if ( in_array($entry->status, ['C', 'F']) ) {

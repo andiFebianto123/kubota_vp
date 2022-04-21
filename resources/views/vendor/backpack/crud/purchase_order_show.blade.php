@@ -63,7 +63,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </tr>
                 <tr>
                     <td>Vendor</td>
-                    <td>: {{$entry->vendor->vend_num}}</td>
+                    <td>: {{$entry->vendor->vend_num ?? '-'}}</td>
                 </tr>
                 <tr>
                     <td>PO Date</td>
@@ -123,8 +123,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <th>Due Date</th>
                             <th>Tax (%)</th>
                             @if($constant::checkPermission('Show Price In PO Menu'))
-                            <th>Unit Price ({{$entry->vendor->currency}})</th>
-                            <th>Total Price ({{$entry->vendor->currency}})</th>
+                            <th>Unit Price ({{$entry->vendor->currency  ?? '-'}})</th>
+                            <th>Total Price ({{$entry->vendor->currency ?? '-'}})</th>
                             @endif
                             <th>Status Accept</th>
                             <th>Read By</th>
