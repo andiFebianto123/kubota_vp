@@ -43,21 +43,23 @@ class SendMailVendorRealTime extends Command
 
     public function handle()
     {
+        $maxBatch = PurchaseOrder::max('session_batch_process');
+        $batchSession = 1;
+        $sessionIncrement = 0;
+        if($maxBatch != null){
+            $sessionIncrement = $maxBatch;
+            $batchSession = $sessionIncrement + 1;
+        }
+
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
         ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('email_flag')
-        ->where(function($query){
-            return $query->where('session_batch_process', 0)
-            ->orWhereNull('session_batch_process');
+        ->where(function($query) use ($sessionIncrement){
+            return $query->where('session_batch_process_revision', '>', $sessionIncrement)
+            ->orWhereNull('session_batch_process_revision');
         });
 
         if($pos->count() > 0){
-            # alias terdapat data yang kosong
-            $sessionIncrement = PurchaseOrder::max('session_batch_process');
-            $batchSession = 1;
-            if($sessionIncrement != null){
-                $batchSession = $sessionIncrement + 1;
-            }
             $getPo = $pos->get();
 
             foreach($getPo as $poo){
