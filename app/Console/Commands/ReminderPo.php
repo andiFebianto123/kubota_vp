@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\EmailLogWriter;
+use App\Mail\ReminderAcceptPo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -99,10 +100,10 @@ class ReminderPo extends Command
                         
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
-                        ->send(new vendorNewPo($details));
+                        ->send(new ReminderAcceptPo($details));
                     }
                     catch(Exception $e){
-                        $subject = 'Reminder accept PO';
+                        $subject = 'Reminder Accept PO';
                         $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
                         $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
                             
