@@ -54,12 +54,13 @@ class ReminderPo extends Command
             'po.id as ID',
             'po.vend_num as kode_vendor',
             'po_line.item as name_item',
+            'po_line.po_line as po_line',
             'vendor.vend_name as name_vendor',
             'vendor.vend_email as emails',
             'vendor.buyer_email as buyers',
             DB::raw('datediff(current_date(), po_line.created_at) as selisih'
         ))
-        ->whereRaw('datediff(current_date(), po_line.created_at) <= ?', [$reminderDay->first()['value']])
+        // ->whereRaw('datediff(current_date(), po_line.created_at) <= ?', [$reminderDay->first()['value']])
         ->where('po_line.accept_flag', 0)
         ->where('po_line.status', 'O')
         ->get();
@@ -70,24 +71,29 @@ class ReminderPo extends Command
 
         if(count($groupByPoLine) > 0){
             # jika ada datanya
-            foreach($groupByPoLine as $po_line){
-                $id = $po_line['ID'];
-                $poNumber = $po_line['po_number'];
+            foreach($groupByPoLine as $poLine){
+                $id = $poLine['ID'];
+                $poNumber = $poLine['po_number'];
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$id}/show";
-                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$id}/show");
+
+                $messageEmail = 'PO '. $poNumber.'-'.$poLine['po_line'].' anda telah diaccept, anda dapat mengklik tombol dibawah ini untuk melihatnya.';
+                if ($poLine['selisih'] <= $reminderDay->first()['value']) {
+                    $messageEmail = 'Anda memiliki PO '. $poNumber.'-'.$poLine['po_line'].'. Silahkan accept PO tersebut melalui link yang kami sediakan : ';
+                }
+
                 $details = [
                     'po_num' => $poNumber,
                     'type' => 'reminder_po',
                     'title' => 'Reminder accept PO',
-                    'message' => 'Semua data PO Line anda telah di accept, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
+                    'message' => $messageEmail,
+                    'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
                 ];
 
-                if($po_line['emails'] != null){
+                if($poLine['emails'] != null && $poLine['selisih'] >= 0){
                     try{
-                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $po_line['emails']));
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po_line['buyers']));
+                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $poLine['emails']));
+                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $poLine['buyers']));
                         $pecahEmailVendor = explode(';', $vendEmails);
                         $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
                         
@@ -97,8 +103,8 @@ class ReminderPo extends Command
                     }
                     catch(Exception $e){
                         $subject = 'Reminder accept PO';
-                        $pecahEmailVendor = implode(", ", explode(';', $po_line['emails']));
-                        $pecahEmailBuyer = ($po_line['buyers'] != null) ?  implode(", ", explode(';', $po_line['buyers'])) : '';
+                        $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
+                        $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
                             
                         (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
                         DB::commit();
@@ -109,12 +115,14 @@ class ReminderPo extends Command
 
                 \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
                 ->whereRaw('datediff(current_date(), po_line.created_at) > ?', [$reminderDay->first()['value']])
+                ->where('po_line', $poLine['po_line'])
                 ->where('accept_flag', 0)
+                ->where('status', 'O')
                 ->update([
                     'accept_flag' => 1,
                     'read_at' => now()
                 ]);
-                $this->info("Cron is working fine!"); 
+                $this->info("Success PO ". $poNumber."-".$poLine['po_line']."::".$poLine['selisih']); 
             }
         }
         return Command::SUCCESS;
