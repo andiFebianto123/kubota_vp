@@ -78,15 +78,17 @@ class ReminderPo extends Command
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$id}/show";
 
-                $messageEmail = 'PO '. $poNumber.'-'.$poLine['po_line'].' anda telah diaccept, anda dapat mengklik tombol dibawah ini untuk melihatnya.';
+                $titleEmail = 'Auto Accept PO';
+                $messageEmail = 'PO '. $poNumber.'-'.$poLine['po_line'].' anda telah diaccept oleh sistem, anda dapat mengklik tombol dibawah ini untuk melihatnya.';
                 if ($poLine['selisih'] <= $reminderDay->first()['value']) {
+                    $titleEmail = 'Reminder Accept PO';
                     $messageEmail = 'Anda memiliki PO '. $poNumber.'-'.$poLine['po_line'].'. Silahkan accept PO tersebut melalui link yang kami sediakan : ';
                 }
 
                 $details = [
                     'po_num' => $poNumber,
                     'type' => 'reminder_po',
-                    'title' => 'Reminder accept PO',
+                    'title' =>  $titleEmail,
                     'message' => $messageEmail,
                     'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
                 ];
@@ -103,7 +105,7 @@ class ReminderPo extends Command
                         ->send(new ReminderAcceptPo($details));
                     }
                     catch(Exception $e){
-                        $subject = 'Reminder Accept PO';
+                        $subject =  $titleEmail;
                         $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
                         $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
                             

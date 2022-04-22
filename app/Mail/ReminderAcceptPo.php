@@ -40,11 +40,11 @@ class ReminderAcceptPo extends Mailable
         }
 
         if ($mailBccs == "") {
-            return $this->subject('Reminder Accept PO - [' . $this->details['po_num'] . ']' )
+            return $this->subject($this->details['title'].' - [' . $this->details['po_num'] . ']' )
                     ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->markdown('emails.sample-mail');
         }else{
-            return $this->subject('Reminder Accept PO - [' . $this->details['po_num'] . ']' )
+            return $this->subject($this->details['title'].' - [' . $this->details['po_num'] . ']' )
                     ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->bcc($arrMailBcc, 'Admin Kubota')
                     ->markdown('emails.sample-mail');
