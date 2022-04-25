@@ -20,7 +20,7 @@
                 <td></td>
             </tr>
             <tr>
-                <td colspan="4">{{$po->vend_num}} - {{$po->vendor->vend_name}}</td>
+                <td colspan="4">{{$po->vend_num}} - {{$po->vendor->vend_name ?? '-'}}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -38,7 +38,7 @@
                 <td></td>
             </tr>
             <tr>
-                <td colspan="4">{{$po->vendor->vend_name}}</td>
+                <td colspan="4">{{$po->vendor->vend_name ?? '-'}}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -46,7 +46,7 @@
                 <td colspan="2">Taman Industri Bukit Semarang Baru (BSB) Blok D.1 Kav.8 <br> Kel.Jatibarang - Kec. Mijen – Kota Semarang</td>
             </tr>
             <tr>
-                <td colspan="4">{{$po->vendor->vend_addr}}</td>
+                <td colspan="4">{{$po->vendor->vend_addr ?? '-'}}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -103,7 +103,7 @@
                 <td></td>
             </tr>
             <tr>
-                <td colspan="4">Email : {{$po->vendor->vend_email}}</td>
+                <td colspan="4">Email : {{$po->vendor->vend_email ?? '-'}}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -131,8 +131,8 @@
                 <td align="center" style="border: 1px solid #000000;"><b>DESCRIPTION</b></td>
                 <td align="center" style="border: 1px solid #000000;"><b>DUE DATE</b></td>
                 <td align="center" style="border: 1px solid #000000;"><b>QTY ORDER</b></td>
-                <td align="center" style="border: 1px solid #000000;"><b>UNIT PRICE ({{$po->vendor->currency}})</b></td>
-                <td align="center" style="border: 1px solid #000000;"><b>TOTAL AMOUNT ({{$po->vendor->currency}})</b></td>
+                <td align="center" style="border: 1px solid #000000;"><b>UNIT PRICE ({{$po->vendor->currency ?? '-'}})</b></td>
+                <td align="center" style="border: 1px solid #000000;"><b>TOTAL AMOUNT ({{$po->vendor->currency ?? '-'}})</b></td>
                 <td align="center" style="border: 1px solid #000000;"><b>PROD DATE (Ref)</b></td>
             </tr>
             @php
@@ -207,7 +207,7 @@
                 </td>
                 <td colspan="2" style="border-top: 1px solid #000000; border-right: 1px solid #000000;">
                     @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
-                    <div class="total-price"><b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
+                    <div class="total-price"><b>{{$po->vendor->currency ?? '-'}} {{number_format($total,0,',','.')}}</b></div>
                     @endif
                 </td>
             </tr>

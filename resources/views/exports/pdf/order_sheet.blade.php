@@ -81,8 +81,8 @@
                     <tr>
                         <td valign="top">
                             <label class="title">ORDER SHEET {{$po->po_num}} Rev.{{$po->po_change}}</label>
-                            <p>{{$po->vend_num}} - {{$po->vendor->vend_name}}</p>
-                            <p>Attn : <br> {{$po->vendor->vend_name}}<br> {{$po->vendor->vend_addr}}</p>
+                            <p>{{$po->vend_num}} - {{$po->vendor->vend_name ?? '-'}}</p>
+                            <p>Attn : <br> {{$po->vendor->vend_name ?? '-'}}<br> {{$po->vendor->vend_addr ?? '-'}}</p>
                         </td>
                         <td valign="top" align="right">
                             <img src="{{ public_path('/img/logokubotaforearth.png')}}" width="250px"><br>
@@ -115,7 +115,7 @@
             <div style="clear: both;"></div>
             <div class="email-and-issued">
                 <div style="float: left;">
-                    Email : {{$po->vendor->vend_email}}
+                    Email : {{$po->vendor->vend_email ?? '-'}}
                 </div>
                 <div style="float: right;">
                     <b>Issued Date : {{date("Y-m-d", strtotime($po->po_date))}}</b>
@@ -133,8 +133,8 @@
                             <th>DESCRIPTION</th>
                             <th>DUE DATE</th>
                             <th>QTY ORDER</th>
-                            <th>UNIT PRICE ({{$po->vendor->currency}})</th>
-                            <th>TOTAL AMOUNT ({{$po->vendor->currency}})</th>
+                            <th>UNIT PRICE ({{$po->vendor->currency ?? '-'}})</th>
+                            <th>TOTAL AMOUNT ({{$po->vendor->currency ?? '-'}})</th>
                             <th>PROD DATE (Ref)</th>
                         </tr>
                     </thead>
@@ -203,7 +203,7 @@
                             </td>
                             <td colspan="2" style="border-top: 1px solid #000000;">
                                 @if(App\Helpers\Constant::checkPermission('Show Price In PO Menu'))
-                                <div class="total-price"><b>{{$po->vendor->currency}} {{number_format($total,0,',','.')}}</b></div>
+                                <div class="total-price"><b>{{$po->vendor->currency ?? '-'}} {{number_format($total,0,',','.')}}</b></div>
                                 @endif
                             </td>
                         </tr>

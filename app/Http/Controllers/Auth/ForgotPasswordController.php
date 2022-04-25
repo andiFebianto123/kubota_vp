@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserForgotPassword;
 use App\Models\UserOtp;
 use App\Notifications\TwoFactorCode;
+use App\Rules\IsValidPassword;
 use Backpack\CRUD\app\Library\Auth\AuthenticatesUsers as AuthAuthenticatesUsers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -80,8 +81,10 @@ class ForgotPasswordController extends Controller
         $token = $request->token;
 
         $rules = [
-            'password' => 'min:6|required_with:password_confirmation|same:password_confirmation',
-            'password_confirmation' => 'min:6'
+            // 'password' => 'min:6|required_with:password_confirmation|same:password_confirmation',
+            // 'password_confirmation' => 'min:6'
+            'password'     => ['required', new IsValidPassword()],
+            'password_confirmation' => ['required','same:password',new IsValidPassword()],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -105,6 +108,9 @@ class ForgotPasswordController extends Controller
             $user->password = bcrypt($password);
             $user->last_update_password = now();
             $user->save();
+
+            UserForgotPassword::where('token', $token)
+            ->update(['expired_at' => now()]);
         }else{
             return response()->json([
                 'status' => false,
@@ -116,6 +122,7 @@ class ForgotPasswordController extends Controller
         return response()->json([
                 'status' => true,
                 'alert' => 'success',
+                'redirect_to' => route('rectmedia.auth.login'),
                 'message' => 'Sukses Update Password, silahkan <a href="'.route('rectmedia.auth.login').'" class="text-warning font-weight-bold"> Login </a> menggunakan password baru anda',
             ], 200);
     }
