@@ -127,6 +127,18 @@ class MaterialOuthouseSummaryPerPoCrudController extends CrudController
                 $query->orWhere('pl.due_date', 'like', '%'.$searchTerm.'%');
             },
         ]);
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/filter-vendor/ajax-itempo-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'po.vend_num', $value);
+            });
+        }
 
         $this->crud->exportRoute = url('admin/mo-po-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
