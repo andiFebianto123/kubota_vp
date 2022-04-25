@@ -2,13 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
 use App\Mail\vendorRevisionPo;
+use App\Models\LogBatchProcess;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Exception;
 
 class SendMailRevisionPoRealTime extends Command
 {
@@ -62,44 +65,53 @@ class SendMailRevisionPoRealTime extends Command
         });
 
         if($pos->count() > 0){
-            $getPo = $pos->take(3)->get();
-
-            foreach($getPo as $poo){
-                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
-                $updatePo->session_batch_process_revision = $batchSession;
-                $updatePo->save();
-            }
+            $getPo = $pos->orderBy('id', 'asc')->get();
 
             foreach($getPo as $po){
+                $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
+                        ->where('type', 'Revision PO')
+                        ->count();
+
+                $updatePo = PurchaseOrder::where('id', $po->ID)->first();
+                $updatePo->session_batch_process_revision = $batchSession;
+                $updatePo->save();
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
-                $details = [
-                    'po_num' => $po->poNumber,
-                    'type' => 'revision_po',
-                    'title' => 'Revisi PO ' . $po->poNumber. ' Rev.'.$po->po_change,
-                    'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                ];
 
-                if($po->emails != null && ($po->last_po_change_email < $po->po_change)){
-                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
-                    $buyerEmails = "";
-                    if ($buyerEmails != null) {
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                if($po->emails != null && ($po->last_po_change_email < $po->po_change) && $countLogError < 11){
+                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $po->poNumber,
+                        'type' => 'revision_po',
+                        'title' => 'Revisi PO ' . $po->poNumber. ' Rev.'.$po->po_change,
+                        'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
+
+                    try {
+                        Mail::to($pecahEmailVendor)
+                            ->cc($pecahEmailBuyer)
+                            ->send(new vendorRevisionPo($details));
+                        
+                        $thePo = PurchaseOrder::where('id', $po->ID)->first();
+                        $thePo->last_po_change_email = $po->po_change;
+                        $thePo->save();
+        
+                        $this->info("Sent ".$po->poNumber."::".$po->emails); 
+                    } catch (Exception $e) {
+                        LogBatchProcess::create([
+                            'mail_to' => json_encode($pecahEmailVendor),
+                            'mail_cc' => json_encode($pecahEmailBuyer),
+                            'mail_reply_to' => json_encode($pecahEmailBuyer),
+                            'po_num' => $po->poNumber,
+                            'error_message' => $e->getMessage(),
+                            'type' => 'Revision PO',
+                        ]);
+                        return Command::FAILURE;
                     }
-                    $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = explode(';', $buyerEmails);
                     
-                    Mail::to($pecahEmailVendor)
-                    ->cc($pecahEmailBuyer)
-                    ->send(new vendorRevisionPo($details));
-
-                    $thePo = PurchaseOrder::where('id', $po->ID)->first();
-                    $thePo->last_po_change_email = $po->po_change;
-                    $thePo->save();
-
-                    $this->info("Sent ".$po->poNumber."::".$po->emails); 
                 }
             }
         }

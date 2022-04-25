@@ -144,4 +144,31 @@ class Constant
         return $letter;
     }
   }
+
+
+  public function emailHandler($emails = '', $mode = 'array'){
+    $arrMails = [];
+    $emails = str_replace(" ", "",str_replace(",", ";", $emails));
+    $strMails = "";
+    if (str_contains($emails, ";")) {
+      foreach (explode(";",$emails) as $key => $email) {
+        if ($email != "") {
+          $arrMails[] = $email;
+          $strMails .=  $email.";";
+        }
+      }
+    }else{
+        $arrMails = [$emails];
+        $strMails = $emails;
+    }
+
+    $strMails = rtrim($strMails, ";");
+
+    $mailFormat = [
+      'array' => $arrMails,
+      'string' => $strMails,
+    ];
+
+    return $mailFormat[$mode];
+  }
 }

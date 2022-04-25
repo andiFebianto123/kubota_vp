@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -64,15 +65,7 @@ class SendMailVendor extends Command
 
             foreach($getPo as $po){
                 
-                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
-                $details = [
-                    'po_num' => $po->poNumber,
-                    'type' => 'reminder_po',
-                    'title' => 'Ada PO ' . $po->poNumber . ' baru',
-                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                ];
+                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";                
 
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
                 if($thePo->email_flag != null){
@@ -80,14 +73,16 @@ class SendMailVendor extends Command
                 }
 
                 if($po->emails != null){
-                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
-                    $buyerEmails = "";
-                    if ($buyerEmails != null) {
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
-                    }
-                    $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = explode(';', $buyerEmails);
-                    
+                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $po->poNumber,
+                        'type' => 'reminder_po',
+                        'title' => 'Ada PO ' . $po->poNumber . ' baru',
+                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
                     Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new vendorNewPo($details));

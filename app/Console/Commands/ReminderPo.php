@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Constant;
 use App\Helpers\EmailLogWriter;
 use App\Mail\ReminderAcceptPo;
 use Illuminate\Console\Command;
@@ -85,21 +86,19 @@ class ReminderPo extends Command
                     $messageEmail = 'Anda memiliki PO '. $poNumber.'-'.$poLine['po_line'].'. Silahkan accept PO tersebut melalui link yang kami sediakan : ';
                 }
 
-                $details = [
-                    'po_num' => $poNumber,
-                    'type' => 'reminder_po',
-                    'title' =>  $titleEmail,
-                    'message' => $messageEmail,
-                    'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                ];
-
                 if($poLine['emails'] != null && $poLine['selisih'] >= 0){
+                    $pecahEmailVendor = (new Constant())->emailHandler($poLine['emails'], 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($poLine['buyers'], 'array');
+                    
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $poNumber,
+                        'type' => 'reminder_po',
+                        'title' =>  $titleEmail,
+                        'message' => $messageEmail,
+                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
                     try{
-                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $poLine['emails']));
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $poLine['buyers']));
-                        $pecahEmailVendor = explode(';', $vendEmails);
-                        $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
-                        
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
                         ->send(new ReminderAcceptPo($details));

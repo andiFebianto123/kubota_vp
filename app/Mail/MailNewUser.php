@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Helpers\Constant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -31,14 +32,7 @@ class MailNewUser extends Mailable
     {
         // return $this->markdown('emails.sample-mail');
         $mailBccs = env('MAIL_USER_BCC',"");
-        $arrMailBcc = [];
-        if (str_contains($mailBccs, ";")) {
-            foreach (explode(";",$mailBccs) as $key => $mailBcc) {
-                $arrMailBcc[] = $mailBcc;
-            }
-        }else{
-            $arrMailBcc = [$mailBccs];
-        }
+        $arrMailBcc = (new Constant())->emailHandler($mailBccs, 'array');
 
         if ($mailBccs == "") {
             return $this->subject('New Account')

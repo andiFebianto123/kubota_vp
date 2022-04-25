@@ -2,12 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Constant;
+use App\Helpers\EmailLogWriter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use App\Models\LogBatchProcess;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Exception;
 
 class SendMailVendorRealTime extends Command
 {
@@ -60,55 +64,57 @@ class SendMailVendorRealTime extends Command
         });
 
         if($pos->count() > 0){
-            $getPo = $pos->take(3)->get();
-
-            foreach($getPo as $poo){
-                $updatePo = PurchaseOrder::where('id', $poo->ID)->first();
-                $updatePo->session_batch_process = $batchSession;
-                $updatePo->save();
-            }
+            $getPo = $pos->orderBy('id', 'asc')->get();
 
             foreach($getPo as $po){
+                $updatePo = PurchaseOrder::where('id', $po->ID)->first();
+                $updatePo->session_batch_process = $batchSession;
+                $updatePo->save();
+
                 $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
                         ->where('status', 'O')
                         ->exists();
+                        
+                $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
+                        ->where('type', 'New PO')
+                        ->count();
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$po->ID}/show");
-                $details = [
-                    'po_num' => $po->poNumber,
-                    'type' => 'reminder_po',
-                    'title' => 'Ada PO ' . $po->poNumber . ' baru',
-                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                ];
-
                 $thePo = PurchaseOrder::where('id', $po->ID)->first();
 
-                // if($thePo->email_flag != null){
-                //     continue;
-                // }
+                if($po->emails != null && $existOrderedPoLine  && $countLogError < 11){
+                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $po->poNumber,
+                        'type' => 'reminder_po',
+                        'title' => 'Ada PO ' . $po->poNumber . ' baru',
+                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
 
-                if($po->emails != null && $existOrderedPoLine){
-                    $vendEmails = str_replace(" ", "",str_replace(",", ";", $po->emails));
-                    $buyerEmails = "";
-                    if ($buyerEmails != null) {
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po->buyers));
+                    try {
+                        Mail::to($pecahEmailVendor)
+                            ->cc($pecahEmailBuyer)
+                            ->send(new vendorNewPo($details));
+                        $thePo->email_flag = now();
+                        $thePo->save();
+                        $this->info("Sent ".$po->poNumber."::".$po->emails); 
+                    } catch (Exception $e) {
+                        //throw $th;
+                        LogBatchProcess::create([
+                            'mail_to' => json_encode($pecahEmailVendor),
+                            'mail_cc' => json_encode($pecahEmailBuyer),
+                            'mail_reply_to' => json_encode($pecahEmailBuyer),
+                            'po_num' => $po->poNumber,
+                            'error_message' => $e->getMessage(),
+                            'type' => 'New PO',
+                        ]);
+                        return Command::FAILURE;
                     }
-                    $pecahEmailVendor = explode(';', $vendEmails);
-                    $pecahEmailBuyer = explode(';', $buyerEmails);
-                    Mail::to($pecahEmailVendor)
-                    ->cc($pecahEmailBuyer)
-                    ->send(new vendorNewPo($details));
                 }
-
-                $thePo->email_flag = now();
-                // $thePo->session_batch_proccess = $batchSession;
-                $thePo->save();
-
             }
         }
-        $this->info("Cron is working fine!"); 
-        // return Command::SUCCESS;
     }
 }
