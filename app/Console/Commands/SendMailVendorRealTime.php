@@ -102,7 +102,6 @@ class SendMailVendorRealTime extends Command
                         $thePo->save();
                         $this->info("Sent ".$po->poNumber."::".$po->emails); 
                     } catch (Exception $e) {
-                        //throw $th;
                         LogBatchProcess::create([
                             'mail_to' => json_encode($pecahEmailVendor),
                             'mail_cc' => json_encode($pecahEmailBuyer),

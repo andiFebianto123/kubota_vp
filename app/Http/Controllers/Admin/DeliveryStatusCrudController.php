@@ -14,6 +14,7 @@ use App\Exports\TemplateExportAll;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use App\Library\ExportXlsx;
+use App\Models\PurchaseOrderLine;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 // untuk box spout
@@ -111,8 +112,10 @@ class DeliveryStatusCrudController extends CrudController
                 'type'     => 'closure',
                 'function' => function($entry) {
                     $currency = "";
-                    if (isset($entry->purchaseOrder->vendor)) {
-                        $currency = $entry->purchaseOrder->vendor->currency;
+                    $poLine = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
+
+                    if (isset($poLine)) {
+                        $currency = $poLine->currency;
                     }
                     $val = number_format($entry->unit_price, 0, ',', '.');
                     return $currency." ".$val;
@@ -124,8 +127,9 @@ class DeliveryStatusCrudController extends CrudController
                 'type'     => 'closure',
                 'function' => function($entry) {
                     $currency = "";
-                    if (isset($entry->purchaseOrder->vendor)) {
-                        $currency = $entry->purchaseOrder->vendor->currency;
+                    $poLine = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
+                    if (isset($poLine)) {
+                        $currency = $poLine->currency;
                     }
                     $val = number_format($entry->total, 0, ',', '.');
                     return $currency." ".$val;

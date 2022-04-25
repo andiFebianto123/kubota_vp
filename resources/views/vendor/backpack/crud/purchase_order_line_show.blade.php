@@ -159,7 +159,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
-                                <th>@if($entry->purchaseOrder->vendor)Amount ({{$entry->purchaseOrder->vendor->currency}})@endif</th>
+                                <th>Amount @if($entry->purchaseOrder->vendor)({{$entry->purchaseOrder->vendor->currency}})@endif</th>
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>

@@ -128,7 +128,7 @@
                                 </td>
                                 <td width="25%">
                                     Currency<br>
-                                    <strong>{{$delivery_show->currency}}</strong>
+                                    <strong>{{$delivery_show->vendor_currency ?? $delivery_show->currency}}</strong>
                                 </td>
                                 <td width="25%">
                                     Tax Status<br>

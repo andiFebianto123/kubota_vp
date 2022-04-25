@@ -11,14 +11,14 @@
                         <div class="form-group">
                             <label class="control-label">New Password</label>
                             <div>
-                                <input type="password" class="form-control rect-validation" name="password">
+                                <input id="password" type="password" class="form-control rect-validation" name="password">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="control-label">New Password Confirmation</label>
                             <div>
-                                <input type="password" class="form-control rect-validation" name="password_confirmation">
+                                <input id="password_confirmation" type="password" class="form-control rect-validation" name="password_confirmation">
                             </div>
                             <input type="hidden" name="token" value="{{request('t')}}">
                         </div>
