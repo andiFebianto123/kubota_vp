@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Constant;
 use App\Helpers\EmailLogWriter;
+use App\Mail\ReminderAcceptPo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -55,12 +57,13 @@ class ReminderPo extends Command
             'po.id as ID',
             'po.vend_num as kode_vendor',
             'po_line.item as name_item',
+            'po_line.po_line as po_line',
             'vendor.vend_name as name_vendor',
             'vendor.vend_email as emails',
             'vendor.buyer_email as buyers',
             DB::raw('datediff(current_date(), po_line.created_at) as selisih'
         ))
-        ->whereRaw('datediff(current_date(), po_line.created_at) <= ?', [$reminderDay->first()['value']])
+        // ->whereRaw('datediff(current_date(), po_line.created_at) <= ?', [$reminderDay->first()['value']])
         ->where('po_line.accept_flag', 0)
         ->where('po_line.status', 'O')
         ->get();
@@ -71,35 +74,40 @@ class ReminderPo extends Command
 
         if(count($groupByPoLine) > 0){
             # jika ada datanya
-            foreach($groupByPoLine as $po_line){
-                $id = $po_line['ID'];
-                $poNumber = $po_line['po_number'];
+            foreach($groupByPoLine as $poLine){
+                $id = $poLine['ID'];
+                $poNumber = $poLine['po_number'];
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$id}/show";
-                // $URL = url("/kubota_vp/kubota-vendor-portal/public/admin/purchase-order/{$id}/show");
-                $details = [
-                    'po_num' => $poNumber,
-                    'type' => 'reminder_po',
-                    'title' => 'Reminder accept PO',
-                    'message' => 'Semua data PO Line anda telah di accept, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL //url("admin/purchase-order/{$po->ID}/show")
-                ];
 
-                if($po_line['emails'] != null){
+                $titleEmail = 'Auto Accept PO';
+                $messageEmail = 'PO '. $poNumber.'-'.$poLine['po_line'].' anda telah diaccept oleh sistem, anda dapat mengklik tombol dibawah ini untuk melihatnya.';
+                if ($poLine['selisih'] <= $reminderDay->first()['value']) {
+                    $titleEmail = 'Reminder Accept PO';
+                    $messageEmail = 'Anda memiliki PO '. $poNumber.'-'.$poLine['po_line'].'. Silahkan accept PO tersebut melalui link yang kami sediakan : ';
+                }
+
+                if($poLine['emails'] != null && $poLine['selisih'] >= 0){
+                    $pecahEmailVendor = (new Constant())->emailHandler($poLine['emails'], 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($poLine['buyers'], 'array');
+                    
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $poNumber,
+                        'type' => 'reminder_po',
+                        'title' =>  $titleEmail,
+                        'message' => $messageEmail,
+                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
                     try{
-                        $vendEmails = str_replace(" ", "",str_replace(",", ";", $po_line['emails']));
-                        $buyerEmails = str_replace(" ", "",str_replace(",", ";", $po_line['buyers']));
-                        $pecahEmailVendor = explode(';', $vendEmails);
-                        $pecahEmailBuyer = ($buyerEmails != null) ? explode(';', $buyerEmails) : '';
-                        
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
-                        ->send(new vendorNewPo($details));
+                        ->send(new ReminderAcceptPo($details));
                     }
                     catch(Exception $e){
-                        $subject = 'Reminder accept PO';
-                        $pecahEmailVendor = implode(", ", explode(';', $po_line['emails']));
-                        $pecahEmailBuyer = ($po_line['buyers'] != null) ?  implode(", ", explode(';', $po_line['buyers'])) : '';
+                        $subject =  $titleEmail;
+                        $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
+                        $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
                             
                         (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
                         DB::commit();
@@ -118,7 +126,7 @@ class ReminderPo extends Command
                         $pl->save();
                     }
                 }
-                $this->info("Cron is working fine!"); 
+                $this->info("Success PO ". $poNumber."-".$poLine['po_line']."::".$poLine['selisih']); 
             }
         }
         return Command::SUCCESS;

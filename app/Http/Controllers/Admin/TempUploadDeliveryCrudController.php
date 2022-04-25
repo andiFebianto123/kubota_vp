@@ -345,22 +345,11 @@ class TempUploadDeliveryCrudController extends CrudController
     {
         $imd = $this->insertMassData();
 
-        $arrIds = $imd['arr_ids'];
-
-        $arrParam['print_all'] = false;
-        $arrParam['po_num'] = '-';
-        $arrParam['po_line'] = '-';
-        $arrParam['print_delivery'] = $arrIds;
-        $arrParam['with_price'] = 'yes';
-
-        $strParam = base64_encode(serialize($arrParam));
-
         return response()->json([
             'status' => $imd['status'],
             'alert' => $imd['alert'],
+            'arr_ids' => $imd['arr_ids'] ?? [],
             'message' => $imd['message'],
-            'newtab' => true,
-            'redirect_to' => url('admin/delivery-export-mass-pdf').'?param='.$strParam ,
             'validation_errors' => []
         ], 200);
 

@@ -168,7 +168,6 @@ function submitAjaxValid(formId, attrs) {
             $('#btn-for-'+formId).html(initText)
             if (response.status) {
                 messageStatusGeneral("#"+formId, response.message, 'success')
-
                 if (response.redirect_to) {
                     if (response.newtab) {
                         window.open(response.redirect_to, '_blank');
