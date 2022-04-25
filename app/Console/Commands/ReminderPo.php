@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\vendorNewPo;
+use App\Models\PurchaseOrderLine;
 use Exception;
 use Log;
 
@@ -115,15 +116,16 @@ class ReminderPo extends Command
                     }
                 }
 
-                \App\Models\PurchaseOrderLine::where('po_num', $poNumber)
+                $poline = PurchaseOrderLine::where('po_num', $poNumber)
                 ->whereRaw('datediff(current_date(), po_line.created_at) > ?', [$reminderDay->first()['value']])
-                ->where('po_line', $poLine['po_line'])
-                ->where('accept_flag', 0)
-                ->where('status', 'O')
-                ->update([
-                    'accept_flag' => 1,
-                    'read_at' => now()
-                ]);
+                ->where('accept_flag', 0)->get();
+                if($poline->count() > 0){
+                    foreach($poline as $pl){
+                        $pl->accept_flag = 1;
+                        $pl->read_at = now();
+                        $pl->save();
+                    }
+                }
                 $this->info("Success PO ". $poNumber."-".$poLine['po_line']."::".$poLine['selisih']); 
             }
         }

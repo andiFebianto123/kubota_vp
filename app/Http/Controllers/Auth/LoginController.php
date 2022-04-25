@@ -139,7 +139,12 @@ class LoginController extends Controller
             $insertOtp->expired_at = Carbon::now()->addMinutes(5);
             $insertOtp->save();
 
-            TempCountFailure::where('account', $input['username'])->where('type', 'login')->delete();
+            $tempCountFailures = TempCountFailure::where('account', $input['username'])->where('type', 'login')->get();
+            if($tempCountFailures->count() > 0){
+                foreach($tempCountFailures as $tempCountFailure){
+                    $tempCountFailure->delete();
+                }
+            }
             
             try{
                 Mail::to($user->email)->send(new TwoFactorMail($details));

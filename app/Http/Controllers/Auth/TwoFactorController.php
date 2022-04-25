@@ -62,7 +62,13 @@ class TwoFactorController extends Controller
             $updateOtp->expired_at = Carbon::now()->addDay($expiredOtp);
             $updateOtp->save();
 
-            TempCountFailure::where('account', $username)->where('type', 'otp')->delete();
+            $tempCountFailures = TempCountFailure::where('account', $username)->where('type', 'otp')->get();
+            if($tempCountFailures->count() > 0){
+                foreach($tempCountFailures as $tempCountFailure){
+                    $tempCountFailure->delete();
+                }
+            }
+
         }else{
             $at = (new AccountAttempt())->insert($username, 'otp');
             

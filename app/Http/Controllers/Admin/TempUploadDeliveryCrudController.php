@@ -301,7 +301,15 @@ class TempUploadDeliveryCrudController extends CrudController
             }
 
             if ($status) {
-                TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+                // TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+
+                $tempUploadDeliverys = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+                if($tempUploadDeliverys->count() > 0){
+                    foreach($tempUploadDeliverys as $tempUpload){
+                        $tempUpload->delete();
+                    }
+                }
+
                 DB::commit();
             }else{
                 DB::rollback();
@@ -350,7 +358,13 @@ class TempUploadDeliveryCrudController extends CrudController
 
     public function cancelToDb(Request $request)
     {
-        TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+        // TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+        $tempUploadDeliverys = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+        if($tempUploadDeliverys->count() > 0){
+            foreach($tempUploadDeliverys as $temp){
+                $temp->delete();
+            }
+        }
     }
 
 
