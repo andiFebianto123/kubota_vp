@@ -654,8 +654,14 @@ class TaxInvoiceCrudController extends CrudController
         $change->file_surat_jalan = null;
         $success = $change->save();
 
-        Comment::where('tax_invoice_id', $id)
-            ->forcedelete();
+        // Comment::where('tax_invoice_id', $id)
+        //     ->forcedelete();
+        $comments = Comment::where('tax_invoice_id', $id)->get();
+        if($comments->count() > 0){
+            foreach($comments as $c){
+                $c->forcedelete();
+            }
+        }
 
         return $success;
     }
@@ -748,9 +754,20 @@ class TaxInvoiceCrudController extends CrudController
                 ]];
             });
 
-            Comment::where('tax_invoice_id', $invoiceId)
-            ->where('user_id', '!=', backpack_user()->id)
-            ->update(['status' => 0, 'read_by' => backpack_user()->id]);
+            // Comment::where('tax_invoice_id', $invoiceId)
+            // ->where('user_id', '!=', backpack_user()->id)
+            // ->update(['status' => 0, 'read_by' => backpack_user()->id]);
+
+            $comments = Comment::where('tax_invoice_id', $invoiceId)
+            ->where('user_id', '!=', backpack_user()->id)->get();
+
+            if($comment->count() > 0){
+                foreach($comments as $comment){
+                    $comment->status = 0;
+                    $comment->read_by = backpack_user()->id;
+                    $comment->save();
+                }
+            }
 
             return response()->json([
                 'result' => $data,
@@ -833,8 +850,13 @@ class TaxInvoiceCrudController extends CrudController
 
 
     public function deleteMessage(req $request){
-        $mesage = Comment::where('id', $request->input('id'))->delete();
-        if($mesage){
+        $message = Comment::where('id', $request->input('id'))->first();
+        
+        if($message != null){
+            $message->delete();
+        }
+
+        if($message){
             return response()->json([
                 'status' => 'success',
             ], 200);

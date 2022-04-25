@@ -29,6 +29,7 @@ use App\Models\Role;
 use Illuminate\Routing\Route;
 use App\Rules\IsValidPassword;
 use App\Exports\TemplateExportAll;
+use App\Models\ModelHasRole;
 // export with spout
 use App\Library\ExportXlsx;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
@@ -299,6 +300,11 @@ class UserCrudController extends CrudController
         $getUsers = $this->crud->model::where('id', $userId)->first();
 
         DB::table('model_has_roles')->where('model_id', $userId)->delete();
+
+        // $modelRoles = ModelHasRole::where('model_id', $userId)->get();
+        // if($modelRoles->count() > 0){
+        //     $modelRoles->delete();
+        // }
 
         $getUsers->assignRole(RoleSpatie::where('id', $role)->first());
 

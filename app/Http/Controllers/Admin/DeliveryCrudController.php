@@ -720,13 +720,33 @@ class DeliveryCrudController extends CrudController
     {
         $delivery = Delivery::where('id', $id)->first();
         if (isset($delivery)) {
-            IssuedMaterialOuthouse::where('ds_num', $delivery->ds_num)
-                                ->where('ds_line', $delivery->ds_line)
-                                ->delete();
-            Delivery::where('id', $id)->delete();
-            DeliveryStatus::where('ds_num', $delivery->ds_num)
-                            ->where('ds_line', $delivery->ds_line)
-                            ->delete();
+            // IssuedMaterialOuthouse::where('ds_num', $delivery->ds_num)
+            //                     ->where('ds_line', $delivery->ds_line)
+            //                     ->delete();
+            $imos = IssuedMaterialOuthouse::where('ds_num', $delivery->ds_num)
+            ->where('ds_line', $delivery->ds_line)->get();
+            if($imos->count() > 0){
+                foreach($imos as $imo){
+                    $imo->delete();
+                }
+            }
+            $ds = Delivery::where('id', $id)->get();
+            if($ds->count() > 0){
+                foreach($ds as $d){
+                    $d->delete();
+                }
+            }
+            // Delivery::where('id', $id)->delete();
+            // DeliveryStatus::where('ds_num', $delivery->ds_num)
+            //                 ->where('ds_line', $delivery->ds_line)
+            //                 ->delete();
+            $dds = DeliveryStatus::where('ds_num', $delivery->ds_num)
+            ->where('ds_line', $delivery->ds_line)->get();
+            if($dds->count() > 0){
+                foreach($dds as $dd){
+                    $dd->delete();
+                }
+            }
         }
 
         return true;

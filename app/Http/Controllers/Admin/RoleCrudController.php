@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\Constant;
 use App\Models\ModelHasRole;
+use App\Models\RolesHasPermission;
 use Exception;
 use Prologue\Alerts\Facades\Alert;
 
@@ -145,12 +146,24 @@ class RoleCrudController extends CrudController
                 // dapatkan id permission
             DB::beginTransaction();
             try {
-                DB::table('role_has_permissions')->where('role_id', $role)->delete();
+                // DB::table('role_has_permissions')->where('role_id', $role)->delete();
+                $rolePermissions = RolesHasPermission::where('role_id', $role)->get();
+                if($rolePermissions->count() > 0){
+                    foreach($rolePermissions as $rolePermission){
+                        $rolePermission->delete();
+                    }
+                }
                 if($request->input('permission') != null){
                     $insertData = collect($request->input('permission'))->map(function($value) use($role){
                         return ['permission_id' => $value, 'role_id' => $role];
                     });
-                    DB::table('role_has_permissions')->insert($insertData->values()->all());
+                    foreach($insertData as $insert){
+                        $insertRolePermission = new RolesHasPermission;
+                        $insertRolePermission->permission_id = $insert['permission_id'];
+                        $insertRolePermission->role_id = $insert['role_id'];
+                        $insertRolePermission->save();
+                    }
+                    // DB::table('role_has_permissions')->insert($insertData->values()->all()); 
                 }
                 DB::commit();
                 return response()->json([

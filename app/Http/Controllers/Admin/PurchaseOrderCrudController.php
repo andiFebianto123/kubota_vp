@@ -51,7 +51,7 @@ class PurchaseOrderCrudController extends CrudController
         if(Constant::checkPermission('Read Purchase Order')){
             $this->crud->allowAccess('list');
         }else{
-            $this->crud->denyAccess('list');
+            $this->crud->denyAccess('list'); 
         }
         if(!Constant::checkPermission('Read PO Detail')){
             $this->crud->denyAccess('show');
@@ -381,7 +381,14 @@ class PurchaseOrderCrudController extends CrudController
 
         try {
             if ($insertOrUpdate == 'insert') {
-                TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+                // TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
+
+                $tempUploadDeliverys =  TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+                if($tempUploadDeliverys->count() > 0){
+                    foreach($tempUploadDeliverys as $val){
+                        $val->delete();
+                    }
+                }
             }
             $import = new DeliverySheetImport($attrs);
             $import->import($file);
@@ -528,9 +535,16 @@ class PurchaseOrderCrudController extends CrudController
                         ], 500);
                     }
                 }
-                PurchaseOrder::where('id', $po->ID)->update([
-                    'email_flag' => now()
-                ]);
+                // PurchaseOrder::where('id', $po->ID)->update([
+                //     'email_flag' => now()
+                // ]);
+                $PoS = PurchaseOrder::where('id', $po->ID)->get();
+                if($PoS->count() > 0){
+                    foreach($PoS as $Po){
+                        $Po->email_flag = now();
+                        $Po->save();
+                    }
+                }
             }
         }
 
@@ -587,9 +601,16 @@ class PurchaseOrderCrudController extends CrudController
                         }
                             
                     }
-                    PurchaseOrder::where('id', $po->ID)->update([
-                        'email_flag' => now()
-                    ]);
+                    // PurchaseOrder::where('id', $po->ID)->update([
+                    //     'email_flag' => now()
+                    // ]);
+                    $PoS = PurchaseOrder::where('id', $po->ID)->get();
+                    if($PoS->count() > 0){
+                        foreach($PoS as $Po){
+                            $Po->email_flag = now();
+                            $Po->save();
+                        }
+                    }
                 }
                 DB::commit();
             }

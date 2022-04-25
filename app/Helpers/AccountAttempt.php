@@ -38,7 +38,12 @@ class AccountAttempt
                 $insertLa->lock_end = Carbon::now()->addMinutes($minutesPassed);
                 $insertLa->save();
 
-                TempCountFailure::where('account', $username)->where('type', $type)->delete();
+                $tempCountFailures = TempCountFailure::where('account', $username)->where('type', $type)->get();
+                if($tempCountFailures->count() > 0){
+                  foreach($tempCountFailures as $tempCountFailure){
+                    $tempCountFailure->delete();
+                  }
+                }
     
                 $response['status'] = false;
                 $response['message'] = 'Max Attempt '.$maxAttempt.' Please try again '.$minutesPassed.' minutes later';
