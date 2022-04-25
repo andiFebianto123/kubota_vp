@@ -171,10 +171,7 @@ class LoginController extends Controller
             ], 200);
         }else{
             $username = $input['username'];
-            // $at = (new AccountAttempt())->insert($username, 'login');
-            $at = new AccountAttempt;
-            $at->{$username} = 'login';
-            $at->save();
+            $at = (new AccountAttempt())->insert($username, 'login');
             
             return response()->json([
                 'status' => false,

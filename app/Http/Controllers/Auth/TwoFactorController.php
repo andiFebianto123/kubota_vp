@@ -70,10 +70,7 @@ class TwoFactorController extends Controller
             }
 
         }else{
-            // $at = (new AccountAttempt())->insert($username, 'otp');
-            $at = new AccountAttempt;
-            $at->{$username} = 'otp';
-            $at->save();
+            $at = (new AccountAttempt())->insert($username, 'otp');
             
             return response()->json([
                 'status' => false,
