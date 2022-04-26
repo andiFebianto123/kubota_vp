@@ -86,13 +86,13 @@ class SendMailRevisionPoRealTime extends Command
             ->get();
 
         foreach ($pos as $po) {
-            $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
-                ->where('type', 'Revision PO')
-                ->count();
+            // $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
+            //     ->where('type', 'Revision PO')
+            //     ->count();
 
             $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
 
-            if ($po->emails != null && ($po->last_po_change_email < $po->po_change) && $countLogError < 11) {
+            if ($po->emails != null && ($po->last_po_change_email < $po->po_change) /* && $countLogError < 11 */) {
                 $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
                 $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
                 $details = [
