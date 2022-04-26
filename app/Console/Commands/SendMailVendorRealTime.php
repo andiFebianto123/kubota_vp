@@ -58,6 +58,7 @@ class SendMailVendorRealTime extends Command
         PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
             ->whereNull('email_flag')
             ->where('last_po_change_email', '=', 0)
+            ->where('po_change', 0)
             ->whereNull('session_batch_process')
             ->update(['session_batch_process' => $batchSession]);
         DB::commit();

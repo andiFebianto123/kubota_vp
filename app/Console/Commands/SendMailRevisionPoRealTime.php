@@ -102,6 +102,7 @@ class SendMailRevisionPoRealTime extends Command
                         ->send(new vendorRevisionPo($details));
 
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
+                    $thePo->email_flag = now();
                     $thePo->last_po_change_email = $po->po_change;
                     $thePo->save();
 
