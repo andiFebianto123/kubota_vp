@@ -47,84 +47,71 @@ class SendMailVendorRealTime extends Command
 
     public function handle()
     {
+        DB::beginTransaction();
         $maxBatch = PurchaseOrder::max('session_batch_process');
         $batchSession = 1;
         $sessionIncrement = 0;
-        if($maxBatch != null || $maxBatch > 0){
+        if ($maxBatch != null || $maxBatch > 0) {
             $sessionIncrement = $maxBatch;
             $batchSession = $sessionIncrement + 1;
         }
+        PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
+            ->whereNull('email_flag')
+            ->where('last_po_change_email', '=', 0)
+            ->whereNull('session_batch_process')
+            ->update(['session_batch_process' => $batchSession]);
+        DB::commit();
 
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
-        ->whereNull('email_flag')
-        ->where('last_po_change_email', '=', 0)
-        ->whereNull('session_batch_process');
-        // ->where(function($query) use ($batchSession){
-        //     return $query->where('session_batch_process', '<', $batchSession)
-        //     ->orWhereNull('session_batch_process');
-        // });
+            ->select('po.id as ID', 'po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->whereNull('email_flag')
+            ->where('last_po_change_email', '=', 0)
+            ->where('session_batch_process', $batchSession)
+            ->get();
 
-        if($pos->count() > 0){
-            $getPo = $pos->orderBy('id', 'asc')->get();
+        foreach ($pos as $po) {
+            $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
+                ->where('status', 'O')
+                ->exists();
 
-            DB::beginTransaction();
+            $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
+                ->where('type', 'New PO')
+                ->count();
 
-            DB::table('po')->update(['session_batch_process' => $batchSession]);
+            $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+            $thePo = PurchaseOrder::where('id', $po->ID)->first();
 
-            $successSent = 0;
+            if ($existOrderedPoLine  && $countLogError < 11) {
+                $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+                $details = [
+                    'buyer_email' => $pecahEmailBuyer,
+                    'po_num' => $po->poNumber,
+                    'type' => 'reminder_po',
+                    'title' => 'Ada PO ' . $po->poNumber . ' baru',
+                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                    'url_button' => $URL . '?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                ];
 
-            foreach($getPo as $po){
-                $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
-                        ->where('status', 'O')
-                        ->exists();
-                        
-                $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
-                        ->where('type', 'New PO')
-                        ->count();
+                try {
+                    Mail::to($pecahEmailVendor)
+                        ->cc($pecahEmailBuyer)
+                        ->send(new vendorNewPo($details));
+                    $thePo->email_flag = now();
+                    $thePo->save();
 
-                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                $thePo = PurchaseOrder::where('id', $po->ID)->first();
-
-                if($po->emails != null && $existOrderedPoLine  && $countLogError < 11){
-                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
-                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
-                    $details = [
-                        'buyer_email' => $pecahEmailBuyer,
+                    $this->info("Sent " . $po->poNumber . "::" . $po->emails);
+                } catch (Exception $e) {
+                    LogBatchProcess::create([
+                        'mail_to' => json_encode($pecahEmailVendor),
+                        'mail_cc' => json_encode($pecahEmailBuyer),
+                        'mail_reply_to' => json_encode($pecahEmailBuyer),
                         'po_num' => $po->poNumber,
-                        'type' => 'reminder_po',
-                        'title' => 'Ada PO ' . $po->poNumber . ' baru',
-                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
-                        'url_button' => $URL.'?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                    ];
-
-                    try {
-                        Mail::to($pecahEmailVendor)
-                            ->cc($pecahEmailBuyer)
-                            ->send(new vendorNewPo($details));
-                        $thePo->email_flag = now();
-                        $thePo->save();
-
-                        $successSent ++;
-                        $this->info("Sent ".$po->poNumber."::".$po->emails); 
-                    } catch (Exception $e) {
-                        LogBatchProcess::create([
-                            'mail_to' => json_encode($pecahEmailVendor),
-                            'mail_cc' => json_encode($pecahEmailBuyer),
-                            'mail_reply_to' => json_encode($pecahEmailBuyer),
-                            'po_num' => $po->poNumber,
-                            'error_message' => $e->getMessage(),
-                            'type' => 'New PO',
-                        ]);
-                        return Command::FAILURE;
-                    }
+                        'error_message' => $e->getMessage(),
+                        'type' => 'New PO',
+                    ]);
+                    return Command::FAILURE;
                 }
-            }
-
-            if ($successSent == $pos->count()) {
-                DB::commit();
-            }else{
-                DB::rollback();
             }
         }
     }
