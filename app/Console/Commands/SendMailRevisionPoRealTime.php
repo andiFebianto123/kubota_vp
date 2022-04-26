@@ -46,7 +46,7 @@ class SendMailRevisionPoRealTime extends Command
 
     public function handle()
     {
-        
+
         DB::beginTransaction();
         $maxBatch = PurchaseOrder::max('session_batch_process');
         $batchSession = 1;
@@ -97,9 +97,9 @@ class SendMailRevisionPoRealTime extends Command
                 ];
 
                 try {
-                    // Mail::to($pecahEmailVendor)
-                    //     ->cc($pecahEmailBuyer)
-                    //     ->send(new VendorRevisionPo($details));
+                    Mail::to($pecahEmailVendor)
+                        ->cc($pecahEmailBuyer)
+                        ->send(new vendorRevisionPo($details));
 
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
                     $thePo->last_po_change_email = $po->po_change;
