@@ -761,7 +761,7 @@ class TaxInvoiceCrudController extends CrudController
             $comments = Comment::where('tax_invoice_id', $invoiceId)
             ->where('user_id', '!=', backpack_user()->id)->get();
 
-            if($comment->count() > 0){
+            if($comments->count() > 0){
                 foreach($comments as $comment){
                     $comment->status = 0;
                     $comment->read_by = backpack_user()->id;
