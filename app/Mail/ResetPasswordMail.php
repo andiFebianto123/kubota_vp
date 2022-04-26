@@ -33,7 +33,7 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        $mailBccs = env('MAIL_PO_BCC',"");
+        $mailBccs = env('MAIL_USER_BCC',"");
         $arrMailBcc = (new Constant())->emailHandler($mailBccs, 'array');
 
         if ($mailBccs == "") {
