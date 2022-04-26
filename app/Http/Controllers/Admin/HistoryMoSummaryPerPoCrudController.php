@@ -141,6 +141,19 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             },
         ]);
 
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            $this->crud->addFilter([
+                'name'        => 'vendor',
+                'type'        => 'select2_ajax',
+                'label'       => 'Name Vendor',
+                'placeholder' => 'Pick a vendor'
+            ],
+            url('admin/filter-vendor/ajax-itempo-options'),
+            function($value) { 
+                $this->crud->addClause('where', 'po.vend_num', $value);
+            });
+        }
+
         $this->crud->addFilter([
             'type'  => 'date_range_hmo',
             'name'  => 'shipped_date',
