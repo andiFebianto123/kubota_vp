@@ -160,6 +160,25 @@ class DeliveryCrudController extends CrudController
                 }
                 
                 return $html;
+            },
+            'orderable'  => true, 
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'ref_ds_num') {
+                    $q = '';
+                    $searchOnlyPo = str_replace("-", "", $searchTerm);
+                    $q = $query->orWhere('delivery.ref_ds_num', 'like', '%'.$searchOnlyPo.'%');
+                    if (str_contains($searchTerm, '-')) {
+                        $q = $query->orWhere(function($q) use ($searchTerm) {
+                            $searchWithSeparator = explode("-", $searchTerm);
+                            $q->where('delivery.ref_ds_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery.ref_ds_line', 'like', '%'.$searchWithSeparator[1].'%');
+                        });
+                    }
+                    return $q;
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery.ref_ds_num', $columnDirection);
             }
         ]);
         CRUD::column('ref_ds_line')->label('Ref DS Line');
