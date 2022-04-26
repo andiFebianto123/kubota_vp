@@ -61,7 +61,7 @@ class SendMailVendorRealTime extends Command
             ->where('po_change', 0)
             ->whereNull('session_batch_process')
             ->whereExists(function($query){
-                $query->from('po_line')->whereRaw('po_line.po_num', '=', 'po.po_num')
+                $query->from('po_line')->whereRaw('po_line.po_num = po.po_num')
                 ->where('po_line.status', 'O');
             })
             ->update(['session_batch_process' => $batchSession]);
@@ -73,7 +73,7 @@ class SendMailVendorRealTime extends Command
             ->where('last_po_change_email', '=', 0)
             ->where('session_batch_process', $batchSession)
             ->whereExists(function($query){
-                $query->from('po_line')->whereRaw('po_line.po_num', '=', 'po.po_num')
+                $query->from('po_line')->whereRaw('po_line.po_num = po.po_num')
                 ->where('po_line.status', 'O');
             })
             ->get();
