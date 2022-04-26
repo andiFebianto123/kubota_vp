@@ -60,6 +60,10 @@ class SendMailVendorRealTime extends Command
             ->where('last_po_change_email', '=', 0)
             ->where('po_change', 0)
             ->whereNull('session_batch_process')
+            ->whereExists(function($query){
+                $query->from('po_line')->whereRaw('po_line.po_num', '=', 'po.po_num')
+                ->where('po_line.status', 'O');
+            })
             ->update(['session_batch_process' => $batchSession]);
         DB::commit();
 
@@ -68,12 +72,16 @@ class SendMailVendorRealTime extends Command
             ->whereNull('email_flag')
             ->where('last_po_change_email', '=', 0)
             ->where('session_batch_process', $batchSession)
+            ->whereExists(function($query){
+                $query->from('po_line')->whereRaw('po_line.po_num', '=', 'po.po_num')
+                ->where('po_line.status', 'O');
+            })
             ->get();
 
         foreach ($pos as $po) {
-            $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
-                ->where('status', 'O')
-                ->exists();
+            // $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
+            //     ->where('status', 'O')
+            //     ->exists();
 
             $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
                 ->where('type', 'New PO')
@@ -82,7 +90,7 @@ class SendMailVendorRealTime extends Command
             $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
             $thePo = PurchaseOrder::where('id', $po->ID)->first();
 
-            if ($existOrderedPoLine  && $countLogError < 11) {
+            if (/* $existOrderedPoLine  && */ $countLogError < 11) {
                 $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
                 $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
                 $details = [
