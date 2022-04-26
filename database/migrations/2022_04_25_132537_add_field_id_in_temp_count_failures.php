@@ -14,7 +14,9 @@ class AddFieldIdInTempCountFailures extends Migration
     public function up()
     {
         Schema::table('temp_count_failures', function (Blueprint $table) {
-            $table->increments('id')->first();
+            if(!Schema::hasColumn('temp_count_failures','id')){
+                $table->increments('id')->first();
+            }
         });
     }
 
