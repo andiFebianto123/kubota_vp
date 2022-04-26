@@ -133,6 +133,7 @@
 			$('li[filter-key={{ $filter->key }}]').on('filter:clear', function(e) {
 				//if triggered by remove filters click just remove active class,no need to send ajax
 				$('li[filter-key={{ $filter->key }}]').removeClass('active');
+				location.reload()
 				dateRangeInput.val("");
 			});
 			// datepicker clear button

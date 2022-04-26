@@ -6,7 +6,6 @@ use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorNewPo;
 use App\Mail\vendorRevisionPo;
 use App\Models\LogBatchProcess;
 use App\Models\PurchaseOrder;
@@ -47,7 +46,7 @@ class SendMailRevisionPoRealTime extends Command
 
     public function handle()
     {
-        $maxBatch = PurchaseOrder::max('session_batch_process_revision');
+        $maxBatch = PurchaseOrder::max('session_batch_process');
         $batchSession = 1;
         $sessionIncrement = 0;
         if($maxBatch != null || $maxBatch > 0){
@@ -56,25 +55,29 @@ class SendMailRevisionPoRealTime extends Command
         }
 
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-        ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email','session_batch_process_revision',
+        ->select('po.id as ID','po.po_num as poNumber','po.last_po_change_email','session_batch_process',
              'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereColumn('last_po_change_email', '<','po_change')
-        ->where(function($query) use ($batchSession){
-            return $query->where('session_batch_process_revision', '<', $batchSession)
-            ->orWhereNull('session_batch_process_revision');
-        });
+        ->whereNull('email_flag')
+        ->where('last_po_change_email', '<', 'po_change')
+        ->whereNull('session_batch_process');
+        // ->where(function($query) use ($batchSession){
+        //     return $query->where('session_batch_process_revision', '<', $batchSession)
+        //     ->orWhereNull('session_batch_process_revision');
+        // });
 
         if($pos->count() > 0){
             $getPo = $pos->orderBy('id', 'asc')->get();
+            DB::beginTransaction();
+
+            DB::table('po')->update(['session_batch_process' => $batchSession]);
+
+            $successSent = 0;
 
             foreach($getPo as $po){
                 $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
                         ->where('type', 'Revision PO')
                         ->count();
-
-                $updatePo = PurchaseOrder::where('id', $po->ID)->first();
-                $updatePo->session_batch_process_revision = $batchSession;
-                $updatePo->save();
 
                 $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
 
@@ -98,7 +101,9 @@ class SendMailRevisionPoRealTime extends Command
                         $thePo = PurchaseOrder::where('id', $po->ID)->first();
                         $thePo->last_po_change_email = $po->po_change;
                         $thePo->save();
-        
+                        
+                        $successSent ++;
+
                         $this->info("Sent ".$po->poNumber."::".$po->emails); 
                     } catch (Exception $e) {
                         LogBatchProcess::create([
@@ -113,6 +118,12 @@ class SendMailRevisionPoRealTime extends Command
                     }
                     
                 }
+            }
+
+            if ($successSent == $pos->count()) {
+                DB::commit();
+            }else{
+                DB::rollback();
             }
         }
     }

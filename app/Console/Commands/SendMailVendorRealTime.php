@@ -58,19 +58,23 @@ class SendMailVendorRealTime extends Command
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
         ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
         ->whereNull('email_flag')
-        ->where(function($query) use ($batchSession){
-            return $query->where('session_batch_process', '<', $batchSession)
-            ->orWhereNull('session_batch_process');
-        });
+        ->where('last_po_change_email', '=', 0)
+        ->whereNull('session_batch_process');
+        // ->where(function($query) use ($batchSession){
+        //     return $query->where('session_batch_process', '<', $batchSession)
+        //     ->orWhereNull('session_batch_process');
+        // });
 
         if($pos->count() > 0){
             $getPo = $pos->orderBy('id', 'asc')->get();
 
-            foreach($getPo as $po){
-                $updatePo = PurchaseOrder::where('id', $po->ID)->first();
-                $updatePo->session_batch_process = $batchSession;
-                $updatePo->save();
+            DB::beginTransaction();
 
+            DB::table('po')->update(['session_batch_process' => $batchSession]);
+
+            $successSent = 0;
+
+            foreach($getPo as $po){
                 $existOrderedPoLine = PurchaseOrderLine::where('po_num', $po->poNumber)
                         ->where('status', 'O')
                         ->exists();
@@ -100,6 +104,8 @@ class SendMailVendorRealTime extends Command
                             ->send(new vendorNewPo($details));
                         $thePo->email_flag = now();
                         $thePo->save();
+
+                        $successSent ++;
                         $this->info("Sent ".$po->poNumber."::".$po->emails); 
                     } catch (Exception $e) {
                         LogBatchProcess::create([
@@ -113,6 +119,12 @@ class SendMailVendorRealTime extends Command
                         return Command::FAILURE;
                     }
                 }
+            }
+
+            if ($successSent == $pos->count()) {
+                DB::commit();
+            }else{
+                DB::rollback();
             }
         }
     }
