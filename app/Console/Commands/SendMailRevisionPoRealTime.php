@@ -99,7 +99,7 @@ class SendMailRevisionPoRealTime extends Command
                 try {
                     Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
-                        ->send(new vendorRevisionPo($details));
+                        ->send(new VendorRevisionPo($details));
 
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
                     $thePo->email_flag = now();
