@@ -42,7 +42,7 @@ class ResetPasswordMail extends Mailable
                     ->markdown('emails.sample-mail');
         }else{
             return $this->subject('Reset Password')
-                    ->bcc($arrMailBcc, 'Admin Kubota')
+                    ->bcc($arrMailBcc)
                     ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->markdown('emails.sample-mail');
         }  

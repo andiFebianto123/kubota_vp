@@ -8,7 +8,7 @@ use App\Mail\ReminderAcceptPo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorNewPo;
+use App\Mail\VendorNewPo;
 use App\Models\PurchaseOrderLine;
 use Exception;
 use Log;

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class vendorRevisionPo extends Mailable
+class VendorRevisionPo extends Mailable
 {
     use Queueable, SerializesModels;
     public $details;
@@ -40,7 +40,7 @@ class vendorRevisionPo extends Mailable
         }else{
             return $this->subject('PO Revision - [' . $this->details['po_num'] . ']' )
                     ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
-                    ->bcc($arrMailBcc, 'Admin Kubota')
+                    ->bcc($arrMailBcc)
                     ->markdown('emails.sample-mail');
         }        
     }

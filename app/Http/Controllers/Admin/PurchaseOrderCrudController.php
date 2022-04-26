@@ -19,7 +19,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Exception;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorNewPo;
+use App\Mail\VendorNewPo;
 use App\Helpers\EmailLogWriter;
 use App\Helpers\Constant;
 use App\Models\TempUploadDelivery;
@@ -518,7 +518,7 @@ class PurchaseOrderCrudController extends CrudController
                         $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
-                        ->send(new vendorNewPo($details));
+                        ->send(new VendorNewPo($details));
                     }
                     catch(Exception $e){
                         $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
@@ -583,7 +583,7 @@ class PurchaseOrderCrudController extends CrudController
                             $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                             Mail::to($pecahEmailVendor)
                             ->cc($pecahEmailBuyer)
-                            ->send(new vendorNewPo($details));
+                            ->send(new VendorNewPo($details));
                         }
                         catch(Exception $e){
                             $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';

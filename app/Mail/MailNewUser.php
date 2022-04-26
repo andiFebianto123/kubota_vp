@@ -41,7 +41,7 @@ class MailNewUser extends Mailable
         }else{
             return $this->subject('New Account')
                 ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
-                ->bcc($arrMailBcc, 'Admin Kubota')
+                ->bcc($arrMailBcc)
                 ->markdown('emails.mail-user');
         }     
 

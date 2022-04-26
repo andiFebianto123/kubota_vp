@@ -7,7 +7,7 @@ use App\Helpers\EmailLogWriter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorNewPo;
+use App\Mail\VendorNewPo;
 use App\Models\LogBatchProcess;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
@@ -96,7 +96,7 @@ class SendMailVendorRealTime extends Command
                 try {
                     Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
-                        ->send(new vendorNewPo($details));
+                        ->send(new VendorNewPo($details));
                     $thePo->email_flag = now();
                     $thePo->save();
 

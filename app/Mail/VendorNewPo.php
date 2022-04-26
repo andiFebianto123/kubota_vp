@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class vendorNewPo extends Mailable
+class VendorNewPo extends Mailable
 {
     use Queueable, SerializesModels;
     public $details;
@@ -35,12 +35,12 @@ class vendorNewPo extends Mailable
 
         if ($mailBccs == "") {
             return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
-                    // ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
+                    ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
                     ->markdown('emails.sample-mail');
         }else{
             return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
-                    // ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
-                    ->bcc($arrMailBcc, 'Admin Kubota')
+                    ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
+                    ->bcc($arrMailBcc)
                     ->markdown('emails.sample-mail');
         }        
     }

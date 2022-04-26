@@ -6,7 +6,7 @@ use App\Helpers\Constant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorRevisionPo;
+use App\Mail\VendorRevisionPo;
 use App\Models\LogBatchProcess;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
@@ -99,7 +99,7 @@ class SendMailRevisionPoRealTime extends Command
                 try {
                     // Mail::to($pecahEmailVendor)
                     //     ->cc($pecahEmailBuyer)
-                    //     ->send(new vendorRevisionPo($details));
+                    //     ->send(new VendorRevisionPo($details));
 
                     $thePo = PurchaseOrder::where('id', $po->ID)->first();
                     $thePo->last_po_change_email = $po->po_change;
