@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ForgotPasswordController extends Controller
 {
-    
+
 
     public function forgotPassword()
     {
@@ -28,9 +28,9 @@ class ForgotPasswordController extends Controller
 
     }
 
-    public function resetPassword() 
+    public function resetPassword()
     {
-        if (request("t") && 
+        if (request("t") &&
             UserForgotPassword::where("token", request("t"))
             ->where('expired_at', '>', Carbon::now())
             ->exists()) {
@@ -57,7 +57,7 @@ class ForgotPasswordController extends Controller
         $insert_otp = new UserForgotPassword();
         $insert_otp->email = $email;
         $insert_otp->token = $token;
-        $insert_otp->expired_at = Carbon::now()->addMinutes(5);
+        $insert_otp->expired_at = Carbon::now()->addDays(1);
         $insert_otp->save();
 
         $details = [
