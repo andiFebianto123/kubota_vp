@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use Exception;
-use Throwable;
 use App\Helpers\Constant;
 use App\Mail\VendorNewPo;
 use App\Models\PurchaseOrder;
+use App\Helpers\EmailLogWriter;
 use App\Models\LogBatchProcess;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -108,15 +108,17 @@ class SendMailVendorRealTime extends Command
                 $thePo->save();
 
                 $this->info("Sent " . $po->poNumber . "::" . $po->emails);
-            } catch (Throwable $e) {
-                LogBatchProcess::create([
-                    'mail_to' => json_encode($pecahEmailVendor),
-                    'mail_cc' => json_encode($pecahEmailBuyer),
-                    'mail_reply_to' => json_encode($pecahEmailBuyer),
-                    'po_num' => $po->poNumber,
-                    'error_message' => $e->getMessage(),
-                    'type' => 'New PO',
-                ]);
+            } catch (Exception $e) {
+                EmailLogWriter::create(
+                    'New Purchase Order - [' . $po->poNumber . ']',
+                    json_encode($pecahEmailVendor),
+                    $e->getMessage(),
+                    json_encode($pecahEmailBuyer),
+                    env('MAIL_PO_BCC',""),
+                    [
+                        'mail_reply_to' => json_encode($pecahEmailBuyer)
+                    ]
+                );
             }
             // }
         }
