@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
+use Exception;
+use Throwable;
 use App\Helpers\Constant;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
+use App\Models\PurchaseOrder;
 use App\Mail\VendorRevisionPo;
 use App\Models\LogBatchProcess;
-use App\Models\PurchaseOrder;
+use Illuminate\Console\Command;
 use App\Models\PurchaseOrderLine;
-use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class SendMailRevisionPoRealTime extends Command
 {
@@ -115,7 +116,7 @@ class SendMailRevisionPoRealTime extends Command
                     $thePo->save();
 
                     $this->info("Sent " . $po->poNumber . "::" . $po->emails);
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                     LogBatchProcess::create([
                         'mail_to' => json_encode($pecahEmailVendor),
                         'mail_cc' => json_encode($pecahEmailBuyer),
