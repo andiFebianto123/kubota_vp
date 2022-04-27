@@ -91,21 +91,20 @@ class SendMailRevisionPoRealTime extends Command
             //     ->where('type', 'Revision PO')
             //     ->count();
 
-            $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-
             if ($po->emails != null && ($po->last_po_change_email < $po->po_change) /* && $countLogError < 11 */) {
-                $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
-                $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
-                $details = [
-                    'buyer_email' => $pecahEmailBuyer,
-                    'po_num' => $po->poNumber,
-                    'type' => 'revision_po',
-                    'title' => 'Revisi PO ' . $po->poNumber . ' Rev.' . $po->po_change,
-                    'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL . '?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
-                ];
-
                 try {
+                    $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $po->poNumber,
+                        'type' => 'revision_po',
+                        'title' => 'Revisi PO ' . $po->poNumber . ' Rev.' . $po->po_change,
+                        'message' => 'Anda memiliki PO yang direvisi. Untuk melihat PO tersebut, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL . '?prev_session=true' //url("admin/purchase-order/{$po->ID}/show")
+                    ];
+    
                     Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
                         ->send(new VendorRevisionPo($details));
