@@ -92,10 +92,10 @@ class SendMailRevisionPoRealTime extends Command
             //     ->count();
 
             if ($po->emails != null && ($po->last_po_change_email < $po->po_change) /* && $countLogError < 11 */) {
+                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+                $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
                 try {
-                    $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
-                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
                     $details = [
                         'buyer_email' => $pecahEmailBuyer,
                         'po_num' => $po->poNumber,
@@ -116,15 +116,13 @@ class SendMailRevisionPoRealTime extends Command
 
                     $this->info("Sent " . $po->poNumber . "::" . $po->emails);
                 } catch (Exception $e) {
-                    EmailLogWriter::create(
+                    (new EmailLogWriter)->create(
                         'PO Revision - [' . $po->poNumber . ']',
                         json_encode($pecahEmailVendor),
                         $e->getMessage(),
                         json_encode($pecahEmailBuyer),
                         env('MAIL_PO_BCC',""),
-                        [
-                            'mail_reply_to' => json_encode($pecahEmailBuyer)
-                        ]
+                        json_encode($pecahEmailBuyer)
                     );
                 }
             }

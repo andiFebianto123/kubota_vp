@@ -85,13 +85,12 @@ class SendMailVendorRealTime extends Command
             // $countLogError = LogBatchProcess::where('po_num', $po->poNumber)
             //     ->where('type', 'New PO')
             //     ->count();
+            $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+            $thePo = PurchaseOrder::where('id', $po->ID)->first();
+            $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+            $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
             try {
-                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                $thePo = PurchaseOrder::where('id', $po->ID)->first();
-    
                 // if ($existOrderedPoLine  && $countLogError < 11) {
-                $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
-                $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
                 $details = [
                     'buyer_email' => $pecahEmailBuyer,
                     'po_num' => $po->poNumber,
@@ -109,15 +108,13 @@ class SendMailVendorRealTime extends Command
 
                 $this->info("Sent " . $po->poNumber . "::" . $po->emails);
             } catch (Exception $e) {
-                EmailLogWriter::create(
+                (new EmailLogWriter)->create(
                     'New Purchase Order - [' . $po->poNumber . ']',
                     json_encode($pecahEmailVendor),
                     $e->getMessage(),
                     json_encode($pecahEmailBuyer),
                     env('MAIL_PO_BCC',""),
-                    [
-                        'mail_reply_to' => json_encode($pecahEmailBuyer)
-                    ]
+                    json_encode($pecahEmailBuyer)
                 );
             }
             // }

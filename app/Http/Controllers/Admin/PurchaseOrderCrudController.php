@@ -513,20 +513,19 @@ class PurchaseOrderCrudController extends CrudController
                 ];
 
                 if($po->emails != null){
+                    $pecahEmailVendor = explode(';', $po->emails);
+                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                     try{
-                        $pecahEmailVendor = explode(';', $po->emails);
-                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
                         ->send(new VendorNewPo($details));
                     }
                     catch(Exception $e){
                         $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
-                        $pecahEmailVendor = implode(", ", explode(';', $po->emails));
-                        $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
+                        // $pecahEmailVendor = implode(", ", explode(';', $po->emails));
+                        // $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
                         
-                        (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
-                        DB::commit();
+                        (new EmailLogWriter())->create($subject, json_encode($pecahEmailVendor), $e->getMessage(), json_encode($pecahEmailBuyer), env('MAIL_PO_BCC',""), json_encode($pecahEmailBuyer));
                         
                         return response()->json([
                             'status' => false,
@@ -578,19 +577,19 @@ class PurchaseOrderCrudController extends CrudController
                     ];
                     
                     if($po->emails != null){
+                        $pecahEmailVendor = explode(';', $po->emails);
+                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                         try{
-                            $pecahEmailVendor = explode(';', $po->emails);
-                            $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
                             Mail::to($pecahEmailVendor)
                             ->cc($pecahEmailBuyer)
                             ->send(new VendorNewPo($details));
                         }
                         catch(Exception $e){
                             $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
-                            $pecahEmailVendor = implode(", ", explode(';', $po->emails));
-                            $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
+                            // $pecahEmailVendor = implode(", ", explode(';', $po->emails));
+                            // $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
                             
-                            (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
+                            (new EmailLogWriter())->create($subject, json_encode($pecahEmailVendor), $e->getMessage(), json_encode($pecahEmailBuyer), env('MAIL_PO_BCC',""), json_encode($pecahEmailBuyer));
                             DB::commit();
                             
                             return response()->json([

@@ -406,7 +406,7 @@ class UserCrudController extends CrudController
                     }
                     catch(Exception $e){
                         $subject = "Data Error User Import";
-                        (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage());
+                        (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage(), '', env('MAIL_USER_BCC',""), env('MAIL_REPLY_TO',""));
                         DB::commit();
                     }
                 }
