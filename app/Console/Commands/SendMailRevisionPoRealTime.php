@@ -124,7 +124,6 @@ class SendMailRevisionPoRealTime extends Command
                         'error_message' => $e->getMessage(),
                         'type' => 'Revision PO',
                     ]);
-                    return Command::FAILURE;
                 }
             }
         }

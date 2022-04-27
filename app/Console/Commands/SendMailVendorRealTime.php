@@ -117,7 +117,6 @@ class SendMailVendorRealTime extends Command
                     'error_message' => $e->getMessage(),
                     'type' => 'New PO',
                 ]);
-                return Command::FAILURE;
             }
             // }
         }
