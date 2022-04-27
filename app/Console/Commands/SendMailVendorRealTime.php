@@ -56,8 +56,7 @@ class SendMailVendorRealTime extends Command
         }
         PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
             ->whereNull('email_flag')
-            ->where('last_po_change_email', '=', 0)
-            ->where('po_change', 0)
+            ->whereNull('last_po_change_email')
             ->whereNull('session_batch_process')
             ->whereExists(function ($query) {
                 $query->from('po_line')->whereRaw('po_line.po_num = po.po_num')
@@ -69,7 +68,7 @@ class SendMailVendorRealTime extends Command
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
             ->select('po.id as ID', 'po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
             ->whereNull('email_flag')
-            ->where('last_po_change_email', '=', 0)
+            ->whereNull('last_po_change_email')
             ->where('session_batch_process', $batchSession)
             ->whereExists(function ($query) {
                 $query->from('po_line')->whereRaw('po_line.po_num = po.po_num')
@@ -103,6 +102,7 @@ class SendMailVendorRealTime extends Command
                 Mail::to($pecahEmailVendor)
                     ->cc($pecahEmailBuyer)
                     ->send(new VendorNewPo($details));
+                $thePo->last_po_change_email = $po->po_change;
                 $thePo->email_flag = now();
                 $thePo->save();
 

@@ -58,6 +58,7 @@ class SendMailRevisionPoRealTime extends Command
         }
         PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
             ->whereColumn('last_po_change_email', '<', 'po_change')
+            ->whereNotNull('last_po_change_email')
             ->whereNull('email_flag')
             ->whereNull('session_batch_process')
             ->whereExists(function($query){
@@ -78,6 +79,7 @@ class SendMailRevisionPoRealTime extends Command
                 'vendor.buyer_email as buyers'
             )
             ->whereColumn('last_po_change_email', '<', 'po_change')
+            ->whereNotNull('last_po_change_email')
             ->whereNull('email_flag')
             ->where('session_batch_process', $batchSession)
             ->whereExists(function($query){
