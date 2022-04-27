@@ -66,7 +66,7 @@ class SendMailVendorRealTime extends Command
         DB::commit();
 
         $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-            ->select('po.id as ID', 'po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->select('po.id as ID', 'po.po_num as poNumber', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
             ->whereNull('email_flag')
             ->whereNull('last_po_change_email')
             ->where('session_batch_process', $batchSession)
