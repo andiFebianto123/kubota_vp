@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class vendorNewPo1 extends Mailable
+class VendorNewPo1 extends Mailable
 {
     use Queueable, SerializesModels;
 

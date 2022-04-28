@@ -40,7 +40,7 @@ class ReminderAcceptPo extends Mailable
         }else{
             return $this->subject($this->details['title'].' - [' . $this->details['po_num'] . ']' )
                     ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
-                    ->bcc($arrMailBcc, 'Admin Kubota')
+                    ->bcc($arrMailBcc)
                     ->markdown('emails.sample-mail');
         }        
     }

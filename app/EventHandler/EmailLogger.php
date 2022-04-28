@@ -24,6 +24,7 @@ class EmailLogger
             'to' => $this->formatAddressField($message, 'To'),
             'cc' => $this->formatAddressField($message, 'Cc'),
             'bcc' => $this->formatAddressField($message, 'Bcc'),
+            'reply_to' => $this->formatAddressField($message, 'Reply-To'),
             'subject' => $message->getSubject(),
             'headers' => (string)$message->getHeaders(),
         ]);
