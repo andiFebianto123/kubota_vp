@@ -15,7 +15,6 @@ use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
-use App\Models\PurchaseOrder;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -24,7 +23,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 use App\Library\ExportXlsx;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Box\Spout\Common\Entity\Style\CellAlignment;
@@ -412,7 +410,7 @@ class DeliveryCrudController extends CrudController
             $insertDsheet->ds_num = $dsNum['single'];
             $insertDsheet->po_num = $poLine->po_num;
             $insertDsheet->po_line = $poLine->po_line;
-            $insertDsheet->po_release = $poLine->po_release;
+            $insertDsheet->po_release = $poLine->po_num."-" .$poLine->po_line;
             $insertDsheet->po_change = $poLine->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
             $insertDsheet->item = $poLine->item;
@@ -439,7 +437,7 @@ class DeliveryCrudController extends CrudController
             $insertDstatus->ds_num = $dsNum['single'];
             $insertDstatus->po_num = $poLine->po_num;
             $insertDstatus->po_line = $poLine->po_line;
-            $insertDstatus->po_release = $poLine->po_release;
+            $insertDstatus->po_release = $poLine->po_num."-" .$poLine->po_line;
             $insertDstatus->ds_line = $dsNum['line'];
             $insertDstatus->item = $poLine->item;
             $insertDstatus->description = $poLine->description;
