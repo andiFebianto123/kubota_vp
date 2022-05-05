@@ -1,19 +1,18 @@
 /* 
   @package NOTY - Dependency-free notification library 
-  @version version: 3.2.0-beta 
   @contributors https://github.com/needim/noty/graphs/contributors 
   @documentation Examples and Documentation - https://ned.im/noty 
   @license Licensed under the MIT licenses: http://www.opensource.org/licenses/mit-license.php 
 */
 
 /*!
-  * Bootstrap v4.6.0 (https://getbootstrap.com/)
+  * BS(https://getbootstrap.com/)
   * Copyright 2011-2021 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 
 /*!
-  * CoreUI v2.1.16 (https://coreui.io)
+  * CUI (https://coreui.io)
   * Copyright 2019 Łukasz Holeczek
   * Licensed under MIT (https://coreui.io)
   */
@@ -23,11 +22,10 @@
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.1.1
  */
 
 /*!
- * Sizzle CSS Selector Engine v2.3.6
+ * Sizzle SE
  * https://sizzlejs.com/
  *
  * Copyright JS Foundation and other contributors
@@ -38,7 +36,7 @@
  */
 
 /*!
- * jQuery JavaScript Library v3.6.0
+ * jQ Js Library 
  * https://jquery.com/
  *
  * Includes Sizzle.js
@@ -52,20 +50,19 @@
  */
 
 /*!
- * pace.js v1.2.4
+ * pace
  * https://github.com/CodeByZach/pace/
  * Licensed MIT © HubSpot, Inc.
  */
 
 /*!
- * perfect-scrollbar v1.5.2
+ * perfect-scrollbar 
  * Copyright 2021 Hyunje Jun, MDBootstrap and Contributors
  * Licensed under MIT
  */
 
 /**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
- * @version 1.16.1
  * @license
  * Copyright (c) 2016 Federico Zivolo and contributors
  *
