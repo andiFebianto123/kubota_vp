@@ -94,7 +94,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <tr>
                     <td>Unit Price</td>
                     <td>:</td>
-                    <td>{{$entry->purchaseOrder->vendor->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
+                    <td>{{$entry->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
                 @endif
             </table>
@@ -119,7 +119,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
-                                <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
+                                <th>Amount ({{$entry->currency}})</th>
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
