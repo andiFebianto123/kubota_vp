@@ -145,7 +145,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('admin/delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
                                 </td>
                             </tr>
                             @php
