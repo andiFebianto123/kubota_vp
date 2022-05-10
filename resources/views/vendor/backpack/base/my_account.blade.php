@@ -115,7 +115,7 @@
                                     $field = 'old_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
-                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="">
+                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) ? old($field) : '' }}">
                             </div>
 
                             <div class="col-md-4 form-group">
@@ -124,7 +124,7 @@
                                     $field = 'new_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
-                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="">
+                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}"  value="{{ old($field) ? old($field) : '' }}" id="{{ $field }}">
                             </div>
 
                             <div class="col-md-4 form-group">
@@ -133,7 +133,7 @@
                                     $field = 'confirm_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
-                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="">
+                                <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) ? old($field) : '' }}">
                             </div>
                         </div>
                     </div>

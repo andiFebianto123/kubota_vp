@@ -60,9 +60,17 @@ class ForgotPasswordController extends Controller
         $insert_otp->expired_at = Carbon::now()->addDays(1);
         $insert_otp->save();
 
+        $notesReset = "<p>
+                        <small>
+                            <i>
+                            Kata sandi harus berisi minimal 8 karakter, satu karakter huruf besar, satu karakter huruf kecil, satu angka, dan satu karakter khusus
+                            </i>
+                        </small>
+                        </p>";
+
         $details = [
             'title' => 'Mail from '.env('APP_EMAIL', 'ptkubota.co.id'),
-            'message' => 'Gunakan Link di bawah ini untuk mereset password',
+            'message' => 'Gunakan Link di bawah ini untuk mereset password '.$notesReset,
             'type' => 'forgot_password',
             'fp_url' => route("reset-password")."?t=".$token
         ];

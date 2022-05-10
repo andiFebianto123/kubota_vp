@@ -73,7 +73,7 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
             $tud->po_line = $rowPoLine;
             $tud->user_id = backpack_auth()->user()->id;
             $tud->shipped_qty = $rowQty;
-            $tud->delivery_date = (isset($rowDeliveryDate)) ? $rowDeliveryDate: "";
+            $tud->delivery_date = (isset($rowDeliveryDate)) ? $this->transformDate($rowDeliveryDate) : "";
             $tud->petugas_vendor = $rowPetugasVendor;
             $tud->no_surat_jalan_vendor = $rowDoNumberVendor;
             $tud->save();
