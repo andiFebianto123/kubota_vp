@@ -139,6 +139,10 @@ class TempUploadDelivery extends Model
         if (!isset($this->delivery_date)) {
             $arrValidation[] = ['mode' => 'danger', 'message' => 'Delivery Date is required'];
         }
+        if (date('Y-m-d', strtotime($this->delivery_date)) < date('Y-m-d', strtotime("2000-12-12"))) {
+            $arrValidation[] = ['mode' => 'danger', 'message' => 'Delivery Date format is not valid (yyyy-mm-dd)'];
+        }
+
     
         return $arrValidation;
     }
