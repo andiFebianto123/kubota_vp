@@ -77,6 +77,7 @@ class DsValidation
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
       ->where('po_line.item', '=', $currentPoLine->item)
+      ->whereNotNull('po_line.item')
       ->where('po.vend_num', '=', $po->vend_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
@@ -95,6 +96,9 @@ class DsValidation
         if ($poLine <= $op->po_line) {
           $show = false;
         }
+      }
+      if (trim($op->item) == "") {
+        $show = false;
       }
       if ($show) {
         $arrOldPo[] = $op;
@@ -123,6 +127,7 @@ class DsValidation
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
       ->where('po_line.item', '=', $currentPoLine->item)
+      ->whereNotNull('po_line.item')
       ->where('po.vend_num', '=', $po->vend_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
@@ -147,6 +152,9 @@ class DsValidation
         if ($poLine <= $op->po_line) {
           $show = false;
         }
+      }
+      if (trim($op->item) == "") {
+        $show = false;
       }
 
       if ($show) {
