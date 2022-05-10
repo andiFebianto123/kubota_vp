@@ -201,12 +201,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </td>
                             </tr>
                             <tr>
-                                <td>Received QTY</td>
-                                <td>: {{$delivery_status->received_qty}}</td>
+                                <td>Shipped Qty</td>
+                                <td>: {{$delivery_status->shipped_qty}}</td>
                             </tr>
                             <tr>
-                                <td>Shipped</td>
-                                <td>: {{$delivery_status->shipped_qty}}</td>
+                                <td>Received QTY</td>
+                                <td>: {{$delivery_status->received_qty}}</td>
                             </tr>
                             <tr>
                                 <td>Rejected QTY</td>
@@ -283,12 +283,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <tr>
                                     <td>Payment Plan Date</td>
                                     <td>:</td>
-                                    <td> {{$delivery_status->payment_plan_date}}</td>
+                                    <td> {{$delivery_status->payment_plan_date ?? "-"}}</td>
                                 </tr>
                                 <tr>
                                     <td>Payment Est Date</td>
                                     <td>:</td>
-                                    <td> {{date('Y-m-d', strtotime($delivery_status->payment_plan_date))}}</td>
+                                    <td> {{$delivery_status->payment_date ?? "-"}}</td>
                                 </tr>
                                 <tr>
                                     <td>Validated</td>
