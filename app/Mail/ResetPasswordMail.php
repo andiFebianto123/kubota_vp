@@ -33,7 +33,7 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        $mailBccs = env('MAIL_PO_BCC',"");
+        $mailBccs = env('MAIL_USER_BCC',"");
         $arrMailBcc = (new Constant())->emailHandler($mailBccs, 'array');
 
         if ($mailBccs == "") {
@@ -42,7 +42,7 @@ class ResetPasswordMail extends Mailable
                     ->markdown('emails.sample-mail');
         }else{
             return $this->subject('Reset Password')
-                    ->bcc($arrMailBcc, 'Admin Kubota')
+                    ->bcc($arrMailBcc)
                     ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->markdown('emails.sample-mail');
         }  

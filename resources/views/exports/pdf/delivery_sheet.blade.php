@@ -110,11 +110,11 @@
                                 </td>
                                 <td width="25%">
                                     Order QTY<br>
-                                    <strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong>
+                                    <strong style="text-align: right;">{{$delivery_show->order_qty}}</strong>
                                 </td>
                                 <td width="25%">
                                     Dlv.QTY<br>
-                                    <strong style="text-align: right;">{{$delivery_show->order_qty}}</strong>
+                                    <strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong>
                                 </td>
                                 <td width="25%">
                                     Unit Price<br>
@@ -158,11 +158,16 @@
                     <table width="98%" style="margin-top: 10px;" class="pdf-table">
                         <tbody>
                             <tr>
-                                <td width="15%" align="center" style="padding:0px;" valign="top">
+                                <td width="24%" align="center" style="padding:0px;" valign="top">
                                     <small>VENDOR</small>
                                     <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
+                                    <div style="margin-top: 106px;">
+                                    @if(isset($delivery_show->petugas_vendor))
+                                    {{substr($delivery_show->petugas_vendor,0,15)}}
+                                    @endif
+                                    </div>
                                 </td>
-                                <td valign="top" height="117px">
+                                <td valign="top" height="130px">
                                     <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
                                     <small>NOTES</small> :
                                     @foreach($issued_mos as $imo)

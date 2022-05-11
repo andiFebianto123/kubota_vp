@@ -94,7 +94,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 <tr>
                     <td>Unit Price</td>
                     <td>:</td>
-                    <td>{{$entry->purchaseOrder->vendor->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
+                    <td>{{$entry->currency}} {{number_format($entry->unit_price,0,',','.')}}</td>
                 </tr>
                 @endif
             </table>
@@ -119,7 +119,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
-                                <th>Amount ({{$entry->purchaseOrder->vendor->currency}})</th>
+                                <th>Amount ({{$entry->currency}})</th>
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
@@ -145,7 +145,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery/'.$delivery->id.'/show')}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('admin/delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
                                 </td>
                             </tr>
                             @php

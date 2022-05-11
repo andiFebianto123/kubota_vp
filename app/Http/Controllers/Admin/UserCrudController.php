@@ -49,8 +49,8 @@ class UserCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/user');
         CRUD::setEntityNameStrings('user', 'users');
         $this->crud->query = $this->crud->query
-                            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                            ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
                             ->select('users.*', 'roles.name as nama_role');
 
         if(Constant::checkPermission('Read User')){
@@ -81,7 +81,6 @@ class UserCrudController extends CrudController
         if(Constant::checkPermission('Access Reset Password')){
             $this->crud->addButtonFromView('line', 'mail_reset_password', 'mail_reset_password', 'beginning');
         }
-
 
         CRUD::column('name');
         CRUD::column('username');
@@ -406,7 +405,7 @@ class UserCrudController extends CrudController
                     }
                     catch(Exception $e){
                         $subject = "Data Error User Import";
-                        (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage());
+                        (new EmailLogWriter())->create($subject, $user['email'], $e->getMessage(), '', env('MAIL_USER_BCC',""), env('MAIL_REPLY_TO',""));
                         DB::commit();
                     }
                 }

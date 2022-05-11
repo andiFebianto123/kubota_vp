@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddFieldIdInTempCountFailures extends Migration
+class RemoveSessionBatchProcessRevisionToPo extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class AddFieldIdInTempCountFailures extends Migration
      */
     public function up()
     {
-        Schema::table('temp_count_failures', function (Blueprint $table) {
-            if(!Schema::hasColumn('temp_count_failures','id')){
-                $table->increments('id')->first();
-            }
-        });
+        if(Schema::hasColumn('po','session_batch_process_revision')){
+            Schema::table('po', function (Blueprint $table) {
+                $table->dropColumn('session_batch_process_revision');
+            });
+        }
     }
 
     /**
@@ -27,7 +27,7 @@ class AddFieldIdInTempCountFailures extends Migration
      */
     public function down()
     {
-        Schema::table('temp_count_failures', function (Blueprint $table) {
+        Schema::table('po', function (Blueprint $table) {
             //
         });
     }

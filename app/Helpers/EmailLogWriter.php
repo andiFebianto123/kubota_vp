@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 class EmailLogWriter{
 
     /*  Insert log to email_log tabble */
-    public function create($subject, $emailTo, $errorMessage, $cc = '', $bcc = ''){
+    public function create($subject, $emailTo, $errorMessage, $cc = '', $bcc = '', $replyTo = ''){
         try{
             $data = [
                 'status' => "Error",
@@ -17,7 +17,8 @@ class EmailLogWriter{
                 'to' => $emailTo,
                 'cc' => $cc,
                 'bcc' =>  $bcc,
-                'subject' => $subject
+                'subject' => $subject,
+                'reply_to' => $replyTo
             ];
             DB::table('email_log')->insert($data);
         }

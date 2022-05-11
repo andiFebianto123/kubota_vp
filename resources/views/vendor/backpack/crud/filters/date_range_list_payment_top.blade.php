@@ -147,7 +147,6 @@
 
             dateRangeInput.daterangepicker($config);
 
-
             dateRangeInput.on('apply.daterangepicker', function(ev, picker) {
 				applyDateRangeFilter{{$filter->key}}(picker.startDate, picker.endDate);
                 dateRangeInput.val(picker.startDate.format('DD MMM YYYY') + ' - ' + picker.endDate.format('DD MMM YYYY'));
@@ -159,7 +158,13 @@
 			$('li[filter-key={{ $filter->key }}]').on('filter:clear', function(e) {
 				//if triggered by remove filters click just remove active class,no need to send ajax
 				$('li[filter-key={{ $filter->key }}]').removeClass('active');
-                dateRangeInput.val("");
+				// applyDateRangeFilter{{$filter->key}}(null, null);
+				dateRangeInput.val("");
+				// dateRangeInput.val(moment().format('DD MMM YYYY') + ' - ' + moment().format('DD MMM YYYY'));
+				// $config.chosenLabel = "{{trans('backpack::crud.today')}}";
+				// $config.ranges = {};
+				location.reload(true);
+
 			});
 			// datepicker clear button
 			$(".daterangepicker-{{ $filter->key }}-clear-button").click(function(e) {

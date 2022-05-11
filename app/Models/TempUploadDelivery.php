@@ -122,7 +122,11 @@ class TempUploadDelivery extends Model
             $arrValidation[] = ['mode' => $unfinishedPoLine['mode'], 'message' => $messageUpl];
         }
         if($currentMaxQty['datas'] < $this->shipped_qty){
-            $arrValidation[] = ['mode' => $currentMaxQty['mode'], 'message' => $currentMaxQty['message']];
+            $msg = $currentMaxQty['message'];
+            if ($currentMaxQty['datas'] == 0) {
+                $msg = 'Available Qty sudah terpenuhi';
+            }
+            $arrValidation[] = ['mode' => $currentMaxQty['mode'], 'message' => $msg];
         }
         if($this->shipped_qty <= 0){
             $arrValidation[] = ['mode' => 'danger', 'message' => 'QTY cannot be 0'];
@@ -139,6 +143,10 @@ class TempUploadDelivery extends Model
         if (!isset($this->delivery_date)) {
             $arrValidation[] = ['mode' => 'danger', 'message' => 'Delivery Date is required'];
         }
+        if (date('Y-m-d', strtotime($this->delivery_date)) < date('Y-m-d', strtotime("2000-12-12"))) {
+            $arrValidation[] = ['mode' => 'danger', 'message' => 'Delivery Date format is not valid (yyyy-mm-dd)'];
+        }
+
     
         return $arrValidation;
     }

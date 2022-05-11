@@ -107,6 +107,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="15%" align="center" style="padding:0px;" valign="top">
                                     <small>VENDOR</small>
                                     <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
+                                    <div style="margin-top: 106px;">
+                                    @if(isset($delivery_show->petugas_vendor))
+                                    {{substr($delivery_show->petugas_vendor,0,15)}}
+                                    @endif
+                                    </div>
                                 </td>
                                 <td valign="top" height="140px">
                                     <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
@@ -201,12 +206,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 </td>
                             </tr>
                             <tr>
-                                <td>Received QTY</td>
-                                <td>: {{$delivery_status->received_qty}}</td>
+                                <td>Shipped Qty</td>
+                                <td>: {{$delivery_status->shipped_qty}}</td>
                             </tr>
                             <tr>
-                                <td>Shipped</td>
-                                <td>: {{$delivery_status->shipped_qty}}</td>
+                                <td>Received QTY</td>
+                                <td>: {{$delivery_status->received_qty}}</td>
                             </tr>
                             <tr>
                                 <td>Rejected QTY</td>
@@ -283,12 +288,12 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <tr>
                                     <td>Payment Plan Date</td>
                                     <td>:</td>
-                                    <td> {{$delivery_status->payment_plan_date}}</td>
+                                    <td> {{$delivery_status->payment_plan_date ?? "-"}}</td>
                                 </tr>
                                 <tr>
                                     <td>Payment Est Date</td>
                                     <td>:</td>
-                                    <td> {{date('Y-m-d', strtotime($delivery_status->payment_plan_date))}}</td>
+                                    <td> {{$delivery_status->payment_date ?? "-"}}</td>
                                 </tr>
                                 <tr>
                                     <td>Validated</td>
@@ -381,7 +386,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 @if(sizeof($delivery_rejects) > 0)
 <div id="modalQtyRejected" class="modal fade" role="dialog">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
 
     <!-- Modal content-->
     <div class="modal-content">

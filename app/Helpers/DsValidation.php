@@ -77,11 +77,13 @@ class DsValidation
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
       ->where('po_line.item', '=', $currentPoLine->item)
+      ->whereNotNull('po_line.item')
       ->where('po.vend_num', '=', $po->vend_num)
+      ->where('po.po_num', '<=', $currentPoLine->po_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
-      ->orderBy('po_line.due_date', 'asc')
-      ->orderBy('po_line.po_line', 'asc')
+   //   ->orderBy('po_line.due_date', 'asc')
+    //  ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
@@ -92,9 +94,17 @@ class DsValidation
         $show = true;
       }
       if ($poNum == $op->po_num) {
+        $show = true;
         if ($poLine <= $op->po_line) {
           $show = false;
         }
+        if ($op->total_shipped_qty == $op->order_qty) {
+          $show = false;
+        }
+      }
+
+      if (trim($op->item) == "") {
+        $show = false;
       }
       if ($show) {
         $arrOldPo[] = $op;
@@ -123,11 +133,13 @@ class DsValidation
       ->where('po_line.status', 'O')
       ->where('po_line.outhouse_flag', 0)
       ->where('po_line.item', '=', $currentPoLine->item)
+      ->whereNotNull('po_line.item')
       ->where('po.vend_num', '=', $po->vend_num)
+      ->where('po.po_num', '<=', $currentPoLine->po_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
-      ->orderBy('po_line.due_date', 'asc')
-      ->orderBy('po_line.po_line', 'asc')
+      // ->orderBy('po_line.due_date', 'asc')
+      // ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
@@ -144,9 +156,16 @@ class DsValidation
         }
       }
       if ($poNum == $op->po_num) {
+        $show = true;
         if ($poLine <= $op->po_line) {
           $show = false;
         }
+        if ($op->total_shipped_qty == $op->order_qty) {
+          $show = false;
+        }
+      }
+      if (trim($op->item) == "") {
+        $show = false;
       }
 
       if ($show) {

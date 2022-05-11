@@ -8,7 +8,7 @@ use App\Mail\ReminderAcceptPo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\vendorNewPo;
+use App\Mail\VendorNewPo;
 use App\Models\PurchaseOrderLine;
 use Exception;
 use Log;
@@ -106,13 +106,10 @@ class ReminderPo extends Command
                     }
                     catch(Exception $e){
                         $subject =  $titleEmail;
-                        $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
-                        $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
+                        // $pecahEmailVendor = implode(", ", explode(';', $poLine['emails']));
+                        // $pecahEmailBuyer = ($poLine['buyers'] != null) ?  implode(", ", explode(';', $poLine['buyers'])) : '';
                             
-                        (new EmailLogWriter())->create($subject, $pecahEmailVendor, $e->getMessage(), $pecahEmailBuyer);
-                        DB::commit();
-                            
-                        return Command::FAILURE;
+                        (new EmailLogWriter())->create($subject, json_encode($pecahEmailVendor), $e->getMessage(), json_encode($pecahEmailBuyer), env('MAIL_PO_BCC',""), json_encode($pecahEmailBuyer));
                     }
                 }
 
@@ -129,6 +126,5 @@ class ReminderPo extends Command
                 $this->info("Success PO ". $poNumber."-".$poLine['po_line']."::".$poLine['selisih']); 
             }
         }
-        return Command::SUCCESS;
     }
 }

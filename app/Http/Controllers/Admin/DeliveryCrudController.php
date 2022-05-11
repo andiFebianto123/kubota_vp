@@ -15,7 +15,6 @@ use App\Models\DeliveryStatus;
 use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrderLine;
-use App\Models\PurchaseOrder;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Prologue\Alerts\Facades\Alert;
@@ -24,7 +23,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 use App\Library\ExportXlsx;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Box\Spout\Common\Entity\Style\CellAlignment;
@@ -160,6 +158,25 @@ class DeliveryCrudController extends CrudController
                 }
                 
                 return $html;
+            },
+            'orderable'  => true, 
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'ref_ds_num') {
+                    $q = '';
+                    $searchOnlyPo = str_replace("-", "", $searchTerm);
+                    $q = $query->orWhere('delivery.ref_ds_num', 'like', '%'.$searchOnlyPo.'%');
+                    if (str_contains($searchTerm, '-')) {
+                        $q = $query->orWhere(function($q) use ($searchTerm) {
+                            $searchWithSeparator = explode("-", $searchTerm);
+                            $q->where('delivery.ref_ds_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery.ref_ds_line', 'like', '%'.$searchWithSeparator[1].'%');
+                        });
+                    }
+                    return $q;
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery.ref_ds_num', $columnDirection);
             }
         ]);
         CRUD::column('ref_ds_line')->label('Ref DS Line');
@@ -309,7 +326,7 @@ class DeliveryCrudController extends CrudController
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery.id', $id)
                         ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date',
-                        'delivery.po_release','po_line.item','delivery.u_m', 'vendor.vend_num as vendor_number',
+                        'delivery.po_release','po_line.item','delivery.u_m', 'po.vend_num as vendor_number', 'delivery.petugas_vendor',
                         'vendor.currency as vendor_currency','vendor.vend_name as vendor_name', 'delivery.no_surat_jalan_vendor',
                         'po_line.item_ptki','po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty',
                         'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description',
@@ -466,7 +483,6 @@ class DeliveryCrudController extends CrudController
             // this rule for po with material outhouse
             if ( $poLine->outhouse_flag == 1 && isset($materialIds)) {
                 $anyErrors = false;
-                $intDsDetail = 1;
                 foreach ($materialIds as $key => $materialId) {
                     $mo = MaterialOuthouse::where('id', $materialId)->first();
                     $moIssueQty = $moIssueQtys[$key];
@@ -476,7 +492,7 @@ class DeliveryCrudController extends CrudController
                     $insertImo = new IssuedMaterialOuthouse();
                     $insertImo->ds_num = $insertDsheet->ds_num;
                     $insertImo->ds_line = $insertDsheet->ds_line;
-                    $insertImo->ds_detail = $intDsDetail++;
+                    $insertImo->ds_detail = $mo->seq;
                     $insertImo->matl_item = $mo->matl_item;
                     $insertImo->description = $mo->description;
                     $insertImo->lot =  $mo->lot;
@@ -632,19 +648,19 @@ class DeliveryCrudController extends CrudController
         $id = 0 ;
 
         if($printDelivery  != null){
-            $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+            $db = Delivery::leftJoin('vendor_item', 'vendor_item.item', 'delivery.item')
             ->join('po', 'po.po_num', 'delivery.po_num')
             ->whereIn('delivery.id', $printDelivery )
-            ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+            // ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
             'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
             'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
         }else{
             if($id != 0){
-                $db = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
+                $db = Delivery::leftJoin('vendor_item', 'vendor_item.item', 'delivery.item')
                 ->join('po', 'po.po_num', 'delivery.po_num')
                 ->where('delivery.id', $id)
-                ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
+               // ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
                 ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
                 'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.ds_line as ds_line', 'delivery.po_num as po_num', 
                 'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'delivery.order_qty as order_qty', 'vendor_item.qty_per_box as qty_per_box','delivery.shipped_date as shipped_date');
