@@ -247,8 +247,6 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 AND delivery.shipped_date <= '".$endDate." 23:59:59')
                 GROUP BY pimo.matl_item";
 
-        
-
         $data_materials = DB::select($sql);
 
         $this->data['data_materials'] = $data_materials;

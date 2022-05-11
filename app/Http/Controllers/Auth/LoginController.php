@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TempCountFailure;
 use App\Helpers\EmailLogWriter;
+use App\Models\Configuration;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -70,7 +71,7 @@ class LoginController extends Controller
         $insertOtp = new UserForgotPassword();
         $insertOtp->email = $email;
         $insertOtp->token = $token;
-        $insertOtp->expired_at = Carbon::now()->addMinutes(5);
+        $insertOtp->expired_at = Carbon::now()->addDay(1);
         $insertOtp->save();
 
         $details = [
@@ -116,6 +117,8 @@ class LoginController extends Controller
         {
             $twoFactorCode = strtoupper(substr(md5(date("Ymd His")), 0, 8));
             $two_factor_url = md5($twoFactorCode);
+            $confExpOtp = Configuration::where('name', 'expired_otp')->first();
+            $expiredOtp = ($confExpOtp) ? $confExpOtp->value:1; // in day
 
             $details = [
                 'title' => 'Mail from '.env('APP_EMAIL', 'ptkubota.co.id'),
@@ -128,14 +131,14 @@ class LoginController extends Controller
             $user = User::where("id", backpack_auth()->user()->id)->first();
             $user->two_factor_code = $twoFactorCode;
             $user->two_factor_url = $two_factor_url;
-            $user->two_factor_expires_at = Carbon::now()->addMinutes(5);
+            $user->two_factor_expires_at = Carbon::now()->addDay($expiredOtp);
             $user->save();
 
             $insertOtp = new UserOtp(); 
             $insertOtp->user_id = backpack_auth()->user()->id;
             $insertOtp->two_factor_code = $twoFactorCode;
             $insertOtp->two_factor_url = $two_factor_url;
-            $insertOtp->expired_at = Carbon::now()->addMinutes(5);
+            $insertOtp->expired_at = Carbon::now()->addDay($expiredOtp);
             $insertOtp->save();
 
             $tempCountFailures = TempCountFailure::where('account', $input['username'])->where('type', 'login')->get();
