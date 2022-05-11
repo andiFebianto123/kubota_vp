@@ -105,10 +105,11 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
         $this->crud->removeButton('create');
 
         $firstDate = date('Y-m-d',strtotime('first day of this month'));
-        
+
         if (!request('shipped_date')) {
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $firstDate);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', now() . ' 23:59:59');
+            session()->put('filter_shipped_date',null);
         }
         
         CRUD::addColumn([
@@ -166,6 +167,8 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
           ],
           false,
           function ($value) { // if the filter is active, apply these constraints
+            session()->put('filter_shipped_date', $value);
+
             $dates = json_decode($value);
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
@@ -197,7 +200,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
     public function showDetailsRow($id)
     {
         $entry = $this->crud->getEntry($id);
-        $url_parent = parse_url(request()->headers->get('referer'));
+        $filterDate = session()->get('filter_shipped_date');
 
         $this->data['entry'] = $entry;
         $this->data['crud'] = $this->crud;
@@ -206,10 +209,8 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
         $startDate = $firstDate;
         $endDate = now();
        
-        if (array_key_exists("query", $url_parent)) {
-            parse_str($url_parent['query'], $param_url);
-
-            $dueDate = $param_url['shipped_date'];
+        if ($filterDate) {
+            $dueDate = $filterDate;
             $dueDateD = json_decode($dueDate);
             $startDate = $dueDateD->from;
             $endDate = $dueDateD->to;
@@ -245,6 +246,8 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 AND (delivery.shipped_date >= '".$startDate."' 
                 AND delivery.shipped_date <= '".$endDate." 23:59:59')
                 GROUP BY pimo.matl_item";
+
+        
 
         $data_materials = DB::select($sql);
 
