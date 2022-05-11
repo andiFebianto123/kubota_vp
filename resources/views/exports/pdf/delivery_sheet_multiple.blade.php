@@ -125,11 +125,11 @@
                                 </td>
                                 <td width="25%">
                                     Order QTY<br>
-                                    <strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong>
+                                    <strong style="text-align: right;">{{$delivery_show->order_qty}}</strong>
                                 </td>
                                 <td width="25%">
                                     Dlv.QTY<br>
-                                    <strong style="text-align: right;">{{$delivery_show->order_qty}}</strong>
+                                    <strong style="text-align: right;">{{$delivery_show->shipped_qty}}</strong>
                                 </td>
                                 <td width="25%">
                                     Unit Price<br>
