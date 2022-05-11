@@ -15,7 +15,10 @@ class User extends Authenticatable
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
-    use RevisionableTrait;
+    use RevisionableTrait; 
+
+    protected $revisionForceDeleteEnabled = true;
+    protected $revisionCreationsEnabled = true;
 
     protected $fillable = [
         'name',
