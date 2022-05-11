@@ -326,7 +326,7 @@ class DeliveryCrudController extends CrudController
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery.id', $id)
                         ->get(['delivery.id as id','delivery.ds_num','delivery.ds_line','delivery.shipped_date', 'po_line.due_date',
-                        'delivery.po_release','po_line.item','delivery.u_m', 'po.vend_num as vendor_number',
+                        'delivery.po_release','po_line.item','delivery.u_m', 'po.vend_num as vendor_number', 'delivery.petugas_vendor',
                         'vendor.currency as vendor_currency','vendor.vend_name as vendor_name', 'delivery.no_surat_jalan_vendor',
                         'po_line.item_ptki','po.po_num as po_number','po_line.po_line as po_line', 'delivery.order_qty as order_qty',
                         'delivery.shipped_qty', 'delivery.unit_price', 'delivery.currency', 'delivery.tax_status', 'delivery.description',

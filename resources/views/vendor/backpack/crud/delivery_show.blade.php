@@ -107,6 +107,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td width="15%" align="center" style="padding:0px;" valign="top">
                                     <small>VENDOR</small>
                                     <div style="width: 100%; border-bottom:1px solid #000000; height:1px;"></div>
+                                    <div style="margin-top: 106px;">
+                                    @if(isset($delivery_show->petugas_vendor))
+                                    {{substr($delivery_show->petugas_vendor,0,15)}}
+                                    @endif
+                                    </div>
                                 </td>
                                 <td valign="top" height="140px">
                                     <small>QC</small> : <strong>@if($delivery_show->inspection_flag == 1) YES @else NO @endif</strong><br>
