@@ -97,6 +97,9 @@ class DsValidation
         if ($poLine <= $op->po_line) {
           $show = false;
         }
+        if ($op->total_shipped_qty == $op->order_qty) {
+          $show = false;
+        }
       }
       if (trim($op->item) == "") {
         $show = false;
@@ -152,6 +155,9 @@ class DsValidation
       if ($poNum == $op->po_num) {
         $show = true;
         if ($poLine <= $op->po_line) {
+          $show = false;
+        }
+        if ($op->total_shipped_qty == $op->order_qty) {
           $show = false;
         }
       }
