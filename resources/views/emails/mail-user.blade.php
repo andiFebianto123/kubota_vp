@@ -5,6 +5,7 @@
 Informasi login :<br/>
 Username : {{ $details['username'] }} <br/>
 Password : {{ $details['send_email_by_password'] }} <br/>
+<br/>
 <p>
 <small>
     <i>
