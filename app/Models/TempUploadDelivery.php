@@ -12,6 +12,9 @@ class TempUploadDelivery extends Model
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
     use RevisionableTrait;
+    
+    protected $revisionForceDeleteEnabled = true;
+    protected $revisionCreationsEnabled = true;
 
     protected $fillable = [
         'petugas_vendor',
