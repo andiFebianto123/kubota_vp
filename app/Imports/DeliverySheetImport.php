@@ -73,7 +73,7 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
             $tud->po_line = $rowPoLine;
             $tud->user_id = backpack_auth()->user()->id;
             $tud->shipped_qty = $rowQty;
-            $tud->delivery_date = (isset($rowDeliveryDate)) ? $this->transformDate($rowDeliveryDate) : "";
+            $tud->delivery_date = $this->transformDate($rowDeliveryDate);
             $tud->petugas_vendor = $rowPetugasVendor;
             $tud->no_surat_jalan_vendor = $rowDoNumberVendor;
             $tud->save();
@@ -83,6 +83,19 @@ class DeliverySheetImport implements ToCollection, WithHeadingRow
 
 
     private function transformDate($value, $format = 'Y-m-d')
+    {
+        if (is_string($value)) {
+            $createDate = str_replace("'", "", $value);
+            $createDate = date($format, strtotime($createDate));
+        }else{
+            $createDate = \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+        }
+        
+        return $createDate;
+    }
+
+
+    private function transformDateOld($value, $format = 'Y-m-d')
     {
         try {
             return \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
