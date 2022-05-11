@@ -4,7 +4,7 @@
 <h3>Anda telah bergabung di akun kubota silahkan login dan reset password anda</h3>
 Informasi login :<br/>
 Username : {{ $details['username'] }} <br/>
-Password : {{ $details['send_email_by_password'] }}
+Password : {{ $details['send_email_by_password'] }} <br/>
 <p>
 <small>
     <i>
