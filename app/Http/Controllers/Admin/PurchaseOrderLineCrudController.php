@@ -60,10 +60,12 @@ class PurchaseOrderLineCrudController extends CrudController
                             ->where("po_line", $entry->po_line)
                             ->get();
 
-        $currentQty = 0;
-        if ($entry->order_qty > $realtimeDsQty) {
-            $currentQty = $entry->order_qty -  $realtimeDsQty;
-        }
+        $args1 = [
+            'po_num' => $entry->po_num, 
+            'po_line' => $entry->po_line, 
+        ];
+        $currentQty = (new DsValidation())->currentMaxQty($args1)['datas'];
+
         if($entry->outhouse_flag == 1){
             $args = [
                 'po_num' => $entry->po_num, 
