@@ -14,7 +14,7 @@ class ChangePoReleaseColumnDeliveryTable extends Migration
     public function up()
     {
         Schema::table('delivery', function (Blueprint $table) {
-            $table->string('po_release')->length(30)->change();
+            $table->integer('po_release')->length(3)->change();
         });
     }
 

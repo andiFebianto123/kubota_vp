@@ -410,7 +410,7 @@ class DeliveryCrudController extends CrudController
             $insertDsheet->ds_num = $dsNum['single'];
             $insertDsheet->po_num = $poLine->po_num;
             $insertDsheet->po_line = $poLine->po_line;
-            $insertDsheet->po_release = $poLine->po_num."-" .$poLine->po_line;
+            $insertDsheet->po_release = $poLine->po_release;
             $insertDsheet->po_change = $poLine->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
             $insertDsheet->item = $poLine->item;
@@ -437,7 +437,7 @@ class DeliveryCrudController extends CrudController
             $insertDstatus->ds_num = $dsNum['single'];
             $insertDstatus->po_num = $poLine->po_num;
             $insertDstatus->po_line = $poLine->po_line;
-            $insertDstatus->po_release = $poLine->po_num."-" .$poLine->po_line;
+            $insertDstatus->po_release = $poLine->po_release;
             $insertDstatus->ds_line = $dsNum['line'];
             $insertDstatus->item = $poLine->item;
             $insertDstatus->description = $poLine->description;

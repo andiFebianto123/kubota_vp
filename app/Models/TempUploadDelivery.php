@@ -122,7 +122,11 @@ class TempUploadDelivery extends Model
             $arrValidation[] = ['mode' => $unfinishedPoLine['mode'], 'message' => $messageUpl];
         }
         if($currentMaxQty['datas'] < $this->shipped_qty){
-            $arrValidation[] = ['mode' => $currentMaxQty['mode'], 'message' => $currentMaxQty['message']];
+            $msg = $currentMaxQty['message'];
+            if ($currentMaxQty['datas'] == 0) {
+                $msg = 'Available Qty sudah terpenuhi';
+            }
+            $arrValidation[] = ['mode' => $currentMaxQty['mode'], 'message' => $msg];
         }
         if($this->shipped_qty <= 0){
             $arrValidation[] = ['mode' => 'danger', 'message' => 'QTY cannot be 0'];

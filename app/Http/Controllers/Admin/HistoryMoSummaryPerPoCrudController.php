@@ -42,12 +42,13 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             $endDate = $dueDateD->to;
         }
 
-        $sql = "(SELECT SUM(order_qty) FROM delivery dlv
-                WHERE delivery.po_num = dlv.po_num AND delivery.po_line = dlv.po_line
-                AND (delivery.shipped_date >= '".$startDate."' 
-                AND delivery.shipped_date <= '".$endDate." 23:59:59')
-                AND dlv.ds_type IN ('00','01')
-                ) AS sum_qty_order";
+        // $sql = "(SELECT SUM(shipped_qty) FROM delivery dlv
+        //         WHERE delivery.po_num = dlv.po_num 
+        //         AND delivery.po_line = dlv.po_line
+        //         AND delivery.shipped_date >= '".$startDate."' 
+        //         AND delivery.shipped_date <= '".$endDate." 23:59:59'
+        //         AND dlv.ds_type IN ('00','01')
+        //         ) AS sum_qty_order";
         
         $this->crud->query = $this->crud->query->select(
             'issued_material_outhouse.id as id', 
@@ -58,7 +59,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             'delivery.due_date', 
             'delivery.shipped_date', 
             'po.vend_num', 
-            DB::raw($sql)
+            'pl.order_qty'
         );
         
         $this->crud->query->join('delivery', function($join){
@@ -67,6 +68,10 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
         });
         $this->crud->query->join('po', function($join){
             $join->on('delivery.po_num', '=', 'po.po_num');
+        });
+        $this->crud->query->join('po_line as pl', function($join){
+            $join->on('issued_material_outhouse.po_num', '=', 'pl.po_num');
+            $join->on('issued_material_outhouse.po_line', '=', 'pl.po_line');
         });
 
         if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
@@ -123,7 +128,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 $query->orWhere('delivery.description', 'like', '%'.$searchTerm.'%');
             },
         ]);
-        CRUD::column('sum_qty_order')->label('Qty Order');
+        CRUD::column('order_qty')->label('Qty Order');
         CRUD::column('u_m')->label('UM');
         CRUD::addColumn([
             'name'  => 'due_date',
