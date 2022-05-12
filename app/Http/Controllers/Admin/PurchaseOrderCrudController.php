@@ -113,10 +113,10 @@ class PurchaseOrderCrudController extends CrudController
         ]);
         CRUD::addColumn([
             'name'     => 'email_flag',
-            'label'    => 'Email Flag',
+            'label'    => 'Email Date',
             'type'     => 'closure',
             'function' => function($entry) {
-                return ($entry->email_flag) ? "✓":"-";
+                return date('Y-m-d',strtotime($entry->email_flag));
             }
         ]);        
         CRUD::addColumn([
