@@ -114,16 +114,31 @@ class TempUploadDelivery extends Model
         ];
         $unfinishedPoLine = $dsValidation->unfinishedPoLineMass($args1);
 
-        // if (sizeof($unfinishedPoLine['datas']) > 0 ) {
-        //     $messageUpl = $unfinishedPoLine['message']." ";
-        //     foreach($unfinishedPoLine['datas'] as $key => $upl){
-        //         $tsq = ($upl->total_shipped_qty)?$upl->total_shipped_qty:"0";
-        //         $tsq .= "/".$upl->order_qty;
-        //         $messageUpl .= $upl->po_num."-".$upl->po_line. " (".date('Y-m-d',strtotime($upl->due_date)).") ".$tsq. "<br>";
-        //     }
-                
-        //     $arrValidation[] = ['mode' => $unfinishedPoLine['mode'], 'message' => $messageUpl];
-        // }
+        if (sizeof($unfinishedPoLine['datas']) > 0 ) {
+            $messageUpl = $unfinishedPoLine['message']." ";
+            $show = true;
+            foreach($unfinishedPoLine['datas'] as $key => $upl){
+                $tud = TempUploadDelivery::where('po_num', $upl->po_num)
+                                ->where('po_line', $upl->po_line)
+                                ->first();
+                $totalPoNumOld = 0;
+                if (isset($tud)) {
+                    $totalPoNumOld = $tud->shipped_qty;
+                }
+
+                $totalShipped = $upl->total_shipped_qty+$totalPoNumOld;
+                $tsq = $totalShipped;
+                $tsq .= "/".$upl->order_qty;
+                $messageUpl .= $upl->po_num."-".$upl->po_line. " (".date('Y-m-d',strtotime($upl->due_date)).") ".$tsq. "<br>";
+
+                if ($totalShipped == $upl->order_qty) {
+                    $show = false;
+                }
+            }
+            if ($show) {
+                $arrValidation[] = ['mode' => $unfinishedPoLine['mode'], 'message' => $messageUpl];
+            }
+        }
         if($currentMaxQty['datas'] < $this->shipped_qty){
             $msg = $currentMaxQty['message'];
             if ($currentMaxQty['datas'] == 0) {
