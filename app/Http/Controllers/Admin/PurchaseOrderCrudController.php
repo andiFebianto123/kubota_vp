@@ -238,7 +238,7 @@ class PurchaseOrderCrudController extends CrudController
             } elseif ($value == "accprog") {
                 $query = "SELECT a.po_num 
                         FROM po a
-                        LEFT JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
                         SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
                         FROM po_line GROUP BY po_num, po_change) b
                         ON a.po_num=b.po_num AND a.po_change=b.po_change
@@ -246,15 +246,12 @@ class PurchaseOrderCrudController extends CrudController
                         AND b.totA>0";
                 
                 $dbQueries = DB::select($query);
-
-                foreach ($dbQueries as $key => $dbq) {
-                    $poLines[] = $dbq->po_num;
-                }
+                $poLines = collect( $dbQueries )->pluck('po_num');
 
             }else if($value == "completed"){
                 $query = "SELECT a.po_num 
                         FROM po a
-                        LEFT JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
                         SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
                         FROM po_line GROUP BY po_num, po_change) b
                         ON a.po_num=b.po_num AND a.po_change=b.po_change
@@ -262,10 +259,7 @@ class PurchaseOrderCrudController extends CrudController
                         AND b.totA>0";
                 
                 $dbQueries = DB::select($query);
-
-                foreach ($dbQueries as $key => $dbq) {
-                    $poLines[] = $dbq->po_num;
-                }
+                $poLines = collect( $dbQueries )->pluck('po_num');
             }
            
             $this->crud->addClause('whereIn', 'po_num', $poLines);
