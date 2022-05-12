@@ -65,7 +65,7 @@ class PurchaseOrderCrudController extends CrudController
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');     
-        $this->crud->orderBy('id', 'asc');
+        $this->crud->orderBy('po_date', 'desc');
 
         if(!Constant::checkPermission('Read Purchase Order')){
             $this->crud->removeButton('show');
