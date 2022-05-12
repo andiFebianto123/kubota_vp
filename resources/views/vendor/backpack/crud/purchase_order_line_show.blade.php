@@ -159,7 +159,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <th>Shipped Date</th>
                                 <th>Qty</th>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
-                                <th>Amount @if($entry->purchaseOrder->vendor)({{$entry->purchaseOrder->vendor->currency}})@endif</th>
+                                <th>Amount ({{$entry->currency}})</th>
+                                <th>Total ({{$entry->currency}})</th>
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
@@ -169,6 +170,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <tbody>
                             @php
                                 $total_price = 0;
+                                $total_amount = 0;
                                 $total_qty = 0;
                             @endphp
                             @foreach ($deliveries as $key => $delivery)
@@ -184,6 +186,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->shipped_qty}}</td>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
                                 <td>{{number_format($delivery->unit_price,0,',','.')}}</td>
+                                <td>{{number_format($delivery->shipped_qty*$delivery->unit_price,0,',','.')}}</td>
                                 @endif
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
@@ -201,6 +204,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                             @php
                                 $total_qty += $delivery->shipped_qty;
+                                $total_amount += $delivery->unit_price;
                                 $total_price += $delivery->unit_price*$delivery->shipped_qty;
                             @endphp
                             @endforeach
@@ -215,6 +219,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     {{$total_qty}}
                                 </td>
                                 @if($constant::checkPermission('Show Price In PO Menu'))
+                                <td>
+                                 {{-- number_format($total_amount,0,',','.') --}}
+                                </td>
                                 <td>
                                  {{ number_format($total_price,0,',','.')}}
                                 </td>
