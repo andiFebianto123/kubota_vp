@@ -33,12 +33,31 @@ class VendorNewPo extends Mailable
         $mailBccs = env('MAIL_PO_BCC',"");
         $arrMailBcc = (new Constant())->emailHandler($mailBccs, 'array');
 
+        $hasAttachment = false;
+
+        if(isset($this->details['pdfData'])){
+            $hasAttachment = true;
+            $pdfData = $this->details['pdfData'];
+            $this->attachData($pdfData['file'], $pdfData['filename'], [
+                'mime' => $pdfData['mime'],
+            ]);
+        }
+
+        if(isset($this->details['excelData'])){
+            $hasAttachment = true;
+            $excelData = $this->details['excelData'];
+            $this->attach($excelData['filepath'], [
+                'as' => $excelData['filename'],
+                'mime' => $excelData['mime'],
+            ]);
+        }
+
         if ($mailBccs == "") {
-            return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
+            return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' . ($hasAttachment ? ' [Attachment]' : ''))
                     ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
                     ->markdown('emails.sample-mail');
         }else{
-            return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' )
+            return $this->subject('New Purchase Order - [' . $this->details['po_num'] . ']' . ($hasAttachment ? ' [Attachment]' : ''))
                     ->replyTo($this->details['buyer_email'], 'Reply to Buyer')
                     ->bcc($arrMailBcc)
                     ->markdown('emails.sample-mail');
