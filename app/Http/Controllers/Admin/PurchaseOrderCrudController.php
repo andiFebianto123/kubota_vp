@@ -2,36 +2,37 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\OrderSheetExport;
-use App\Exports\TemplateExportAll;
-use App\Exports\PurchaseOrderExport;
-use App\Exports\TemplateMassDsExport;
-use App\Http\Requests\PurchaseOrderRequest;
-use App\Imports\DeliverySheetImport;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderLine;
-use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Prologue\Alerts\Facades\Alert;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Exception;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\VendorNewPo;
-use App\Helpers\EmailLogWriter;
+use Throwable;
 use App\Helpers\Constant;
+use App\Mail\VendorNewPo;
+use App\Library\ExportXlsx;
+use Illuminate\Http\Request;
+use App\Models\PurchaseOrder;
+use App\Helpers\EmailLogWriter;
+use App\Exports\OrderSheetExport;
+use App\Models\PurchaseOrderLine;
+use App\Exports\TemplateExportAll;
 use App\Models\TempUploadDelivery;
 use Illuminate\Support\Facades\DB;
-use Throwable;
+use Prologue\Alerts\Facades\Alert;
+use App\Exports\PurchaseOrderExport;
+use App\Imports\DeliverySheetImport;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TemplateMassDsExport;
+use Illuminate\Support\Facades\Storage;
+use Box\Spout\Common\Entity\Style\Color;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Illuminate\Support\Facades\Validator;
 
 // export with spout
-use App\Library\ExportXlsx;
-use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use App\Http\Requests\PurchaseOrderRequest;
 use Box\Spout\Common\Entity\Style\CellAlignment;
-use Box\Spout\Common\Entity\Style\Color;
+use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 
 class PurchaseOrderCrudController extends CrudController
@@ -62,6 +63,7 @@ class PurchaseOrderCrudController extends CrudController
 
     protected function setupListOperation()
     {
+        $this->crud->setListView('purchase_order.list');
         $this->crud->removeButton('create');
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');     
@@ -73,6 +75,7 @@ class PurchaseOrderCrudController extends CrudController
         if(Constant::checkPermission('Send Mail New PO')){
             $this->crud->enableBulkActions();
             $this->crud->addButtonFromView('top', 'bulk_send_mail_new_po', 'bulk_send_mail_new_po', 'beginning');
+            $this->crud->addButtonFromView('top', 'bulk_send_mail_new_po_with_attachment', 'bulk_send_mail_new_po_with_attachment', 'end');
         }
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // if(Constant::checkPermission('Export Purchase Order')){
@@ -430,6 +433,27 @@ class PurchaseOrderCrudController extends CrudController
         ], 200);
     }
 
+    private function exportPdfOrderSheetFunction($po, $poLines, $stream = true){
+       
+
+        $collectionPoLines = collect($poLines)->unique('po_line')->sortBy('po_line');
+        $arrPoLineStatus = (new Constant())->statusOFC();
+        
+        $data['po_lines'] = $collectionPoLines;
+        $data['po'] = $po;
+        $data['arr_po_line_status'] = $arrPoLineStatus;
+
+        $pdf = PDF::loadview('exports.pdf.order_sheet',$data);
+        $pdf->setPaper('A4', 'landscape');
+
+        if($stream){
+            return $pdf->stream();
+        }
+        else{
+            return $pdf->output();
+        }
+    }
+
 
     public function exportPdfOrderSheet($poNum)
     {
@@ -443,20 +467,35 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('status', 'O')
                                 ->where('accept_flag', '<', 2)
                                 ->get();
+        return $this->exportPdfOrderSheetFunction($po, $poLines);
+    }
+
+
+    public function exportExcelOrderSheetFunction($po, $poLines, $download = true){
+       
 
         $collectionPoLines = collect($poLines)->unique('po_line')->sortBy('po_line');
         $arrPoLineStatus = (new Constant())->statusOFC();
+        $filename = 'order-sheet-'.date('YmdHis').'.xlsx';
         
         $data['po_lines'] = $collectionPoLines;
         $data['po'] = $po;
         $data['arr_po_line_status'] = $arrPoLineStatus;
 
-        $pdf = PDF::loadview('exports.pdf.order_sheet',$data);
-        $pdf->setPaper('A4', 'landscape');
-
-        return $pdf->stream();
+        if($download){
+            return Excel::download(new OrderSheetExport($data), $filename);
+        }
+        else{
+            $pathExcel = Storage::disk('public')->path($filename);
+            register_shutdown_function(function ($path) {
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+            }, $pathExcel);
+            Excel::store(new OrderSheetExport($data), $filename, 'public');
+            return $pathExcel;
+        }
     }
-
 
     public function exportExcelOrderSheet($poNum)
     {
@@ -470,16 +509,7 @@ class PurchaseOrderCrudController extends CrudController
                                 ->where('status', 'O')
                                 ->where('accept_flag', '<', 2)
                                 ->get();
-
-        $collectionPoLines = collect($poLines)->unique('po_line')->sortBy('po_line');
-        $arrPoLineStatus = (new Constant())->statusOFC();
-        $filename = 'order-sheet-'.date('YmdHis').'.xlsx';
-        
-        $data['po_lines'] = $collectionPoLines;
-        $data['po'] = $po;
-        $data['arr_po_line_status'] = $arrPoLineStatus;
-
-        return Excel::download(new OrderSheetExport($data), $filename);
+        return $this->exportExcelOrderSheetFunction($po, $poLines);
     }
 
 
@@ -503,18 +533,22 @@ class PurchaseOrderCrudController extends CrudController
         if($pos->count() > 0){
             $getPo = $pos->get();
             foreach($getPo as $po){
-                $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                $details = [
-                    'po_num' => $po->poNumber,
-                    'type' => 'reminder_po',
-                    'title' => 'Ada PO baru - '.$po->poNumber,
-                    'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
-                    'url_button' => $URL."?prev_session=true" 
-                ];
-
                 if($po->emails != null){
-                    $pecahEmailVendor = explode(';', $po->emails);
-                    $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                    // $pecahEmailVendor = explode(';', $po->emails);
+                    // $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                    $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                    $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+
+                    $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
+                    $details = [
+                        'buyer_email' => $pecahEmailBuyer,
+                        'po_num' => $po->poNumber,
+                        'type' => 'reminder_po',
+                        'title' => 'Ada PO baru - '.$po->poNumber,
+                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                        'url_button' => $URL."?prev_session=true" 
+                    ];
+    
                     try{
                         Mail::to($pecahEmailVendor)
                         ->cc($pecahEmailBuyer)
@@ -554,35 +588,63 @@ class PurchaseOrderCrudController extends CrudController
         ], 200);
     }
 
-
-    public function sendMailNewPo(Request $request){
+    private function sendMailNewPoFunction($request, $withAttachment = false){
         $poIds = $request->ids;
 
         DB::beginTransaction();
         try {
             $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-            ->select('po.id as ID','po.po_num as poNumber', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->select('po.id as ID','po.po_num as poNumber', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
             ->whereIn('po.id', $poIds);
 
             if($pos->count() > 0){
                 $getPo = $pos->get();
                 foreach($getPo as $po){
-                    $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
-                    $details = [
-                        'po_num' => $po->poNumber,
-                        'type' => 'reminder_po',
-                        'title' => 'Ada PO baru - ' . $po->poNumber,
-                        'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
-                        'url_button' => $URL."?prev_session=true" 
-                    ];
-                    
                     if($po->emails != null){
-                        $pecahEmailVendor = explode(';', $po->emails);
-                        $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                        $poLines = PurchaseOrderLine::where('po.po_num', $po->poNumber)
+                        ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                        ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                        ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                        ->orderBy('po_line.id', 'desc')
+                        ->where('status', 'O')
+                        ->where('accept_flag', '<', 2)
+                        ->get();
+                        // $pecahEmailVendor = explode(';', $po->emails);
+                        // $pecahEmailBuyer = ($po->buyers != null) ? explode(';', $po->buyers) : '';
+                        $pecahEmailVendor = (new Constant())->emailHandler($po->emails, 'array');
+                        $pecahEmailBuyer = (new Constant())->emailHandler($po->buyers, 'array');
+
+                        $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->ID}/show";
                         try{
-                            Mail::to($pecahEmailVendor)
-                            ->cc($pecahEmailBuyer)
-                            ->send(new VendorNewPo($details));
+                            $pdfData = null;
+                            $excelData = null;
+                            if($withAttachment){
+                                $pdf = $this->exportPdfOrderSheetFunction($po, $poLines, false);
+                                $pdfData = [
+                                    'file' => $pdf,
+                                    'filename' => 'ORDER SHEET ' . $po->poNumber .' Rev.' . $po->po_change . '.pdf',
+                                    'mime' => 'application/pdf'
+                                ];
+                                $excelPath = $this->exportExcelOrderSheetFunction($po, $poLines, false);
+                                $excelData = [
+                                    'filepath' => $excelPath,
+                                    'filename' => 'ORDER SHEET ' . $po->poNumber .' Rev.' . $po->po_change . '.xlsx',
+                                    'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                                ];
+                            }
+                            $details = [
+                                'buyer_email' => $pecahEmailBuyer,
+                                'po_num' => $po->poNumber,
+                                'type' => 'reminder_po',
+                                'title' => 'Ada PO baru - ' . $po->poNumber,
+                                'message' => 'Anda memiliki PO baru. Untuk melihat PO baru, anda dapat mengklik tombol dibawah ini.',
+                                'url_button' => $URL."?prev_session=true",
+                                'pdfData' => $pdfData,
+                                'excelData' => $excelData
+                            ];
+                            $mail = Mail::to($pecahEmailVendor)
+                            ->cc($pecahEmailBuyer);
+                            $mail->send(new VendorNewPo($details));
                         }
                         catch(Exception $e){
                             $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
@@ -629,6 +691,15 @@ class PurchaseOrderCrudController extends CrudController
                 'validation_errors' => []
             ], 500);
         }
+    }
+
+
+    public function sendMailNewPo(Request $request){
+       return $this->sendMailNewPoFunction($request);
+    }
+
+    public function sendMailNewPoWithAttachment(Request $request){
+        return $this->sendMailNewPoFunction($request, true);
     }
 
 

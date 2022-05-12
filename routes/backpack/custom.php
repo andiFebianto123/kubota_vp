@@ -50,6 +50,7 @@ Route::group([
     Route::get('purchase-order-line/{id}/unread', 'PurchaseOrderLineCrudController@unread');
     Route::get('purchase-order/{id}/{line}/detail-change', 'PurchaseOrderCrudController@detailChange');
     Route::post('send-mail-new-po', 'PurchaseOrderCrudController@sendMailNewPo');
+    Route::post('send-mail-new-po-with-attachment', 'PurchaseOrderCrudController@sendMailNewPoWithAttachment');
     Route::get('purchase-order/check-existing-temp', 'PurchaseOrderCrudController@checkExistingTemp');
 
     Route::post('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
