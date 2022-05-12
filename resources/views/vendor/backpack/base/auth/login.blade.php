@@ -61,6 +61,35 @@
         }).mouseout(function(){
             $(this).parent().prev().attr('type','password');
         });
+
+        $("span.show-password").each(function(i, el){
+            console.log('AHA');
+            onLongPress(el, function(){
+                $(el).parent().prev().attr('type','text');
+            }, function(){
+                $(el).parent().prev().attr('type','password');
+            })
+        });
+
+        function onLongPress(element, callback, ownCancel) {
+            let timer;
+
+            element.addEventListener('touchstart', () => { 
+                console.log('CALLED');
+                timer = setTimeout(() => {
+                timer = null;
+                callback();
+                }, 500);
+            });
+
+            function cancel() {
+                clearTimeout(timer);
+                ownCancel()
+            }
+
+            element.addEventListener('touchend', cancel);
+            element.addEventListener('touchmove', cancel);
+        }
     </script>
     @endsection
 @endsection
