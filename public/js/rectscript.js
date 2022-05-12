@@ -64,7 +64,7 @@ function submitAfterValid(formId, massError = false) {
                 }
             },
             error: function(xhr, status, error) {
-                console.log(xhr.responseJSON.errors);
+                // console.log(xhr.responseJSON.errors);
                 $('#btn-for-'+formId).html(initText)
                 $('#btn-for-'+formId).removeAttr('disabled')
                 $(".progress-loading").remove()

@@ -165,7 +165,7 @@ class UserCrudController extends CrudController
         CRUD::field('name');
         CRUD::field('username');
         CRUD::field('email');
-        CRUD::field('password');
+        CRUD::field('password')->type('show_password');
         CRUD::addField([   // select_from_array
             'name'        => 'is_active',
             'label'       => "Status",

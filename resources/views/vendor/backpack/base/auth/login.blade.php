@@ -17,8 +17,13 @@
 
                         <div class="form-group">
                             <label class="control-label" for="password">Password</label>
-                            <div>
+                            <div class="input-group">
                                 <input type="password" class="form-control rect-validation" name="password" id="password">
+                                <div class="input-group-append">
+                                    <span class="input-group-text show-password" style="cursor: pointer">
+                                        <i class="la la-eye" aria-hidden="true"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -49,6 +54,35 @@
                 return false; 
             }
         });
+        $("span.show-password").mousedown(function(){
+            $(this).parent().prev().attr('type','text');
+        }).mouseup(function(){
+            $(this).parent().prev().attr('type','password');
+        }).mouseout(function(){
+            $(this).parent().prev().attr('type','password');
+        });
+
+        $("span.show-password").each(function(i, el){
+            onLongPress(el, function(){
+                $(el).parent().prev().attr('type','text');
+            }, function(){
+                $(el).parent().prev().attr('type','password');
+            })
+        });
+
+        function onLongPress(element, callback, cancel) {
+            element.addEventListener('touchstart', () => { 
+                callback();
+            });
+
+            element.addEventListener('touchend', cancel);
+            element.addEventListener('touchmove', function(e){
+                var selectedElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                if (!selectedElement.classList.contains('show-password') && !selectedElement.classList.contains('input-group-append')){
+                    cancel();
+                }
+            });
+        }
     </script>
     @endsection
 @endsection
