@@ -63,7 +63,6 @@
         });
 
         $("span.show-password").each(function(i, el){
-            console.log('AHA');
             onLongPress(el, function(){
                 $(el).parent().prev().attr('type','text');
             }, function(){
@@ -71,24 +70,17 @@
             })
         });
 
-        function onLongPress(element, callback, ownCancel) {
-            let timer;
-
+        function onLongPress(element, callback, cancel) {
             element.addEventListener('touchstart', () => { 
-                console.log('CALLED');
-                timer = setTimeout(() => {
-                timer = null;
                 callback();
-                }, 500);
             });
 
-            function cancel() {
-                clearTimeout(timer);
-                ownCancel()
-            }
-
             element.addEventListener('touchend', cancel);
-            element.addEventListener('touchmove', cancel);
+            element.addEventListener('touchmove', function(e){
+                if (!document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY).classList.contains('show-password')){
+                    cancel();
+                }
+            });
         }
     </script>
     @endsection
