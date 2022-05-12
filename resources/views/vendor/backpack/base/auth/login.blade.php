@@ -77,7 +77,8 @@
 
             element.addEventListener('touchend', cancel);
             element.addEventListener('touchmove', function(e){
-                if (!document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY).classList.contains('show-password')){
+                var selectedElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                if (!selectedElement.classList.contains('show-password') && !selectedElement.classList.contains('input-group-append')){
                     cancel();
                 }
             });
