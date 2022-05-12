@@ -115,7 +115,14 @@
                                     $field = 'old_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
+                                <div class="input-group">
                                 <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) ? old($field) : '' }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text show-password" style="cursor: pointer">
+                                        <i class="la la-eye" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                                </div>
                             </div>
 
                             <div class="col-md-4 form-group">
@@ -124,7 +131,14 @@
                                     $field = 'new_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
+                                <div class="input-group">
                                 <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}"  value="{{ old($field) ? old($field) : '' }}" id="{{ $field }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text show-password" style="cursor: pointer">
+                                        <i class="la la-eye" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                                </div>
                             </div>
 
                             <div class="col-md-4 form-group">
@@ -133,7 +147,14 @@
                                     $field = 'confirm_password';
                                 @endphp
                                 <label class="required">{{ $label }}</label>
+                                <div class="input-group">
                                 <input autocomplete="new-password" required class="form-control" type="password" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) ? old($field) : '' }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text show-password" style="cursor: pointer">
+                                        <i class="la la-eye" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -150,3 +171,15 @@
 
     </div>
 @endsection
+
+@push('after_scripts')
+    <script>
+        $("span.show-password").mousedown(function(){
+            $(this).parent().prev().attr('type','text');
+        }).mouseup(function(){
+            $(this).parent().prev().attr('type','password');
+        }).mouseout(function(){
+            $(this).parent().prev().attr('type','password');
+        });
+    </script>
+@endpush

@@ -17,8 +17,13 @@
 
                         <div class="form-group">
                             <label class="control-label" for="password">Password</label>
-                            <div>
+                            <div class="input-group">
                                 <input type="password" class="form-control rect-validation" name="password" id="password">
+                                <div class="input-group-append">
+                                    <span class="input-group-text show-password" style="cursor: pointer">
+                                        <i class="la la-eye" aria-hidden="true"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -48,6 +53,13 @@
                 submitAfterValid('form-login')
                 return false; 
             }
+        });
+        $("span.show-password").mousedown(function(){
+            $(this).parent().prev().attr('type','text');
+        }).mouseup(function(){
+            $(this).parent().prev().attr('type','password');
+        }).mouseout(function(){
+            $(this).parent().prev().attr('type','password');
         });
     </script>
     @endsection
