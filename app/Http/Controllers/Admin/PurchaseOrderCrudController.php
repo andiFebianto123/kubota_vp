@@ -136,7 +136,7 @@ class PurchaseOrderCrudController extends CrudController
             'label'    => 'Email Date',
             'type'     => 'closure',
             'function' => function($entry) {
-                return date('Y-m-d',strtotime($entry->email_flag));
+                return ($entry->email_flag)? date('Y-m-d',strtotime($entry->email_flag)):"";
             }
         ]);        
         CRUD::addColumn([
@@ -229,33 +229,43 @@ class PurchaseOrderCrudController extends CrudController
             'accprog' => 'ACC PROG', 'new' => 'NEW', 'completed' => 'COMPLETED',
           ], function($value) { // if the filter is active
 
-            $query = "select pl1.po_num, count(pl1.po_line) as many_po,
-                            (select count(pl2.po_line) 
-                            from po_line pl2 
-                            where pl2.po_num = pl1.po_num
-                            and pl2.status = 'O'
-                            and pl2.accept_flag = 1
-                            and pl2.read_at is not null
-                            ) as many_acc
-                        from po_line pl1
-                        group by pl1.po_num
-                        having count(pl1.po_line) > 0;";
+            $poLines = [];
+            if ($value == "new") {
+                $poLines = PurchaseOrderLine::where('status','O')->whereNotIn('accept_flag', [1,2])->pluck('po_num');
+            } elseif ($value == "accprog") {
+                $query = "SELECT a.po_num 
+                        FROM po a
+                        LEFT JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
+                        FROM po_line GROUP BY po_num, po_change) b
+                        ON a.po_num=b.po_num AND a.po_change=b.po_change
+                        WHERE b.totA < b.Tot 
+                        AND b.totA>0";
+                
+                $dbQueries = DB::select($query);
 
-            $progressAccs = DB::select($query);
-            $arrColStat = [];
-            foreach ($progressAccs as $key => $pa) {
-                if ($pa->many_acc == 0) {
-                    $arrColStat['new'][] = $pa->po_num;
-                }else{
-                    if ($pa->many_po == $pa->many_acc) {
-                        $arrColStat['completed'][] = $pa->po_num;
-                    }else if ($pa->many_po > $pa->many_acc) {
-                        $arrColStat['accprog'][] = $pa->po_num;
-                    }
+                foreach ($dbQueries as $key => $dbq) {
+                    $poLines[] = $dbq->po_num;
+                }
+
+            }else if($value == "completed"){
+                $query = "SELECT a.po_num 
+                        FROM po a
+                        LEFT JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
+                        FROM po_line GROUP BY po_num, po_change) b
+                        ON a.po_num=b.po_num AND a.po_change=b.po_change
+                        WHERE b.totA = b.Tot 
+                        AND b.totA>0";
+                
+                $dbQueries = DB::select($query);
+
+                foreach ($dbQueries as $key => $dbq) {
+                    $poLines[] = $dbq->po_num;
                 }
             }
            
-            $this->crud->addClause('whereIn', 'po_num', $arrColStat[$value]);
+            $this->crud->addClause('whereIn', 'po_num', $poLines);
         });
 
     }
