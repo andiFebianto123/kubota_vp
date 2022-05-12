@@ -91,7 +91,7 @@ class PurchaseOrderCrudController extends CrudController
             $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
-        CRUD::column('id')->label('ID');
+        // CRUD::column('id')->label('ID');
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             CRUD::addColumn([
                 'label'     => 'Kode Vendor',
@@ -100,6 +100,26 @@ class PurchaseOrderCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'vend_num',
             ]);
+            CRUD::addColumn([
+                'label'     => 'Nama Vendor',
+                'name'      => 'vend_name',
+                'entity'    => 'vendor', 
+                'type' => 'relationship',
+                'attribute' => 'vend_name',
+                'orderable'  => true, 
+                // 'searchLogic' => true,
+                'searchLogic' => function ($query, $column, $searchTerm) {
+                    $query->orWhereHas('vendor', function ($q) use ($column, $searchTerm) {
+                        $q->where('vend_name', 'like', '%'.$searchTerm.'%');
+                    });
+                },
+                'orderLogic' => function ($query, $column, $columnDirection) {
+                    $q = $query->join('vendor', 'vendor.vend_num', 'po.vend_num')
+                    ->orderBy('vendor.vend_name', $columnDirection);
+                    return $q;
+                }
+            ],
+            );
         }
         CRUD::addColumn([
             'label'     => 'PO Number', 
@@ -124,7 +144,42 @@ class PurchaseOrderCrudController extends CrudController
             'name'      => 'po_change', 
             'type' => 'text',
         ]);
+        CRUD::addColumn([
+            'name'     => 'accept_status',
+            'label'    => 'Stat Acc',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $arc = $this->acceptRejectCount($entry->po_num);
+                $strStatus = "";
+                
+                if ($arc['accept'] == 0) {
+                    $strStatus = "NEW";
+                }else{
+                    if ($arc['total'] == $arc['accept']) {
+                        $strStatus = "COMPLETED";
+                    }else if ($arc['total'] > $arc['accept']) {
+                        $strStatus = "ACC PROG";
+                    }
+                }
+                
+                return "<small>".$strStatus."</small>";
+            },
+        ]);  
+        CRUD::addColumn([
+            'name'     => 'accept_number',
+            'label'    => 'A/R/Total',
+            'type'     => 'closure',
+            'function' => function($entry) {
+                $arc = $this->acceptRejectCount($entry->po_num);
+                $totalPo = $arc['total'];
+                $rejectNumb = $arc['reject'];
+                $acceptNumb = $arc['accept'];
 
+                $strNumb = $acceptNumb ."/".$rejectNumb. "/" .$totalPo;
+
+                return $strNumb;
+            }
+        ]);  
         $this->crud->addFilter([
             'name'  => 'item',
             'type'  => 'select2_multiple_ajax_po',
@@ -164,6 +219,45 @@ class PurchaseOrderCrudController extends CrudController
                     session()->put("filter_vend_num", $value);
             });
         }
+
+        $this->crud->addFilter([
+            'name'  => 'stat_acc',
+            'type'  => 'dropdown',
+            'label' => 'Stat Acc'
+          ], 
+          [
+            'accprog' => 'ACC PROG', 'new' => 'NEW', 'completed' => 'COMPLETED',
+          ], function($value) { // if the filter is active
+
+            $query = "select pl1.po_num, count(pl1.po_line) as many_po,
+                            (select count(pl2.po_line) 
+                            from po_line pl2 
+                            where pl2.po_num = pl1.po_num
+                            and pl2.status = 'O'
+                            and pl2.accept_flag = 1
+                            and pl2.read_at is not null
+                            ) as many_acc
+                        from po_line pl1
+                        group by pl1.po_num
+                        having count(pl1.po_line) > 0;";
+
+            $progressAccs = DB::select($query);
+            $arrColStat = [];
+            foreach ($progressAccs as $key => $pa) {
+                if ($pa->many_acc == 0) {
+                    $arrColStat['new'][] = $pa->po_num;
+                }else{
+                    if ($pa->many_po == $pa->many_acc) {
+                        $arrColStat['completed'][] = $pa->po_num;
+                    }else if ($pa->many_po > $pa->many_acc) {
+                        $arrColStat['accprog'][] = $pa->po_num;
+                    }
+                }
+            }
+           
+            $this->crud->addClause('whereIn', 'po_num', $arrColStat[$value]);
+        });
+
     }
 
 
@@ -882,6 +976,23 @@ class PurchaseOrderCrudController extends CrudController
             return Excel::download(new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title), $filename);
         }
         return 0;
+    }
+
+
+    private function acceptRejectCount($po_num){
+        $totalPo = PurchaseOrderLine::where('po_num', $po_num)->count();
+        $rejectNumb = PurchaseOrderLine::where('po_num', $po_num)
+                        ->where('status', 'O')
+                        ->where('accept_flag', 2)
+                        ->whereNotNull('read_at')
+                        ->count();
+        $acceptNumb = PurchaseOrderLine::where('po_num', $po_num)
+                        ->where('status', 'O')
+                        ->where('accept_flag', 1)
+                        ->whereNotNull('read_at')
+                        ->count();
+
+        return ['reject' => $rejectNumb, 'accept' => $acceptNumb, 'total' => $totalPo];
     }
 
 }
