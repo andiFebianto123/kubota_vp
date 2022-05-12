@@ -41,5 +41,27 @@
         }).mouseout(function(){
             $(this).parent().prev().attr('type','password');
         });
+
+        $("span.show-password").each(function(i, el){
+            onLongPress(el, function(){
+                $(el).parent().prev().attr('type','text');
+            }, function(){
+                $(el).parent().prev().attr('type','password');
+            })
+        });
+
+        function onLongPress(element, callback, cancel) {
+            element.addEventListener('touchstart', () => { 
+                callback();
+            });
+
+            element.addEventListener('touchend', cancel);
+            element.addEventListener('touchmove', function(e){
+                var selectedElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                if (!selectedElement.classList.contains('show-password') && !selectedElement.classList.contains('input-group-append')){
+                    cancel();
+                }
+            });
+        }
     </script>
 @endif
