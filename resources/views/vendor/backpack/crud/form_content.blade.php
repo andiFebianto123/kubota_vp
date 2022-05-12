@@ -1,4 +1,4 @@
-<input type="hidden" name="http_referrer" value={{ url($crud->route) }}>
+{{-- <input type="hidden" name="http_referrer" value={{ url($crud->route) }}> --}}
 
 {{-- See if we're using tabs --}}
 @if ($crud->tabsEnabled() && count($crud->getTabs()))
