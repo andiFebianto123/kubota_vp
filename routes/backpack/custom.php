@@ -11,6 +11,7 @@ Route::group([
     Route::crud('vendor', 'VendorCrudController');
     Route::get('vendor-export', 'VendorCrudController@exportAdvance');
     Route::crud('user', 'UserCrudController');
+    Route::post('user/reset-attempt-login/{id}', 'UserCrudController@resetAttemptLogin');
     Route::crud('general-message', 'GeneralMessageCrudController');
     Route::get('dashboard', 'DashboardController@index');
     Route::crud('delivery', 'DeliveryCrudController');

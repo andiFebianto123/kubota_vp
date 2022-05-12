@@ -2,39 +2,40 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\UserRequest;
-use App\Models\UserOtp;
-use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use App\Helpers\EmailLogWriter;
 use Exception;
-use App\Imports\UserMasterImport;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
-use Prologue\Alerts\Facades\Alert;
-use Spatie\Permission\Models\Role as RoleSpatie;
-use App\Helpers\Constant;
-use App\Models\Vendor;
-use App\Models\User;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\TemplateUserExport;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request as requests;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\MailNewUser;
-use App\Models\Delivery;
-use App\Models\PurchaseOrderLine;
 use App\Models\Role;
+use App\Models\User;
+use App\Models\Vendor;
+use App\Models\UserOtp;
+use App\Models\Delivery;
+use App\Helpers\Constant;
+use App\Mail\MailNewUser;
+use App\Library\ExportXlsx;
+use App\Models\ModelHasRole;
+use App\Models\LockedAccount;
 use Illuminate\Routing\Route;
 use App\Rules\IsValidPassword;
+use App\Helpers\EmailLogWriter;
+use App\Imports\UserMasterImport;
+use App\Models\PurchaseOrderLine;
 use App\Exports\TemplateExportAll;
-use App\Models\ModelHasRole;
-// export with spout
-use App\Library\ExportXlsx;
-use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
-use Box\Spout\Common\Entity\Style\CellAlignment;
+use App\Http\Requests\UserRequest;
+use Illuminate\Support\Facades\DB;
+use Prologue\Alerts\Facades\Alert;
+use App\Exports\TemplateUserExport;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 use Box\Spout\Common\Entity\Style\Color;
+use Illuminate\Http\Request as requests;
+use Illuminate\Support\Facades\Validator;
+// export with spout
+use Box\Spout\Common\Entity\Style\CellAlignment;
+use Spatie\Permission\Models\Role as RoleSpatie;
+use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 class UserCrudController extends CrudController
 {
@@ -80,6 +81,10 @@ class UserCrudController extends CrudController
 
         if(Constant::checkPermission('Access Reset Password')){
             $this->crud->addButtonFromView('line', 'mail_reset_password', 'mail_reset_password', 'beginning');
+        }
+
+        if(Constant::checkPermission('Access Reset Attempt Login')){
+            $this->crud->addButtonFromView('line', 'reset_attempt_login', 'reset_attempt_login', 'beginning');
         }
 
         CRUD::column('name');
@@ -672,7 +677,45 @@ class UserCrudController extends CrudController
         }
         return 0;
     }
-    
+
+
+    public function resetAttemptLogin($id){
+        DB::beginTransaction();
+        try{
+            $user = User::where('id', $id)->first();
+            if($user == null){
+                DB::rollback();
+                return response()->json(['message' => 'User tidak ditemukan'], 404);
+            }
+            $now = now();
+
+            $las = LockedAccount::where('account', $user->username)
+            ->where('type', 'login')
+            ->where('lock_end', '>', $now)
+            ->get();
+            foreach($las as $la){
+                $la->delete();
+            }
+
+            $las = LockedAccount::where('account', $user->email)
+            ->where('type', 'login')
+            ->where('lock_end', '>', $now)
+            ->get();
+            foreach($las as $la){
+                $la->delete();
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'alert' => 'success',
+                'message' => 'Berhasil melakukan reset attempt login']);
+        }
+        catch(Exception $e){
+            DB::rollback();
+            throw $e;
+        }
+    }
 
    
 }
