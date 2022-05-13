@@ -33,7 +33,7 @@ use Box\Spout\Common\Entity\Style\CellAlignment;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-
+use Doctrine\DBAL\Query\QueryBuilder;
 
 class PurchaseOrderCrudController extends CrudController
 {
@@ -148,38 +148,28 @@ class PurchaseOrderCrudController extends CrudController
             'type' => 'text',
         ]);
         CRUD::addColumn([
-            'name'     => 'accept_status',
+            'name'     => 'status_accepted',
             'label'    => 'Stat Acc',
             'type'     => 'closure',
-            'function' => function($entry) {
-                $arc = $this->acceptRejectCount($entry->po_num);
+            'function' => function($entry){
                 $strStatus = "";
-                
-                if ($arc['accept'] == 0) {
+                if ($entry->accept_po_line == 0) {
                     $strStatus = "NEW";
-                }else{
-                    if ($arc['total'] == $arc['accept']) {
-                        $strStatus = "COMPLETED";
-                    }else if ($arc['total'] > $arc['accept']) {
-                        $strStatus = "ACC PROG";
-                    }
+                }else if ($entry->accept_po_line == $entry->total_po_line) {
+                    $strStatus = "COMPLETED";
+                }else if ($entry->accept_po_line < $entry->total_po_line) {
+                    $strStatus = "ACC PROG";
                 }
-                
-                return "<small>".$strStatus."</small>";
-            },
+
+                return $strStatus;
+            }
         ]);  
         CRUD::addColumn([
             'name'     => 'accept_number',
             'label'    => 'A/R/Total',
             'type'     => 'closure',
             'function' => function($entry) {
-                $arc = $this->acceptRejectCount($entry->po_num);
-                $totalPo = $arc['total'];
-                $rejectNumb = $arc['reject'];
-                $acceptNumb = $arc['accept'];
-
-                $strNumb = $acceptNumb ."/".$rejectNumb. "/" .$totalPo;
-
+                $strNumb = $entry->accept_po_line ."/".$entry->reject_po_line. "/" .$entry->total_po_line;
                 return $strNumb;
             }
         ]);  
@@ -229,13 +219,12 @@ class PurchaseOrderCrudController extends CrudController
             'label' => 'Stat Acc'
           ], 
           [
-            'accprog' => 'ACC PROG', 'new' => 'NEW', 'completed' => 'COMPLETED',
+            'ACC PROG' => 'ACC PROG', 'NEW' => 'NEW', 'COMPLETED' => 'COMPLETED',
           ], function($value) { // if the filter is active
-
             $poLines = [];
-            if ($value == "new") {
+            if ($value == "NEW") {
                 $poLines = PurchaseOrderLine::where('status','O')->whereNotIn('accept_flag', [1,2])->pluck('po_num');
-            } elseif ($value == "accprog") {
+            } elseif ($value == "ACC PROG") {
                 $query = "SELECT a.po_num 
                         FROM po a
                         JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
@@ -246,9 +235,9 @@ class PurchaseOrderCrudController extends CrudController
                         AND b.totA>0";
                 
                 $dbQueries = DB::select($query);
-                $poLines = collect( $dbQueries )->pluck('po_num');
+                $poLines = collect($dbQueries)->pluck('po_num');
 
-            }else if($value == "completed"){
+            }else if($value == "COMPLETED"){
                 $query = "SELECT a.po_num 
                         FROM po a
                         JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
@@ -259,10 +248,11 @@ class PurchaseOrderCrudController extends CrudController
                         AND b.totA>0";
                 
                 $dbQueries = DB::select($query);
-                $poLines = collect( $dbQueries )->pluck('po_num');
+                $poLines = collect($dbQueries)->pluck('po_num');
             }
-           
+
             $this->crud->addClause('whereIn', 'po_num', $poLines);
+
         });
 
     }
@@ -1051,23 +1041,6 @@ class PurchaseOrderCrudController extends CrudController
             return Excel::download(new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title), $filename);
         }
         return 0;
-    }
-
-
-    private function acceptRejectCount($po_num){
-        $totalPo = PurchaseOrderLine::where('po_num', $po_num)->count();
-        $rejectNumb = PurchaseOrderLine::where('po_num', $po_num)
-                        ->where('status', 'O')
-                        ->where('accept_flag', 2)
-                        ->whereNotNull('read_at')
-                        ->count();
-        $acceptNumb = PurchaseOrderLine::where('po_num', $po_num)
-                        ->where('status', 'O')
-                        ->where('accept_flag', 1)
-                        ->whereNotNull('read_at')
-                        ->count();
-
-        return ['reject' => $rejectNumb, 'accept' => $acceptNumb, 'total' => $totalPo];
     }
 
 }

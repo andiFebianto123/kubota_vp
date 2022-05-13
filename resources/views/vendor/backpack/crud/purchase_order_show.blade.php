@@ -173,12 +173,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                     @endif
                                 @endif
                                 @if($po_line->read_at)
-                                    @if(backpack_auth()->user()->hasRole('Admin PTKI') && sizeof($po_line->delivery) == 0)
+                                    @if($constant::checkPermission('Unread PO Detail') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
-                                            @if($constant::checkPermission('Unread PO Detail'))
                                                 <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
-                                            @endif
-                                        @endif
+                                       @endif
                                     @endif    
                                 @else
                                     @if($po_line->status == 'O')

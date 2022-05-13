@@ -24,6 +24,8 @@ class PurchaseOrder extends Model
         'session_batch_proccess',
     ];
 
+    protected $append = ['status_accepted','total_po_line', 'accept_po_line', 'reject_po_line'];
+
     public function vendor()
     {
         return $this->belongsTo('App\Models\Vendor', 'vend_num', 'vend_num');
@@ -55,4 +57,43 @@ class PurchaseOrder extends Model
     {
         return date("Y-m-d", strtotime($value));
     }
+
+
+    public function getTotalPoLineAttribute(){
+        $totalPo = PurchaseOrderLine::where('po_num', $this->po_num)->count();
+
+        return $totalPo;
+    }
+
+
+    public function getAcceptPoLineAttribute(){
+        return PurchaseOrderLine::where('po_num', $this->po_num)
+                        ->where('status', 'O')
+                        ->where('accept_flag', 1)
+                        ->whereNotNull('read_at')
+                        ->count();
+    }
+
+
+    public function getRejectPoLineAttribute(){
+        return PurchaseOrderLine::where('po_num', $this->po_num)
+                        ->where('status', 'O')
+                        ->where('accept_flag', 2)
+                        ->whereNotNull('read_at')
+                        ->count();
+    }
+
+
+    // public function getStatusAcceptedAttribute(){
+    //     $strStatus = "";
+    //     if ($this->accept_po_line == 0) {
+    //         $strStatus = "NEW";
+    //     }else if ($this->accept_po_line == $this->total_po_line) {
+    //         $strStatus = "COMPLETED";
+    //     }else if ($this->accept_po_line < $this->total_po_line) {
+    //         $strStatus = "ACC PROG";
+    //     }
+
+    //     return $strStatus;
+    // }
 }

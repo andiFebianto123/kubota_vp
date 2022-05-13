@@ -425,6 +425,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <th>Type</th>
                         <th>Qty</th>
                         <th>Repair Date</th>
+                        <th>Ref Num</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -435,6 +436,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <td>{{$drep->repair_type}}</td>
                         <td>{{$drep->repair_qty}}</td>
                         <td>{{$drep->repair_date}}</td>
+                        <td>
+                            @if($drep->repair_type == 'INTERNAL')
+                            <a href="{{url('admin/delivery-detail/'.$drep->ref_num.'/'.$drep->ref_line)}}">{{$drep->ref_num}}-{{$drep->ref_line}}</a>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

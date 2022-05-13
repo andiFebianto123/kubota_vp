@@ -12,6 +12,7 @@ use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use App\Models\StatusTempUploadDelivery;
 use App\Models\TempUploadDelivery;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -174,6 +175,40 @@ class TempUploadDeliveryCrudController extends CrudController
     private function insertMassData(){
         $dataTemps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
         $arrIds = [];
+        $uniqueGroupId = substr(md5(now()),0,10);
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($dataTemps as $key => $dt) {
+                $status = "success";
+                $detail = [];
+                if (sizeOf($dt->validation_message) > 0) {
+                    $status = "error";
+                    $detail = $dt->validation_message;
+                }
+                $arrMessage = [
+                    'group_id' =>  $uniqueGroupId,
+                    'status' => $status,
+                    'detail' => $detail,
+                ];
+                $insertLog = new StatusTempUploadDelivery();
+                $insertLog->po_num = $dt->po_num;
+                $insertLog->po_line = $dt->po_line;
+                $insertLog->user_id = $dt->user_id;
+                $insertLog->shipped_qty = $dt->shipped_qty;
+                $insertLog->delivery_date = $dt->delivery_date;
+                $insertLog->petugas_vendor = $dt->petugas_vendor;
+                $insertLog->no_surat_jalan_vendor = $dt->no_surat_jalan_vendor;
+                $insertLog->message = json_encode($arrMessage);
+                $insertLog->save();
+            }
+            DB::commit();
+
+        } catch (\Throwable $th) {
+            DB::rollback();
+        }
+
         DB::beginTransaction();
 
         try{
@@ -301,8 +336,6 @@ class TempUploadDeliveryCrudController extends CrudController
             }
 
             if ($status) {
-                // TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->delete();
-
                 $tempUploadDeliverys = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
                 if($tempUploadDeliverys->count() > 0){
                     foreach($tempUploadDeliverys as $tempUpload){

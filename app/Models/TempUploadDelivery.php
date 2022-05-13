@@ -17,12 +17,17 @@ class TempUploadDelivery extends Model
     protected $revisionCreationsEnabled = true;
 
     protected $fillable = [
-        'petugas_vendor',
-        'no_surat_jalan_vendor',
-        'order_qty',
+        'po_num',	
+        'po_line',	
+        'user_id',	
+        'shipped_qty',	
+        'data_attr',	
+        'delivery_date',	
+        'petugas_vendor',	
+        'no_surat_jalan_vendor',	
     ];
 
-    protected $appends = ['po_item', 'po_description', 'category_validation', 'available_qty'];
+    protected $appends = ['po_item', 'po_description', 'category_validation', 'available_qty', 'validation_message'];
  
     public function cancelInsert($crud = false)
     {
@@ -78,6 +83,16 @@ class TempUploadDelivery extends Model
         }
         
         return $dangerMode;
+    }
+
+
+    public function getValidationMessageAttribute(){
+        $dangerMessage = [];
+        foreach ($this->rowValidation() as $key => $v) {
+            $dangerMessage[] = $v['message'];
+        }
+        
+        return $dangerMessage;
     }
 
 
