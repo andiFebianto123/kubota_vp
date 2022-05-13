@@ -246,4 +246,39 @@
 
   <!-- CRUD LIST CONTENT - crud_list_scripts stack -->
   @stack('crud_list_scripts')
+
+  <script>
+        // TODO : untuk modal permission pada list table
+        $('#modalListPermission').on('show.bs.modal', function (event) {
+          var role = $(event.relatedTarget).attr('data-permission');
+          $.ajax({
+            url: $(this).attr('action'),
+            type: 'GET',
+            data:{
+              role: role
+            },
+            success:function(result){
+              if(result.status){
+                $('#table-list-permission tbody').html('');
+                $('#modal-title-show-permission').html('Permission - '+result.role);
+                $.each(result.result, function(i, permission){
+                  var tbody = $(`<tr>
+                        <td>${permission.id}</td>
+                        <td>${permission.name}</td>
+                        <td>${permission.description}</td>`);
+                  $('#table-list-permission tbody').append(tbody);
+                });
+              }
+            },
+            error: function(result){
+              if(result.responseJSON.status == false){
+                    new Noty({
+                        type: result.responseJSON.alert,
+                        text: result.responseJSON.message
+                    }).show();
+              }
+            }
+          });
+        });
+  </script>
 @endsection
