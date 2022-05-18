@@ -206,7 +206,7 @@
                             <li>Material Mill Sheet</li>
                             <li>Material Safety Data Sheet</li>
                             <li>Result of Inspection (Certificate)</li>
-                            <li>Product Safaty Information Sheet</li>
+                            <li>Product Safety Information Sheet</li>
                             <li>Instruction Operator Manual</li>
                         </ul>
                     </div>

@@ -198,7 +198,7 @@
             element.addEventListener('touchend', cancel);
             element.addEventListener('touchmove', function(e){
                 var selectedElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-                if (!selectedElement.classList.contains('show-password') && !selectedElement.classList.contains('input-group-append')){
+                if (!selectedElement.classList.contains('show-password') && !selectedElement.classList.contains('input-group-append') && !selectedElement.classList.contains('la-eye')){
                     cancel();
                 }
             });
