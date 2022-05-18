@@ -38,12 +38,12 @@ class ResetPasswordMail extends Mailable
 
         if ($mailBccs == "") {
             return $this->subject('Reset Password')
-                    ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                    // ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->markdown('emails.sample-mail');
         }else{
             return $this->subject('Reset Password')
                     ->bcc($arrMailBcc)
-                    ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                    // ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                     ->markdown('emails.sample-mail');
         }  
 

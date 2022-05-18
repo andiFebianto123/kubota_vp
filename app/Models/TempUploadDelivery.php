@@ -146,7 +146,7 @@ class TempUploadDelivery extends Model
                 $tsq .= "/".$upl->order_qty;
                 $messageUpl .= $upl->po_num."-".$upl->po_line. " (".date('Y-m-d',strtotime($upl->due_date)).") ".$tsq. "<br>";
 
-                if ($totalShipped == $upl->order_qty) {
+                if ($totalShipped >= $upl->order_qty) {
                     $show = false;
                 }
             }

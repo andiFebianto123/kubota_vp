@@ -14,6 +14,8 @@ class DeliveryStatus extends Model
     
     protected $table = 'delivery_status';
 
+    protected $append = ['po_po_line'];
+
     public function purchaseOrder()
     {
         return $this->belongsTo('App\Models\PurchaseOrder', 'po_num', 'po_num');
@@ -23,5 +25,11 @@ class DeliveryStatus extends Model
     public function excelExportAdvance($crud = null){
         $url = url('admin/delivery-statuses-export');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export</a>';
+    }
+
+
+    public function getPoPoLineAttribute()
+    {
+        return $this->po_num. "-" .$this->po_line;
     }
 }

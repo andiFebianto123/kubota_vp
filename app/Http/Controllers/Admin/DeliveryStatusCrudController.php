@@ -72,7 +72,27 @@ class DeliveryStatusCrudController extends CrudController
         CRUD::column('ds_num')->label('DS Num');
         CRUD::column('ds_line')->label('DS Line');
         CRUD::column('ds_type')->label('DS Type');
-        CRUD::column('po_release')->label('PO Release');
+        CRUD::addColumn([
+            'label'     => 'PO',
+            'name'      => 'po_po_line',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'po_po_line') {
+                    $searchOnlyPo = str_replace("-", "", $searchTerm);
+                    $query->orWhere('delivery_status.po_num', 'like', '%'.$searchOnlyPo.'%');
+                    if (str_contains($searchTerm, '-')) {
+                        $query->orWhere(function($q) use ($searchTerm) {
+                            $searchWithSeparator = explode("-", $searchTerm);
+                            $q->where('delivery_status.po_num', 'like', '%'.$searchWithSeparator[0].'%')
+                              ->Where('delivery_status.po_line', 'like', '%'.$searchWithSeparator[1].'%');
+                        });
+                    }
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.po_num', $columnDirection)->select('delivery_status.*');
+            }
+        ]);
         CRUD::column('description')->label('Desc');
         CRUD::column('grn_num')->label('GRN Num');
         CRUD::column('grn_line')->label('GRN Line');

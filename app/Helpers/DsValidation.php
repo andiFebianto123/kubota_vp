@@ -25,7 +25,7 @@ class DsValidation
 
     $realtimeDsQty = Delivery::where("po_num", $poNum)
       ->where("po_line", $poLine)
-      ->whereIn("ds_type", ['00', '01'])
+      ->whereIn("ds_type", ['00', '01', '02'])
       ->sum('shipped_qty');
 
     $realtimeQty = $qtyInitial - $realtimeDsQty;

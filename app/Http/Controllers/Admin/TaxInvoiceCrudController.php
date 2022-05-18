@@ -1187,24 +1187,28 @@ class TaxInvoiceCrudController extends CrudController
                     'item' => $result->item,
                     'description' => $result->description,
                     'payment_plan_date' => $result->payment_plan_date,
-                    'unit_price' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->unit_price);
-                    },
+                    'unit_price' => $result->unit_price,
+                    // 'unit_price' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                    // },
                     'qty_received' => $result->received_qty,
                     'qty_rejected' => $result->rejected_qty,
                     'no_faktur' => $result->no_faktur_pajak,
                     'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
-                    'harga_sebelum_pajak' => function($entry){
-                        return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
-                    },
-                    'ppn' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->pph);
-                    },
-                    'pph' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->pph);
-                    },
+                    'harga_sebelum_pajak' => $result->harga_sebelum_pajak,
+                    // 'harga_sebelum_pajak' => function($entry){
+                    //     return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
+                    // },
+                    'ppn' => $result->ppn,
+                    'pph' => $result->pph,
+                    // 'ppn' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    // },
+                    // 'pph' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    // },
                     'total' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+                        return $entry->harga_sebelum_pajak + $entry->ppn - $entry->pph;
                     },
                     'comments' => $result->comment,
                     'confirm' => function($entry){

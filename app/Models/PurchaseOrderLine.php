@@ -228,7 +228,10 @@ class PurchaseOrderLine extends Model
 
     public function getTotalShippedQtyAttribute()
     {
-        return Delivery::where('po_num', $this->po_num)->where('po_line', $this->po_line)->sum('shipped_qty');
+        return Delivery::where('po_num', $this->po_num)
+            ->where('po_line', $this->po_line)
+            ->whereIn("ds_type", ['00', '01', '02'])
+            ->sum('shipped_qty');
     }
 
 

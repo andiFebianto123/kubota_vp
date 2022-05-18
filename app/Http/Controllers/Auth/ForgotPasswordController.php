@@ -44,8 +44,8 @@ class ForgotPasswordController extends Controller
     public function sendLink(Request $request)
     {
         $email = $request->email;
-
         $token = md5(date("Ymd His"));
+        $expiredAt = Carbon::now()->addDays(1);
 
         if (!User::where('email', $email)->exists()) {
             return response()->json([
@@ -57,10 +57,10 @@ class ForgotPasswordController extends Controller
         $insert_otp = new UserForgotPassword();
         $insert_otp->email = $email;
         $insert_otp->token = $token;
-        $insert_otp->expired_at = Carbon::now()->addDays(1);
+        $insert_otp->expired_at = $expiredAt;
         $insert_otp->save();
 
-        $notesReset = "<p>
+        $notesReset = "<br>Batas maksimal reset password hingga : ".$expiredAt."<p>
                         <small>
                             <i>
                             Kata sandi harus berisi minimal 8 karakter, satu karakter huruf besar, satu karakter huruf kecil, satu angka, dan satu karakter khusus
