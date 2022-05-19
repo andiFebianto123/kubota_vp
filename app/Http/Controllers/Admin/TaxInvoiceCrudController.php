@@ -28,7 +28,7 @@ use App\Library\ExportXlsx;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Box\Spout\Common\Entity\Style\CellAlignment;
 use Box\Spout\Common\Entity\Style\Color;
-
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 
 class TaxInvoiceCrudController extends CrudController 
 {
@@ -1189,7 +1189,8 @@ class TaxInvoiceCrudController extends CrudController
                     'payment_plan_date' => $result->payment_plan_date,
                     'unit_price' => $result->unit_price,
                     // 'unit_price' => function($entry){
-                    //     return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                    //     return WriterEntityFactory::createCell($entry->unit_price, 
+                    //         (new StyleBuilder())->setFormat('#,##0.00')->build());
                     // },
                     'qty_received' => $result->received_qty,
                     'qty_rejected' => $result->rejected_qty,
@@ -1226,7 +1227,9 @@ class TaxInvoiceCrudController extends CrudController
                 ];
             };
 
-            $export = new ExportXlsx($filename);
+            $writer = WriterEntityFactory::createXLSXWriter();
+            $writer->openToBrowser($filename);
+            
     
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
@@ -1234,10 +1237,8 @@ class TaxInvoiceCrudController extends CrudController
                             ->setCellAlignment(CellAlignment::LEFT)
                             ->setBackgroundColor(Color::rgb(102, 171, 163))
                             ->build();
-    
-            $firstSheet = $export->currentSheet();
-    
-            $export->addRow([
+
+            $excelHeader = [
                 'No',
                 'PO',
                 'DS Num',
@@ -1259,7 +1260,16 @@ class TaxInvoiceCrudController extends CrudController
                 'Ref DS Num',
                 'Ref DS Line',
                 'Updated'
-            ], $styleForHeader);
+            ];
+
+            $rowFromHeader = WriterEntityFactory::createRowFromArray($excelHeader, $styleForHeader);
+            $writer->addRow($rowFromHeader);
+
+            $styleNumb = (new StyleBuilder())
+                        ->setFormat('#,##0.00')
+                        ->setShouldWrapText(false)
+                        ->setCellAlignment(CellAlignment::RIGHT)
+                        ->build();
 
             $styleForBody = (new StyleBuilder())
                             ->setFontColor(Color::BLACK)
@@ -1267,71 +1277,38 @@ class TaxInvoiceCrudController extends CrudController
                             ->build();
 
             $increment = 1;
+            $shouldFormatNumber = ['unit_price', 'harga_sebelum_pajak', 'ppn', 'pph', 'total'];
+
             foreach($datas as $data){
                 $row = $resultCallback($data);
                 $rowT = [];
                 foreach($row as $key => $value){
-                    if($value == "<number>"){
-                        $rowT[] = $increment;
-                    }else if(is_callable($value)){
-                        $rowT[] = $value($data);
+                    if (in_array($key, $shouldFormatNumber)) {
+                        if($value == "<number>"){
+                            $rowT[] = WriterEntityFactory::createCell($increment);
+                        }else if(is_callable($value)){
+                            $rowT[] = WriterEntityFactory::createCell($value($data), $styleNumb);
+                        }else{
+                            $rowT[] = WriterEntityFactory::createCell($value, $styleNumb);
+                        }
                     }else{
-                        $rowT[] = $value;
+                        if($value == "<number>"){
+                            $rowT[] = WriterEntityFactory::createCell($increment);
+                        }else if(is_callable($value)){
+                            $rowT[] = WriterEntityFactory::createCell($value($data));
+                        }else{
+                            $rowT[] = WriterEntityFactory::createCell($value);
+                        }
                     }
+                    
                 }
+                
                 $increment++;
-                $export->addRow($rowT, $styleForBody);
+                $rows = WriterEntityFactory::createRow($rowT, $styleForBody);
+                $writer->addRow($rows);
             }
 
-            $export->close();   
-
-            // $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
-            //     $styleHeader = [
-            //         //Set font style
-            //         'font' => [
-            //             'bold'      =>  true,
-            //             'color' => ['argb' => 'ffffff'],
-            //         ],
-        
-            //         //Set background style
-            //         'fill' => [
-            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-            //             'startColor' => [
-            //                 'rgb' => '66aba3',
-            //              ]           
-            //         ],
-        
-            //     ];
-
-            //     $styleGroupProtected = [
-            //         //Set background style
-            //         'fill' => [
-            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-            //             'startColor' => [
-            //                 'rgb' => 'ededed',
-            //              ]           
-            //         ],
-        
-            //     ];
-
-            //     $arrColumns = range('A', 'S');
-            //     // $totalColom = 31;
-            //     // for($i = 1; $i<=$totalColom; $i++){
-            //     //     $col = getNameFromNumber($i);
-            //     //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
-            //     //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-            //     // }
-            //     foreach ($arrColumns as $key => $col) {
-            //         $event->sheet->getColumnDimension($col)->setAutoSize(true);
-            //         $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-            //     }
-                
-            //     $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
-            // };
-
-            // $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
-
-            // return Excel::download($export, $filename);
+            $writer->close();   
         }
     }
 
@@ -1355,24 +1332,28 @@ class TaxInvoiceCrudController extends CrudController
                     'item' => $result->item,
                     'description' => $result->description,
                     'payment_plan_date' => $result->payment_plan_date,
-                    'unit_price' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->unit_price);
-                    },
+                    'unit_price' => $result->unit_price,
+                    // 'unit_price' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->unit_price);
+                    // },
                     'qty_received' => $result->received_qty,
                     'qty_rejected' => $result->rejected_qty,
                     'no_faktur' => $result->no_faktur_pajak,
                     'no_surat_jalan_vendor' => $result->no_surat_jalan_vendor,
-                    'harga_sebelum_pajak' => function($entry){
-                        return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
-                    },
-                    'ppn' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->pph);
-                    },
-                    'pph' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice($entry->pph);
-                    },
+                    'harga_sebelum_pajak' => $result->harga_sebelum_pajak,
+                    // 'harga_sebelum_pajak' => function($entry){
+                    //     return $entry->currency. ' ' . Constant::getPrice($entry->harga_sebelum_pajak);
+                    // },
+                    'ppn' => $result->ppn,
+                    'pph' => $result->pph,
+                    // 'ppn' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->ppn);
+                    // },
+                    // 'pph' => function($entry){
+                    //     return $entry->currency.' '.Constant::getPrice($entry->pph);
+                    // },
                     'total' => function($entry){
-                        return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
+                        return $entry->harga_sebelum_pajak + $entry->ppn - $entry->pph;
                     },
                     'comments' => $result->comment,
                     'confirm' => function($entry){
@@ -1390,8 +1371,9 @@ class TaxInvoiceCrudController extends CrudController
                 ];
             };
 
-            $export = new ExportXlsx($filename);
-    
+            $writer = WriterEntityFactory::createXLSXWriter();
+            $writer->openToBrowser($filename);
+
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
                             ->setFontColor(Color::WHITE)
@@ -1399,9 +1381,8 @@ class TaxInvoiceCrudController extends CrudController
                             ->setBackgroundColor(Color::rgb(102, 171, 163))
                             ->build();
     
-            $firstSheet = $export->currentSheet();
     
-            $export->addRow([
+            $excelHeader = [
                 'No',
                 'PO',
                 'DS Num',
@@ -1423,7 +1404,15 @@ class TaxInvoiceCrudController extends CrudController
                 'Ref DS Num',
                 'Ref DS Line',
                 'Updated'
-            ], $styleForHeader);
+            ];
+
+            $rowFromHeader = WriterEntityFactory::createRowFromArray($excelHeader, $styleForHeader);
+            $writer->addRow($rowFromHeader);
+
+            $styleNumb = (new StyleBuilder())
+                        ->setFormat('#,##0.00')
+                        ->setCellAlignment(CellAlignment::RIGHT)
+                        ->build();
 
             $styleForBody = (new StyleBuilder())
                             ->setFontColor(Color::BLACK)
@@ -1431,71 +1420,39 @@ class TaxInvoiceCrudController extends CrudController
                             ->build();
 
             $increment = 1;
+            $shouldFormatNumber = ['unit_price', 'harga_sebelum_pajak', 'ppn', 'pph', 'total'];
+
             foreach($datas as $data){
                 $row = $resultCallback($data);
                 $rowT = [];
                 foreach($row as $key => $value){
-                    if($value == "<number>"){
-                        $rowT[] = $increment;
-                    }else if(is_callable($value)){
-                        $rowT[] = $value($data);
+                    if (in_array($key, $shouldFormatNumber)) {
+                        if($value == "<number>"){
+                            $rowT[] = WriterEntityFactory::createCell($increment);
+                        }else if(is_callable($value)){
+                            $rowT[] = WriterEntityFactory::createCell($value($data), $styleNumb);
+                        }else{
+                            $rowT[] = WriterEntityFactory::createCell($value, $styleNumb);
+                        }
                     }else{
-                        $rowT[] = $value;
+                        if($value == "<number>"){
+                            $rowT[] = WriterEntityFactory::createCell($increment);
+                        }else if(is_callable($value)){
+                            $rowT[] = WriterEntityFactory::createCell($value($data));
+                        }else{
+                            $rowT[] = WriterEntityFactory::createCell($value);
+                        }
                     }
+                    
                 }
+                
                 $increment++;
-                $export->addRow($rowT, $styleForBody);
+                $rows = WriterEntityFactory::createRow($rowT, $styleForBody);
+                $writer->addRow($rows);
             }
 
-            $export->close();
+            $writer->close();
 
-            // $styleHeader = function(\Maatwebsite\Excel\Events\AfterSheet $event){
-            //     $styleHeader = [
-            //         //Set font style
-            //         'font' => [
-            //             'bold'      =>  true,
-            //             'color' => ['argb' => 'ffffff'],
-            //         ],
-        
-            //         //Set background style
-            //         'fill' => [
-            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-            //             'startColor' => [
-            //                 'rgb' => '66aba3',
-            //              ]           
-            //         ],
-        
-            //     ];
-
-            //     $styleGroupProtected = [
-            //         //Set background style
-            //         'fill' => [
-            //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-            //             'startColor' => [
-            //                 'rgb' => 'ededed',
-            //              ]           
-            //         ],
-        
-            //     ];
-
-            //     $arrColumns = range('A', 'S');
-            //     // $totalColom = 31;
-            //     // for($i = 1; $i<=$totalColom; $i++){
-            //     //     $col = getNameFromNumber($i);
-            //     //     $event->sheet->getColumnDimension($col)->setAutoSize(true);
-            //     //     $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-            //     // }
-            //     foreach ($arrColumns as $key => $col) {
-            //         $event->sheet->getColumnDimension($col)->setAutoSize(true);
-            //         $event->sheet->getStyle($col.'1')->getFont()->setBold(true);
-            //     }
-                
-            //     $event->sheet->getDelegate()->getStyle('A1:S1')->applyFromArray($styleHeader);
-            // };
-
-            // $export = new TemplateExportAll($data, $header, $resultCallback, $styleHeader, $title);
-
-            // return Excel::download($export, $filename);
         }
         return 0;
     }
