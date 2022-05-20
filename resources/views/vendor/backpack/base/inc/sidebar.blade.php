@@ -80,7 +80,7 @@
       $curentPageLink.parents('li').addClass('open');
       // - the actual element is active
       $curentPageLink.each(function() {
-        $(this).addClass('active');
+        //$(this).addClass('active');
       });
   </script>
 @endpush

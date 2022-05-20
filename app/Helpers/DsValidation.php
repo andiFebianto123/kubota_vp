@@ -3,6 +3,8 @@
 namespace App\Helpers;
 
 use App\Models\Delivery;
+use App\Models\DeliveryRepair;
+use App\Models\DeliveryReturn;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
@@ -179,5 +181,36 @@ class DsValidation
       'mode'   => 'danger',
       'message' => 'Selesaikan terlebih dahulu PO yang lama!'
     ];
+  }
+
+
+  public function availableQtyReturn($dsNum, $dsLine)
+  {
+    $totalDeliveryCreated = DeliveryReturn::join('delivery as dlv', function($join){
+          $join->on('dlv.ds_num', '=', 'delivery_return.ds_num');
+          $join->on('dlv.ds_line', '=', 'delivery_return.ds_line');
+      })
+      ->where('ref_ds_num', $dsNum)
+      ->where('ref_ds_line', $dsLine)
+      ->whereIn('delivery_return.ds_type', ['0P', '1P'])
+      ->sum('qty');
+
+    $totalDeliveryClosed = DeliveryReturn::join('delivery as dlv', function($join){
+        $join->on('dlv.ds_num', '=', 'delivery_return.ds_num');
+        $join->on('dlv.ds_line', '=', 'delivery_return.ds_line');
+    })
+    ->where('ref_ds_num', $dsNum)
+    ->where('ref_ds_line', $dsLine)
+    ->whereIn('delivery_return.ds_type', ['R0', 'R1'])
+    ->sum('qty');
+
+    $totalDeliveryReturn = DeliveryRepair::where('ds_num_reject', $dsNum)
+          ->where('ds_line_reject', $dsLine)
+          ->where('repair_type', 'RETURN')
+          ->sum('repair_qty');
+
+    $availableQty = $totalDeliveryReturn - $totalDeliveryCreated - $totalDeliveryClosed;
+
+    return $availableQty;
   }
 }

@@ -46,7 +46,7 @@ class Sidebar
         'name' => 'Delivery Sheet',
         'url' => backpack_url('delivery'),
         'icon' => 'la-file',
-        'key' => 'delivery',
+        'key' => 'delivery-sheet',
         'access' => Constant::checkPermission('Read Delivery Sheet'),
         'childrens' => []
       ],

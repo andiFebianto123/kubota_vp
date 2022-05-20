@@ -5,7 +5,7 @@
             $user = backpack_auth()->user()->last_update_password;
             $url = ($user == null) ? "javascript:void(0)" : $menu['url'];
         ?>
-        <a class="nav-link parent @if($menu['childrens']) nav-dropdown-toggle @endif" href="{{  $url }}">
+        <a class="nav-link @if(str_contains(URL::current(), $menu['key'])) active @endif  parent @if($menu['childrens']) nav-dropdown-toggle @endif" href="{{  $url }}">
             <i class="nav-icon la {{$menu['icon']}}"></i> {{$menu['name']}}
         </a>
         @if($menu['childrens'])

@@ -12,12 +12,14 @@ use App\Models\DeliveryStatus;
 use Illuminate\Support\Facades\DB;
 use App\Exports\TemplateExportAll;
 use App\Helpers\DsValidation;
+use App\Http\Requests\DeliveryRepairRequest;
 use App\Http\Requests\DeliveryRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use App\Library\ExportXlsx;
 use App\Models\DeliveryRepair;
 use App\Models\DeliveryReturn;
+use App\Models\IssuedMaterialOuthouse;
 use App\Models\MaterialOuthouse;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
@@ -68,7 +70,7 @@ class DeliveryReturnCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
         $this->crud->addButtonFromModelFunction('line', 'create_ds_return', 'createDsReturn', 'end');
-        $this->crud->addButtonFromModelFunction('line', 'close_ds_return', 'closeDsReturn', 'end');
+        $this->crud->addButtonFromView('line', 'closed_ds_return', 'closed_ds_return', 'end');
         $this->crud->exportRoute = url('admin/delivery-statuses-export');
        //  $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         $this->crud->query->join('delivery_status', function($join){
@@ -115,9 +117,9 @@ class DeliveryReturnCrudController extends CrudController
             'label'    => 'Available Qty',
             'type'     => 'closure',
             'function' => function($entry) {
-                $dsClosed = DeliveryReturn::where('ds_num', $entry->ds_num_reject)->where('ds_line', $entry->ds_line_reject)->sum('qty');
-                $avail = $entry->repair_qty - $dsClosed;
-                return $avail;
+                $availableQty = (new DsValidation())->availableQtyReturn($entry->ds_num_reject, $entry->ds_line_reject);
+
+                return $availableQty;
             },
             
         ]);
@@ -178,16 +180,22 @@ class DeliveryReturnCrudController extends CrudController
         $deliveryStatus = DeliveryStatus::where('ds_num', $dsNum)
                         ->where('ds_line', $dsLine)
                         ->first();
+        
+        $deliveryRepair = DeliveryRepair::where('ds_num_reject', $dsNum)
+                        ->where('ds_line_reject', $dsLine)
+                        ->first();
 
-        $deliveryReturns = DeliveryReturn::where('ds_num', $dsNum)
-                            ->where('ds_line', $dsLine)
-                            ->get();
+        $deliveryReturns = DeliveryReturn::join('delivery as dlv', function($join){
+                                $join->on('dlv.ds_num', '=', 'delivery_return.ds_num');
+                                $join->on('dlv.ds_line', '=', 'delivery_return.ds_line');
+                            })
+                            ->where('ref_ds_num', $dsNum)
+                            ->where('ref_ds_line', $dsLine)
+                            ->get(['delivery_return.*', 'dlv.no_surat_jalan_vendor','dlv.shipped_qty',
+                            'dlv.ref_ds_num', 'dlv.ref_ds_line', 'dlv.petugas_vendor']);
 
-        $args1 = [
-            'po_num' => $deliveryStatus->po_num, 
-            'po_line' => $deliveryStatus->po_line, 
-        ];
-        $currentQty = (new DsValidation())->currentMaxQty($args1)['datas'];
+       
+        $availableQty = (new DsValidation())->availableQtyReturn($dsNum, $dsLine);
 
         $this->crud->addField([
             'label' => 'Delivery Date From Vendor',
@@ -222,13 +230,13 @@ class DeliveryReturnCrudController extends CrudController
             'name' => 'no_surat_jalan_vendor',
         ]); 
         $this->crud->addField([
-            'type' => 'number_qty',
+            'type' => 'number_qty_return',
             'name' => 'shipped_qty',
             'label' => 'Qty',
             'actual_qty' => $deliveryStatus->shipped_qty,
-            'default' => $currentQty,
+            'default' => $availableQty,
             'attributes' => [
-                'data-max' =>  $currentQty,
+                'data-max' =>  $availableQty,
               ], 
         ]);
         
@@ -247,6 +255,8 @@ class DeliveryReturnCrudController extends CrudController
         $data['entry'] = $deliveryStatus;
         $data['unfinished_po_line'] = $unfinishedPoLine;
         $data['deliveryReturns'] = $deliveryReturns;
+        $data['deliveryRepair'] = $deliveryRepair;
+        $data['availableQty'] = $availableQty; //$availableQty;
 
         $canAccess = false;
         /*
@@ -381,45 +391,65 @@ class DeliveryReturnCrudController extends CrudController
     }
 
 
-    public function store(Request $request)
+    public function store(DeliveryRepairRequest $request)
     {
         $this->crud->setRequest($this->crud->validateRequest());
         $request = $this->crud->getRequest();
 
-        $dsNum = $request->input('ds_num');
-        $dsLine = $request->input('ds_line');
+        $strDsNum = $request->input('ds_num');
+        $strDsLine = $request->input('ds_line');
         $petugasVendor = $request->input('petugas_vendor');
         $noSuratJalanVendor = $request->input('no_surat_jalan_vendor');
         $shippedQty = $request->input('shipped_qty');
+        $shippedDate = $request->input('shipped_date');
+
+        $delivery = Delivery::where('ds_num', $strDsNum)->where('ds_line', $strDsLine)->first();
+
+        $dsNum =  (new Constant())->codeDs($delivery->po_num, $delivery->po_line, $shippedDate);
+        $availableQty = (new DsValidation())->availableQtyReturn($strDsNum, $strDsLine);
+
+        if ($availableQty < $shippedQty) {
+            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
+
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => "Qty Alert",
+                'errors' => $errors
+            ], 422);
+        }
 
         $dsType = '0P';
         
         DB::beginTransaction();
 
         try{
-            /*
+
             $insertDsheet = new Delivery();
             $insertDsheet->ds_num = $dsNum['single'];
-            $insertDsheet->po_num = $poLine->po_num;
-            $insertDsheet->po_line = $poLine->po_line;
-            $insertDsheet->po_release = $poLine->po_release;
-            $insertDsheet->po_change = $poLine->po_change;
+            $insertDsheet->po_num = $delivery->po_num;
+            $insertDsheet->po_line = $delivery->po_line;
+            $insertDsheet->po_release = $delivery->po_release;
+            $insertDsheet->po_change = $delivery->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
-            $insertDsheet->item = $poLine->item;
-            $insertDsheet->description = $poLine->description;
-            $insertDsheet->u_m = $poLine->u_m;
-            $insertDsheet->due_date = $poLine->due_date;
-            $insertDsheet->unit_price = $poLine->unit_price;
-            $insertDsheet->wh = $poLine->wh;
-            $insertDsheet->location = $poLine->location;
-            $insertDsheet->tax_status = $poLine->tax_status;
-            $insertDsheet->currency = $poLine->currency;
+            $insertDsheet->ds_type = $dsType;
+            $insertDsheet->item = $delivery->item;
+            $insertDsheet->description = $delivery->description;
+            $insertDsheet->u_m = $delivery->u_m;
+            $insertDsheet->due_date = $delivery->due_date;
+            $insertDsheet->unit_price = $delivery->unit_price;
+            $insertDsheet->wh = $delivery->wh;
+            $insertDsheet->location = $delivery->location;
+            $insertDsheet->tax_status = $delivery->tax_status;
+            $insertDsheet->currency = $delivery->currency;
             $insertDsheet->shipped_qty = $shippedQty;
             $insertDsheet->shipped_date = $shippedDate;
-            $insertDsheet->order_qty = $poLine->order_qty;
-            $insertDsheet->w_serial = $poLine->w_serial;
+            $insertDsheet->order_qty = $delivery->order_qty;
+            $insertDsheet->w_serial = $delivery->w_serial;
             $insertDsheet->petugas_vendor = $petugasVendor;
             $insertDsheet->no_surat_jalan_vendor = $noSuratJalanVendor;
+            $insertDsheet->ref_ds_num = $strDsNum;
+            $insertDsheet->ref_ds_line = $strDsLine;
             $insertDsheet->created_by = backpack_auth()->user()->id;
             $insertDsheet->updated_by = backpack_auth()->user()->id;
             $insertDsheet->save();
@@ -427,25 +457,27 @@ class DeliveryReturnCrudController extends CrudController
             // Insert delivery status
             $insertDstatus = new DeliveryStatus();
             $insertDstatus->ds_num = $dsNum['single'];
-            $insertDstatus->po_num = $poLine->po_num;
-            $insertDstatus->po_line = $poLine->po_line;
-            $insertDstatus->po_release = $poLine->po_release;
+            $insertDstatus->po_num = $delivery->po_num;
+            $insertDstatus->po_line = $delivery->po_line;
+            $insertDstatus->po_release = $delivery->po_release;
             $insertDstatus->ds_line = $dsNum['line'];
-            $insertDstatus->item = $poLine->item;
-            $insertDstatus->description = $poLine->description;
-            $insertDstatus->unit_price = $poLine->unit_price;
+            $insertDstatus->ds_type = $dsType;
+            $insertDstatus->item = $delivery->item;
+            $insertDstatus->description = $delivery->description;
+            $insertDstatus->unit_price = $delivery->unit_price;
             $insertDstatus->shipped_qty = $shippedQty;
             $insertDstatus->petugas_vendor = $petugasVendor;
             $insertDstatus->no_surat_jalan_vendor = $noSuratJalanVendor;
+            $insertDstatus->ref_ds_num = $strDsNum;
+            $insertDstatus->ref_ds_line = $strDsLine;
             $insertDstatus->created_by = backpack_auth()->user()->id;
             $insertDstatus->updated_by = backpack_auth()->user()->id;
             $insertDstatus->save();
-            */
 
             // Insert delivery sheet
             $insertReturn = new DeliveryReturn();
-            $insertReturn->ds_num = $dsNum;
-            $insertReturn->ds_line = $dsLine;
+            $insertReturn->ds_num = $dsNum['single'];
+            $insertReturn->ds_line = $dsNum['line'];
             $insertReturn->ds_type = $dsType;
             $insertReturn->qty = $shippedQty;
             $insertReturn->created_by = backpack_auth()->user()->id;
@@ -462,7 +494,7 @@ class DeliveryReturnCrudController extends CrudController
                 'status' => true,
                 'alert' => 'success',
                 'message' => $message,
-                'redirect_to' => url('admin/delivery-return/create-ds?num='.$dsNum.'&line='.$dsLine),
+                'redirect_to' => url('admin/delivery-return/create-ds?num='.$strDsNum.'&line='.$strDsLine),
                 'validation_errors' => []
             ], 200);
 
@@ -476,5 +508,139 @@ class DeliveryReturnCrudController extends CrudController
             ], 500);
         }
     }
+
+
+    public function closeDs(Request $request)
+    {
+        $id = $request->input('id');
+        
+        $dr = DeliveryRepair::where('id', $id)->first();
+        $availableQty = (new DsValidation())->availableQtyReturn($dr->ds_num_reject, $dr->ds_line_reject);
+
+        $delivery = Delivery::where('ds_num', $dr->ds_num_reject)->where('ds_line', $dr->ds_line_reject)->first();
+
+        $dsNum =  (new Constant())->codeDs($delivery->po_num, $delivery->po_line, $availableQty);
+
+        if ($availableQty <= 0) {
+
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => "Qty Sudah diclosed",
+            ], 422);
+        }
+
+        $dsType = 'R0';
+        
+        DB::beginTransaction();
+
+        try{
+            $insertDsheet = new Delivery();
+            $insertDsheet->ds_num = $dsNum['single'];
+            $insertDsheet->po_num = $delivery->po_num;
+            $insertDsheet->po_line = $delivery->po_line;
+            $insertDsheet->po_release = $delivery->po_release;
+            $insertDsheet->po_change = $delivery->po_change;
+            $insertDsheet->ds_line = $dsNum['line'];
+            $insertDsheet->ds_type = $dsType;
+            $insertDsheet->item = $delivery->item;
+            $insertDsheet->description = $delivery->description;
+            $insertDsheet->u_m = $delivery->u_m;
+            $insertDsheet->due_date = $delivery->due_date;
+            $insertDsheet->unit_price = $delivery->unit_price;
+            $insertDsheet->wh = $delivery->wh;
+            $insertDsheet->location = $delivery->location;
+            $insertDsheet->tax_status = $delivery->tax_status;
+            $insertDsheet->currency = $delivery->currency;
+            $insertDsheet->shipped_qty = $availableQty;
+            $insertDsheet->shipped_date = now();
+            $insertDsheet->order_qty = $delivery->order_qty;
+            $insertDsheet->w_serial = $delivery->w_serial;
+            $insertDsheet->petugas_vendor = $delivery->petugas_vendor;
+            $insertDsheet->no_surat_jalan_vendor = $delivery->no_surat_jalan_vendor;
+            $insertDsheet->ref_ds_num = $delivery->ds_num;
+            $insertDsheet->ref_ds_line = $delivery->ds_line;
+            $insertDsheet->created_by = backpack_auth()->user()->id;
+            $insertDsheet->updated_by = backpack_auth()->user()->id;
+            $insertDsheet->save();
+
+            // Insert delivery status
+            $insertDstatus = new DeliveryStatus();
+            $insertDstatus->ds_num = $dsNum['single'];
+            $insertDstatus->po_num = $delivery->po_num;
+            $insertDstatus->po_line = $delivery->po_line;
+            $insertDstatus->po_release = $delivery->po_release;
+            $insertDstatus->ds_line = $dsNum['line'];
+            $insertDstatus->ds_type = $dsType;
+            $insertDstatus->item = $delivery->item;
+            $insertDstatus->description = $delivery->description;
+            $insertDstatus->unit_price = $delivery->unit_price;
+            $insertDstatus->shipped_qty = $availableQty;
+            $insertDstatus->petugas_vendor = $delivery->petugas_vendor;
+            $insertDstatus->no_surat_jalan_vendor = $delivery->no_surat_jalan_vendor;
+            $insertDstatus->ref_ds_num = $delivery->ds_num;
+            $insertDstatus->ref_ds_line = $delivery->ds_line;
+            $insertDstatus->created_by = backpack_auth()->user()->id;
+            $insertDstatus->updated_by = backpack_auth()->user()->id;
+            $insertDstatus->save();
+
+            // Insert delivery sheet
+            $insertReturn = new DeliveryReturn();
+            $insertReturn->ds_num = $dsNum['single'];
+            $insertReturn->ds_line = $dsNum['line'];
+            $insertReturn->ds_type = $dsType;
+            $insertReturn->qty = $availableQty;
+            $insertReturn->created_by = backpack_auth()->user()->id;
+            $insertReturn->updated_by = backpack_auth()->user()->id;
+            $insertReturn->save();
+        
+            DB::commit();
+
+            $message = 'Delivery Return Closed';
+
+            Alert::success($message)->flash();
+
+            return true;
+
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'alert' => 'danger',
+                'message' => $e->getMessage(),
+                'validation_errors' => []
+            ], 500);
+        }
+    }
+
+
+    public function destroy($id)
+    {
+        $deliveryReturn = DeliveryReturn::where('id', $id)->first();
+        if (isset($deliveryReturn)) {
+            DB::beginTransaction();
+            try {
+                DeliveryStatus::where('ds_num', $deliveryReturn->ds_num)
+                ->where('ds_line', $deliveryReturn->ds_line)->delete();
+                Delivery::where('ds_num', $deliveryReturn->ds_num)
+                ->where('ds_line', $deliveryReturn->ds_line)->delete();
+                DeliveryReturn::where('id', $id)->delete();
+                
+                DB::commit();
+
+            } catch(\Exception $e){
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'alert' => 'danger',
+                    'message' => $e->getMessage(),
+                    'validation_errors' => []
+                ], 500);
+            }
+        }
+
+        return true;
+    }
+
 
 }
