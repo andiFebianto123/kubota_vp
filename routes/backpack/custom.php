@@ -115,4 +115,6 @@ Route::group([
 
     Route::get('active-inactive/{id}', 'UserCrudController@activeInactive');
 
+    Route::crud('delivery-return', 'DeliveryReturnCrudController');
+    Route::get('delivery-return/create-ds', 'DeliveryReturnCrudController@createDs');
 });

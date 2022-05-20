@@ -486,6 +486,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses untuk melakukan reset attempt login'
               ],
               ['name' => 'Access Reset Attempt Login']
+            ],
+            [
+              [
+                "name" => 'Read Delivery Return',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk mengakses menu delivery return'
+              ],
+              ['name' => 'Read Delivery Return']
             ]
         ];
         foreach($arrPermission as $key => $seed) {

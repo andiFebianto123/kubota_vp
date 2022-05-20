@@ -35,6 +35,14 @@ class Sidebar
         ]
       ],
       [
+        'name' => 'Delivery Return',
+        'url' => backpack_url('delivery-return'),
+        'icon' => 'la-dice',
+        'key' => 'delivery-return',
+        'access' => Constant::checkPermission('Read Delivery Return'),
+        'childrens' => []
+      ],
+      [
         'name' => 'Delivery Sheet',
         'url' => backpack_url('delivery'),
         'icon' => 'la-file',
