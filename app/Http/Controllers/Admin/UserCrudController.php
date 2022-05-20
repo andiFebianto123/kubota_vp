@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Exception;
+use Illuminate\Support\Str;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Vendor;
@@ -170,7 +171,7 @@ class UserCrudController extends CrudController
         CRUD::field('name');
         CRUD::field('username');
         CRUD::field('email');
-        CRUD::field('password')->type('show_password');
+        // CRUD::field('password')->type('show_password');
         CRUD::addField([   // select_from_array
             'name'        => 'is_active',
             'label'       => "Status",
@@ -246,14 +247,9 @@ class UserCrudController extends CrudController
         $this->crud->setRequest($this->crud->validateRequest());
 
         $request = $this->crud->getRequest();
-
-        $request->validate([
-            'password' => ['required' , new IsValidPassword()]
-        ]);
-
-        if ($request->input('password')) {
-            $request->request->set('password', bcrypt($request->input('password')));
-        } 
+        $strPasswordRandom = Str::random(8);
+        $password = bcrypt($strPasswordRandom);
+        $request->request->set('password', $password);
         $this->crud->setRequest($request);
         $this->crud->unsetValidation();
 
@@ -266,6 +262,21 @@ class UserCrudController extends CrudController
         Alert::success(trans('backpack::crud.insert_success'))->flash();
 
         $this->crud->setSaveAction();
+
+      //  $userSaved = User::where('id',$item->getKey())->first();
+
+        try{
+            User::where('id',$item->getKey())
+            ->update(['password'=>$password]);
+
+            $item['send_email_by_password'] = $strPasswordRandom;
+            Mail::to(str_replace(" ", "", $item['email']))
+            ->send(new MailNewUser($item));
+        }
+        catch(Exception $e){
+            $subject = "Data Error User Import Single";
+            (new EmailLogWriter())->create($subject, $item['email'], $e->getMessage(), '', env('MAIL_USER_BCC',""), env('MAIL_REPLY_TO',""));
+        }
 
         return $this->crud->performSaveAction($item->getKey());
     }

@@ -29,11 +29,12 @@ class UserRequest extends FormRequest
         return [
             'name' => "required",
             // 'role_id' => "required",
+            'is_active' => "required",
             'roles' => 'required',
             'vendor_id' => "required_if:roles,==,2",
             'username' => 'required|string|unique:users,username,'.$this->id.',id',
             'email' => 'required|email|unique:users,email,'.$this->id.',id',
-            'password' => Rule::requiredIf($this->method() == 'POST'),
+            //'password' => Rule::requiredIf($this->method() == 'POST'),
         ];
     }
 
