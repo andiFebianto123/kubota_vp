@@ -1266,7 +1266,7 @@ class TaxInvoiceCrudController extends CrudController
             $writer->addRow($rowFromHeader);
 
             $styleNumb = (new StyleBuilder())
-                        ->setFormat('#.##0')
+                        ->setFormat('#,#0')
                         ->setShouldWrapText(false)
                         ->setCellAlignment(CellAlignment::RIGHT)
                         ->build();
