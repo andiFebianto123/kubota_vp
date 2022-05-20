@@ -30,7 +30,7 @@ use Box\Spout\Common\Entity\Style\CellAlignment;
 use Box\Spout\Common\Entity\Style\Color;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 
-class TaxInvoiceCrudController extends CrudController 
+class TaxInvoiceCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -69,10 +69,10 @@ class TaxInvoiceCrudController extends CrudController
         }
         $this->crud->allowAccess('advanced_export_excel');
 
-        $this->crud->setListView('vendor.backpack.crud.list_payment'); 
+        $this->crud->setListView('vendor.backpack.crud.list_payment');
     }
 
-    
+
 
 
     protected function setupListOperation()
@@ -110,7 +110,7 @@ class TaxInvoiceCrudController extends CrudController
             'function' => function($entry) {
                 return $entry->po_num.'-'.$entry->po_line;
             },
-            'orderable'  => true, 
+            'orderable'  => true,
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'po_po_line') {
                     $q = '';
@@ -217,7 +217,7 @@ class TaxInvoiceCrudController extends CrudController
                 return $entry->currency.' '.Constant::getPrice(($entry->harga_sebelum_pajak + $entry->ppn - $entry->pph));
             }
         ]);
-        CRUD::addColumn([ 
+        CRUD::addColumn([
             'label' => 'Comments',
             'name' => 'comment',
             'type' => 'comment'
@@ -269,10 +269,10 @@ class TaxInvoiceCrudController extends CrudController
                     $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
                 }
-                
+
                 return $html;
             },
-            'orderable'  => true, 
+            'orderable'  => true,
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if ($column['name'] == 'ref_ds_num') {
                     $q = '';
@@ -368,7 +368,7 @@ class TaxInvoiceCrudController extends CrudController
     }
 
 
-    
+
     protected function setupCreateOperation()
     {
         CRUD::setValidation(TaxInvoiceRequest::class);
@@ -419,9 +419,9 @@ class TaxInvoiceCrudController extends CrudController
         ## Read value
         $draw = request('draw');
         $start = request("start");
-        $rowperpage = request("length"); 
+        $rowperpage = request("length");
         $filters = [];
-   
+
         $order_arr = request('order');
         $searchArr = request('search');
 
@@ -431,12 +431,12 @@ class TaxInvoiceCrudController extends CrudController
         if (request('end_date') != null){
             $filters[] = ['delivery_status.payment_plan_date', '<=', request('end_date')];
         }
-   
+
         // $columnIndex = $columnIndex_arr[0]['column']; // Column index
         // $columnName = $columnName_arr[$columnIndex]['data']; // Column name
         // $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $searchArr['value']; // Search value
-   
+
         // Total records
         $countDeliveryStatuses = DeliveryStatus::where('validate_by_fa_flag', 1)
             ->where('executed_flag', 0)
@@ -452,7 +452,7 @@ class TaxInvoiceCrudController extends CrudController
                             ->orWhere('delivery_status.description','LIKE', '%'.$searchValue.'%');
                         })
                         ->count();
-   
+
         $deliveryStatuses = DeliveryStatus::leftJoin('po', 'po.po_num', 'delivery_status.po_num')
             ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
             ->where('validate_by_fa_flag', 1)
@@ -475,8 +475,8 @@ class TaxInvoiceCrudController extends CrudController
         }else{
             $deliveryStatuses = $deliveryStatuses->get();
         }
-   
-        $tableBodies = [];        
+
+        $tableBodies = [];
         foreach ($deliveryStatuses as $key => $ds) {
             $tableBody = [];
             $total = $ds->harga_sebelum_pajak + $ds->ppn + $ds->pph;
@@ -524,7 +524,7 @@ class TaxInvoiceCrudController extends CrudController
            "iTotalDisplayRecords" => $totalRecordswithFilter,
            "aaData" => $tableBodies
         );
-   
+
         return $response;
     }
 
@@ -549,13 +549,13 @@ class TaxInvoiceCrudController extends CrudController
         $tableHeader[] = 'Total';
         $tableHeader[] = 'Ref DS Num';
         $tableHeader[] = 'Ref Ds Line';
-        
+
         $table['header'] = $tableHeader;
         $table['body'] = [];
 
         return $table;
     }
-    
+
 
     protected function setupUpdateOperation()
     {
@@ -583,7 +583,7 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         if ($notExistFaktur) {
-            Validator::make($request->all(), 
+            Validator::make($request->all(),
                 ['file_faktur_pajak' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,png,jpg,jpeg'])
                 ->validate();
         }
@@ -684,7 +684,7 @@ class TaxInvoiceCrudController extends CrudController
 
         return $success;
     }
-    
+
 
     public function confirmFakturPajak($id){
         $db = $this->crud->model::where('id', $id)->first();
@@ -870,7 +870,7 @@ class TaxInvoiceCrudController extends CrudController
 
     public function deleteMessage(req $request){
         $message = Comment::where('id', $request->input('id'))->first();
-        
+
         if($message != null){
             $message->delete();
         }
@@ -913,7 +913,7 @@ class TaxInvoiceCrudController extends CrudController
                         ->leftJoin('po', 'po.po_num', 'po_line.po_num')
                         ->leftJoin('vendor', 'vendor.vend_num', 'po.vend_num')
                         ->where('delivery_status.id', $id)
-                        ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date', 
+                        ->get(['delivery_status.id as id','delivery_status.ds_num','delivery_status.ds_line', 'po_line.due_date',
                         'delivery_status.po_release','po_line.item','vendor.vend_num as vendor_number','vendor.currency as vendor_currency',
                         'vendor.vend_num as vendor_name', 'delivery_status.no_surat_jalan_vendor','po_line.item_ptki',
                         'po.po_num as po_number','po_line.po_line as po_line', 'delivery_status.shipped_qty', 'delivery_status.unit_price',
@@ -1018,7 +1018,7 @@ class TaxInvoiceCrudController extends CrudController
         ];
     }
 
-    
+
     public function getRowViews2($entry, $rowNumber = false, $lineButton)
     {
         $row_items = [];
@@ -1049,7 +1049,7 @@ class TaxInvoiceCrudController extends CrudController
         return $row_items;
     }
 
-    
+
     public function applySearchTerm2($searchTerm)
     {
         return $this->crud2->where(function ($query) use ($searchTerm) {
@@ -1171,7 +1171,7 @@ class TaxInvoiceCrudController extends CrudController
             $sqlQuery = File::get(storage_path('app/taxInvoice.txt'));
             $pattern = '/((limit+\s+[0-9]+)|(offset+\s+[0-9]+))/i';
             $query = preg_replace($pattern, "", $sqlQuery);
-            $datas = DB::select($query);            
+            $datas = DB::select($query);
             $filename = 'Tax-payment'.date('YmdHis').'.xlsx';
 
             // $title = "Report Tax Payment";
@@ -1189,7 +1189,7 @@ class TaxInvoiceCrudController extends CrudController
                     'payment_plan_date' => $result->payment_plan_date,
                     'unit_price' => $result->unit_price,
                     // 'unit_price' => function($entry){
-                    //     return WriterEntityFactory::createCell($entry->unit_price, 
+                    //     return WriterEntityFactory::createCell($entry->unit_price,
                     //         (new StyleBuilder())->setFormat('#,##0.00')->build());
                     // },
                     'qty_received' => $result->received_qty,
@@ -1229,8 +1229,8 @@ class TaxInvoiceCrudController extends CrudController
 
             $writer = WriterEntityFactory::createXLSXWriter();
             $writer->openToBrowser($filename);
-            
-    
+
+
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
                             ->setFontColor(Color::WHITE)
@@ -1266,7 +1266,7 @@ class TaxInvoiceCrudController extends CrudController
             $writer->addRow($rowFromHeader);
 
             $styleNumb = (new StyleBuilder())
-                        ->setFormat('#,##0.00')
+                        ->setFormat('#.##0')
                         ->setShouldWrapText(false)
                         ->setCellAlignment(CellAlignment::RIGHT)
                         ->build();
@@ -1300,15 +1300,15 @@ class TaxInvoiceCrudController extends CrudController
                             $rowT[] = WriterEntityFactory::createCell($value);
                         }
                     }
-                    
+
                 }
-                
+
                 $increment++;
                 $rows = WriterEntityFactory::createRow($rowT, $styleForBody);
                 $writer->addRow($rows);
             }
 
-            $writer->close();   
+            $writer->close();
         }
     }
 
@@ -1380,8 +1380,8 @@ class TaxInvoiceCrudController extends CrudController
                             ->setCellAlignment(CellAlignment::LEFT)
                             ->setBackgroundColor(Color::rgb(102, 171, 163))
                             ->build();
-    
-    
+
+
             $excelHeader = [
                 'No',
                 'PO',
@@ -1443,9 +1443,9 @@ class TaxInvoiceCrudController extends CrudController
                             $rowT[] = WriterEntityFactory::createCell($value);
                         }
                     }
-                    
+
                 }
-                
+
                 $increment++;
                 $rows = WriterEntityFactory::createRow($rowT, $styleForBody);
                 $writer->addRow($rows);
