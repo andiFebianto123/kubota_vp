@@ -113,7 +113,7 @@ class Sidebar
         'name' => 'Vendor',
         'url' => backpack_url('vendor'),
         'icon' => 'la-people-carry',
-        'key' => 'vendor',
+        'key' => 'vendors',
         'access' => Constant::checkPermission('Read Vendor'),
         'childrens' => []
       ],
