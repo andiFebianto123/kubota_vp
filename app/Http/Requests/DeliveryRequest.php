@@ -26,8 +26,8 @@ class DeliveryRequest extends FormRequest
      */
     public function rules()
     {
-        $minDate = Carbon::now()->subDays(30)->format('d/m/Y');
-        $maxDate = Carbon::now()->addDay(7)->format('d/m/Y');
+        $minDate = Carbon::now()->subDays(30)->format('Y-m-d');
+        $maxDate = Carbon::now()->addDay(7)->format('Y-m-d');
 
         return [
             'shipped_date' => 'required|date|after:' . $minDate . '|before:'.$maxDate,
