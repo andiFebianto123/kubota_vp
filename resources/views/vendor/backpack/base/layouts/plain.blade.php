@@ -8,12 +8,15 @@
   @yield('header')
 
   <div class="container">
-  @yield('content')
+    @yield('content')
   </div>
 
   <footer class="app-footer sticky-footer">
-    @include('backpack::inc.footer')
+      @include('backpack::inc.footer')
   </footer>
+
+
+
 
   @yield('before_scripts')
   @stack('before_scripts')
@@ -22,6 +25,20 @@
 
   @yield('after_scripts')
   @stack('after_scripts')
+  <script>
+    if($( window ).height() < 424){
+      $('.app-footer').addClass('d-none')
+    }
+    $(window).on('resize', function(){
+        var win = $(this); //this = window
+        if (win.height() < 424) {
+          $('.app-footer').addClass('d-none')
+        }else{
+          $('.app-footer').removeClass('d-none')
+        }
+    });
+
+  </script>
 
 </body>
 </html>
