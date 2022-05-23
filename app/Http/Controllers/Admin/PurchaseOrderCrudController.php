@@ -682,7 +682,7 @@ class PurchaseOrderCrudController extends CrudController
         DB::beginTransaction();
         try {
             $pos = PurchaseOrder::join('vendor', 'po.vend_num', '=', 'vendor.vend_num')
-            ->select('po.id as ID','po.po_num as poNumber', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
+            ->select('po.*', 'po.id as ID','po.po_num as poNumber', 'po.po_change', 'vendor.vend_email as emails', 'vendor.buyer_email as buyers')
             ->whereIn('po.id', $poIds);
 
             if($pos->count() > 0){
