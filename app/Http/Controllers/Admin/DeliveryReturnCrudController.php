@@ -100,7 +100,7 @@ class DeliveryReturnCrudController extends CrudController
         $this->crud->groupBy('ds_num_reject');
         $this->crud->groupBy('ds_line_reject');
         $this->crud->query = $this->crud->query->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
-        'delivery_status.received_qty', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');
+        'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');
 
         CRUD::column('ds_num_reject')->label('DS Num');
         CRUD::column('ds_line_reject')->label('DS Line');
@@ -122,7 +122,9 @@ class DeliveryReturnCrudController extends CrudController
                 }
             },
             'orderLogic' => function ($query, $column, $columnDirection) {
-                return $query->orderBy('delivery_status.po_num', $columnDirection)->select('delivery_status.*');
+                return $query->orderBy('delivery_status.po_num', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
             }
         ]);
         CRUD::column('item');
