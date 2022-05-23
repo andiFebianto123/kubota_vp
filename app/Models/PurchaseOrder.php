@@ -68,7 +68,7 @@ class PurchaseOrder extends Model
 
     public function getAcceptPoLineAttribute(){
         return PurchaseOrderLine::where('po_num', $this->po_num)
-                        ->where('status', 'O')
+                        // ->where('status', 'O')
                         ->where('accept_flag', 1)
                         ->whereNotNull('read_at')
                         ->count();
@@ -77,7 +77,7 @@ class PurchaseOrder extends Model
 
     public function getRejectPoLineAttribute(){
         return PurchaseOrderLine::where('po_num', $this->po_num)
-                        ->where('status', 'O')
+                        // ->where('status', 'O')
                         ->where('accept_flag', 2)
                         ->whereNotNull('read_at')
                         ->count();

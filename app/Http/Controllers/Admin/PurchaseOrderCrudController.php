@@ -223,7 +223,7 @@ class PurchaseOrderCrudController extends CrudController
           ], function($value) { // if the filter is active
             $poLines = [];
             if ($value == "NEW") {
-                $poLines = PurchaseOrderLine::where('status','O')->whereNotIn('accept_flag', [1,2])->pluck('po_num');
+                $poLines = PurchaseOrderLine::whereNotIn('accept_flag', [1,2])->pluck('po_num');
             } elseif ($value == "ACC PROG") {
                 $query = "SELECT a.po_num 
                         FROM po a
