@@ -116,7 +116,7 @@
             <table class="email-and-issued" style="width:100%">
                 <tbody>
                     <tr>
-                        <td style="width:80%;text-align:left">Email : {{$po->vendor->vend_email ?? '-'}}</td>
+                        <td style="width:80%;text-align:left">Email : {{implode(', ', preg_split("/[;,]+/", preg_replace('/\s+/', '', $po->vendor->vend_email ?? '-')))}}</td>
                         <td style="width:20%;text-align:right;padding-right:20px;padding-left:20px"><b>Issued Date : {{date("Y-m-d", strtotime($po->po_date))}}</b></td>
                     </tr>
                 </tbody>
