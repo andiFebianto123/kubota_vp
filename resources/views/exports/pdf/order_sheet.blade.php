@@ -39,7 +39,7 @@
         .email-and-issued {
             font-size: 10px;
             font-family: Arial, Helvetica, sans-serif;
-            margin: 10px 10px 15px 10px;
+            margin: 10px 10px 0px 10px;
         }
         .title-table-right {
             font-weight: bold;
@@ -113,14 +113,14 @@
                 </table>
             </div>
             <div style="clear: both;"></div>
-            <div class="email-and-issued">
-                <div style="float: left;">
-                    Email : {{$po->vendor->vend_email ?? '-'}}
-                </div>
-                <div style="float: right;">
-                    <b>Issued Date : {{date("Y-m-d", strtotime($po->po_date))}}</b>
-                </div>
-            </div>
+            <table class="email-and-issued" style="width:100%">
+                <tbody>
+                    <tr>
+                        <td style="width:80%;text-align:left">Email : {{$po->vendor->vend_email ?? '-'}}</td>
+                        <td style="width:20%;text-align:right;padding-right:20px;padding-left:20px"><b>Issued Date : {{date("Y-m-d", strtotime($po->po_date))}}</b></td>
+                    </tr>
+                </tbody>
+            </table>
             <div style="clear: both;"></div>
             <div>
                 <table class="table-items" border="0" cellspacing="0">
