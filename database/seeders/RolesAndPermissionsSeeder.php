@@ -494,6 +494,30 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses untuk mengakses menu delivery return'
               ],
               ['name' => 'Read Delivery Return']
+            ],
+            [
+              [
+                "name" => 'Close Delivery Return',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk melakukan close pada delivery return'
+              ],
+              ['name' => 'Close Delivery Return']
+            ],
+            [
+              [
+                "name" => 'Create Delivery Return',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk melakukan create pada delivery return'
+              ],
+              ['name' => 'Create Delivery Return']
+            ],
+            [
+              [
+                "name" => 'Delete Delivery Return',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk melakukan delete pada delivery return'
+              ],
+              ['name' => 'Delete Delivery Return']
             ]
         ];
         foreach($arrPermission as $key => $seed) {

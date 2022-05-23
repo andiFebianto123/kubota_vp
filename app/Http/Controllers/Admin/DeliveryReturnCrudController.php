@@ -69,14 +69,33 @@ class DeliveryReturnCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
-        $this->crud->addButtonFromModelFunction('line', 'create_ds_return', 'createDsReturn', 'end');
-        $this->crud->addButtonFromView('line', 'closed_ds_return', 'closed_ds_return', 'end');
+        if(Constant::checkPermission('Create Delivery Return')){
+            $this->crud->addButtonFromModelFunction('line', 'create_ds_return', 'createDsReturn', 'end');
+        }
+        if(Constant::checkPermission('Close Delivery Return')){
+            $this->crud->addButtonFromView('line', 'closed_ds_return', 'closed_ds_return', 'end');
+        }
         $this->crud->exportRoute = url('admin/delivery-statuses-export');
-       //  $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         $this->crud->query->join('delivery_status', function($join){
             $join->on('delivery_status.ds_num', '=', 'delivery_repair.ds_num_reject');
             $join->on('delivery_status.ds_line', '=', 'delivery_repair.ds_line_reject');
         });
+
+        $sqlAvailableQty = "(repair_qty
+                            -
+                            (IFNULL((SELECT sum(shipped_qty) from delivery dlv 
+                                    WHERE dlv.ref_ds_num = delivery_repair.ds_num_reject  
+                                    AND dlv.ref_ds_line = delivery_repair.ds_line_reject
+                                AND dlv.ds_type IN ('0P', '1P')
+                            ),0))
+                            -
+                            (IFNULL((SELECT sum(shipped_qty) from delivery dlv 
+                                    WHERE dlv.ref_ds_num = delivery_repair.ds_num_reject  
+                                    AND dlv.ref_ds_line = delivery_repair.ds_line_reject
+                                AND dlv.ds_type IN ('R0', 'R1')
+                            ),0))) > 0";
+
+        $this->crud->query = $this->crud->query->whereRaw($sqlAvailableQty);
         $this->crud->addClause('where', 'repair_type', 'RETURN');
         $this->crud->groupBy('ds_num_reject');
         $this->crud->groupBy('ds_line_reject');
@@ -168,7 +187,7 @@ class DeliveryReturnCrudController extends CrudController
 
     public function createDs()
     {
-        if(!Constant::checkPermission('Read PO Line Detail')){
+        if(!Constant::checkPermission('Create Delivery Return')){
             abort(403);
         }
 
@@ -180,6 +199,10 @@ class DeliveryReturnCrudController extends CrudController
         $deliveryStatus = DeliveryStatus::where('ds_num', $dsNum)
                         ->where('ds_line', $dsLine)
                         ->first();
+
+        if (!isset($deliveryStatus)) {
+            abort(403);
+        }
         
         $deliveryRepair = DeliveryRepair::where('ds_num_reject', $dsNum)
                         ->where('ds_line_reject', $dsLine)
@@ -256,34 +279,8 @@ class DeliveryReturnCrudController extends CrudController
         $data['unfinished_po_line'] = $unfinishedPoLine;
         $data['deliveryReturns'] = $deliveryReturns;
         $data['deliveryRepair'] = $deliveryRepair;
-        $data['availableQty'] = $availableQty; //$availableQty;
-
-        $canAccess = false;
-        /*
-        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            $canAccess = true;
-        }else{
-            $po = PurchaseOrderLine::where('id', $entry->id )->first();
-            if (backpack_auth()->user()->vendor->vend_num == $po->purchaseOrder->vend_num) {
-                $canAccess = true;
-            }
-        }
-        if ($entry->accept_flag == 2) {
-            $canAccess = false;
-        }
-        if ($entry->accept_flag == 0 &&  $entry->status == 'O') {
-            $canAccess = false;
-        }
-      
-        if ($canAccess) {
-            $layout = 'vendor.backpack.crud.delivery_return_detail';
-            if ( in_array($entry->status, ['C', 'F']) ) {
-                $layout = 'vendor.backpack.crud.purchase_order_line_show_readonly';
-            }
-        }else{
-            abort(404);
-        }*/
-
+        $data['availableQty'] = $availableQty; 
+        
         return view('vendor.backpack.crud.delivery_return_detail', $data);
     }
 
@@ -512,6 +509,10 @@ class DeliveryReturnCrudController extends CrudController
 
     public function closeDs(Request $request)
     {
+        if(!Constant::checkPermission('Close Delivery Return')){
+            abort(403);
+        }
+
         $id = $request->input('id');
         
         $dr = DeliveryRepair::where('id', $id)->first();
