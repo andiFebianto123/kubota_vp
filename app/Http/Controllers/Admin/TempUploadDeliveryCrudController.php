@@ -246,6 +246,8 @@ class TempUploadDeliveryCrudController extends CrudController
                 $insertDlv->w_serial = ($dataTemp->serial_number) ? $dataTemp->serial_number : 0;
                 $insertDlv->petugas_vendor = $dataTemp->petugas_vendor;
                 $insertDlv->no_surat_jalan_vendor = $dataTemp->no_surat_jalan_vendor;
+
+                dd($poLine);
     
                 if ($poLine->status == 'O' && $poLine->accept_flag == 1 && $dataTemp->category_validation != 'danger') {
                     $insertDlv->save();

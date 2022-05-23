@@ -84,9 +84,17 @@ class DsValidation
       ->where('po.po_num', '<=', $currentPoLine->po_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
       ->where($filters)
+      ->whereRaw(DB::raw("po_line.po_change =
+                                (
+                                  select Max(pl.po_change)
+                                  from po_line as pl 
+                                  where pl.po_num = po_line.po_num
+                                  and pl.po_line = po_line.po_line
+                )"))
    //   ->orderBy('po_line.due_date', 'asc')
     //  ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
+      ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
     $arrOldPo = [];
@@ -139,10 +147,18 @@ class DsValidation
       ->where('po.vend_num', '=', $po->vend_num)
       ->where('po.po_num', '<=', $currentPoLine->po_num)
       ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
+      ->whereRaw(DB::raw("po_line.po_change =
+                                (
+                                  select Max(pl.po_change)
+                                  from po_line as pl 
+                                  where pl.po_num = po_line.po_num
+                                  and pl.po_line = po_line.po_line
+                )"))
       ->where($filters)
       // ->orderBy('po_line.due_date', 'asc')
       // ->orderBy('po_line.po_line', 'asc')
       ->orderBy('po_line.po_num', 'asc')
+      ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
       ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
 
     $arrOldPo = [];

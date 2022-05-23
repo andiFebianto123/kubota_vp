@@ -6,6 +6,7 @@ use App\Helpers\DsValidation;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -55,7 +56,15 @@ class TemplateMassDsExport implements  FromView, WithEvents
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->where('status', 'O')
                                 ->where('accept_flag','!=', 2)
+                                ->whereRaw(DB::raw("po_line.po_change =
+                                (
+                                  select Max(pl.po_change)
+                                  from po_line as pl 
+                                  where pl.po_num = po_line.po_num
+                                  and pl.po_line = po_line.po_line
+                                )"))
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->groupBy('po_change', 'po_num', 'po_line')
                                 ->orderBy('po_line.id', 'desc')
                                 ->get();
                                 
