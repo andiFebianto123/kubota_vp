@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DeliveryRequest extends FormRequest
@@ -25,7 +26,11 @@ class DeliveryRequest extends FormRequest
      */
     public function rules()
     {
+        $minDate = Carbon::now()->subDays(30)->format('d/m/Y');
+        $maxDate = Carbon::now()->addDay(7)->format('d/m/Y');
+
         return [
+            'shipped_date' => 'required|date|after:' . $minDate . '|before:'.$maxDate,
             'shipped_qty' => 'required|numeric|gt:0',
             'petugas_vendor' => 'required',
             'no_surat_jalan_vendor' => 'required'
