@@ -154,11 +154,11 @@ class PurchaseOrderCrudController extends CrudController
             'function' => function($entry){
                 $strStatus = "";
                 if ($entry->accept_po_line == 0) {
-                    $strStatus = "NEW";
+                    $strStatus = "UNREAD";
                 }else if ($entry->accept_po_line == $entry->total_po_line) {
-                    $strStatus = "COMPLETED";
+                    $strStatus = "READ ALL";
                 }else if ($entry->accept_po_line < $entry->total_po_line) {
-                    $strStatus = "ACC PROG";
+                    $strStatus = "PARTIALLY READ";
                 }
 
                 return $strStatus;
@@ -219,12 +219,23 @@ class PurchaseOrderCrudController extends CrudController
             'label' => 'Stat Acc'
           ], 
           [
-            'ACC PROG' => 'ACC PROG', 'NEW' => 'NEW', 'COMPLETED' => 'COMPLETED',
+            'PARTIALLY READ' => 'PARTIALLY READ', 'UNREAD' => 'UNREAD', 'READ ALL' => 'READ ALL',
           ], function($value) { // if the filter is active
             $poLines = [];
-            if ($value == "NEW") {
-                $poLines = PurchaseOrderLine::whereNotIn('accept_flag', [1,2])->pluck('po_num');
-            } elseif ($value == "ACC PROG") {
+            if ($value == "UNREAD") {
+                // $poLines = PurchaseOrderLine::where('accept_flag', 0)->pluck('po_num');
+                $query = "SELECT a.po_num 
+                        FROM po a
+                        JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
+                        FROM po_line GROUP BY po_num, po_change) b
+                        ON a.po_num=b.po_num AND a.po_change=b.po_change
+                        WHERE b.totA=0";
+                
+                $dbQueries = DB::select($query);
+                $poLines = collect($dbQueries)->pluck('po_num');
+
+            } elseif ($value == "PARTIALLY READ") {
                 $query = "SELECT a.po_num 
                         FROM po a
                         JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
@@ -237,7 +248,7 @@ class PurchaseOrderCrudController extends CrudController
                 $dbQueries = DB::select($query);
                 $poLines = collect($dbQueries)->pluck('po_num');
 
-            }else if($value == "COMPLETED"){
+            }else if($value == "READ ALL"){
                 $query = "SELECT a.po_num 
                         FROM po a
                         JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 

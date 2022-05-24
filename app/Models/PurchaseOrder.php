@@ -70,7 +70,6 @@ class PurchaseOrder extends Model
         return PurchaseOrderLine::where('po_num', $this->po_num)
                         // ->where('status', 'O')
                         ->where('accept_flag', 1)
-                        ->whereNotNull('read_at')
                         ->count();
     }
 
@@ -79,7 +78,6 @@ class PurchaseOrder extends Model
         return PurchaseOrderLine::where('po_num', $this->po_num)
                         // ->where('status', 'O')
                         ->where('accept_flag', 2)
-                        ->whereNotNull('read_at')
                         ->count();
     }
 
