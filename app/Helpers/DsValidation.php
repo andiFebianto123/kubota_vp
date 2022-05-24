@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Models\Delivery;
 use App\Models\DeliveryRepair;
 use App\Models\DeliveryReturn;
 use App\Models\MaterialOuthouse;
@@ -19,18 +18,27 @@ class DsValidation
     $poNum = $args['po_num'];
     $poLine = $args['po_line'];
 
-    $qtyInitial = PurchaseOrderLine::where("po_num", $poNum)
-      ->where("po_line", $poLine)
-      ->orderBy('po_change', 'desc')
-      ->first()
-      ->order_qty;
+    $queryCount = "SELECT 
+    (pl.order_qty - 
+       (IFNULL((
+            SELECT sum(shipped_qty) 
+                 from delivery dlv 
+                 WHERE dlv.po_num = pl.po_num  
+                 AND dlv.po_line = pl.po_line
+                 AND dlv.ds_type IN ('00', '01', '02')
+                 ),0)
+        )
+    ) as maximum_qty
+    FROM 
+    po_line pl
+    where po_num = '".$poNum."' and po_line = '".$poLine."'
+    GROUP by po_num, po_line, po_change";
 
-    $realtimeDsQty = Delivery::where("po_num", $poNum)
-      ->where("po_line", $poLine)
-      ->whereIn("ds_type", ['00', '01', '02'])
-      ->sum('shipped_qty');
-
-    $realtimeQty = $qtyInitial - $realtimeDsQty;
+    $selectMaxQty =  DB::select($queryCount);
+    $realtimeQty = 0;
+    if (sizeof($selectMaxQty) > 0) {
+      $realtimeQty = $selectMaxQty[0]->maximum_qty;
+    }
 
     return [
       'datas'  => $realtimeQty,

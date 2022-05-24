@@ -53,9 +53,7 @@ class PurchaseOrderLineCrudController extends CrudController
         $deliveries = Delivery::where("po_num", $entry->po_num)
                         ->where("po_line", $entry->po_line)
                         ->get();
-        $realtimeDsQty = Delivery::where("po_num", $entry->po_num)
-                            ->where("po_line", $entry->po_line)
-                            ->sum('shipped_qty');
+                        
         $deliveryStatuses = DeliveryStatus::where("po_num", $entry->po_num)
                             ->where("po_line", $entry->po_line)
                             ->get();
@@ -233,24 +231,4 @@ class PurchaseOrderLineCrudController extends CrudController
         return redirect()->back();
     }
 
-
-    
-    
-
-    // function exportPdfLabelInstant($id){
-    //     $delivery = Delivery::join('vendor_item', 'vendor_item.item', 'delivery.item')
-    //             ->join('po', 'po.po_num', 'delivery.po_num')
-    //             ->where('delivery.id', $id)
-    //             ->where('vendor_item.vend_num', DB::raw('po.vend_num'))
-    //             ->select('delivery.id as id', 'po.po_num as po_num', 'delivery.po_line as po_line', 'delivery.item as item', 
-    //             'delivery.description as description', 'delivery.ds_num as ds_num', 'delivery.po_num as po_num', 
-    //             'po.vend_num as vend_num', 'delivery.shipped_qty as qty', 'vendor_item.qty_per_box as qty_per_box')
-    //             ->get();
-        
-    //     $data['data'] = $delivery;
-        
-    //     $pdf = PDF::loadview('exports.pdf.delivery_sheet_label', $data)->setPaper('A4');
-
-    //     return $pdf->stream();
-    // }
 }
