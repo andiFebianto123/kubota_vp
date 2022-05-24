@@ -118,4 +118,5 @@ Route::group([
     Route::crud('delivery-return', 'DeliveryReturnCrudController');
     Route::get('delivery-return/create-ds', 'DeliveryReturnCrudController@createDs');
     Route::post('delivery-return/close-ds', 'DeliveryReturnCrudController@closeDs');
+    Route::get('delivery-return-export', 'DeliveryStatusCrudController@exportAdvance');
 });

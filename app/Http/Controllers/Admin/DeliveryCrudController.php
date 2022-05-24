@@ -98,6 +98,11 @@ class DeliveryCrudController extends CrudController
             'type' => 'text',
         ]);
         CRUD::addColumn([
+            'label'     => 'DS Type',
+            'name'      => 'ds_type',
+            'type' => 'text',
+        ]);
+        CRUD::addColumn([
             'label'     => 'Shipped Date',
             'name'      => 'shipped_date',
             'type' => 'text',
@@ -402,6 +407,16 @@ class DeliveryCrudController extends CrudController
             ], 422);
         }
 
+        $dsType = '00';
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            if (strtoupper(Constant::getRole()) == "ADMIN PTKI") {
+                $dsType = '02';
+            }
+            $dsType = '01';
+        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
+            $dsType = '00';
+        }
+
         DB::beginTransaction();
 
         try{
@@ -411,6 +426,7 @@ class DeliveryCrudController extends CrudController
             $insertDsheet->po_num = $poLine->po_num;
             $insertDsheet->po_line = $poLine->po_line;
             $insertDsheet->po_release = $poLine->po_release;
+            $insertDsheet->ds_type = $dsType;
             $insertDsheet->po_change = $poLine->po_change;
             $insertDsheet->ds_line = $dsNum['line'];
             $insertDsheet->item = $poLine->item;
@@ -440,6 +456,7 @@ class DeliveryCrudController extends CrudController
             $insertDstatus->po_release = $poLine->po_release;
             $insertDstatus->ds_line = $dsNum['line'];
             $insertDstatus->item = $poLine->item;
+            $insertDstatus->ds_type = $dsType;
             $insertDstatus->description = $poLine->description;
             $insertDstatus->unit_price = $poLine->unit_price;
             $insertDstatus->shipped_qty = $shippedQty;

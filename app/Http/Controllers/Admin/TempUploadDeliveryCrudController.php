@@ -179,6 +179,16 @@ class TempUploadDeliveryCrudController extends CrudController
 
         DB::beginTransaction();
 
+        $dsType = '00';
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            if (strtoupper(Constant::getRole()) == "ADMIN PTKI") {
+                $dsType = '02';
+            }
+            $dsType = '01';
+        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
+            $dsType = '00';
+        }
+
         try {
             foreach ($dataTemps as $key => $dt) {
                 $status = "success";
@@ -220,17 +230,18 @@ class TempUploadDeliveryCrudController extends CrudController
                             ->where('po_line.po_line', $dataTemp->po_line)
                             ->orderBy('po_line.po_change', 'desc')
                             ->first();
-                $ds_num =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->po_line, $dataTemp->delivery_date);
-                $ds_line = $ds_num['line'];
+                $dsNum =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->po_line, $dataTemp->delivery_date);
+                $dsLine = $dsNum['line'];
     
                 $insertDlv = new Delivery();
-                $insertDlv->ds_num = $ds_num['single'];
-                $insertDlv->group_ds_num = $ds_num['group'];
+                $insertDlv->ds_num = $dsNum['single'];
+                $insertDlv->group_ds_num = $dsNum['group'];
                 $insertDlv->po_line = $dataTemp->po_line;
                 $insertDlv->po_num = $dataTemp->po_num;
                 $insertDlv->po_change = $poLine->po_change;
                 $insertDlv->po_release = $poLine->po_num."-" .$poLine->po_line;
-                $insertDlv->ds_line = $ds_line;
+                $insertDlv->ds_line = $dsLine;
+                $insertDlv->ds_type = $dsType;
                 $insertDlv->item = $poLine->item;
                 $insertDlv->description = $poLine->description;
                 $insertDlv->u_m = $poLine->u_m;
@@ -246,18 +257,17 @@ class TempUploadDeliveryCrudController extends CrudController
                 $insertDlv->w_serial = ($dataTemp->serial_number) ? $dataTemp->serial_number : 0;
                 $insertDlv->petugas_vendor = $dataTemp->petugas_vendor;
                 $insertDlv->no_surat_jalan_vendor = $dataTemp->no_surat_jalan_vendor;
-
-                dd($poLine);
     
                 if ($poLine->status == 'O' && $poLine->accept_flag == 1 && $dataTemp->category_validation != 'danger') {
                     $insertDlv->save();
     
                     $insertDlvStatus = new DeliveryStatus();
-                    $insertDlvStatus->ds_num = $ds_num['single'];
+                    $insertDlvStatus->ds_num = $dsNum['single'];
                     $insertDlvStatus->po_num = $poLine->po_num;
                     $insertDlvStatus->po_line = $poLine->po_line;
                     $insertDlvStatus->po_release = $poLine->po_num."-" .$poLine->po_line;
-                    $insertDlvStatus->ds_line = $ds_line;
+                    $insertDlvStatus->ds_line = $dsLine;
+                    $insertDlvStatus->ds_type = $dsType;
                     $insertDlvStatus->item = $poLine->item;
                     $insertDlvStatus->description = $poLine->description;
                     $insertDlvStatus->unit_price = $poLine->unit_price;
@@ -278,8 +288,8 @@ class TempUploadDeliveryCrudController extends CrudController
                             $materialOuthouse = MaterialOuthouse::where('id', $da->id)->first();
                             if (isset($materialOuthouse)) {
                                 $insertOuthouse = new IssuedMaterialOuthouse();
-                                $insertOuthouse->ds_num = $ds_num['single'];
-                                $insertOuthouse->ds_line = $ds_line;
+                                $insertOuthouse->ds_num = $dsNum['single'];
+                                $insertOuthouse->ds_line = $dsLine;
                                 $insertOuthouse->ds_detail = $int_ds_detail++;
                                 $insertOuthouse->matl_item = $materialOuthouse->matl_item;
                                 $insertOuthouse->description =  $materialOuthouse->description;
@@ -300,8 +310,8 @@ class TempUploadDeliveryCrudController extends CrudController
                             $issuedQty =  $dataTemp->shipped_qty * $om->qty_per;
         
                             $insertImo = new IssuedMaterialOuthouse();
-                            $insertImo->ds_num =  $ds_num['single'];
-                            $insertImo->ds_line = $ds_line;
+                            $insertImo->ds_num =  $dsNum['single'];
+                            $insertImo->ds_line = $dsLine;
                             $insertImo->ds_detail = $poLine->item;
                             $insertImo->matl_item = $om->matl_item;
                             $insertImo->description = $om->description;
@@ -309,7 +319,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             $insertImo->issue_qty = $issuedQty;
                             $insertImo->po_num = $poLine->po_num;
                             $insertImo->po_line = $poLine->po_line;
-                            $insertImo->ds_type = $ds_num['type'];
+                            $insertImo->ds_type = $dsNum['type'];
                             $insertImo->vend_num = $poLine->vend_num;
                             $insertImo->created_by = backpack_auth()->user()->id;
                             $insertImo->updated_by = backpack_auth()->user()->id;

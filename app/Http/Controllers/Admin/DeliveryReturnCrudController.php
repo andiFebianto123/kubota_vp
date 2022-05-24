@@ -75,7 +75,8 @@ class DeliveryReturnCrudController extends CrudController
         if(Constant::checkPermission('Close Delivery Return')){
             $this->crud->addButtonFromView('line', 'closed_ds_return', 'closed_ds_return', 'end');
         }
-        $this->crud->exportRoute = url('admin/delivery-statuses-export');
+        $this->crud->exportRoute = url('admin/delivery-return-export');
+        $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         $this->crud->query->join('delivery_status', function($join){
             $join->on('delivery_status.ds_num', '=', 'delivery_repair.ds_num_reject');
             $join->on('delivery_status.ds_line', '=', 'delivery_repair.ds_line_reject');
@@ -127,11 +128,81 @@ class DeliveryReturnCrudController extends CrudController
                 'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
             }
         ]);
-        CRUD::column('item');
-        CRUD::column('description');
-        CRUD::column('shipped_qty');
-        CRUD::column('received_qty');
-        CRUD::column('rejected_qty')->label('Reject Qty');
+        CRUD::addColumn([
+            'label'     => 'Item',
+            'name'      => 'item',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'item') {
+                    $query->orWhere('delivery_status.item', 'like', '%'.$searchTerm.'%');
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.item', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Description',
+            'name'      => 'description',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'item') {
+                    $query->orWhere('delivery_status.description', 'like', '%'.$searchTerm.'%');
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.description', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Shipped Qty',
+            'name'      => 'shipped_qty',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'item') {
+                    $query->orWhere('delivery_status.shipped_qty', 'like', '%'.$searchTerm.'%');
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.shipped_qty', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Received Qty',
+            'name'      => 'received_qty',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'item') {
+                    $query->orWhere('delivery_status.received_qty', 'like', '%'.$searchTerm.'%');
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.received_qty', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
+            }
+        ]);
+        CRUD::addColumn([
+            'label'     => 'Rejected Qty',
+            'name'      => 'rejected_qty',
+            'orderable'  => true,
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if ($column['name'] == 'item') {
+                    $query->orWhere('delivery_status.rejected_qty', 'like', '%'.$searchTerm.'%');
+                }
+            },
+            'orderLogic' => function ($query, $column, $columnDirection) {
+                return $query->orderBy('delivery_status.rejected_qty', $columnDirection)
+                ->select('delivery_repair.*','delivery_status.item', 'delivery_status.description', 
+                'delivery_status.received_qty', 'delivery_status.po_num', 'delivery_status.po_line', 'delivery_status.shipped_qty', 'delivery_status.rejected_qty');        
+            }
+        ]);
         CRUD::column('repair_qty')->label('Return Qty');
         CRUD::addColumn([
             'name'     => 'available_qty',
@@ -144,7 +215,7 @@ class DeliveryReturnCrudController extends CrudController
             },
             
         ]);
-        /*
+        
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([
                 'name'        => 'vendor',
@@ -154,22 +225,24 @@ class DeliveryReturnCrudController extends CrudController
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
-                // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
-                // JOIN po p ON p.po_num = d.po_num
-                // WHERE p.vend_num = 'V001303'
-                $dbGet = \App\Models\DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
-                ->select('delivery_status.id as id')
+                $dbGet = \App\Models\DeliveryRepair::join('delivery_status', function($join){
+                    $join->on('delivery_status.ds_num', '=', 'delivery_repair.ds_num_reject');
+                    $join->on('delivery_status.ds_line', '=', 'delivery_repair.ds_line_reject');
+                })
+                ->join('po', 'po.po_num', 'delivery_status.po_num')
+                ->select('delivery_repair.id as id')
                 ->where('po.vend_num', $value)
                 ->get()
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
-                $this->crud->addClause('whereIn', 'delivery_status.id', $dbGet->unique()->toArray());
+                $this->crud->addClause('whereIn', 'delivery_repair.id', $dbGet->unique()->toArray());
             });
         }else{
+            $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num');
             $this->crud->addClause('where', 'po.vend_num', backpack_auth()->user()->vendor->vend_num);
         }
-        */
+        
     }
 
 
@@ -198,17 +271,26 @@ class DeliveryReturnCrudController extends CrudController
         $dsNum = request('num');
         $dsLine = request('line');
 
-        $deliveryStatus = DeliveryStatus::where('ds_num', $dsNum)
-                        ->where('ds_line', $dsLine)
-                        ->first();
+        $deliveryRepair = DeliveryRepair::where('ds_num_reject', $dsNum)
+            ->where('ds_line_reject', $dsLine)
+            ->first();
+        
+        $deliveryStatus = DeliveryStatus::join('po', 'po.po_num', 'delivery_status.po_num')
+            ->where('ds_num', $dsNum)
+            ->where('ds_line', $dsLine)
+            ->first();
 
-        if (!isset($deliveryStatus)) {
+        if (!isset($deliveryRepair)) {
             abort(403);
         }
-        
-        $deliveryRepair = DeliveryRepair::where('ds_num_reject', $dsNum)
-                        ->where('ds_line_reject', $dsLine)
-                        ->first();
+
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            // $canAccess = true;
+        }else{
+            if (backpack_auth()->user()->vendor->vend_num != $deliveryStatus->vend_num) {
+                abort(403);
+            }
+        }
 
         $deliveryReturns = DeliveryReturn::join('delivery as dlv', function($join){
                                 $join->on('dlv.ds_num', '=', 'delivery_return.ds_num');
@@ -218,7 +300,6 @@ class DeliveryReturnCrudController extends CrudController
                             ->where('ref_ds_line', $dsLine)
                             ->get(['delivery_return.*', 'dlv.no_surat_jalan_vendor','dlv.shipped_qty',
                             'dlv.ref_ds_num', 'dlv.ref_ds_line', 'dlv.petugas_vendor']);
-
        
         $availableQty = (new DsValidation())->availableQtyReturn($dsNum, $dsLine);
 
@@ -264,7 +345,6 @@ class DeliveryReturnCrudController extends CrudController
                 'data-max' =>  $availableQty,
               ], 
         ]);
-        
 
         $arrFilters = [];
         $arrFilters[] = ['po_line.item', '=', $deliveryStatus->item];
@@ -373,7 +453,7 @@ class DeliveryReturnCrudController extends CrudController
             $query = preg_replace($pattern, "", $sqlQuery);
             $datas = DB::select($query);
 
-            $filename = 'DST-'.date('YmdHis').'.xlsx';
+            $filename = 'DSR-'.date('YmdHis').'.xlsx';
 
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
@@ -418,7 +498,12 @@ class DeliveryReturnCrudController extends CrudController
             ], 422);
         }
 
-        $dsType = '0P';
+        $dsType = 'P';
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            $dsType = '1P';
+        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
+            $dsType = '0P';
+        }
         
         DB::beginTransaction();
 
@@ -533,7 +618,12 @@ class DeliveryReturnCrudController extends CrudController
             ], 422);
         }
 
-        $dsType = 'R0';
+        $dsType = 'R';
+        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
+            $dsType = 'R1';
+        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
+            $dsType = 'R0';
+        }
         
         DB::beginTransaction();
 
