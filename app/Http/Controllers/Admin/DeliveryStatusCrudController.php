@@ -67,6 +67,8 @@ class DeliveryStatusCrudController extends CrudController
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
         $this->crud->exportRoute = url('admin/delivery-statuses-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R0');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R1');
 
         CRUD::column('id')->label('ID');
         CRUD::column('ds_num')->label('DS Num');
@@ -93,6 +95,7 @@ class DeliveryStatusCrudController extends CrudController
                 return $query->orderBy('delivery_status.po_num', $columnDirection)->select('delivery_status.*');
             }
         ]);
+        
         CRUD::column('description')->label('Desc');
         CRUD::column('grn_num')->label('GRN Num');
         CRUD::column('grn_line')->label('GRN Line');

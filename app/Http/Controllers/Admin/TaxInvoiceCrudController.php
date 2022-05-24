@@ -90,6 +90,9 @@ class TaxInvoiceCrudController extends CrudController
 
         $this->crud->addButtonFromView('line_2', 'show2', 'show', 'begining');
 
+        $this->crud->addClause('where', 'ds_type', '!=', 'R0');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R1');
+
         $this->crud->addClause('where', 'executed_flag', '=', 0);
         $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
 
@@ -944,6 +947,8 @@ class TaxInvoiceCrudController extends CrudController
         }
 
         $this->crud2->where('executed_flag','!=', 0);
+        $this->crud->addClause('where', 'ds_type', '!=', 'R0');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R1');
     }
 
 

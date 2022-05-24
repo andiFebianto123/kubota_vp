@@ -71,6 +71,8 @@ class DeliveryCrudController extends CrudController
         $this->crud->exportRoute = url('admin/delivery-sheet-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R0');
+        $this->crud->addClause('where', 'ds_type', '!=', 'R1');
 
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addButtonFromView('top', 'bulk_print_label', 'bulk_print_label', 'beginning');
