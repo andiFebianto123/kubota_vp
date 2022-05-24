@@ -181,14 +181,14 @@ class TempUploadDelivery extends Model
             $arrValidation[] = ['mode' => 'danger', 'message' => 'Delivery Date format is not valid (yyyy-mm-dd)'];
         }
 
-        $minDate = Carbon::now()->subDays(30)->format('d/m/Y');
-        $maxDate = Carbon::now()->addDay(7)->format('d/m/Y');
+        $minDate = Carbon::now()->subDays(30)->format('Y-m-d');
+        $maxDate = Carbon::now()->addDay(7)->format('Y-m-d');
 
-        if (date('d/m/Y', strtotime($this->delivery_date)) > $maxDate) {
-            $arrValidation[] = ['mode' => 'danger', 'message' => 'The shipped date must be a date before '.$maxDate];
+        if (date('Y-m-d', strtotime($this->delivery_date)) >= $maxDate) {
+            $arrValidation[] = ['mode' => 'danger', 'message' => 'The delivery date must be a date before '.$maxDate];
         }
-        if (date('d/m/Y', strtotime($this->delivery_date)) < $minDate) {
-            $arrValidation[] = ['mode' => 'danger', 'message' => 'The shipped date must be a date after '.$minDate];
+        if (date('Y-m-d', strtotime($this->delivery_date)) <= $minDate) {
+            $arrValidation[] = ['mode' => 'danger', 'message' => 'The delivery date must be a date after '.$minDate];
         }
         return $arrValidation;
     }

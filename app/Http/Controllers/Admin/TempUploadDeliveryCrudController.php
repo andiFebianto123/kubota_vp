@@ -415,8 +415,6 @@ class TempUploadDeliveryCrudController extends CrudController
 
     public function edit($id)
     {
-        CRUD::setValidation(DeliveryRequest::class);
-
         $entry = $this->crud->getCurrentEntry();
         $poLine = PurchaseOrderLine::where('po_num', $entry->po_num)->where('po_line', $entry->po_line)->first();
 
@@ -518,6 +516,8 @@ class TempUploadDeliveryCrudController extends CrudController
 
     public function update($id)
     {
+        CRUD::setValidation(DeliveryRequest::class);
+
         $this->crud->setRequest($this->crud->validateRequest());
         $entry = $this->crud->getCurrentEntry();
         $request = $this->crud->getRequest();
