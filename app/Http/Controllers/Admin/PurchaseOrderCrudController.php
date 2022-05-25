@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Validator;
 
 // export with spout
 use App\Http\Requests\PurchaseOrderRequest;
+use App\Mail\RejectPoMail;
 use Box\Spout\Common\Entity\Style\CellAlignment;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
@@ -374,7 +375,6 @@ class PurchaseOrderCrudController extends CrudController
             $po_line->save();
         }
         
-
         return response()->json([
             'status' => true,
             'alert' => 'success',
@@ -391,6 +391,9 @@ class PurchaseOrderCrudController extends CrudController
         $poId = $request->po_id;
         $reason = $request->reason;
 
+        $poNum = ""; 
+        $dataPoLine = "<ul>";
+        DB::beginTransaction();
         foreach ($poLineIds as $key => $poLineId) {
             $po_line = PurchaseOrderLine::where('id', $poLineId)->first();
             $po_line->reason = $reason;
@@ -398,6 +401,61 @@ class PurchaseOrderCrudController extends CrudController
             $po_line->read_by = backpack_auth()->user()->id;
             $po_line->read_at = now();
             $po_line->save();
+
+            $poNum = $po_line->po_num;
+            $dataPoLine .= "<li>".$po_line->po_num."-".$po_line->po_line."</li>";
+        }
+        $dataPoLine .= "</ul>";
+
+        $po = PurchaseOrder::join('vendor','vendor.vend_num','po.vend_num')
+            ->where('po_num', $poNum)
+            ->select('po.*', 'vendor.vend_email', 'vendor.buyer_email')
+            ->first();
+        
+        if (isset($po)) {
+            $pecahEmailVendor = (new Constant())->emailHandler($po['vend_email'], 'array');
+            $pecahEmailBuyer = (new Constant())->emailHandler($po['buyer_email'], 'array');
+            $titleEmail = 'Rejected PO';
+            $messageEmail = 'Anda memiliki po reject sebagai berikut : '.$dataPoLine.' Alasan reject : '.$reason;
+            $URL = env('APP_URL_PRODUCTION') . "/purchase-order/{$po->id}/show";
+
+            $details = [
+                'buyer_email' => $pecahEmailBuyer,
+                'po_num' => $po_line->po_num,
+                'type' => 'reminder_po',
+                'title' =>  $titleEmail,
+                'message' => $messageEmail,
+                'url_button' => $URL.'?prev_session=true'
+            ];
+            try{
+                Mail::to($pecahEmailVendor)
+                ->cc($pecahEmailBuyer)
+                ->send(new RejectPoMail($details));
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => true,
+                    'alert' => 'success',
+                    'message' => 'Reject Successfully',
+                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'validation_errors' => []
+                ], 200);
+            }
+            catch(Exception $e){
+                $subject =  $titleEmail;
+                DB::rollback();
+
+                return response()->json([
+                    'status' => false,
+                    'alert' => 'danger',
+                    'message' => $e->getMessage(),
+                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'validation_errors' => []
+                ], 200);
+                    
+                (new EmailLogWriter())->create($subject, json_encode($pecahEmailVendor), $e->getMessage(), json_encode($pecahEmailBuyer), env('MAIL_PO_BCC',""), json_encode($pecahEmailBuyer));
+            }
         }
         
         return response()->json([
@@ -499,18 +557,6 @@ class PurchaseOrderCrudController extends CrudController
             session()->flash('message', 'Data has been successfully import');
             session()->flash('status', 'success');
         } catch (Throwable $e) {
-
-            // $failures = $e->mes();
-            // $arrErrors = [];
-
-            // foreach ($failures as $failure) {
-            //     $arrErrors[] = [
-            //         'row' => $failure->row(),
-            //         'errormsg' => $failure->errors(),
-            //         'values' => $failure->values(),
-            //     ];
-            // }
-            // $errorMultiples = collect($arrErrors)->unique('row');
 
             DB::rollback();
 

@@ -8,6 +8,9 @@
 </span>
 
 <script>
+	$('#crudTable_filter input').keyup(function(e) {
+		crud.checkedItems = [];
+	});
 	if (typeof addOrRemoveCrudCheckedItem != 'function') {
 	  function addOrRemoveCrudCheckedItem(element) {
 	  	crud.lastCheckedItem = false;
