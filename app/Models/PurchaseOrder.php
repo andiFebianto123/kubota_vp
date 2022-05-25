@@ -60,7 +60,7 @@ class PurchaseOrder extends Model
 
 
     public function getTotalPoLineAttribute(){
-        $totalPo = PurchaseOrderLine::where('po_num', $this->po_num)->count();
+        $totalPo = PurchaseOrderLine::where('po_num', $this->po_num)->groupBy('po_num', 'po_change')->count();
 
         return $totalPo;
     }
@@ -70,6 +70,7 @@ class PurchaseOrder extends Model
         return PurchaseOrderLine::where('po_num', $this->po_num)
                         // ->where('status', 'O')
                         ->where('accept_flag', 1)
+                        ->groupBy('po_num', 'po_change')
                         ->count();
     }
 
@@ -78,6 +79,7 @@ class PurchaseOrder extends Model
         return PurchaseOrderLine::where('po_num', $this->po_num)
                         // ->where('status', 'O')
                         ->where('accept_flag', 2)
+                        ->groupBy('po_num', 'po_change')
                         ->count();
     }
 
