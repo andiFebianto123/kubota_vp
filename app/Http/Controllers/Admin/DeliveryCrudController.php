@@ -390,7 +390,7 @@ class DeliveryCrudController extends CrudController
         $args = [
             'po_num' => $poLine->po_num,
             'po_line' => $poLine->po_line ,
-            'order_qty' => $shippedQty
+            'shipped_qty' => $shippedQty
         ];
         // DS validation function available at App\Helpers\DsValidation
         $cmq = (new DsValidation())->currentMaxQty($args);
@@ -398,8 +398,9 @@ class DeliveryCrudController extends CrudController
             $alertFor = " Outhouse";
             $cmq =  (new DsValidation())->currentMaxQtyOuthouse($args);
         }
+        
         if ($cmq['datas'] < $shippedQty) {
-            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal'];
+            $errors = ['shipped_qty' => 'Jumlah Qty melebihi batas maksimal '.$cmq['datas']];
 
             return response()->json([
                 'status' => false,

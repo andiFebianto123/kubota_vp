@@ -35,13 +35,14 @@ class DsValidation
     GROUP by po_num, po_line, po_change";
 
     $selectMaxQty =  DB::select($queryCount);
+
     $realtimeQty = 0;
     if (sizeof($selectMaxQty) > 0) {
       $realtimeQty = $selectMaxQty[0]->maximum_qty;
     }
 
     return [
-      'datas'  => $realtimeQty,
+      'datas'  => round($realtimeQty,8),
       'mode'   => 'danger',
       'message' => 'Maksimum Qty ' . $realtimeQty
     ];
@@ -67,7 +68,7 @@ class DsValidation
     }
 
     return [
-      'datas'  => $currentQty,
+      'datas'  => round($currentQty,8),
       'mode'   => 'danger',
       'message' => 'Maksimum Qty ' . $currentQty
     ];
@@ -235,6 +236,6 @@ class DsValidation
 
     $availableQty = $totalDeliveryReturn - $totalDeliveryCreated - $totalDeliveryClosed;
 
-    return $availableQty;
+    return round($availableQty, 8);
   }
 }
