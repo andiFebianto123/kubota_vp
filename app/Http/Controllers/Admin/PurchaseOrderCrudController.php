@@ -91,7 +91,7 @@ class PurchaseOrderCrudController extends CrudController
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            $this->crud->addClause('where', 'vend_num', '=', backpack_auth()->user()->vendor->vend_num);
+            $this->crud->addClause('where', 'po.vend_num', '=', backpack_auth()->user()->vendor->vend_num);
         }
 
         // CRUD::column('id')->label('ID');
@@ -113,7 +113,7 @@ class PurchaseOrderCrudController extends CrudController
                 // 'searchLogic' => true,
                 'searchLogic' => function ($query, $column, $searchTerm) {
                     $query->orWhereHas('vendor', function ($q) use ($column, $searchTerm) {
-                        $q->where('vend_name', 'like', '%'.$searchTerm.'%');
+                        $q->where('po.vend_num', 'like', '%'.$searchTerm.'%');
                     });
                 },
                 'orderLogic' => function ($query, $column, $columnDirection) {

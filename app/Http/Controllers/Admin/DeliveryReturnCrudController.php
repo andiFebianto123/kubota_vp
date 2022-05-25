@@ -225,13 +225,7 @@ class DeliveryReturnCrudController extends CrudController
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
-                $dbGet = \App\Models\DeliveryRepair::join('delivery_status', function($join){
-                    $join->on('delivery_status.ds_num', '=', 'delivery_repair.ds_num_reject');
-                    $join->on('delivery_status.ds_line', '=', 'delivery_repair.ds_line_reject');
-                })
-                ->join('po', 'po.po_num', 'delivery_status.po_num')
-                ->select('delivery_repair.id as id')
-                ->where('po.vend_num', $value)
+                $dbGet = \App\Models\DeliveryRepair::where('ds_num_reject','like', $value.'%')
                 ->get()
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
@@ -239,8 +233,8 @@ class DeliveryReturnCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'delivery_repair.id', $dbGet->unique()->toArray());
             });
         }else{
-            $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num');
-            $this->crud->addClause('where', 'po.vend_num', backpack_auth()->user()->vendor->vend_num);
+            // $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num');
+            $this->crud->addClause('where', 'ds_num_reject','like', backpack_auth()->user()->vendor->vend_num.'%');
         }
         
     }
