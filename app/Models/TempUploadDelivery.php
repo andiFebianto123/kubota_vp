@@ -43,7 +43,8 @@ class TempUploadDelivery extends Model
     public function purchaseOrderLine()
     {
         return $this->belongsTo('App\Models\PurchaseOrderLine', 'po_num', 'po_num')
-                  ->where('po_line', $this->po_line);
+                  ->where('po_line', $this->po_line)
+                  ->orderBy('po_change', 'desc');
     }
 
 
@@ -167,6 +168,9 @@ class TempUploadDelivery extends Model
         }
         if($this->purchaseOrderLine->accept_flag != 1){
             $arrValidation[] = ['mode' => 'danger', 'message' => 'This PO LINE has not been accepted'];
+        }
+        if($this->purchaseOrderLine->status != 'O'){
+            $arrValidation[] = ['mode' => 'danger', 'message' => 'This PO Line status is '.$this->purchaseOrderLine->status];
         }
         if (!isset($this->petugas_vendor)) {
             $arrValidation[] = ['mode' => 'danger', 'message' => 'Petugas Vendor is required'];
