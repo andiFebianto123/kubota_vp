@@ -290,6 +290,7 @@ class TempUploadDeliveryCrudController extends CrudController
                                 $insertOuthouse = new IssuedMaterialOuthouse();
                                 $insertOuthouse->ds_num = $dsNum['single'];
                                 $insertOuthouse->ds_line = $dsLine;
+                                $insertOuthouse->ds_type = $dsType;
                                 $insertOuthouse->ds_detail = $int_ds_detail++;
                                 $insertOuthouse->matl_item = $materialOuthouse->matl_item;
                                 $insertOuthouse->description =  $materialOuthouse->description;
@@ -319,7 +320,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             $insertImo->issue_qty = $issuedQty;
                             $insertImo->po_num = $poLine->po_num;
                             $insertImo->po_line = $poLine->po_line;
-                            $insertImo->ds_type = $dsNum['type'];
+                            $insertImo->ds_type = $dsType;
                             $insertImo->vend_num = $poLine->vend_num;
                             $insertImo->created_by = backpack_auth()->user()->id;
                             $insertImo->updated_by = backpack_auth()->user()->id;

@@ -49,7 +49,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
             WHERE imo.matl_item = material_outhouse.matl_item
             AND imo.po_num = po.po_num
             AND imo.vend_num = po.vend_num
-            AND (imo.ds_type = '00' OR imo.ds_type = '01')
+            AND imo.ds_type IN ('00','01', '02')
             AND EXISTS(
                 SELECT 1 FROM po_line WHERE po_line.po_num = imo.po_num 
                 AND po_line.po_line = imo.po_line

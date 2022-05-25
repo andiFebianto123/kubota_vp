@@ -518,7 +518,7 @@ class DeliveryCrudController extends CrudController
                     $insertImo->issue_qty = $moIssueQty;
                     $insertImo->po_num = $poLine->po_num;
                     $insertImo->po_line = $poLine->po_line;
-                    $insertImo->ds_type = $dsNum['type'];
+                    $insertImo->ds_type = $dsType;
                     $insertImo->vend_num = $poLine->vend_num;
                     $insertImo->created_by = backpack_auth()->user()->id;
                     $insertImo->updated_by = backpack_auth()->user()->id;
