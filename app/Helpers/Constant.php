@@ -32,28 +32,34 @@ class Constant
     return $status;
   }
 
-  public function codeDs($poNum, $poLine, $delivery_date){
-    $code = "";
-    $user = backpack_auth()->user()->roles->pluck('name')->first();
-    if(strpos(strtoupper($user), 'PTKI')){
-      $code = '02';
-    }else{
-      $code = '00';
+  public function codeDs($poNum, $deliveryDate, $category = 'general'){
+    $code = '00';
+    $role = strtoupper(Constant::getRole());
+    if ($category == 'general') {
+      if(strpos($role, 'PTKI')){
+        $code = '01';
+        if ($role == "ADMIN PTKI") {
+          $code = '02';
+        }
+      }elseif (strpos($role, 'VENDOR')) {
+        $code = '00';
+      }
+    }elseif ($category == 'return') {
+      if(strpos($role, 'PTKI')){
+        $code = '1P';
+      }elseif (strpos($role, 'VENDOR')) {
+        $code = '0P';
+      }
+    }elseif ($category == 'closed') {
+      if(strpos($role, 'PTKI')){
+        $code = 'R1';
+      }elseif (strpos($role, 'VENDOR')) {
+          $code = 'R0';
+      }
     }
-    // switch (backpack_auth()->user()->roles->pluck('name')->first()) {
-    //     case 'Admin PTKI':
-    //         $code = "02";
-    //         break;
-    //     case 'User PTKI':
-    //         $code = "02";
-    //         break;
-    //     default:
-    //         $code = "00";
-    //         break;
-    // }
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
-    $dsNumMid = $po->vend_num.date('ymd', strtotime($delivery_date));
+    $dsNumMid = $po->vend_num.date('ymd', strtotime($deliveryDate));
     $ds = Delivery::where('ds_num', $dsNumMid.$code)->orderBy('ds_line', 'desc')->first();
     $dsLine = (isset($ds))?$ds->ds_line+1:1;
 

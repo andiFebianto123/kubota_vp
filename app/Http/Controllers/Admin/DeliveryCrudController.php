@@ -384,7 +384,7 @@ class DeliveryCrudController extends CrudController
 
 
         // ds num generator from global function
-        $dsNum =  (new Constant())->codeDs($poLine->po_num, $poLine->po_line, $shippedDate);
+        $dsNum =  (new Constant())->codeDs($poLine->po_num, $shippedDate);
 
         $alertFor = "";
         $args = [
@@ -409,15 +409,7 @@ class DeliveryCrudController extends CrudController
             ], 422);
         }
 
-        $dsType = '00';
-        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            if (strtoupper(Constant::getRole()) == "ADMIN PTKI") {
-                $dsType = '02';
-            }
-            $dsType = '01';
-        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
-            $dsType = '00';
-        }
+        $dsType = $dsNum['type'];
 
         DB::beginTransaction();
 

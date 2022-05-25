@@ -179,16 +179,6 @@ class TempUploadDeliveryCrudController extends CrudController
 
         DB::beginTransaction();
 
-        $dsType = '00';
-        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            if (strtoupper(Constant::getRole()) == "ADMIN PTKI") {
-                $dsType = '02';
-            }
-            $dsType = '01';
-        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
-            $dsType = '00';
-        }
-
         try {
             foreach ($dataTemps as $key => $dt) {
                 $status = "success";
@@ -230,8 +220,9 @@ class TempUploadDeliveryCrudController extends CrudController
                             ->where('po_line.po_line', $dataTemp->po_line)
                             ->orderBy('po_line.po_change', 'desc')
                             ->first();
-                $dsNum =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->po_line, $dataTemp->delivery_date);
+                $dsNum =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->delivery_date);
                 $dsLine = $dsNum['line'];
+                $dsType = $dsNum['type'];
     
                 $insertDlv = new Delivery();
                 $insertDlv->ds_num = $dsNum['single'];

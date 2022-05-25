@@ -478,7 +478,7 @@ class DeliveryReturnCrudController extends CrudController
 
         $delivery = Delivery::where('ds_num', $strDsNum)->where('ds_line', $strDsLine)->first();
 
-        $dsNum =  (new Constant())->codeDs($delivery->po_num, $delivery->po_line, $shippedDate);
+        $dsNum =  (new Constant())->codeDs($delivery->po_num, $shippedDate, 'return');
         $availableQty = (new DsValidation())->availableQtyReturn($strDsNum, $strDsLine);
 
         if ($availableQty < $shippedQty) {
@@ -492,12 +492,7 @@ class DeliveryReturnCrudController extends CrudController
             ], 422);
         }
 
-        $dsType = 'P';
-        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            $dsType = '1P';
-        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
-            $dsType = '0P';
-        }
+        $dsType = $dsNum['type'];
         
         DB::beginTransaction();
 
@@ -601,7 +596,7 @@ class DeliveryReturnCrudController extends CrudController
 
         $delivery = Delivery::where('ds_num', $dr->ds_num_reject)->where('ds_line', $dr->ds_line_reject)->first();
 
-        $dsNum =  (new Constant())->codeDs($delivery->po_num, $delivery->po_line, $availableQty);
+        $dsNum =  (new Constant())->codeDs($delivery->po_num, $delivery->shipped_date, 'closed');
 
         if ($availableQty <= 0) {
 
@@ -612,12 +607,7 @@ class DeliveryReturnCrudController extends CrudController
             ], 422);
         }
 
-        $dsType = 'R';
-        if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
-            $dsType = 'R1';
-        }elseif (strpos(strtoupper(Constant::getRole()), 'VENDOR')) {
-            $dsType = 'R0';
-        }
+        $dsType = $dsNum['type'];
         
         DB::beginTransaction();
 
