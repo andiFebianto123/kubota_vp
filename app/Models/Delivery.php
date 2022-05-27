@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Traits\CustomRevisionableTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Venturecraft\Revisionable\RevisionableTrait;
@@ -10,7 +11,11 @@ class Delivery extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-    use RevisionableTrait;
+    use CustomRevisionableTrait;
+
+    protected $revisionEnabled = true;
+    protected $revisionCreationsEnabled = true;
+    protected $revisionForceDeleteEnabled = true;
 
     protected $table = 'delivery';
     protected $append = ['po_po_line'];

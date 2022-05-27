@@ -225,12 +225,15 @@ class DeliveryReturnCrudController extends CrudController
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
             function($value) {
-                $dbGet = \App\Models\DeliveryRepair::where('ds_num_reject','like', $value.'%')
-                ->get()
-                ->mapWithKeys(function($po, $index){
-                    return [$index => $po->id];
-                });
-                $this->crud->addClause('whereIn', 'delivery_repair.id', $dbGet->unique()->toArray());
+                // dd($value);
+                // $dbGet = \App\Models\DeliveryRepair::where('ds_num_reject','like', $value.'%')
+                // ->get()
+                // ->mapWithKeys(function($po, $index){
+                //     return [$index => $po->id];
+                // });
+                // $this->crud->addClause('whereIn', 'delivery_repair.id', $dbGet->unique()->toArray());
+                $this->crud->addClause('where', 'ds_num_reject','like', $value.'%');
+
             });
         }else{
             // $this->crud->query->join('po', 'po.po_num', 'delivery_status.po_num');
@@ -697,12 +700,28 @@ class DeliveryReturnCrudController extends CrudController
         if (isset($deliveryReturn)) {
             DB::beginTransaction();
             try {
-                DeliveryStatus::where('ds_num', $deliveryReturn->ds_num)
-                ->where('ds_line', $deliveryReturn->ds_line)->delete();
-                Delivery::where('ds_num', $deliveryReturn->ds_num)
-                ->where('ds_line', $deliveryReturn->ds_line)->delete();
-                DeliveryReturn::where('id', $id)->delete();
-                
+                $dlvStatus = DeliveryStatus::where('ds_num', $deliveryReturn->ds_num)
+                ->where('ds_line', $deliveryReturn->ds_line)->get();
+                if($dlvStatus->count() > 0){
+                    foreach($dlvStatus as $ds){
+                        $ds->delete();
+                    }
+                }
+
+                $dlv = Delivery::where('ds_num', $deliveryReturn->ds_num)
+                ->where('ds_line', $deliveryReturn->ds_line)->get();
+                if($dlv->count() > 0){
+                    foreach($dlv as $d){
+                        $d->delete();
+                    }
+                }
+
+                $dlvReturn = DeliveryReturn::where('id', $id)->get();
+                if($dlvReturn->count() > 0){
+                    foreach($dlvReturn as $dr){
+                        $dr->delete();
+                    }
+                }
                 DB::commit();
 
             } catch(\Exception $e){
@@ -715,7 +734,6 @@ class DeliveryReturnCrudController extends CrudController
                 ], 500);
             }
         }
-
         return true;
     }
 
