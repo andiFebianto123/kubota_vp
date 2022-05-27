@@ -74,7 +74,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>: {{($entry->email_flag) ? "✓":"-"}}</td>
                 </tr>
                 <tr>
-                    <td>Order Sheet</td>
+                    <td>Order Sheet (Ordered)</td>
+                    <td>: 
+                        @if($constant::checkPermission('Read PO Detail'))
+                            <a href="{{url('admin/order-sheet-export-pdf-ordered/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel-ordered/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td>Order Sheet (All)</td>
                     <td>: 
                         @if($constant::checkPermission('Read PO Detail'))
                             <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>

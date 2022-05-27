@@ -23,6 +23,9 @@ Route::group([
 
     Route::get('order-sheet-export-pdf/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheet');
     Route::get('order-sheet-export-excel/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheet');
+    Route::get('order-sheet-export-pdf-ordered/{po_num}', 'PurchaseOrderCrudController@exportPdfOrderSheetOrdered');
+    Route::get('order-sheet-export-excel-ordered/{po_num}', 'PurchaseOrderCrudController@exportExcelOrderSheetOrdered');
+    
     Route::get('template-serial-numbers', 'DeliveryCrudController@exportTemplateSerialNumber');
     Route::post('serial-number-import', 'DeliveryCrudController@importSn');
 

@@ -600,22 +600,6 @@ class PurchaseOrderCrudController extends CrudController
     }
 
 
-    public function exportPdfOrderSheet($poNum)
-    {
-        $po = PurchaseOrder::where('po_num', $poNum)->first();
-
-        $poLines = PurchaseOrderLine::where('po.po_num', $poNum )
-                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
-                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
-                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
-                                ->orderBy('po_line.id', 'desc')
-                                ->where('status', 'O')
-                                ->where('accept_flag', '<', 2)
-                                ->get();
-        return $this->exportPdfOrderSheetFunction($po, $poLines);
-    }
-
-
     public function exportExcelOrderSheetFunction($po, $poLines, $download = true){
        
 
@@ -642,7 +626,8 @@ class PurchaseOrderCrudController extends CrudController
         }
     }
 
-    public function exportExcelOrderSheet($poNum)
+
+    public function exportPdfOrderSheetOrdered($poNum)
     {
         $po = PurchaseOrder::where('po_num', $poNum)->first();
 
@@ -653,6 +638,50 @@ class PurchaseOrderCrudController extends CrudController
                                 ->orderBy('po_line.id', 'desc')
                                 ->where('status', 'O')
                                 ->where('accept_flag', '<', 2)
+                                ->get();
+        return $this->exportPdfOrderSheetFunction($po, $poLines);
+    }
+
+
+    public function exportExcelOrderSheetOrdered($poNum)
+    {
+        $po = PurchaseOrder::where('po_num', $poNum)->first();
+
+        $poLines = PurchaseOrderLine::where('po.po_num', $poNum )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->where('status', 'O')
+                                ->where('accept_flag', '<', 2)
+                                ->get();
+        return $this->exportExcelOrderSheetFunction($po, $poLines);
+    }
+
+
+    public function exportPdfOrderSheet($poNum)
+    {
+        $po = PurchaseOrder::where('po_num', $poNum)->first();
+
+        $poLines = PurchaseOrderLine::where('po.po_num', $poNum )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
+                                ->get();
+        return $this->exportPdfOrderSheetFunction($po, $poLines);
+    }
+
+
+    public function exportExcelOrderSheet($poNum)
+    {
+        $po = PurchaseOrder::where('po_num', $poNum)->first();
+
+        $poLines = PurchaseOrderLine::where('po.po_num', $poNum )
+                                ->leftJoin('po', 'po.po_num', 'po_line.po_num')
+                                ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
+                                ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
+                                ->orderBy('po_line.id', 'desc')
                                 ->get();
         return $this->exportExcelOrderSheetFunction($po, $poLines);
     }
