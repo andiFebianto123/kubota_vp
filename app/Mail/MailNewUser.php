@@ -36,11 +36,11 @@ class MailNewUser extends Mailable
 
         if ($mailBccs == "") {
             return $this->subject('New Account')
-                ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                // ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                 ->markdown('emails.mail-user');
         }else{
             return $this->subject('New Account')
-                ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
+                // ->replyTo(env('MAIL_REPLY_TO',""), 'Reply to Admin')
                 ->bcc($arrMailBcc)
                 ->markdown('emails.mail-user');
         }     

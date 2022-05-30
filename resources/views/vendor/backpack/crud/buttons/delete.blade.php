@@ -79,10 +79,13 @@
 			          }
 			      },
 			      error: function(result) {
-			          // Show an alert with the result
+					var defaultText = "{!! trans('backpack::crud.delete_confirmation_not_message') !!}";
+                      if(result.status != 500 && result.responseJSON != null && result.responseJSON.message != null && result.responseJSON.message.length != 0){
+						  defaultText = result.responseJSON.message;
+					  }
 			          swal({
 		              	title: "{!! trans('backpack::crud.delete_confirmation_not_title') !!}",
-                        text: "{!! trans('backpack::crud.delete_confirmation_not_message') !!}",
+                        text: defaultText,
 		              	icon: "error",
 		              	timer: 4000,
 		              	buttons: false,
