@@ -52,10 +52,12 @@ class PurchaseOrderLineCrudController extends CrudController
                 ->first();
         $deliveries = Delivery::where("po_num", $entry->po_num)
                         ->where("po_line", $entry->po_line)
+                        ->whereIn('ds_type', ['00', '01', '02'])
                         ->get();
                         
         $deliveryStatuses = DeliveryStatus::where("po_num", $entry->po_num)
                             ->where("po_line", $entry->po_line)
+                            ->whereIn('ds_type', ['00', '01', '02'])
                             ->get();
 
         $args1 = [
