@@ -207,7 +207,7 @@ class DeliveryStatusCrudController extends CrudController
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
-                'label'       => 'Name Vendor',
+                'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
             url('admin/filter-vendor/ajax-itempo-options'),

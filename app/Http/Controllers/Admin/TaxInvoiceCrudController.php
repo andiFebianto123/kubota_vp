@@ -302,7 +302,7 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud->addFilter([
                 'name'        => 'vendor',
                 'type'        => 'select2_ajax',
-                'label'       => 'Name Vendor',
+                'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
             url('admin/filter-vendor/ajax-itempo-options'),
@@ -337,7 +337,7 @@ class TaxInvoiceCrudController extends CrudController
             $this->crud->addFilter([
                 'name'        => 'vendor2',
                 'type'        => 'select2_ajax_custom',
-                'label'       => 'Name Vendor',
+                'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor',
                 'custom_table' => true,
             ],
