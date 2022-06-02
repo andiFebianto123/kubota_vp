@@ -187,6 +187,98 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div><!-- /.box-body -->
         @endif
     </div>
+
+    <div class="col-md-12">
+        @if($constant::checkPermission('Read PO Line Detail'))
+        <div class="card">
+            <div class="card-header bg-secondary">
+               <label class="font-weight-bold mb-0">Delivery Sheet Detail (Repair)</label> 
+            </div>
+            <div class="card-body">
+                @if(sizeof($delivery_repairs) > 0)
+
+                    <table id="ds-table-repair" class="table table-striped mb-0 table-responsive">
+                        <thead>
+                            <tr>
+                                <th>PO</th>
+                                <th>DS Number</th>
+                                <th>DS Line</th>
+                                <th>Group DS</th>
+                                <th>Shipped Date</th>
+                                <th>Qty</th>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <th>Amount ({{$entry->currency}})</th>
+                                <th>Total ({{$entry->currency}})</th>
+                                @endif
+                                <th>DO Number</th>
+                                <th>Operator</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $total_price = 0;
+                                $total_amount = 0;
+                                $total_qty = 0;
+                            @endphp
+                            @foreach ($delivery_repairs as $key => $delivery_repair)
+                            <tr>
+                                <td style="white-space: nowrap;">{{$delivery_repair->po_num}}-{{$delivery_repair->po_line}}</td>
+                                <td>{{$delivery_repair->ds_num}}</td>
+                                <td>{{$delivery_repair->ds_line}}</td>
+                                <td>{{$delivery_repair->group_ds_num}}</td>
+                                <td>{{date('Y-m-d',strtotime($delivery_repair->shipped_date))}}</td>
+                                <td>{{$delivery_repair->shipped_qty}}</td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <td>{{number_format($delivery_repair->unit_price,0,',','.')}}</td>
+                                <td>{{number_format($delivery_repair->shipped_qty*$delivery_repair->unit_price,0,',','.')}}</td>
+                                @endif
+                                <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
+                                <td>{{$delivery_repair->petugas_vendor}}</td>
+                                <td style="white-space: nowrap;">
+                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
+                                    <a href="{{url('admin/delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                  
+                                </td>
+                            </tr>
+                            @php
+                                $total_qty += $delivery_repair->shipped_qty;
+                                $total_amount += $delivery_repair->unit_price;
+                                $total_price += $delivery_repair->unit_price*$delivery_repair->shipped_qty;
+                            @endphp
+                            @endforeach
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" class="text-center font-weight-bold">
+                                    Total
+                                </td>
+                                <td>
+                                    {{$total_qty}}
+                                </td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <td>
+                                 {{-- number_format($total_amount,0,',','.') --}}
+                                </td>
+                                <td>
+                                 {{ number_format($total_price,0,',','.')}}
+                                </td>
+                                @endif
+                                <td colspan='3'></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                   
+                @else
+                <p>No Data Available</p>
+                @endif
+            </div>
+
+        </div><!-- /.box-body -->
+        @endif
+    </div>
 </div>
 
 @endsection

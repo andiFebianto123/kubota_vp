@@ -230,6 +230,116 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             </tr>
                         </tfoot>
                     </table>
+                    {{--
+                        @if($constant::checkPermission('Print Label Delivery Sheet'))
+                    <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
+                    @endif
+                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
+                    --}}
+                   
+                @else
+                <p>No Data Available</p>
+                @endif
+            </div>
+
+        </div><!-- /.box-body -->
+        @endif
+    </div>
+
+
+    <div class="col-md-12">
+        @if($constant::checkPermission('Read PO Line Detail'))
+        <div class="card">
+            <div class="card-header bg-secondary">
+               <label class="font-weight-bold mb-0">Delivery Sheet Detail (Repair)</label> 
+            </div>
+            <div class="card-body">
+                @if(sizeof($delivery_repairs) > 0)
+
+                    <table id="ds-table-repair" class="table table-striped mb-0 table-responsive">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="check-all-cb-repair" name="print_deliverie_repairs" class="check-all-repair" data-delivery="{{sizeof($delivery_repairs)}}" >
+                                </th>
+                                <th>PO</th>
+                                <th>DS Number</th>
+                                <th>DS Line</th>
+                                <th>Group DS</th>
+                                <th>Shipped Date</th>
+                                <th>Qty</th>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <th>Amount ({{$entry->currency}})</th>
+                                <th>Total ({{$entry->currency}})</th>
+                                @endif
+                                <th>DO Number</th>
+                                <th>Operator</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $total_price = 0;
+                                $total_amount = 0;
+                                $total_qty = 0;
+                            @endphp
+                            @foreach ($delivery_repairs as $key => $delivery_repair)
+                            <tr>
+                                <td>
+                                    <input type="checkbox" value="{{$delivery_repair->id}}" name="print_delivery[]" class="check-delivery-repair check-repair-{{$delivery_repair->id}}">
+                                </td>
+                                <td style="white-space: nowrap;">{{$delivery_repair->po_num}}-{{$delivery_repair->po_line}}</td>
+                                <td>{{$delivery_repair->ds_num}}</td>
+                                <td>{{$delivery_repair->ds_line}}</td>
+                                <td>{{$delivery_repair->group_ds_num}}</td>
+                                <td>{{date('Y-m-d',strtotime($delivery_repair->shipped_date))}}</td>
+                                <td>{{$delivery_repair->shipped_qty}}</td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <td>{{number_format($delivery_repair->unit_price,0,',','.')}}</td>
+                                <td>{{number_format($delivery_repair->shipped_qty*$delivery_repair->unit_price,0,',','.')}}</td>
+                                @endif
+                                <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
+                                <td>{{$delivery_repair->petugas_vendor}}</td>
+                                <td style="white-space: nowrap;">
+                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
+                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
+                                    <a href="{{url('admin/delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                    @if($constant::checkPermission('Print Label Delivery Sheet'))
+                                    <button type="button" id="btn-for-form-print-label-{{$delivery_repair->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery_repair->id}}')"" data-toggle='tooltip'  data-placement='top' title="Print Label"><i class="la la-tag"></i></button>
+                                    @endif
+                                    @if($constant::checkPermission('Delete Delivery Sheet'))
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery_repair->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                    @endif
+                                </td>
+                            </tr>
+                            @php
+                                $total_qty += $delivery_repair->shipped_qty;
+                                $total_amount += $delivery_repair->unit_price;
+                                $total_price += $delivery_repair->unit_price*$delivery_repair->shipped_qty;
+                            @endphp
+                            @endforeach
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" class="text-center font-weight-bold">
+                                    Total
+                                </td>
+                                <td>
+                                    {{$total_qty}}
+                                </td>
+                                @if($constant::checkPermission('Show Price In PO Menu'))
+                                <td>
+                                 {{-- number_format($total_amount,0,',','.') --}}
+                                </td>
+                                <td>
+                                 {{ number_format($total_price,0,',','.')}}
+                                </td>
+                                @endif
+                                <td colspan='3'></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                     @if($constant::checkPermission('Print Label Delivery Sheet'))
                     <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
                     @endif
@@ -329,6 +439,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     })
     $(document).ready( function () {
         $('#ds-table').DataTable();
+        $('#ds-table-repair').DataTable();
         initializeFieldsWithJavascript('form');
     } );
 
@@ -386,6 +497,40 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         }
         e.stopPropagation();
     });
+
+
+
+    var rowsSelected = []
+    var totalChecked = 0
+
+    $('#check-all-cb-repair').change(function (e) {
+        totalChecked = 0
+        $(".check-delivery-repair").prop('checked', $(this).prop('checked'))
+        anyChecked = $(this).prop('checked')
+        $(this).val($(this).prop('checked'))
+        if ($(this).prop('checked')) {
+            $("#ds-table-repair tbody input[type='checkbox']").prop("checked", false).trigger("click");
+        }else{
+            $("#ds-table-repair tbody input[type='checkbox']").prop("checked", true).trigger("click");
+        }
+        e.stopPropagation()
+    })
+
+    $("#ds-table-repair tbody").on('click', 'input[type="checkbox"]', function(e){
+        var rowId = $(this).val();
+        var index = $.inArray(rowId, rowsSelected);
+        if(this.checked && index === -1){
+            rowsSelected.push(rowId);
+            $(this).prop('checked', true)
+            totalChecked ++
+        } else if (!this.checked && index !== -1){
+            rowsSelected.splice(index, 1)
+            $(this).prop('checked', false) 
+            totalChecked --
+        }
+        e.stopPropagation();
+    });
+
 
     function printLabel(){
         submitAjaxValid('form-print-label', {action:urlPrintLabel, data: { print_delivery: rowsSelected}})

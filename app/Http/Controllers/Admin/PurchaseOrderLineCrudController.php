@@ -59,7 +59,11 @@ class PurchaseOrderLineCrudController extends CrudController
                             ->where("po_line", $entry->po_line)
                             ->whereIn('ds_type', ['00', '01', '02'])
                             ->get();
-
+        
+        $deliveryRepair = Delivery::where("po_num", $entry->po_num)
+                            ->where("po_line", $entry->po_line)
+                            ->whereIn('ds_type', ['0P', '1P', '0R', '1R'])
+                            ->get();
         $args1 = [
             'po_num' => $entry->po_num, 
             'po_line' => $entry->po_line, 
@@ -154,7 +158,7 @@ class PurchaseOrderLineCrudController extends CrudController
         $data['unfinished_po_line'] = $unfinishedPoLine;
         $data['deliveries'] = $deliveries;
         $data['delivery_statuses'] = $deliveryStatuses;
-
+        $data['delivery_repairs'] = $deliveryRepair;
         $canAccess = false;
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $canAccess = true;

@@ -31,7 +31,17 @@ class DsValidation
     ) as maximum_qty
     FROM 
     po_line pl
-    where po_num = '".$poNum."' and po_line = '".$poLine."'
+    WHERE 
+      pl.po_num = '".$poNum."' 
+    AND 
+      pl.po_line = '".$poLine."'
+    AND 
+      pl.po_change = (
+        select Max(pl2.po_change)
+        from po_line as pl2 
+        where pl2.po_num = pl.po_num
+        and pl2.po_line = pl.po_line
+      )
     GROUP by po_num, po_line, po_change";
 
     $selectMaxQty =  DB::select($queryCount);
