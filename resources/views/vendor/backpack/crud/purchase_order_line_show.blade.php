@@ -145,7 +145,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($deliveries) > 0)
-
                     <table id="ds-table" class="table table-striped mb-0 table-responsive">
                         <thead>
                             <tr>
@@ -164,6 +163,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
+                                <th>Ref DS Num</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -190,6 +190,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @endif
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
+                                <td style="white-space: nowrap;">
+                                    <a href="{{url('admin/delivery-detail').'/'.$delivery->ref_ds_num.'/'.$delivery->ref_ds_line}}" class='btn-link'>
+                                        {{$delivery->ref_ds_num}}-{{$delivery->ref_ds_line}}
+                                    </a>
+                                </td>
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
@@ -226,16 +231,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                  {{ number_format($total_price,0,',','.')}}
                                 </td>
                                 @endif
-                                <td colspan='3'></td>
+                                <td colspan='4'></td>
                             </tr>
                         </tfoot>
                     </table>
-                    {{--
-                        @if($constant::checkPermission('Print Label Delivery Sheet'))
+                    @if($constant::checkPermission('Print Label Delivery Sheet'))
                     <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
                     @endif
                     <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
-                    --}}
                    
                 @else
                 <p>No Data Available</p>
@@ -255,7 +258,6 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
             </div>
             <div class="card-body">
                 @if(sizeof($delivery_repairs) > 0)
-
                     <table id="ds-table-repair" class="table table-striped mb-0 table-responsive">
                         <thead>
                             <tr>
@@ -274,6 +276,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
+                                <th>Ref DS Num</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -286,7 +289,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             @foreach ($delivery_repairs as $key => $delivery_repair)
                             <tr>
                                 <td>
-                                    <input type="checkbox" value="{{$delivery_repair->id}}" name="print_delivery[]" class="check-delivery-repair check-repair-{{$delivery_repair->id}}">
+                                    <input type="checkbox" value="{{$delivery_repair->id}}" name="print_delivery_repair[]" class="check-delivery-repair check-repair-{{$delivery_repair->id}}">
                                 </td>
                                 <td style="white-space: nowrap;">{{$delivery_repair->po_num}}-{{$delivery_repair->po_line}}</td>
                                 <td>{{$delivery_repair->ds_num}}</td>
@@ -301,8 +304,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery_repair->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
-                                    <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
+                                    <a href="{{url('admin/delivery-detail').'/'.$delivery_repair->ref_ds_num.'/'.$delivery_repair->ref_ds_line}}" class='btn-link'>
+                                        {{$delivery_repair->ref_ds_num}}-{{$delivery_repair->ref_ds_line}}
+                                    </a>
+                                </td>
+                                <td style="white-space: nowrap;">
                                     <a href="{{url('admin/delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
                                     @if($constant::checkPermission('Print Label Delivery Sheet'))
                                     <button type="button" id="btn-for-form-print-label-{{$delivery_repair->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery_repair->id}}')"" data-toggle='tooltip'  data-placement='top' title="Print Label"><i class="la la-tag"></i></button>
@@ -336,14 +342,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                  {{ number_format($total_price,0,',','.')}}
                                 </td>
                                 @endif
-                                <td colspan='3'></td>
+                                <td colspan='4'></td>
                             </tr>
                         </tfoot>
                     </table>
                     @if($constant::checkPermission('Print Label Delivery Sheet'))
-                    <button type="button" id="btn-for-form-print-label" class="btn btn-sm btn-danger" onclick="printLabel()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
+                    <button type="button" id="btn-for-form-print-label-repair" class="btn btn-sm btn-danger" onclick="printLabelRepair()"><i class="la la-file-pdf"></i> <span>PDF Label</span></button>
                     @endif
-                    <button type="button" id="btn-for-form-print-mass-ds" class="btn btn-sm btn-danger" onclick="printMassDs()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
+                    <button type="button" id="btn-for-form-print-mass-ds-repair" class="btn btn-sm btn-danger" onclick="printMassDsRepair()"><i class="la la-file-pdf"></i> <span>PDF DS</span></button>
                 @else
                 <p>No Data Available</p>
                 @endif
@@ -498,13 +504,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         e.stopPropagation();
     });
 
-
-
-    var rowsSelected = []
-    var totalChecked = 0
-
+    var rowsSelectedRepair = []
+    var totalCheckedRepair = 0
     $('#check-all-cb-repair').change(function (e) {
-        totalChecked = 0
+        totalCheckedRepair = 0
         $(".check-delivery-repair").prop('checked', $(this).prop('checked'))
         anyChecked = $(this).prop('checked')
         $(this).val($(this).prop('checked'))
@@ -518,15 +521,15 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 
     $("#ds-table-repair tbody").on('click', 'input[type="checkbox"]', function(e){
         var rowId = $(this).val();
-        var index = $.inArray(rowId, rowsSelected);
+        var index = $.inArray(rowId, rowsSelectedRepair);
         if(this.checked && index === -1){
-            rowsSelected.push(rowId);
+            rowsSelectedRepair.push(rowId);
             $(this).prop('checked', true)
-            totalChecked ++
+            totalCheckedRepair ++
         } else if (!this.checked && index !== -1){
-            rowsSelected.splice(index, 1)
+            rowsSelectedRepair.splice(index, 1)
             $(this).prop('checked', false) 
-            totalChecked --
+            totalCheckedRepair --
         }
         e.stopPropagation();
     });
@@ -540,9 +543,16 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         submitAjaxValid('form-print-label-'+id, {action:urlPrintLabel, data: { print_delivery: [id]}})
     }
 
-
     function printMassDs(){
         submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: rowsSelected}})
+    }
+
+    function printLabelRepair(){
+        submitAjaxValid('form-print-label-repair', {action:urlPrintLabel, data: { print_delivery: rowsSelectedRepair}})
+    }
+
+    function printMassDsRepair(){
+        submitAjaxValid('form-print-mass-ds-repair', {action:urlMassDs, data: { print_delivery: rowsSelectedRepair}})
     }
 
     function initializeFieldsWithJavascript(container) {

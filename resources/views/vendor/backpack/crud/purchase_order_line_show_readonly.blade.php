@@ -212,6 +212,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @endif
                                 <th>DO Number</th>
                                 <th>Operator</th>
+                                <th>Ref DS Num</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -235,6 +236,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 @endif
                                 <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery_repair->petugas_vendor}}</td>
+                                <td style="white-space: nowrap;">
+                                    <a href="{{url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line}}" class='btn-link'>
+                                        {{$delivery_repair->ref_ds_num}}-{{$delivery_repair->ref_ds_line}}
+                                    </a>
+                                </td>
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
@@ -266,7 +272,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                  {{ number_format($total_price,0,',','.')}}
                                 </td>
                                 @endif
-                                <td colspan='3'></td>
+                                <td colspan='4'></td>
                             </tr>
                         </tfoot>
                     </table>
