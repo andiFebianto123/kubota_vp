@@ -93,29 +93,37 @@ class DsValidation
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
-    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)->where('po_line', $poLine)->first();
-    $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
-      ->where('po_line.status', 'O')
-      ->where('po_line.outhouse_flag', 0)
-      ->where('po_line.item', '=', $currentPoLine->item)
-      ->whereNotNull('po_line.item')
-      ->where('po.vend_num', '=', $po->vend_num)
-      ->where('po.po_num', '<=', $currentPoLine->po_num)
-      ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
-      ->where($filters)
-      ->whereRaw(DB::raw("po_line.po_change =
-                                (
-                                  select Max(pl.po_change)
-                                  from po_line as pl 
-                                  where pl.po_num = po_line.po_num
-                                  and pl.po_line = po_line.po_line
-                )"))
-   //   ->orderBy('po_line.due_date', 'asc')
-    //  ->orderBy('po_line.po_line', 'asc')
-      ->orderBy('po_line.po_num', 'asc')
-      ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
-      ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)
+      ->where('po_line', $poLine)
+      ->where('urgent_flag', 0)
+      ->first();
 
+    $oldPo = [];
+    if (isset($currentPoLine)) {
+      $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+        ->where('po_line.status', 'O')
+        ->where('po_line.outhouse_flag', 0)
+        ->whereNotNull('po_line.item')
+        ->where('po_line.item', '=', $currentPoLine->item)
+        ->where('po.vend_num', '=', $po->vend_num)
+        ->where('po.po_num', '<=', $currentPoLine->po_num)
+        ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
+        ->where($filters)
+        ->whereRaw(DB::raw("po_line.po_change =
+                                  (
+                                    select Max(pl.po_change)
+                                    from po_line as pl 
+                                    where pl.po_num = po_line.po_num
+                                    and pl.po_line = po_line.po_line
+                  )"))
+        ->orderBy('po_line.due_date', 'asc')
+      //  ->orderBy('po_line.po_line', 'asc')
+        ->orderBy('po_line.po_num', 'asc')
+        ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
+        ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+
+    }
+    
     $arrOldPo = [];
     foreach ($oldPo as $key => $op) {
       $show = false;
@@ -157,29 +165,36 @@ class DsValidation
     $filters = (isset($args['filters'])) ? $args['filters'] : [];
 
     $po = PurchaseOrder::where('po_num', $poNum)->first();
-    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)->where('po_line', $poLine)->first();
-    $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
-      ->where('po_line.status', 'O')
-      ->where('po_line.outhouse_flag', 0)
-      ->where('po_line.item', '=', $currentPoLine->item)
-      ->whereNotNull('po_line.item')
-      ->where('po.vend_num', '=', $po->vend_num)
-      ->where('po.po_num', '<=', $currentPoLine->po_num)
-      ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
-      ->whereRaw(DB::raw("po_line.po_change =
-                                (
-                                  select Max(pl.po_change)
-                                  from po_line as pl 
-                                  where pl.po_num = po_line.po_num
-                                  and pl.po_line = po_line.po_line
-                )"))
-      ->where($filters)
-      // ->orderBy('po_line.due_date', 'asc')
-      // ->orderBy('po_line.po_line', 'asc')
-      ->orderBy('po_line.po_num', 'asc')
-      ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
-      ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+    $currentPoLine = PurchaseOrderLine::where('po_num', $poNum)
+      ->where('po_line', $poLine)
+      ->where('urgent_flag', 0)
+      ->first();
 
+    $oldPo = [];
+    if (isset($currentPoLine)) {
+      $oldPo = PurchaseOrderLine::join('po', 'po.po_num', 'po_line.po_num')
+        ->where('po_line.status', 'O')
+        ->where('po_line.outhouse_flag', 0)
+        ->where('po_line.item', '=', $currentPoLine->item)
+        ->whereNotNull('po_line.item')
+        ->where('po.vend_num', '=', $po->vend_num)
+        ->where('po.po_num', '<=', $currentPoLine->po_num)
+        ->whereDate('po_line.due_date', '<=', date('Y-m-d', strtotime($due_date)))
+        ->whereRaw(DB::raw("po_line.po_change =
+                                  (
+                                    select Max(pl.po_change)
+                                    from po_line as pl 
+                                    where pl.po_num = po_line.po_num
+                                    and pl.po_line = po_line.po_line
+                  )"))
+        ->where($filters)
+        ->orderBy('po_line.due_date', 'asc')
+        // ->orderBy('po_line.po_line', 'asc')
+        ->orderBy('po_line.po_num', 'asc')
+        ->groupBy('po_line.po_num', 'po_line.po_line', 'po_line.po_change')
+        ->get(['po_line.po_num', 'po_line.po_line', 'po_line.item', 'po_line.description', 'po_line.due_date', 'po_line.order_qty']);
+    }
+    
     $arrOldPo = [];
     foreach ($oldPo as $key => $op) {
       $show = false;

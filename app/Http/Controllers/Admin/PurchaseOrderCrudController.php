@@ -468,6 +468,46 @@ class PurchaseOrderCrudController extends CrudController
     }
 
 
+    public function urgentPoLine(Request $request)
+    {
+        $poLineIds = json_decode($request->po_line_ids);
+        $poId = $request->po_id;
+        $reason = $request->reason;
+        $isUrgent = $request->is_urgent;
+
+        DB::beginTransaction();
+        try {
+            foreach ($poLineIds as $key => $poLineId) {
+                $po_line = PurchaseOrderLine::where('id', $poLineId)->first();
+                $po_line->urgent_reason = $reason;
+                $po_line->urgent_flag = $isUrgent;
+                $po_line->urgent_date = now();
+                $po_line->save();
+            }
+
+            DB::commit();
+            
+            return response()->json([
+                    'status' => true,
+                    'alert' => 'success',
+                    'message' => 'PO Changed Successfully',
+                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'validation_errors' => []
+                ], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+
+                return response()->json([
+                    'status' => false,
+                    'alert' => 'danger',
+                    'message' => $e->getMessage(),
+                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'validation_errors' => []
+                ], 200);
+        }
+    }
+
+
     public function exportExcel()
     {
         $filename = 'po-'.date('YmdHis').'.xlsx';

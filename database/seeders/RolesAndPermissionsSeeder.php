@@ -518,6 +518,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses untuk melakukan delete pada delivery return'
               ],
               ['name' => 'Delete Delivery Return']
+            ],
+            [
+              [
+                "name" => 'Mark Urgent PO',
+                "guard_name" => 'web',
+                "description" => 'Mempunyai akses untuk menandai po urgent'
+              ],
+              ['name' => 'Mark Urgent PO']
             ]
         ];
         foreach($arrPermission as $key => $seed) {

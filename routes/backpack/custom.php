@@ -45,6 +45,7 @@ Route::group([
     Route::post('purchase-order-import-ds', 'PurchaseOrderCrudController@importDs');
     Route::post('purchase-order-accept-po-line', 'PurchaseOrderCrudController@acceptPoLine');
     Route::post('purchase-order-reject-po-line', 'PurchaseOrderCrudController@rejectPoLine');
+    Route::post('purchase-order-urgent-po-line', 'PurchaseOrderCrudController@urgentPoLine');
     Route::get('purchase-order-export-excel', 'PurchaseOrderCrudController@exportExcel');
     Route::get('purchase-order-export', 'PurchaseOrderCrudController@exportAdvance');
 

@@ -153,13 +153,18 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <!-- <input type="checkbox" class="check-read-po-lines check-read-{{$po_line->id}}"> -->
                                 @endif
                             </td>
-                            <td class="text-nowrap">{{$entry->po_num}}-{{$po_line->po_line}}</td>
+                            <td class="text-nowrap">
+                                @if($po_line->urgent_flag == 1)
+                                <b class="text-danger">*</b> 
+                                @endif
+                                {{$entry->po_num}}-{{$po_line->po_line}}
+                            </td>
                             <td>
                                 <span class="{{$arr_po_line_status[$po_line->status]['color']}}">
                                     {{$arr_po_line_status[$po_line->status]['text']}}
                                 </span>
                             </td>
-                            <td>{{$po_line->item}}</td>
+                            <td>{{$po_line->item}} </td>
                             <td>{{$po_line->description}}</td>
                             <td>{!! $po_line->change_order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
@@ -195,6 +200,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                         @if($constant::checkPermission('Reject PO Detail'))
                                             <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="rejectPoLines([{{$po_line->id}}])" data-target="#modalReject"><i class="la la-times"></i> Reject</button>
                                         @endif
+                                    @endif
+                                @endif
+                                @if($constant::checkPermission('Mark Urgent PO') && strpos(strtoupper(App\Helpers\Constant::getRole()), 'PTKI'))
+                                    @if($po_line->urgent_flag == 0)
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="urgentPoLines([{{$po_line->id}}], true)" data-target="#modalUrgentPo"><i class="la la-exclamation"></i> Urgent</button>
+                                    @else
+                                    <button class="btn btn-sm btn-link"  type="button" data-toggle="modal"  onclick="notUrgentPoLines([{{$po_line->id}}], false)" data-target="#modalNotUrgentPo"><i class="la la-bolt"></i>Not Urgent</button>
                                     @endif
                                 @endif
                             </td>
@@ -269,7 +281,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 @section('after_scripts')
 
 <!-- Modal -->
-
+@if($constant::checkPermission('Accept PO Detail'))
 <div id="modalAccept" class="modal fade" role="dialog">
   <div class="modal-dialog">
 
@@ -293,7 +305,9 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+@endif
 
+@if($constant::checkPermission('Reject PO Detail'))
 <div id="modalReject" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <!-- Modal content-->
@@ -318,6 +332,62 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
     </div>
   </div>
 </div>
+@endif
+
+@if($constant::checkPermission('Mark Urgent PO'))
+<div id="modalUrgentPo" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Urgent PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-urgent-po"></p>
+            <form id="form-urgent-po-line" action="{{url('admin/purchase-order-urgent-po-line')}}" method="post">
+                @csrf
+                <label for="">Write Reason</label>
+                <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
+                <input type="hidden" name="po_line_ids" class="val-urgent">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <input type="hidden" name="is_urgent" value="1">
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-urgent-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValid('form-urgent-po-line')">Submit</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalNotUrgentPo" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Not Urgent PO Line</h5>
+        </div>
+        <div class="modal-body">
+            <p class="text-not-urgent-po"></p>
+            <form id="form-not-urgent-po-line" action="{{url('admin/purchase-order-urgent-po-line')}}" method="post">
+                @csrf
+                <label for="">Write Reason</label>
+                <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
+                <input type="hidden" name="po_line_ids" class="val-not-urgent">
+                <input type="hidden" name="po_id" value="{{$entry->id}}">
+                <input type="hidden" name="is_urgent" value="0">
+                <div class="mt-4 text-right">
+                    <button id="btn-for-form-not-urgent-po-line" type="button" class="btn btn-sm btn-outline-vp-primary" onclick="submitAfterValid('form-not-urgent-po-line')">Submit</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>      
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+@endif
+
 <script src="{{ asset('packages/backpack/crud/js/list.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/crud.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
 <script src="{{ asset('packages/backpack/crud/js/show.js').'?v='.config('backpack.base.cachebusting_string') }}"></script>
@@ -462,6 +532,21 @@ function callButton(anyChecked){
      $('.val-reject').val(strPoLines)
      $('.text-reject').text('Reject '+lengthPoLines+' Po Line?')
  }
+
+ function urgentPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-urgent').val(strPoLines)
+     $('.text-urgent-po').text('Mark '+lengthPoLines+' po line(s) as urgent Po Line?')
+ }
+
+ function notUrgentPoLines(arrPoLines){
+     var strPoLines = JSON.stringify(arrPoLines)
+     var lengthPoLines = arrPoLines.length
+     $('.val-not-urgent').val(strPoLines)
+     $('.text-not-urgent-po').text('Mark '+lengthPoLines+' po line(s) as not urgent Po Line?')
+ }
+
 
  function createDs(num, url){
     $('.text-count-ds').text("Anda Sudah Memiliki "+num+" DS. Apakah yakin akan melanjutkan menambah DS?")
