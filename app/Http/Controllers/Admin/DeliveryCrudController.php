@@ -508,7 +508,7 @@ class DeliveryCrudController extends CrudController
                     $insertImo->matl_item = $mo->matl_item;
                     $insertImo->description = $mo->description;
                     $insertImo->lot =  $mo->lot;
-                    $insertImo->issue_qty = $moIssueQty;
+                    $insertImo->issue_qty = $issuedQty;
                     $insertImo->po_num = $poLine->po_num;
                     $insertImo->po_line = $poLine->po_line;
                     $insertImo->ds_type = $dsType;
