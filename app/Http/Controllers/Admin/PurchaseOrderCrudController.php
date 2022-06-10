@@ -428,11 +428,8 @@ class PurchaseOrderCrudController extends CrudController
                 'url_button' => $URL.'?prev_session=true'
             ];
             try{
-                $mailBccs = env('MAIL_PO_BCC',"");
-                $arrMailBcc = (new Constant())->emailHandler($mailBccs, 'array');
-        
+               
                 Mail::to($pecahEmailBuyer)
-                ->cc($arrMailBcc)
                 ->send(new RejectPoMail($details));
 
                 DB::commit();
