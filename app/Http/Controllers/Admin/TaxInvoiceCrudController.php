@@ -84,9 +84,9 @@ class TaxInvoiceCrudController extends CrudController
         }
         $this->crud->addButtonFromView('line', 'accept_faktur_pajak', 'accept_faktur_pajak', 'begining');
         $this->crud->addButtonFromView('line', 'reject_faktur_pajak', 'reject_faktur_pajak', 'end');
-        if(Constant::checkPermission('Download Button List Payment')){
-            $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
-        }
+        // if(Constant::checkPermission('Download Button List Payment')){
+        //     $this->crud->addButtonFromModelFunction('line', 'download', 'download', 'end');
+        // }
 
         $this->crud->addButtonFromView('line_2', 'show2', 'show', 'begining');
 
@@ -297,6 +297,13 @@ class TaxInvoiceCrudController extends CrudController
         ]);
         CRUD::column('ref_ds_line')->label('Ref DS Line');
         CRUD::column('updated_at');
+        if(Constant::checkPermission('Download Button List Payment')){
+            CRUD::addColumn([
+                'label' => 'Download',
+                'name' => 'download_column',
+                'type' => 'html',
+            ]);
+        }
 
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){
             $this->crud->addFilter([

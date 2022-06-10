@@ -13,6 +13,7 @@ class TaxInvoice extends Model
 
     protected $table = 'delivery_status';
     protected $guarded = ['id'];
+    protected $append = ['download_column'];
 
     public function getPaymentPlanDateAttribute($value)
     {
@@ -20,7 +21,7 @@ class TaxInvoice extends Model
     }
 
     
-    public function download()
+    public function getDownloadColumnAttribute()
     {
         $fakturPajak = '';
         $invoice = '';
