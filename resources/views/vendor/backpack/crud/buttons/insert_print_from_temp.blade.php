@@ -12,22 +12,32 @@
           var button = $(button);
           var route = button.attr('data-route');          
           var redirectTo = button.attr('data-redirect');
+          $(button).html("Processing...")
+          $(button).attr('disabled', 'disabled')
 
           $.ajax({
               url: route,
               type: 'POST',
               success: function(response) {                  
                 if (response.status) {
-                    submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: response.arr_ids }})
                     new Noty({
                         text: response.message,
                         type: response.alert
                     }).show();
+                    submitAjaxValid('form-print-mass-ds', {action:urlMassDs, data: { print_delivery: response.arr_ids }})
                     setTimeout(function() { 
                         window.location.href = redirectTo
                     }, 3000);
 
-                }              
+                }else{
+                    new Noty({
+                        text: response.message,
+                        type: response.alert
+                    }).show();
+                }      
+                $(button).html("<i class='la la-file-pdf'></i> Insert + PDF")
+                $(button).removeAttr('disabled')
+
               },
               error: function(result) {
                   // Show an alert with the result
@@ -35,6 +45,8 @@
                       text: "The new entry could not be created. Please try again.",
                       type: "warning"
                   }).show();
+                  $(button).html("<i class='la la-file-pdf'></i> Insert + PDF")
+                  $(button).removeAttr('disabled')
               }
           });
     }

@@ -112,11 +112,11 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->description}}</td>
                             <td>{!! $po_line->order_qty !!}</td>
                             <td>{{$po_line->u_m}}</td>
-                            <td>{!! $po_line->due_date !!}</td>
+                            <td>{!! date('Y-m-d', strtotime($po_line->due_date)) !!}</td>
                             <td>{{$po_line->tax}}</td>
                             @if($constant::checkPermission('Show Price In PO Menu'))
-                            <td class="text-nowrap">{!! $po_line->unit_price !!}</td>
-                            <td class="text-nowrap">{!! $po_line->total_price !!}</td>
+                            <td class="text-nowrap">{!! number_format($po_line->unit_price,0,',','.') !!}</td>
+                            <td class="text-nowrap">{!! number_format($po_line->order_qty*$po_line->unit_price,0,',','.') !!}</td>
                             @endif
                         </tr>
                         @endforeach
