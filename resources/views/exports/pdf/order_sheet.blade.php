@@ -164,9 +164,9 @@
                             </td>
                             <td align="center">
                                 @if($po_line->po_change == $po->po_change)
-                                {!! $po_line->change_due_date_bold !!}
+                                {!! date('Y', strtotime($po_line->change_due_date_bold)) > 2000 ? $po_line->change_due_date_bold : "-" !!}
                                 @else
-                                {{$due_date}}
+                                {{ date('Y', strtotime($due_date)) > 2000 ? $due_date : "-" }}
                                 @endif
                             </td>
                             <td align="right">
@@ -181,7 +181,7 @@
                                     @if($po_line->po_change == $po->po_change)
                                     {!! $po_line->change_unit_price_bold !!}
                                     @else
-                                    {{$unit_price}}
+                                    {{  $unit_price }}
                                     @endif
                                 @endif
                             </td>
@@ -190,7 +190,7 @@
                                     {{number_format($po_line->order_qty*$po_line->unit_price,0,',','.')}}
                                 @endif
                             </td>
-                            <td align="center">{!! date("Y-m-d", strtotime($po_line->production_date)) !!}</td>
+                            <td align="center">{!!  date('Y', strtotime($po_line->production_date)) > 2000 ? date("Y-m-d", strtotime($po_line->production_date)) : "-" !!}</td>
                         </tr>
                         @endforeach
                         <tr>

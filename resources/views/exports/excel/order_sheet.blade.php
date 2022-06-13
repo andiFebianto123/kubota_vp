@@ -167,9 +167,9 @@
                 </td>
                 <td align="center" style="border-right:1px solid #000000;">
                     @if($po_line->po_change == $po->po_change)
-                    {!! $po_line->change_due_date_bold !!}
+                    {!! date('Y', strtotime($po_line->change_due_date_bold)) > 2000 ? $po_line->change_due_date_bold : "-" !!}
                     @else
-                    {{$due_date}}
+                    {{ date('Y', strtotime($due_date)) > 2000 ? $due_date : "-" }}
                     @endif
                 </td>
                 <td align="right" style="border-right:1px solid #000000;">
@@ -194,8 +194,9 @@
                     @endif
                 </td>
                 <td align="center" style="border-right:1px solid #000000;">
-                    {!! date("Y-m-d", strtotime($po_line->production_date)) !!}
+                    {!!  date('Y', strtotime($po_line->production_date)) > 2000 ? date("Y-m-d", strtotime($po_line->production_date)) : "-" !!}
                 </td>
+
             </tr>
             @endforeach
             <tr>
