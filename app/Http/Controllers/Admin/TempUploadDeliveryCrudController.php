@@ -172,8 +172,37 @@ class TempUploadDeliveryCrudController extends CrudController
     }
 
 
+    private function dsCreation($dataTemps){
+        $arrDsCreated = [];
+        $arrDsNum = [];
+        foreach ($dataTemps as $key => $dt) {
+            $dsNum =  (new Constant())->codeDs($dt->po_num, $dt->delivery_date);
+            $dsType = $dsNum['type'];
+            $dsSingle = $dsNum['single'];
+            $dsGroup = $dsNum['group'];
+            $dsLine = $dsNum['line'];
+
+            $arrDsNum[$dsSingle][] = $key;
+
+            $arrDsCreated[] = [
+                'id' => $dt->id, 
+                'ds_num' => $dsSingle, 
+                'ds_type' => $dsType, 
+                'ds_group' => $dsGroup, 
+                'ds_line' => count($arrDsNum[$dsSingle]) + $dsLine - 1
+            ];
+        }
+        $collectDsCreated = collect($arrDsCreated);
+
+        return $collectDsCreated;
+    }
+
+
     private function insertMassData(){
         $dataTemps = TempUploadDelivery::where('user_id', backpack_auth()->user()->id)->get();
+
+        $collectDsCreated = $this->dsCreation($dataTemps);
+
         $arrIds = [];
         $uniqueGroupId = substr(md5(now()),0,10);
 
@@ -214,19 +243,23 @@ class TempUploadDeliveryCrudController extends CrudController
         try{
             $successInsert = 0;
             $totalInsert = sizeof($dataTemps);
+            $addLine = 1;
+            $arrDsNum = [];
             foreach ($dataTemps as $key => $dataTemp) { 
                 $poLine = PurchaseOrderLine::where('po_line.po_num', $dataTemp->po_num)
                             ->leftJoin('po', 'po.po_num', 'po_line.po_num' )
                             ->where('po_line.po_line', $dataTemp->po_line)
                             ->orderBy('po_line.po_change', 'desc')
                             ->first();
-                $dsNum =  (new Constant())->codeDs($dataTemp->po_num, $dataTemp->delivery_date);
-                $dsLine = $dsNum['line'];
-                $dsType = $dsNum['type'];
-    
+                $singleDs = $collectDsCreated->where('id', $dataTemp->id)->first();
+                $dsNum = $singleDs['ds_num'];
+                $dsLine = $singleDs['ds_line'];
+                $dsType = $singleDs['ds_type'];
+                $dsGroup = $singleDs['ds_group'];
+
                 $insertDlv = new Delivery();
-                $insertDlv->ds_num = $dsNum['single'];
-                $insertDlv->group_ds_num = $dsNum['group'];
+                $insertDlv->ds_num = $dsNum;
+                $insertDlv->group_ds_num = $dsGroup;
                 $insertDlv->po_line = $dataTemp->po_line;
                 $insertDlv->po_num = $dataTemp->po_num;
                 $insertDlv->po_change = $poLine->po_change;
@@ -253,7 +286,7 @@ class TempUploadDeliveryCrudController extends CrudController
                     $insertDlv->save();
     
                     $insertDlvStatus = new DeliveryStatus();
-                    $insertDlvStatus->ds_num = $dsNum['single'];
+                    $insertDlvStatus->ds_num = $dsNum;
                     $insertDlvStatus->po_num = $poLine->po_num;
                     $insertDlvStatus->po_line = $poLine->po_line;
                     $insertDlvStatus->po_release = $poLine->po_num."-" .$poLine->po_line;
@@ -279,7 +312,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             $materialOuthouse = MaterialOuthouse::where('id', $da->id)->first();
                             if (isset($materialOuthouse)) {
                                 $insertOuthouse = new IssuedMaterialOuthouse();
-                                $insertOuthouse->ds_num = $dsNum['single'];
+                                $insertOuthouse->ds_num = $dsNum;
                                 $insertOuthouse->ds_line = $dsLine;
                                 $insertOuthouse->ds_type = $dsType;
                                 $insertOuthouse->ds_detail = $int_ds_detail++;
@@ -302,7 +335,7 @@ class TempUploadDeliveryCrudController extends CrudController
                             $issuedQty =  $dataTemp->shipped_qty * $om->qty_per;
         
                             $insertImo = new IssuedMaterialOuthouse();
-                            $insertImo->ds_num =  $dsNum['single'];
+                            $insertImo->ds_num =  $dsNum;
                             $insertImo->ds_line = $dsLine;
                             $insertImo->ds_detail = $poLine->item;
                             $insertImo->matl_item = $om->matl_item;
