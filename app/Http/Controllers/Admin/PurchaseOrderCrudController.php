@@ -678,6 +678,13 @@ class PurchaseOrderCrudController extends CrudController
                                 ->orderBy('po_line.id', 'desc')
                                 ->where('status', 'O')
                                 ->where('accept_flag', '<', 2)
+                                ->whereRaw(DB::raw("po_line.po_change =
+                                                (
+                                                  select Max(pl.po_change)
+                                                  from po_line as pl 
+                                                  where pl.po_num = po_line.po_num
+                                                  and pl.po_line = po_line.po_line
+                                )"))
                                 ->get();
         return $this->exportPdfOrderSheetFunction($po, $poLines);
     }
@@ -694,6 +701,13 @@ class PurchaseOrderCrudController extends CrudController
                                 ->orderBy('po_line.id', 'desc')
                                 ->where('status', 'O')
                                 ->where('accept_flag', '<', 2)
+                                ->whereRaw(DB::raw("po_line.po_change =
+                                                (
+                                                  select Max(pl.po_change)
+                                                  from po_line as pl 
+                                                  where pl.po_num = po_line.po_num
+                                                  and pl.po_line = po_line.po_line
+                                )"))
                                 ->get();
         return $this->exportExcelOrderSheetFunction($po, $poLines);
     }
@@ -708,6 +722,13 @@ class PurchaseOrderCrudController extends CrudController
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
+                                ->whereRaw(DB::raw("po_line.po_change =
+                                                (
+                                                  select Max(pl.po_change)
+                                                  from po_line as pl 
+                                                  where pl.po_num = po_line.po_num
+                                                  and pl.po_line = po_line.po_line
+                                )"))
                                 ->get();
         return $this->exportPdfOrderSheetFunction($po, $poLines);
     }
@@ -722,6 +743,13 @@ class PurchaseOrderCrudController extends CrudController
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->select('po_line.*', 'vendor.vend_name as vendor_name', 'vendor.currency as vendor_currency')
                                 ->orderBy('po_line.id', 'desc')
+                                ->whereRaw(DB::raw("po_line.po_change =
+                                                (
+                                                  select Max(pl.po_change)
+                                                  from po_line as pl 
+                                                  where pl.po_num = po_line.po_num
+                                                  and pl.po_line = po_line.po_line
+                                )"))
                                 ->get();
         return $this->exportExcelOrderSheetFunction($po, $poLines);
     }
