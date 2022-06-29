@@ -889,7 +889,7 @@ class PurchaseOrderCrudController extends CrudController
                             $mail->send(new VendorNewPo($details));
                         }
                         catch(Exception $e){
-                            $subject = 'New Purchase Order - [' . $details['po_num'] . ']New Purchase Order - [' . $details['po_num'] . ']';
+                            $subject = 'New Purchase Order - [' . $po->poNumber . ']New Purchase Order - [' . $po->poNumber . ']';
                             // $pecahEmailVendor = implode(", ", explode(';', $po->emails));
                             // $pecahEmailBuyer = ($po->buyers != null) ?  implode(", ", explode(';', $po->buyers)) : '';
                             
