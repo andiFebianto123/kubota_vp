@@ -6,7 +6,7 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithDrawings;
-
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 
@@ -43,6 +43,15 @@ class OrderSheetExport implements FromView, WithEvents, WithDrawings
             },
         ];
     }
+
+
+
+    // public function columnFormats(): array
+    // {
+    //     return [
+    //         'E' => NumberFormat::FORMAT_TEXT,
+    //     ];
+    // }
 
 
     public function view(): View

@@ -138,7 +138,7 @@
             @php
             $total = 0;
             $num = 1;
-            @endphp
+            @endphp                
             @foreach ($po_lines as $key => $po_line)
             @php
                 $total += $po_line->order_qty*$po_line->unit_price;
@@ -156,7 +156,7 @@
                     {{$po_line->po_change}}
                 </td>
                 <td style="border-right:1px solid #000000;">
-                    {{$po_line->item}}
+                    {{$po_line->item ?? ''}}
                 </td>
                 <td style="border-right:1px solid #000000;">
                     @if($po_line->po_change == $po->po_change)

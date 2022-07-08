@@ -103,8 +103,7 @@ class PurchaseOrderLine extends Model
 
     private function changeDescription($layout = 'html')
     {
-        $value = $this->description;
-
+        $value = htmlspecialchars($this->description);
         $htmlRow['html'] = $value; 
         $htmlRow['bold'] = $value; 
         if($this->po_change > 0){
@@ -183,8 +182,6 @@ class PurchaseOrderLine extends Model
     {
         return $this->changeDescription('bold');
     }
-
-
 
     public function getChangeTotalPriceAttribute()
     {
