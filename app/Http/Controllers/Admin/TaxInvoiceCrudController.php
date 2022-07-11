@@ -1196,8 +1196,8 @@ class TaxInvoiceCrudController extends CrudController
                     },
                     'ds_num' => $result->ds_num,
                     'ds_line' => $result->ds_line,
-                    'item' => $result->item,
-                    'description' => $result->description,
+                    'item' => htmlspecialchars($result->item),
+                    'description' => htmlspecialchars($result->description),
                     'payment_plan_date' => $result->payment_plan_date,
                     'unit_price' => $result->unit_price,
                     // 'unit_price' => function($entry){
@@ -1241,7 +1241,6 @@ class TaxInvoiceCrudController extends CrudController
 
             $writer = WriterEntityFactory::createXLSXWriter();
             $writer->openToBrowser($filename);
-
 
             $styleForHeader = (new StyleBuilder())
                             ->setFontBold()
@@ -1341,8 +1340,8 @@ class TaxInvoiceCrudController extends CrudController
                     },
                     'ds_num' => $result->ds_num,
                     'ds_line' => $result->ds_line,
-                    'item' => $result->item,
-                    'description' => $result->description,
+                    'item' => htmlspecialchars($result->item),
+                    'description' => htmlspecialchars($result->description),
                     'payment_plan_date' => $result->payment_plan_date,
                     'unit_price' => $result->unit_price,
                     // 'unit_price' => function($entry){
@@ -1466,6 +1465,5 @@ class TaxInvoiceCrudController extends CrudController
             $writer->close();
 
         }
-        return 0;
     }
 }
