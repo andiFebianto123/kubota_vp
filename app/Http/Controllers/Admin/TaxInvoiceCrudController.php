@@ -357,6 +357,7 @@ class TaxInvoiceCrudController extends CrudController
                 ->mapWithKeys(function($po, $index){
                     return [$index => $po->id];
                 });
+
                 $this->crud2 = $this->crud2->whereIn('delivery_status.id', $dbGet->unique()->toArray());
             });
         }
