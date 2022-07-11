@@ -84,8 +84,15 @@
 			// replace the datatables ajax url with new_url and reload it
 			new_url = normalizeAmpersand(new_url.toString());
 			ajax_table.ajax.url(new_url).load();
+
+			var ajax_table2 = $('#crudTable').DataTable();
+			var current_url2 = ajax_table2.ajax.url();
+			var new_url2 = addOrUpdateUriParameter(current_url2, parameter, val);
+			new_url2 = normalizeAmpersand(new_url2.toString());
+			ajax_table2.ajax.url(new_url2);
+
 			// add filter to URL
-			crud.updateUrl(new_url);
+			crud.updateUrl(new_url2);
 			// mark this filter as active in the navbar-filters
 			if (URI(new_url).hasQuery('{{ $filter->name }}', true)) {
 				$('li[filter-key={{ $filter->key }}]').removeClass('active').addClass('active');
