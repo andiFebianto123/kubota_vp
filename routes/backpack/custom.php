@@ -90,6 +90,7 @@ Route::group([
     Route::post('role/change-role-permission', 'RoleCrudController@changeRolePermission');
     Route::get('role/show-role-permission', 'RoleCrudController@showPermission');
     Route::crud('tax-invoice', 'TaxInvoiceCrudController');
+    Route::crud('tax-invoice2', 'TaxInvoiceCrudController');
     Route::get('export-tax-invoice', 'TaxInvoiceCrudController@exportAdvanceTop');
     Route::get('export-tax-history-invoice', 'TaxInvoiceCrudController@exportAdvanceBottom');
     
