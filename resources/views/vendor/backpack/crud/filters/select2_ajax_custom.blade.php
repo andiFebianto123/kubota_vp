@@ -99,9 +99,10 @@
 					var val_text = $(this).select2('data')[0]?$(this).select2('data')[0].text:null;
 					var parameter = filterName;
 
-			    	// behaviour for ajax table
-					var ajax_table = $('#crudTable2').DataTable();
+			    	var ajax_table = $('#crudTable2').DataTable();
+
 					var current_url = ajax_table.ajax.url();
+
 					var new_url = addOrUpdateUriParameter(current_url, parameter, val);
 					new_url = addOrUpdateUriParameter(new_url, parameter + '_text', val_text);
 					new_url = normalizeAmpersand(new_url.toString());
@@ -109,8 +110,16 @@
 					// replace the datatables ajax url with new_url and reload it
 					ajax_table.ajax.url(new_url).load();
 
+					var ajax_table2 = $('#crudTable').DataTable();
+					var current_url2 = ajax_table2.ajax.url();
+					var new_url2 = addOrUpdateUriParameter(current_url2, parameter, val);
+					new_url2 = addOrUpdateUriParameter(new_url2, parameter + '_text', val_text);
+					new_url2 = normalizeAmpersand(new_url2.toString());
+
+					ajax_table2.ajax.url(new_url2);
+
 					// add filter to URL
-					crud.updateUrl(new_url);
+					crud.updateUrl(new_url2);
 
 					// mark this filter as active in the navbar-filters
 					if (URI(new_url).hasQuery(filterName, true)) {
