@@ -278,13 +278,8 @@ class PurchaseOrderCrudController extends CrudController
             $poLines = [];
             if ($value == "ACCEPTED") {
                 // $poLines = PurchaseOrderLine::where('accept_flag', 0)->pluck('po_num');
-                $query = "SELECT a.po_num 
-                        FROM po a
-                        JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
-                        SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
-                        FROM po_line GROUP BY po_num, po_change) b
-                        ON a.po_num=b.po_num AND a.po_change=b.po_change
-                        WHERE b.totA>0";
+                $query = "SELECT a.po_num FROM po a
+                 JOIN (SELECT po_num, po_change FROM po_line WHERE accept_flag = 1 GROUP BY po_num, po_change) b ON a.po_num=b.po_num AND a.po_change=b.po_change";
                 
                 $dbQueries = DB::select($query);
                 $poLines = collect($dbQueries)->pluck('po_num');
