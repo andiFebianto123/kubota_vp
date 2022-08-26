@@ -181,7 +181,7 @@ class PurchaseOrderCrudController extends CrudController
             'url' => url('admin/filter-po/ajax-itempo-options'),
             'placeholder' => 'Pilih item number',
           ],
-          function(){
+          function(){ 
             session()->put("filter_po_num", null);
             session()->put("filter_item", null);
           },
@@ -258,6 +258,57 @@ class PurchaseOrderCrudController extends CrudController
                         ON a.po_num=b.po_num AND a.po_change=b.po_change
                         WHERE b.totA = b.Tot 
                         AND b.totA>0";
+                
+                $dbQueries = DB::select($query);
+                $poLines = collect($dbQueries)->pluck('po_num');
+            }
+
+            $this->crud->addClause('whereIn', 'po_num', $poLines);
+
+        });
+
+        $this->crud->addFilter([
+            'name'  => 'stat_acc',
+            'type'  => 'dropdown',
+            'label' => 'A/R/Open'
+          ], 
+          [
+            'ACCEPTED' => 'ACCEPTED', 'REJECT' => 'REJECT', 'OPEN' => 'OPEN',
+          ], function($value) { // if the filter is active
+            $poLines = [];
+            if ($value == "ACCEPTED") {
+                // $poLines = PurchaseOrderLine::where('accept_flag', 0)->pluck('po_num');
+                $query = "SELECT a.po_num 
+                        FROM po a
+                        JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                        SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
+                        FROM po_line GROUP BY po_num, po_change) b
+                        ON a.po_num=b.po_num AND a.po_change=b.po_change
+                        WHERE b.totA>0";
+                
+                $dbQueries = DB::select($query);
+                $poLines = collect($dbQueries)->pluck('po_num');
+
+            } elseif ($value == "REJECT") {
+                $query = "SELECT a.po_num 
+                    FROM po a
+                    JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                    SUM(CASE WHEN accept_flag=2 THEN 1 ELSE 0 END) AS totA
+                    FROM po_line GROUP BY po_num, po_change) b
+                    ON a.po_num=b.po_num AND a.po_change=b.po_change
+                    WHERE b.totA>0";
+                
+                $dbQueries = DB::select($query);
+                $poLines = collect($dbQueries)->pluck('po_num');
+
+            }else if($value == "OPEN"){
+                $query = "SELECT a.po_num 
+                    FROM po a
+                    JOIN (SELECT po_num, po_change,COUNT(*) AS Tot, 
+                    SUM(CASE WHEN accept_flag=1 THEN 1 ELSE 0 END) AS totA
+                    FROM po_line GROUP BY po_num, po_change) b
+                    ON a.po_num=b.po_num AND a.po_change=b.po_change
+                    WHERE b.totA=0";
                 
                 $dbQueries = DB::select($query);
                 $poLines = collect($dbQueries)->pluck('po_num');
