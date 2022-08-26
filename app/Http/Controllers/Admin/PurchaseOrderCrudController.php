@@ -284,7 +284,10 @@ class PurchaseOrderCrudController extends CrudController
                 // $dbQueries = DB::select($query);
                 // $poLines = collect($dbQueries)->pluck('po_num');
 
-                $this->crud->query->join(DB::Raw("(SELECT po_num, po_change FROM po_line WHERE accept_flag = 1 GROUP BY po_num, po_change) valid"), "po.po_num", "=", "valid.po_num");
+                $this->crud->query->join(DB::Raw("(SELECT po_num, po_change FROM po_line WHERE accept_flag = 1 GROUP BY po_num, po_change) valid"), function($join){
+                    $join->on( "po.po_num", "=", "valid.po_num");
+                    $join->on("po.po_changes", "=", "valid.po_changes");
+                });
 
             } elseif ($value == "REJECT") {
                 $query = "SELECT a.po_num 
