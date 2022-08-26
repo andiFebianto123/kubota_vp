@@ -281,8 +281,10 @@ class PurchaseOrderCrudController extends CrudController
                 $query = "SELECT a.po_num FROM po a
                  JOIN (SELECT po_num, po_change FROM po_line WHERE accept_flag = 1 GROUP BY po_num, po_change) b ON a.po_num=b.po_num AND a.po_change=b.po_change";
                 
-                $dbQueries = DB::select($query);
-                $poLines = collect($dbQueries)->pluck('po_num');
+                // $dbQueries = DB::select($query);
+                // $poLines = collect($dbQueries)->pluck('po_num');
+
+                $this->crud->query->join(DB::Raw("(SELECT po_num, po_change FROM po_line WHERE accept_flag = 1 GROUP BY po_num, po_change) valid"), "po.po_num", "=", "valid.po_num");
 
             } elseif ($value == "REJECT") {
                 $query = "SELECT a.po_num 
@@ -295,6 +297,7 @@ class PurchaseOrderCrudController extends CrudController
                 
                 $dbQueries = DB::select($query);
                 $poLines = collect($dbQueries)->pluck('po_num');
+                $this->crud->addClause('whereIn', 'po_num', $poLines);
 
             }else if($value == "OPEN"){
                 $query = "SELECT a.po_num 
@@ -307,9 +310,9 @@ class PurchaseOrderCrudController extends CrudController
                 
                 $dbQueries = DB::select($query);
                 $poLines = collect($dbQueries)->pluck('po_num');
+                $this->crud->addClause('whereIn', 'po_num', $poLines);
             }
 
-            $this->crud->addClause('whereIn', 'po_num', $poLines);
 
         });
 
