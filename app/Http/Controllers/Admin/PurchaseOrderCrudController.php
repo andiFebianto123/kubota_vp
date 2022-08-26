@@ -268,7 +268,7 @@ class PurchaseOrderCrudController extends CrudController
         });
 
         $this->crud->addFilter([
-            'name'  => 'stat_acc',
+            'name'  => 'stat_po_line',
             'type'  => 'dropdown',
             'label' => 'A/R/Open'
           ], 
