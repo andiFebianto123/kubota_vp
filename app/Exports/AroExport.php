@@ -113,7 +113,7 @@ class AroExport implements  FromView, WithEvents
         }
         $data['po_lines'] = $arrPoLines;
         $data['arr_po_line_status'] = (new Constant())->statusOFC();
-        $data['arr_po_line_aro'] = (new Constnat())->statusARO();
+        $data['arr_po_line_aro'] = (new Constant())->statusARO();
     
         return view('exports.excel.template_mass_ds', $data);
     }
