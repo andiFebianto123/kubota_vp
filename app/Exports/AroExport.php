@@ -79,7 +79,7 @@ class AroExport implements  FromView, WithEvents
             $po_lines = $po_lines->leftJoin('po', 'po.po_num', 'po_line.po_num')
                                 ->leftJoin('vendor', 'po.vend_num', 'vendor.vend_num')
                                 ->where('status', 'O')
-                                ->where('accept_flag','!=', 2)
+                                // ->where('accept_flag','!=', 2)
                                 ->whereRaw(DB::raw("po_line.po_change =
                                 (
                                   select Max(pl.po_change)
