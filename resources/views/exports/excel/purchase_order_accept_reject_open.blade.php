@@ -40,7 +40,7 @@
                     @endif
                     <td>{{ $po_line['order_qty'] }}</td>
                     <td>{{ $po_line['po_change'] }}</td>
-                    <td>{{ $arr_po_line_aro[$po_line['accept_flag']]}}</td>
+                    <td>{{ $arr_po_line_aro[$po_line['accept_flag']]['text']}}</td>
                 </tr>
             @endforeach
             </tbody>
