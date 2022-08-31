@@ -31,7 +31,7 @@
                     <td>{{ $key+1 }}</td>
                     <td>{{ $po_line['po_num'] }}</td>
                     <td>{{ $po_line['po_line'] }}</td>
-                    <td>{{$arr_po_line_status[$po_line->status]['text']}}</td>
+                    <td>{{$arr_po_line_status[$po_line['status']]['text']}}</td>
                     <td>{{ $po_line['item'] }}</td>
                     <td>{{ $po_line['description'] }}</td>
                     <td>{{ date('Y-m-d', strtotime($po_line['due_date'])) }}</td>
