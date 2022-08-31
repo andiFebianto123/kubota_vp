@@ -531,7 +531,7 @@ class RolesAndPermissionsSeeder extends Seeder
               [
                 "name" => "Import Accept/Reject/Open PO",
                 "guard_name" => "web",
-                "decription" => "Mempunyai akses untuk import purchase order dengan status accept/reject/open"
+                "description" => "Mempunyai akses untuk import purchase order dengan status accept/reject/open"
               ],
               [
                 'name' => 'Import Accept/Reject/Open PO'
