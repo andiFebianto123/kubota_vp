@@ -87,8 +87,13 @@ class PurchaseOrderCrudController extends CrudController
             $this->crud->addButtonFromModelFunction('top', 'link_temp_ds', 'linkTempDs', 'end');
         }
 
-        $this->crud->exportRoute = url('admin/purchase-order-export');
+        if(Constant::checkPermission("Export Accept/Reject/Open PO")){
+            $this->crud->allowAccess('export_aro_excel');
+            $this->crud->addButtonFromView('top', 'export_aro', 'export_aro', 'end');
+        }
 
+        $this->crud->exportRoute = url('admin/purchase-order-export');
+        $this->crud->exportAroRoute = url('admin/accept-reject-open-po-export');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
@@ -267,6 +272,9 @@ class PurchaseOrderCrudController extends CrudController
 
         });
 
+        if (!request('stat_po_line')) {
+            session()->put("stat_po_line", null);
+        }
         $this->crud->addFilter([
             'name'  => 'stat_po_line',
             'type'  => 'dropdown',
@@ -315,6 +323,7 @@ class PurchaseOrderCrudController extends CrudController
                 $poLines = collect($dbQueries)->pluck('po_num');
                 $this->crud->addClause('whereIn', 'po_num', $poLines);
             }
+            session()->put("stat_po_line", $value);
 
 
         });
@@ -567,13 +576,41 @@ class PurchaseOrderCrudController extends CrudController
         return Excel::download(new PurchaseOrderExport, $filename);
     }
 
+    public function exportARO(Request $request){
+        $filename = 'export-aro-po-'.date('YmdHis').'.xlsx';
+        $headerRange = "J";
+        $styleRange = "J";
+        if(Constant::checkPermission('Show Price In PO A/R/Open Menu')){
+            $headerRange = "K";
+            $styleRange = "K";
+        }
+        $attrs['filter_po_num'] = session()->get('filter_po_num') ?? null;
+        $attrs['filter_vend_num'] = session()->get('filter_vend_num') ?? null;
+        $attrs['filter_item'] = session()->get('filter_item') ?? null;
+        $attrs['filter_status_aro'] = session()->get('stat_po_line') ?? null;
+        $attrs['header_range'] = $headerRange; // default M
+        $attrs['style_range'] = $styleRange; // default I
+
+        Excel::store(new TemplateMassDsExport($attrs),$filename, 'excel_export');
+        // public_path('export-excel/'.$filename);
+
+        return response()->json([
+            'status' => true,
+            'alert' => 'success',
+            'message' => 'Sukses Generate Excel Aro',
+            'newtab' => true,
+            'redirect_to' => asset('export-excel/'.$filename) ,
+            'validation_errors' => []
+        ], 200);
+    }
+
 
     public function templateMassDs(Request $request)
     {
         $filename = 'template-mass-ds-'.date('YmdHis').'.xlsx';
         $headerRange = "M";
         $styleRange = "I";
-        if(Constant::checkPermission('Show Price In PO Menu')){
+        if(Constant::checkPermission('Show Price In A/R/O PO Menu')){
             $headerRange = "N";
             $styleRange = "J";
         }

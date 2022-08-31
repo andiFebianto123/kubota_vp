@@ -8,6 +8,16 @@ use Carbon\Carbon;
 class Constant
 {
  
+  public function statusARO(){
+    $status = [];
+
+    $status[0] = ["text" => "OPEN", "accept_flag" => 0];
+    $status[1] = ["text" => "ACCEPT", "accept_flag" => 1];
+    $status[2] = ["text" => "REJECT", "accept_flag" => 2];
+
+    return $status;
+  }
+
   public function statusOFC(){
 
     $status = [];   

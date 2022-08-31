@@ -531,10 +531,20 @@ class RolesAndPermissionsSeeder extends Seeder
               [
                 "name" => "Export Accept/Reject/Open PO",
                 "guard_name" => "web",
-                "description" => "Mempunyai akses untuk import purchase order dengan status accept/reject/open"
+                "description" => "Mempunyai akses untuk export purchase order dengan status accept/reject/open"
               ],
               [
                 'name' => 'Export Accept/Reject/Open PO'
+              ]
+            ],
+            [
+              [
+                "name" => "Show Price In PO A/R/Open Menu",
+                "guard_name" => "web",
+                "description" => "Mempunyai akses untuk melihat price purchase order line accept/reject/open xport"
+              ],
+              [
+                'name' => 'Show Price In PO A/R/Open Menu'
               ]
             ]
         ];
