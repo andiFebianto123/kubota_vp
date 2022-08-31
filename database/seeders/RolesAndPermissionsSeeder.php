@@ -526,6 +526,13 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => 'Mempunyai akses untuk menandai po urgent'
               ],
               ['name' => 'Mark Urgent PO']
+            ],
+            [
+              [
+                "name" => "Import Accept/Reject/Open PO",
+                "guard_name" => "web",
+                "decription" => "Mempunyai akses untuk import purchase order dengan status accept/reject/open"
+              ]
             ]
         ];
         foreach($arrPermission as $key => $seed) {
