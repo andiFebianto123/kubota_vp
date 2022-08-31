@@ -591,7 +591,7 @@ class PurchaseOrderCrudController extends CrudController
         $attrs['header_range'] = $headerRange; // default M
         $attrs['style_range'] = $styleRange; // default I
 
-        Excel::store(new TemplateMassDsExport($attrs),$filename, 'excel_export');
+        Excel::store(new AroExport($attrs),$filename, 'excel_export');
         // public_path('export-excel/'.$filename);
 
         return response()->json([

@@ -8,7 +8,7 @@
         var route = $(button).attr('data-route');
         var expFilename = "{{(isset($crud->exportAroFilename)) ? $crud->exportFilename : date('YmdHis').'.xlsx'}}"
 
-        ajaxDownloadFile('export-aro-excel', {action:route, filename:expFilename, data: {}})
+        submitAjaxValid('export-aro-excel', {action:route, data: {}})
     }
     
 </script>
