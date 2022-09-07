@@ -34,7 +34,7 @@ class TwoFactorController extends Controller
         $expiredOtp = ($confExpOtp) ? $confExpOtp->value:1; // in day
         $username = backpack_auth()->user()->username;
         $checkLock = (new AccountAttempt())->checkLock($username, 'otp');
-        $redirectTo = (session()->has('prev_url'))? session()->get('prev_url'): url('admin/dashboard');
+        $redirectTo = (session()->has('prev_url'))? session()->get('prev_url'): url('dashboard');
         $checkExistOtp = User::where("id", backpack_auth()->user()->id)
                             ->where("two_factor_code", $twoFactorCode)
                             ->where("two_factor_expires_at", '>', Carbon::now())

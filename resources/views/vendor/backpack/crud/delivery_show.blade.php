@@ -142,7 +142,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
             </div>
             <div class="mt-4 text-center">
-                <a href="{{url('admin/delivery-export-pdf-single-ds?id='.$delivery->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
+                <a href="{{url('delivery-export-pdf-single-ds?id='.$delivery->id)}}" class="btn btn-danger"><i class="la la-file-pdf"></i>PRINT PDF</a>
             </div>
         </div>
     
@@ -438,7 +438,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                         <td>{{$drep->repair_date}}</td>
                         <td>
                             @if($drep->repair_type == 'INTERNAL')
-                            <a href="{{url('admin/delivery-detail/'.$drep->ref_num.'/'.$drep->ref_line)}}">{{$drep->ref_num}}-{{$drep->ref_line}}</a>
+                            <a href="{{url('delivery-detail/'.$drep->ref_num.'/'.$drep->ref_line)}}">{{$drep->ref_num}}-{{$drep->ref_line}}</a>
                             @endif
                         </td>
                     </tr>

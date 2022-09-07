@@ -51,7 +51,7 @@ class Delivery extends Model
     }
 
     public function excelExportAdvance(){
-        $url = url('admin/delivery-sheet-export');
+        $url = url('delivery-sheet-export');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
     }
 

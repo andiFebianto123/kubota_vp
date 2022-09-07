@@ -65,7 +65,7 @@ class DeliveryStatusCrudController extends CrudController
         $this->crud->removeButton('delete');
         $this->crud->removeButton('show');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
-        $this->crud->exportRoute = url('admin/delivery-statuses-export');
+        $this->crud->exportRoute = url('delivery-statuses-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         $this->crud->addClause('where', 'ds_type', '!=', 'R0');
         $this->crud->addClause('where', 'ds_type', '!=', 'R1');
@@ -173,7 +173,7 @@ class DeliveryStatusCrudController extends CrudController
                     ->first();
                 $html = '';
                 if (isset($delivery)) {
-                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $url = url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
                 }
                 
@@ -210,7 +210,7 @@ class DeliveryStatusCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) {
                 // SELECT d.id, d.ds_num, d.po_num, p.vend_num FROM `delivery` d
                 // JOIN po p ON p.po_num = d.po_num

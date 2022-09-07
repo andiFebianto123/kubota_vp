@@ -19,7 +19,7 @@
                         class="text-success" 
                         id="comment-{{ $entry->id }}"
                         data-id-tax-invoice = "{{ $entry->id }}"
-                        data-route="{{ url('admin/send-comments') }}"
+                        data-route="{{ url('send-comments') }}"
                         onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
                     >
                         <strong>{{ $column['text'] }}</strong>
@@ -30,7 +30,7 @@
                         data-toggle="modal" 
                         data-id-tax-invoice="{{ $entry->id }}" 
                         data-target=".bd-example-modal-lg" 
-                        data-route="{{ url('admin/send-comments') }}"
+                        data-route="{{ url('send-comments') }}"
                         onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
                         id="comment-{{ $entry->id }}"
                     >
@@ -43,7 +43,7 @@
                     data-id-tax-invoice="{{ $entry->id }}" 
                     class="text-dark"
                     onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
-                    data-route="{{ url('admin/send-comments') }}"
+                    data-route="{{ url('send-comments') }}"
                 >
                     {{ $column['text'] }}
                 </a>
@@ -55,7 +55,7 @@
                         data-id-tax-invoice="{{ $entry->id }}" 
                         class="text-info"
                         onclick="openCommentModal('{{ $entry->id }}','{{$entry->executed_flag}}')"
-                        data-route="{{ url('admin/send-comments') }}"
+                        data-route="{{ url('send-comments') }}"
                     >
                         <i>Add Comment</i>
                     </a>

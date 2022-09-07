@@ -104,7 +104,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });
@@ -116,7 +116,7 @@ class MaterialOuthouseSummaryPerItemCrudController extends CrudController
         CRUD::column('matl_item')->label('Matl Item');
         CRUD::column('description');
         CRUD::column('mavailable_material')->label('Available Material');
-        $this->crud->exportRoute = url('admin/mo-item-export');
+        $this->crud->exportRoute = url('mo-item-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
     }

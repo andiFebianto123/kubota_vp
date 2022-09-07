@@ -105,7 +105,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
                 @endif
                 <form id="form-delivery" method="post"
-                        action="{{ url('admin/purchase-order/temp-upload-delivery/'.$entry->id) }}"
+                        action="{{ url('purchase-order/temp-upload-delivery/'.$entry->id) }}"
                         @if ($crud->hasUploadFields('create'))
                         enctype="multipart/form-data"
                         @endif

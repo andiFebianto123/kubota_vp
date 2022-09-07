@@ -4,7 +4,7 @@
 
 @push('after_scripts')
 <script>
-    var urlMassAttachment = "{{url('admin/send-mail-new-po-with-attachment')}}"
+    var urlMassAttachment = "{{url('send-mail-new-po-with-attachment')}}"
 
 	function sendMailWithAttachment(button) {
 	    if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)

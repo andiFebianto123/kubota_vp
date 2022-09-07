@@ -4,7 +4,7 @@
 
 @push('after_scripts')
 <script>
-    var urlMass = "{{url('admin/send-mail-new-po')}}"
+    var urlMass = "{{url('send-mail-new-po')}}"
 
 	function sendMail(button) {
 	    if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)

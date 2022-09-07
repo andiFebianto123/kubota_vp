@@ -1,10 +1,10 @@
-<button onclick="insertPrintToDb(this)"  id="btn-for-form-print-mass-ds" type="button" data-redirect="{{url('admin/purchase-order')}}" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertprintfromtemp">
+<button onclick="insertPrintToDb(this)"  id="btn-for-form-print-mass-ds" type="button" data-redirect="{{url('purchase-order')}}" data-route="{{ url($crud->route.'/print-insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertprintfromtemp">
     <i class="la la-file-pdf"></i> Insert + PDF
 </button>
 
 @push('after_scripts')
 <script>
-    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
+    var urlMassDs = "{{url('delivery-export-pdf-mass-ds-post')}}"
     
     function insertPrintToDb(button) {
           // ask for confirmation before deleting an item

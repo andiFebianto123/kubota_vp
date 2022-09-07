@@ -179,7 +179,7 @@
           <p>Silahkan menggunakan template di bawah ini untuk mengimport </p>
             <div class="" style="border: 1px solid #9e9e9e; padding: 0px 12px;">
                 Template : 
-                <a href="{{url('admin/template-users')}}" class="btn btn-link">template-users-sheet.xlsx</a>
+                <a href="{{url('template-users')}}" class="btn btn-link">template-users-sheet.xlsx</a>
             </div>
             <div class ="mt-3" style="border-top: 1px solid gray;">&nbsp</div>
             <p>Silahkan upload file untuk diimport melalui button dibawah ini </p>

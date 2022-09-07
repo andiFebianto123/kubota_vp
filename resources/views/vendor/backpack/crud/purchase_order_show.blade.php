@@ -77,8 +77,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>Order Sheet (Ordered)</td>
                     <td>: 
                         @if($constant::checkPermission('Read PO Detail'))
-                            <a href="{{url('admin/order-sheet-export-pdf-ordered/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
-                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel-ordered/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                            <a href="{{url('order-sheet-export-pdf-ordered/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('order-sheet-export-excel-ordered/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
                         @endif
                     </td>
                 </tr>
@@ -86,8 +86,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                     <td>Order Sheet (All)</td>
                     <td>: 
                         @if($constant::checkPermission('Read PO Detail'))
-                            <a href="{{url('admin/order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
-                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('admin/order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
+                            <a href="{{url('order-sheet-export-pdf/'.$entry->po_num)}}" class="btn btn-sm btn-danger" target="_blank"><i class="la la-file-pdf"></i> PDF</a>
+                            <a class="btn btn-sm btn-primary-vp" target="_blank" href="{{url('order-sheet-export-excel/'.$entry->po_num)}}"><i class="la la-file-excel"></i> Excel</a>
                         @endif
                     </td>
                 </tr>
@@ -183,13 +183,13 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td class="text-nowrap"><!-- Single edit button -->
                                 @if(in_array($po_line->status, ['F', 'C']) || ($po_line->status == 'O' && $po_line->accept_flag == 1))
                                     @if($constant::checkPermission('Read PO Detail'))
-                                        <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                        <a href="{{url('purchase-order-line')}}/{{$po_line->id}}/show" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                     @endif
                                 @endif
                                 @if($po_line->read_at)
                                     @if($constant::checkPermission('Unread PO Detail') && sizeof($po_line->delivery) == 0)
                                         @if($po_line->count_ds == 0)
-                                                <a href="{{url('admin/purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
+                                                <a href="{{url('purchase-order-line')}}/{{$po_line->id}}/unread" class="btn btn-sm btn-link"><i class="la la-book"></i> Unread</a>
                                        @endif
                                     @endif    
                                 @else
@@ -252,7 +252,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                             <td>{{$po_line->po_change}}</td>
                             <td>
                                 @if($constant::checkPermission('Read PO Detail'))
-                                    <a href="{{url('admin/purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_change}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
+                                    <a href="{{url('purchase-order')}}/{{$po_line->po_num}}/{{$po_line->po_change}}/detail-change" class="btn btn-sm btn-link"><i class="la la-eye"></i> View</a>
                                 @endif
                             </td>
                         </tr>
@@ -292,7 +292,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-accept"></p>
-            <form id="form-accept-po-line" action="{{url('admin/purchase-order-accept-po-line')}}" method="post">
+            <form id="form-accept-po-line" action="{{url('purchase-order-accept-po-line')}}" method="post">
                 @csrf
                 <input type="hidden" name="po_line_ids" class="val-accept">
                 <input type="hidden" name="po_id" value="{{$entry->id}}">
@@ -317,7 +317,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-reject"></p>
-            <form id="form-reject-po-line" action="{{url('admin/purchase-order-reject-po-line')}}" method="post">
+            <form id="form-reject-po-line" action="{{url('purchase-order-reject-po-line')}}" method="post">
                 @csrf
                 <label for="">Write Reason</label>
                 <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
@@ -344,7 +344,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-urgent-po"></p>
-            <form id="form-urgent-po-line" action="{{url('admin/purchase-order-urgent-po-line')}}" method="post">
+            <form id="form-urgent-po-line" action="{{url('purchase-order-urgent-po-line')}}" method="post">
                 @csrf
                 <label for="">Write Reason</label>
                 <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>
@@ -370,7 +370,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
         </div>
         <div class="modal-body">
             <p class="text-not-urgent-po"></p>
-            <form id="form-not-urgent-po-line" action="{{url('admin/purchase-order-urgent-po-line')}}" method="post">
+            <form id="form-not-urgent-po-line" action="{{url('purchase-order-urgent-po-line')}}" method="post">
                 @csrf
                 <label for="">Write Reason</label>
                 <textarea name="reason" class="form-control" id="" cols="30" rows="10"></textarea>

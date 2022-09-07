@@ -2,7 +2,7 @@
 
 @push('after_scripts')
 <script>
-    var urlMassDs = "{{url('admin/delivery-export-mass-ds-post')}}"
+    var urlMassDs = "{{url('delivery-export-mass-ds-post')}}"
 
 	function printMassDs(button) {
 

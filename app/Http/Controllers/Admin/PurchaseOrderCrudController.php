@@ -93,8 +93,8 @@ class PurchaseOrderCrudController extends CrudController
             $this->crud->addButtonFromView('top', 'export_aro', 'export_aro', 'end');
         }
 
-        $this->crud->exportRoute = url('admin/purchase-order-export');
-        $this->crud->exportAroRoute = url('admin/accept-reject-open-po-export');
+        $this->crud->exportRoute = url('purchase-order-export');
+        $this->crud->exportAroRoute = url('accept-reject-open-po-export');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 
         if(!strpos(strtoupper(Constant::getRole()), 'PTKI')){
@@ -184,7 +184,7 @@ class PurchaseOrderCrudController extends CrudController
             'name'  => 'item',
             'type'  => 'select2_multiple_ajax_po',
             'label' => 'Item Number',
-            'url' => url('admin/filter-po/ajax-itempo-options'),
+            'url' => url('filter-po/ajax-itempo-options'),
             'placeholder' => 'Pilih item number',
           ],
           function(){ 
@@ -212,7 +212,7 @@ class PurchaseOrderCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) { 
                 // $this->crud->filterVendNum = $value;
                     $this->crud->addClause('where', 'vend_num', $value);
@@ -419,7 +419,7 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Read Successfully',
-            'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+            'redirect_to' => url('purchase-order')."/".$poId."/show",
             'validation_errors' => []
         ], 200);
     }
@@ -441,7 +441,7 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Accept Successfully',
-            'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+            'redirect_to' => url('purchase-order')."/".$poId."/show",
             'validation_errors' => []
         ], 200);
     }
@@ -500,7 +500,7 @@ class PurchaseOrderCrudController extends CrudController
                     'status' => true,
                     'alert' => 'success',
                     'message' => 'Reject Successfully',
-                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'redirect_to' => url('purchase-order')."/".$poId."/show",
                     'validation_errors' => []
                 ], 200);
             }
@@ -512,7 +512,7 @@ class PurchaseOrderCrudController extends CrudController
                     'status' => false,
                     'alert' => 'danger',
                     'message' => $e->getMessage(),
-                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'redirect_to' => url('purchase-order')."/".$poId."/show",
                     'validation_errors' => []
                 ], 200);
                     
@@ -524,7 +524,7 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Reject Successfully',
-            'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+            'redirect_to' => url('purchase-order')."/".$poId."/show",
             'validation_errors' => []
         ], 200);
     }
@@ -553,7 +553,7 @@ class PurchaseOrderCrudController extends CrudController
                     'status' => true,
                     'alert' => 'success',
                     'message' => 'PO Changed Successfully',
-                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'redirect_to' => url('purchase-order')."/".$poId."/show",
                     'validation_errors' => []
                 ], 200);
         } catch (Exception $e) {
@@ -563,7 +563,7 @@ class PurchaseOrderCrudController extends CrudController
                     'status' => false,
                     'alert' => 'danger',
                     'message' => $e->getMessage(),
-                    'redirect_to' => url('admin/purchase-order')."/".$poId."/show",
+                    'redirect_to' => url('purchase-order')."/".$poId."/show",
                     'validation_errors' => []
                 ], 200);
         }
@@ -703,7 +703,7 @@ class PurchaseOrderCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => 'Data has been successfully import',
-            'redirect_to' => url('admin/purchase-order/temp-upload-delivery'),
+            'redirect_to' => url('purchase-order/temp-upload-delivery'),
             'validation_errors' => [],
         ], 200);
     }

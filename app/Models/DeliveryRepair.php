@@ -23,7 +23,7 @@ class DeliveryRepair extends Model
 
     
     public function excelExportAdvance($crud = null){
-        $url = url('admin/delivery-statuses-export');
+        $url = url('delivery-statuses-export');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export</a>';
     }
 
@@ -35,12 +35,12 @@ class DeliveryRepair extends Model
 
 
     public function createDsReturn(){
-        $url = url('admin/delivery-return').'/create-ds?num='.$this->ds_num_reject.'&line='.$this->ds_line_reject;
+        $url = url('delivery-return').'/create-ds?num='.$this->ds_num_reject.'&line='.$this->ds_line_reject;
         return '<a class="btn btn-sm btn-link" href="'.$url.'"><i class="la la-plus"></i> Create</a>';
     }
 
     public function closeDsReturn(){
-        $url = url('admin/delivery-return').'?create='.$this->ds_num_reject.'-'.$this->ds_line_reject;
+        $url = url('delivery-return').'?create='.$this->ds_num_reject.'-'.$this->ds_line_reject;
         return '<a class="btn btn-sm btn-link" href="'.$url.'"><i class="la la-times"></i> Close</a>';
     }
 }

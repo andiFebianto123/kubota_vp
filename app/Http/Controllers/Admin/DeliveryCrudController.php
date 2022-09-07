@@ -68,7 +68,7 @@ class DeliveryCrudController extends CrudController
         $this->crud->addButtonFromView('line', 'show_detail_ds', 'show_detail_ds', 'beginning');
 
         $this->crud->addButtonFromView('top', 'bulk_print_ds_no_price', 'bulk_print_ds_no_price', 'end');
-        $this->crud->exportRoute = url('admin/delivery-sheet-export');
+        $this->crud->exportRoute = url('delivery-sheet-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
         $this->crud->addClause('where', 'ds_type', '!=', 'R0');
@@ -160,7 +160,7 @@ class DeliveryCrudController extends CrudController
                     ->first();
                 $html = '';
                 if (isset($delivery)) {
-                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $url = url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
                 }
                 
@@ -195,7 +195,7 @@ class DeliveryCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = Delivery::join('po', 'po.po_num', 'delivery.po_num')
                 ->select('delivery.id as id')
@@ -295,7 +295,7 @@ class DeliveryCrudController extends CrudController
                     ->first();
         $htmlRefDsNum = '-';
         if (isset($deliveryFromRef)) {
-            $url = url('admin/delivery-detail').'/'.$deliveryFromRef->ds_num.'/'.$deliveryFromRef->ds_line;
+            $url = url('delivery-detail').'/'.$deliveryFromRef->ds_num.'/'.$deliveryFromRef->ds_line;
             $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$delivery->ref_ds_num."-".$delivery->ref_ds_line."</a>";
         }
 
@@ -545,7 +545,7 @@ class DeliveryCrudController extends CrudController
                 'status' => true,
                 'alert' => 'success',
                 'message' => $message,
-                'redirect_to' => url('admin/purchase-order-line/'.$poLineId.'/show'),
+                'redirect_to' => url('purchase-order-line/'.$poLineId.'/show'),
                 'validation_errors' => []
             ], 200);
 
@@ -882,7 +882,7 @@ class DeliveryCrudController extends CrudController
                         ->first();
                         $url = '';
                         if (isset($delivery)) {
-                            $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                            $url = url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                         }
                         return $url;
                     },

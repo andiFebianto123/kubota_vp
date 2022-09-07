@@ -154,7 +154,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'po.vend_num', $value);
             });
@@ -173,7 +173,7 @@ class HistoryMoSummaryPerPoCrudController extends CrudController
             $this->crud->addClause('where', 'delivery.shipped_date', '>=', $dates->from);
             $this->crud->addClause('where', 'delivery.shipped_date', '<=', $dates->to . ' 23:59:59');
           });
-          $this->crud->exportRoute = url('admin/history-mo-po-export');
+          $this->crud->exportRoute = url('history-mo-po-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
         //   $this->crud->addButtonFromModelFunction('top', 'excel_export_advance2', 'excelExportAdvance2', 'end');

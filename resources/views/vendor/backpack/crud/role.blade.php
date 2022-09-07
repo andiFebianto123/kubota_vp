@@ -165,14 +165,14 @@
             </button>
         </div>
         <div class="modal-body">
-          <form id="role-form" action="{{ url('admin/role/change-role-permission') }}">
+          <form id="role-form" action="{{ url('role/change-role-permission') }}">
             <div class="form-group">
               <label><strong>Role :</strong></label>
               <select 
               class="form-control select2-role" 
               style="width: 100%;"
               name="role"
-              data-route="{{ url('admin/role/get-role-permission') }}"
+              data-route="{{ url('role/get-role-permission') }}"
               >
                   @if($option_role->values()->count() > 0)
                       @foreach($option_role as $key => $role)
@@ -208,7 +208,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="modalListPermission" tabindex="-1" action="{{ url('admin/role/show-role-permission') }}" role="dialog" aria-labelledby="exampleModalLabel">
+<div class="modal fade" id="modalListPermission" tabindex="-1" action="{{ url('role/show-role-permission') }}" role="dialog" aria-labelledby="exampleModalLabel">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">

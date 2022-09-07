@@ -17,7 +17,7 @@
             </div>
             <div class ="mt-3" style="border-top: 1px solid gray;">&nbsp</div>
             <p>Silahkan upload file untuk diimport melalui button dibawah ini </p>
-            <form id="form-import-ds" action="{{url('admin/purchase-order-import-ds')}}" method="post">
+            <form id="form-import-ds" action="{{url('purchase-order-import-ds')}}" method="post">
                 @csrf
                 <p></p>
                 <input id="field_file_ds" type="file" name="file_po" class="form-control py-1 rect-validation">
@@ -48,7 +48,7 @@
     });
     $('#field_file_ds').on("change", function(){ 
         $('button').attr('disabled', 'disabled')
-        var urlCheckExistingTemp = "{{url('admin/purchase-order/check-existing-temp')}}"
+        var urlCheckExistingTemp = "{{url('purchase-order/check-existing-temp')}}"
         $.get( urlCheckExistingTemp, function( data ) {
             if (data.counting > 0) {
                 $("#field_existing_ds").removeClass("d-none") 
@@ -58,7 +58,7 @@
     });
 
     function downloadTemplateMassDs(){
-        var urlTemplateMassDs = "{{url('admin/template-mass-ds')}}"
+        var urlTemplateMassDs = "{{url('template-mass-ds')}}"
         submitAjaxValid('form-template-mass-ds', {action:urlTemplateMassDs, data: {}})
     }
 

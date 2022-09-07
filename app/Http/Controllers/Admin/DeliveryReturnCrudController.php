@@ -75,7 +75,7 @@ class DeliveryReturnCrudController extends CrudController
         if(Constant::checkPermission('Close Delivery Return')){
             $this->crud->addButtonFromView('line', 'closed_ds_return', 'closed_ds_return', 'end');
         }
-        $this->crud->exportRoute = url('admin/delivery-return-export');
+        $this->crud->exportRoute = url('delivery-return-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         $this->crud->query->join('delivery_status', function($join){
             $join->on('delivery_status.ds_num', '=', 'delivery_repair.ds_num_reject');
@@ -223,7 +223,7 @@ class DeliveryReturnCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = PurchaseOrder::where('vend_num', $value)
                 ->get()
@@ -572,7 +572,7 @@ class DeliveryReturnCrudController extends CrudController
                 'status' => true,
                 'alert' => 'success',
                 'message' => $message,
-                'redirect_to' => url('admin/delivery-return/create-ds?num='.$strDsNum.'&line='.$strDsLine),
+                'redirect_to' => url('delivery-return/create-ds?num='.$strDsNum.'&line='.$strDsLine),
                 'validation_errors' => []
             ], 200);
 

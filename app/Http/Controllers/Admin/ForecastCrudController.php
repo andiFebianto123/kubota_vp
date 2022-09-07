@@ -137,7 +137,7 @@ class ForecastCrudController extends CrudController
             ]);
         }
 
-        $this->crud->urlAjaxFilterVendor = url('admin/filter-vendor/ajax-itempo-options2');
+        $this->crud->urlAjaxFilterVendor = url('filter-vendor/ajax-itempo-options2');
         $this->data['filter_vendor'] = backpack_user()->hasRole('Admin PTKI');
         $this->data['type_forecast'] = $start->type;
         if(strpos(strtoupper(Constant::getRole()), 'PTKI')){

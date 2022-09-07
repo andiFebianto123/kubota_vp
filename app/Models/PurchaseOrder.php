@@ -33,23 +33,23 @@ class PurchaseOrder extends Model
 
     public function viewByPoNum()
     {
-        $url = url('admin/purchase-order/'.$this->po_num.'/show');
+        $url = url('purchase-order/'.$this->po_num.'/show');
         return '<a class="btn btn-sm btn-link" href="'.$url.'"><i class="la la la-eye"></i> View</a>';
     }
 
     // public function excelExport($crud = false)
     // {
-    //     $url = url('admin/purchase-order-export-excel');
+    //     $url = url('purchase-order-export-excel');
     //     return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export All</a>';
     // }
 
     public function excelExportAdvance(){
-        $url = url('admin/purchase-order-export');
+        $url = url('purchase-order-export');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export Advance</a>';
     }
 
     public function linkTempDs(){
-        $url = url('admin/purchase-order/temp-upload-delivery');
+        $url = url('purchase-order/temp-upload-delivery');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-upload"></i> Temp DS</a>';
     }
 

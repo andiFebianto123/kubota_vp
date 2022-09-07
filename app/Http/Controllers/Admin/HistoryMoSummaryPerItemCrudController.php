@@ -98,7 +98,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });
@@ -125,7 +125,7 @@ class HistoryMoSummaryPerItemCrudController extends CrudController
         });
         $this->crud->groupBy('issued_material_outhouse.matl_item');
         
-        $this->crud->exportRoute = url('admin/history-mo-item-export');
+        $this->crud->exportRoute = url('history-mo-item-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
 

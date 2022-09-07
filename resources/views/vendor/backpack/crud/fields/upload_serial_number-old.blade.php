@@ -127,8 +127,8 @@
             <h5 class="modal-title">Import Serial Numbers</h5>
         </div>
         <div class="modal-body">
-            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{url('admin/template-serial-numbers')}}">template-serial-number.xlsx</a></p>
-            <form id="form-import-sn" action="{{url('admin/serial-number-import')}}" method="post" enctype="multipart/form-data">
+            <p>Silahkan menggunakan template di bawah ini untuk mengimport <br><a href="{{url('template-serial-numbers')}}">template-serial-number.xlsx</a></p>
+            <form id="form-import-sn" action="{{url('serial-number-import')}}" method="post" enctype="multipart/form-data">
                 @csrf
                 <input type="file" name="file_sn" class="form-control py-1 rect-validation">
 

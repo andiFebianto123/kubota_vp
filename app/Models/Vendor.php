@@ -30,7 +30,7 @@ class Vendor extends Model
     }
 
     public function excelExportAdvance(){
-        $url = url('admin/vendor-export');
+        $url = url('vendor-export');
         return '<a class="btn btn-sm btn-primary-vp" href="'.$url.'"><i class="la la-file-excel"></i> Export </a>';
     }
 }

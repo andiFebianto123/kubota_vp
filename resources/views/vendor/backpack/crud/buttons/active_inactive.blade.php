@@ -1,4 +1,4 @@
-<button class="btn btn-sm btn-link" type="button" id="btn-for-active-inactive-{{$entry->getKey()}}" data-button-type="active-or-inactive" data-value="{{$entry->is_active}}" onclick="activeInactiveFunc(this)" data-route="{{ url('admin/active-inactive' . '/' . $entry->getkey()) }}">
+<button class="btn btn-sm btn-link" type="button" id="btn-for-active-inactive-{{$entry->getKey()}}" data-button-type="active-or-inactive" data-value="{{$entry->is_active}}" onclick="activeInactiveFunc(this)" data-route="{{ url('active-inactive' . '/' . $entry->getkey()) }}">
     @if($entry->is_active)
     <i class="la la-user-slash"></i> Inactive
     @else

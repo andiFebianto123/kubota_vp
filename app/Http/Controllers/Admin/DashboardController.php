@@ -19,7 +19,7 @@ class DashboardController extends Controller
     public function index()
     {
         if(backpack_user()->last_update_password === NULL){
-            return redirect(url('admin/edit-account-info'));
+            return redirect(url('edit-account-info'));
         }
 
         if(!Constant::checkPermission('Read dashboard')){

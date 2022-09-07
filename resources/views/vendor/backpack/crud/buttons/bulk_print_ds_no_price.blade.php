@@ -2,7 +2,7 @@
 
 @push('after_scripts')
 <script>
-    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
+    var urlMassDs = "{{url('delivery-export-pdf-mass-ds-post')}}"
 
 	function printMassDs(button) {
 		if (typeof crud.checkedItems === 'undefined' || crud.checkedItems.length == 0)

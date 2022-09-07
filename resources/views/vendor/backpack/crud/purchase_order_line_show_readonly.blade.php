@@ -148,7 +148,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="Detail"><i class="la la-qrcode"></i></a>
                                 </td>
                             </tr>
                             @php
@@ -237,14 +237,14 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery_repair->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line}}" class='btn-link'>
+                                    <a href="{{url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line}}" class='btn-link'>
                                         {{$delivery_repair->ref_ds_num}}-{{$delivery_repair->ref_ds_line}}
                                     </a>
                                 </td>
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
-                                    <a href="{{url('admin/delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
                                   
                                 </td>
                             </tr>

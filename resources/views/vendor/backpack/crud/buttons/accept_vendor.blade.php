@@ -1,4 +1,4 @@
-<a href="javascript:void(0)" onclick="acceptPoAll(this)" data-route="{{ url('admin/accept-all-po') }}" class="btn btn-sm btn-primary-vp" data-button-type="acceptPo">
+<a href="javascript:void(0)" onclick="acceptPoAll(this)" data-route="{{ url('accept-all-po') }}" class="btn btn-sm btn-primary-vp" data-button-type="acceptPo">
     <i class="la la-envelope"></i> Send Mail New PO
 </a>
 

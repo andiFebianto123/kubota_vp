@@ -93,7 +93,7 @@ class VendorCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) { 
                 $this->crud->addClause('where', 'vend_num', $value);
             });
@@ -101,7 +101,7 @@ class VendorCrudController extends CrudController
             $this->crud->removeButton('create');
             $this->crud->addClause('where', 'id', '=', backpack_auth()->user()->vendor->id);
         }
-        $this->crud->exportRoute = url('admin/vendor-export');
+        $this->crud->exportRoute = url('vendor-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');
     }

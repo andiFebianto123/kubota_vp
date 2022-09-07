@@ -1,7 +1,7 @@
 @if (isset($entry->confirm_flag) && $entry->confirm_flag == 0)
 <a href="javascript:void(0)" 
     onclick="rejectFakturPajak(this)" 
-    data-route="{{ url('admin/confirm-reject-faktur-pajak/'.$entry->id) }}"
+    data-route="{{ url('confirm-reject-faktur-pajak/'.$entry->id) }}"
     data-id-tax-invoice="{{ $entry->id }}"
     class="btn btn-sm btn-link" 
     data-button-type="rejectFakturPajak"

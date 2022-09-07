@@ -116,7 +116,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
                 @endif
                 <form id="form-delivery" method="post"
-                        action="{{ url('admin/delivery') }}"
+                        action="{{ url('delivery') }}"
                         @if ($crud->hasUploadFields('create'))
                         enctype="multipart/form-data"
                         @endif
@@ -191,19 +191,19 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail').'/'.$delivery->ref_ds_num.'/'.$delivery->ref_ds_line}}" class='btn-link'>
+                                    <a href="{{url('delivery-detail').'/'.$delivery->ref_ds_num.'/'.$delivery->ref_ds_line}}" class='btn-link'>
                                         {{$delivery->ref_ds_num}}-{{$delivery->ref_ds_line}}
                                     </a>
                                 </td>
                                 <td style="white-space: nowrap;">
                                     <!-- <a href="#" class="btn btn-sm btn-danger"><i class="la la-file-pdf"></i> + Harga</a>
                                     <a href="#" class="btn btn-sm btn-secondary"><i class="la la-file-pdf"></i> - Harga</a> -->
-                                    <a href="{{url('admin/delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('delivery-detail/'.$delivery->ds_num.'/'.$delivery->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
                                     @if($constant::checkPermission('Print Label Delivery Sheet'))
                                     <button type="button" id="btn-for-form-print-label-{{$delivery->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery->id}}')"" data-toggle='tooltip'  data-placement='top' title="Print Label"><i class="la la-tag"></i></button>
                                     @endif
                                     @if($constant::checkPermission('Delete Delivery Sheet'))
-                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('delivery/'.$delivery->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                     @endif
                                 </td>
                             </tr>
@@ -304,17 +304,17 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$delivery_repair->no_surat_jalan_vendor}}</td>
                                 <td>{{$delivery_repair->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail').'/'.$delivery_repair->ref_ds_num.'/'.$delivery_repair->ref_ds_line}}" class='btn-link'>
+                                    <a href="{{url('delivery-detail').'/'.$delivery_repair->ref_ds_num.'/'.$delivery_repair->ref_ds_line}}" class='btn-link'>
                                         {{$delivery_repair->ref_ds_num}}-{{$delivery_repair->ref_ds_line}}
                                     </a>
                                 </td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('delivery-detail/'.$delivery_repair->ds_num.'/'.$delivery_repair->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
                                     @if($constant::checkPermission('Print Label Delivery Sheet'))
                                     <button type="button" id="btn-for-form-print-label-{{$delivery_repair->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$delivery_repair->id}}')"" data-toggle='tooltip'  data-placement='top' title="Print Label"><i class="la la-tag"></i></button>
                                     @endif
                                     @if($constant::checkPermission('Delete Delivery Sheet'))
-                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery/'.$delivery_repair->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('delivery/'.$delivery_repair->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                     @endif
                                 </td>
                             </tr>
@@ -437,8 +437,8 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
 </div>
 @stack('crud_fields_scripts')
 <script>
-    var urlMassDs = "{{url('admin/delivery-export-pdf-mass-ds-post')}}"
-    var urlPrintLabel = "{{url('admin/delivery-export-pdf-mass-label-post')}}"
+    var urlMassDs = "{{url('delivery-export-pdf-mass-ds-post')}}"
+    var urlPrintLabel = "{{url('delivery-export-pdf-mass-label-post')}}"
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()

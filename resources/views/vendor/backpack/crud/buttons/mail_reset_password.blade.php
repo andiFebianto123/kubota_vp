@@ -1,4 +1,4 @@
-<button class="btn btn-sm btn-link" type="button" id="btn-for-form-reset-password-{{$entry->getKey()}}" data-button-type="reset-password" onclick="resetPassword(this)"  data-username="{{ $entry->username }}" data-email="{{ $entry->email }}" data-route="{{ url('admin/forgot-password') }}">
+<button class="btn btn-sm btn-link" type="button" id="btn-for-form-reset-password-{{$entry->getKey()}}" data-button-type="reset-password" onclick="resetPassword(this)"  data-username="{{ $entry->username }}" data-email="{{ $entry->email }}" data-route="{{ url('forgot-password') }}">
     <i class="la la-lock"></i> Reset Password
 </button>
 

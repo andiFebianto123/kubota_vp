@@ -96,10 +96,10 @@ class TaxInvoiceCrudController extends CrudController
         $this->crud->addClause('where', 'executed_flag', '=', 0);
         $this->crud->addClause('where', 'validate_by_fa_flag', '=', 1);
 
-        $this->crud->exportRoute = url('admin/export-tax-invoice');
+        $this->crud->exportRoute = url('export-tax-invoice');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
-        $this->crud->exportRoute2 = url('admin/export-tax-history-invoice');
+        $this->crud->exportRoute2 = url('export-tax-history-invoice');
         $this->crud->addButtonFromView('top-history', 'advanced_export_excel2', 'advanced_export_excel2', 'end');
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance_top', 'excelExportAdvanceTop', 'end');
 
@@ -269,7 +269,7 @@ class TaxInvoiceCrudController extends CrudController
                     ->first();
                 $html = '';
                 if (isset($delivery)) {
-                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $url = url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $html = "<a href='".$url."' class='btn-link'>".$entry->ref_ds_num."</a>";
                 }
 
@@ -312,7 +312,7 @@ class TaxInvoiceCrudController extends CrudController
                 'label'       => 'Vendor Name',
                 'placeholder' => 'Pick a vendor'
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')
@@ -348,7 +348,7 @@ class TaxInvoiceCrudController extends CrudController
                 'placeholder' => 'Pick a vendor',
                 'custom_table' => true,
             ],
-            url('admin/filter-vendor/ajax-itempo-options'),
+            url('filter-vendor/ajax-itempo-options'),
             function($value) {
                 $dbGet = TaxInvoice::join('po', 'po.po_num', 'delivery_status.po_num')
                 ->select('delivery_status.id as id')
@@ -417,7 +417,7 @@ class TaxInvoiceCrudController extends CrudController
             'name'        => 'ds_nums',
             'label'       => "Delivery Status",
             'type'        => 'checklist_table_ajax',
-            'ajax_url'    => url('admin/tax-invoice/ajax-delivery-status'),
+            'ajax_url'    => url('tax-invoice/ajax-delivery-status'),
             'table'       =>  ['table_header' => $this->deliveryStatus()['header']]
         ]);
 
@@ -517,7 +517,7 @@ class TaxInvoiceCrudController extends CrudController
                     ->where('ds_line', $ds->ref_ds_line)
                     ->first();
                 if (isset($delivery)) {
-                    $url = url('admin/delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
+                    $url = url('delivery-detail').'/'.$delivery->ds_num.'/'.$delivery->ds_line;
                     $htmlRefDsNum = "<a href='".$url."' class='btn-link'>".$ds->ref_ds_num."</a>";
                 }
                 $htmlRefDsLine = $ds->ref_ds_line;

@@ -131,7 +131,7 @@ class UserCrudController extends CrudController
             },
         ]);
 
-        $this->crud->exportRoute = url('admin/user-export');
+        $this->crud->exportRoute = url('user-export');
         $this->crud->addButtonFromView('top', 'advanced_export_excel', 'advanced_export_excel', 'end');
 
         // $this->crud->addButtonFromModelFunction('top', 'excel_export_advance', 'excelExportAdvance', 'end');

@@ -635,7 +635,7 @@ class TempUploadDeliveryCrudController extends CrudController
             'status' => true,
             'alert' => 'success',
             'message' => $message,
-            'redirect_to' => url('admin/purchase-order/temp-upload-delivery'),
+            'redirect_to' => url('purchase-order/temp-upload-delivery'),
             'validation_errors' => []
         ], 200);
     }

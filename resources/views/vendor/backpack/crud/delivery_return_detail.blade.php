@@ -117,7 +117,7 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                 </div>
                 @endif
                 <form id="form-delivery-return" method="post"
-                        action="{{ url('admin/delivery-return') }}"
+                        action="{{ url('delivery-return') }}"
                         >
                     {!! csrf_field() !!}
                     <div class="m-2">
@@ -171,10 +171,10 @@ $breadcrumbs = $breadcrumbs ?? $defaultBreadcrumbs;
                                 <td>{{$dr->no_surat_jalan_vendor}}</td>
                                 <td>{{$dr->petugas_vendor}}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="{{url('admin/delivery-detail/'.$dr->ds_num.'/'.$dr->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
+                                    <a href="{{url('delivery-detail/'.$dr->ds_num.'/'.$dr->ds_line)}}" class="btn btn-sm btn-outline-primary" data-toggle='tooltip' data-placement='top' title="DS Detail"><i class="la la-qrcode"></i></a>
                                     <button type="button" id="btn-for-form-print-label-{{$dr->id}}" class="btn btn-sm btn-outline-primary" onclick="printLabelInstant('{{$dr->id}}')"" data-toggle='tooltip'  data-placement='top' title="Print Label"><i class="la la-tag"></i></button>
                                     @if($constant::checkPermission('Delete Delivery Return'))
-                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('admin/delivery-return/'.$dr->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
+                                    <a href="javascript:void(0)" onclick="deleteEntry(this)" data-route="{{ url('delivery-return/'.$dr->id) }}" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' data-placement='top' data-button-type="delete" title="Delete"><i class="la la-trash"></i></a>
                                     @endif
                                 </td>
                             </tr>

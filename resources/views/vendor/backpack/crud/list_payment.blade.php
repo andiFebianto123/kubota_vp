@@ -347,7 +347,7 @@
 
     function loadMessage(id){
       $.ajax({
-          url: "{{ url('admin/get-comments') }}",
+          url: "{{ url('get-comments') }}",
           type: 'POST',
           data: {
             id_payment: id
@@ -386,7 +386,7 @@
               // console.log($(e.target).parent().parent());
               var id_tax_payment = $(e.target).attr('data-id-payment');
               $.ajax({
-                url: "{{ url('admin/delete-comments') }}",
+                url: "{{ url('delete-comments') }}",
                 type: 'POST',
                 data: {
                   id: id_tax_payment

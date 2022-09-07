@@ -85,7 +85,7 @@
                     style="{{ $style }}"
                 >
                     @if(isset($column['link']))
-                    <a href="{{url('admin/forecast')}}{{$column['link']}}{{$column['label']}}">{{$column['label']}}</a>
+                    <a href="{{url('forecast')}}{{$column['link']}}{{$column['label']}}">{{$column['label']}}</a>
                     @else
                     <strong>{!! $column['label'] !!}</strong>
                     @endif

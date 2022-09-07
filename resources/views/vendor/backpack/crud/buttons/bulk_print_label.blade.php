@@ -2,7 +2,7 @@
 
 @push('after_scripts')
 <script>
-    var urlPrintLabel = "{{url('admin/delivery-export-pdf-mass-label-post')}}"
+    var urlPrintLabel = "{{url('delivery-export-pdf-mass-label-post')}}"
 
 	function printLabel(button) {
 		console.log(urlPrintLabel);

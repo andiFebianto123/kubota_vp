@@ -1,4 +1,4 @@
-<a href="javascript:void(0)" onclick="insertToDb(this)" data-redirect="{{url('admin/purchase-order')}}" data-route="{{ url($crud->route.'/insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertfromtemp">
+<a href="javascript:void(0)" onclick="insertToDb(this)" data-redirect="{{url('purchase-order')}}" data-route="{{ url($crud->route.'/insert-to-db') }}" class="btn btn-sm btn-primary-vp" data-button-type="insertfromtemp">
     <i class="la la-cloud"></i> Insert
 </a>
 
