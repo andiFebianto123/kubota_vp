@@ -27,6 +27,12 @@ Route::post('update-password', 'Auth\MyAccountController@postChangePasswordForm2
 // Route::get('/', function () {
 //     return redirect()->to('admin');
 // });
+Route::get('/admin', function(){
+    return redirect()->to('/');
+});
+Route::get('/admin/login', function(){
+    return redirect()->to('/');
+});
 Route::get('auth/login', function () {
     return redirect()->to('/');
 });
