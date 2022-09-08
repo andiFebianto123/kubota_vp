@@ -57,6 +57,12 @@ Route::group([
     Route::post('send-mail-new-po-with-attachment', 'PurchaseOrderCrudController@sendMailNewPoWithAttachment');
     Route::get('purchase-order/check-existing-temp', 'PurchaseOrderCrudController@checkExistingTemp');
 
+    Route::get('/admin/purchase-order/{id}/show', function($id){
+        return redirect()->to('purchase-order/'.$id.'/show');
+    });
+    Route::get('/admin/purchase-order/{id}', function($id){
+        return redirect()->to('purchase-order/'.$id.'/show');
+    });
     Route::post('accept-reject-open-po-export', "PurchaseOrderCrudController@exportARO");
     Route::post('template-mass-ds', 'PurchaseOrderCrudController@templateMassDs');
 
