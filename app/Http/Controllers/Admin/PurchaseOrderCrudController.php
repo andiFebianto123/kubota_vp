@@ -610,9 +610,9 @@ class PurchaseOrderCrudController extends CrudController
     {
         $filename = 'template-mass-ds-'.date('YmdHis').'.xlsx';
         $headerRange = "M";
-        $styleRange = "I";
+        $styleRange = "K";
         
-        if(Constant::checkPermission('Show Price In PO A/R/Open Menu')){
+        if(Constant::checkPermission('Show Price In PO Menu')){
             $headerRange = "N";
             $styleRange = "J";
         }
