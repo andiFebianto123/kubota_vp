@@ -516,7 +516,7 @@ class DeliveryCrudController extends CrudController
                     $insertImo->created_by = backpack_auth()->user()->id;
                     $insertImo->updated_by = backpack_auth()->user()->id;
                     $insertImo->save();
-                    if ($issuedQty > $remainingQty ) {
+                    if (round($issuedQty,8) > round($remainingQty, 8)) {
                         $anyErrors = true;
                     }
                 }

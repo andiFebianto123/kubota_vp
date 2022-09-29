@@ -16,13 +16,14 @@
             arrLotQty[qtyper] = lotqty
             arrQtyPer.push(qtyper)
             $('.outhouse-table tbody tr:eq('+k+')').css('color', '#000000')
-            if (issuedQty > lotqty) {
+            if (issuedQty.toFixed(8) > lotqty.toFixed(8)) {
                 $('.outhouse-table tbody tr:eq('+k+')').css('color', '#df4759')
                 anyError = true
             }
         }) 
         var maxQtyPer = Math.max(...arrQtyPer)
         var maxQtyAllowed = arrLotQty[maxQtyPer]/maxQtyPer
+            maxQtyAllowed = maxQtyAllowed.toFixed(0)
         if (anyError) {
             $('.info-qty').html('<small>Jumlah Qty melebihi batas maksimal ('+maxQtyAllowed+')</small>')
         }       
