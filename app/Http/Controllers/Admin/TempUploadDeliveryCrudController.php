@@ -600,7 +600,7 @@ class TempUploadDeliveryCrudController extends CrudController
 
                 $arrDatas['attributes'][] = ['id' => $oi, 'qty' => $materialIssues[$k]];
 
-                if ($issuedQty > $lotQty ) {
+                if (round($issuedQty, 8) > round($lotQty,8)) {
                     $any_errors = true;
                 }
             }
